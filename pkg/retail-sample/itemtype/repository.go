@@ -1,11 +1,15 @@
 package itemtype
 
-import "sync/atomic"
-
 type (
+	ItemTypeDB interface {
+		Add(string) uint64
+		Get(uint64) Entity
+		Remove(uint64)
+		List() []Entity
+	}
+
 	repository struct {
-		data map[ItemType]uint64
-		counter uint64
+		db ItemTypeDB
 	}
 
 	ItemType struct {
@@ -13,36 +17,27 @@ type (
 	}
 )
 
-func NewRepository() repository {
-	return repository{
-		data:    make(map[ItemType]uint64),
-		counter: 0,
-	}
-}
-
 func (r *repository) List() []ItemType {
-	types := make([]ItemType, 0, len(r.data))
-	for t := range r.data {
-		types = append(types, t)
+	var v []ItemType
+	for _, i := range r.db.List() {
+		v = append(v, ItemType{
+			Name: i.name,
+		})
 	}
-	return types
+	return v
 }
 
 func (r *repository) Add(name string) uint64 {
-	atomic.AddUint64(&r.counter, 1)
-	r.data[ItemType{Name: name}] = r.counter
-	return r.counter
+	return r.db.Add(name)
 }
 
-func (r *repository) RemoveItemType(name string, qty int) {
-	delete(r.data, ItemType{Name: name})
+func (r *repository) Remove(id uint64) {
+	r.db.Remove(id)
 }
 
 func (r *repository) Get(i uint64) ItemType {
-	for itemType, gotID := range r.data {
-		if i == gotID {
-			return itemType
-		}
+	entity := r.db.Get(i)
+	return ItemType{
+		Name: entity.name,
 	}
-	return ItemType{}
 }

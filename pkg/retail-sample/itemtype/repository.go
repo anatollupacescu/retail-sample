@@ -8,8 +8,8 @@ type (
 		List() []Entity
 	}
 
-	repository struct {
-		db ItemTypeDB
+	Repository struct {
+		DB ItemTypeDB
 	}
 
 	ItemType struct {
@@ -17,9 +17,9 @@ type (
 	}
 )
 
-func (r *repository) List() []ItemType {
+func (r *Repository) List() []ItemType {
 	var v []ItemType
-	for _, i := range r.db.List() {
+	for _, i := range r.DB.List() {
 		v = append(v, ItemType{
 			Name: i.name,
 		})
@@ -27,16 +27,16 @@ func (r *repository) List() []ItemType {
 	return v
 }
 
-func (r *repository) Add(name string) uint64 {
-	return r.db.Add(name)
+func (r *Repository) Add(name string) uint64 {
+	return r.DB.Add(name)
 }
 
-func (r *repository) Remove(id uint64) {
-	r.db.Remove(id)
+func (r *Repository) Remove(id uint64) {
+	r.DB.Remove(id)
 }
 
-func (r *repository) Get(i uint64) ItemType {
-	entity := r.db.Get(i)
+func (r *Repository) Get(i uint64) ItemType {
+	entity := r.DB.Get(i)
 	return ItemType{
 		Name: entity.name,
 	}

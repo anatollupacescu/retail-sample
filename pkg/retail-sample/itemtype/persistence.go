@@ -47,9 +47,9 @@ func (db *InMemoryDB) List() []Entity {
 	return types
 }
 
-func NewInMemoryRepository() repository {
-	return repository{
-		db: &InMemoryDB{
+func NewInMemoryRepository() Repository {
+	return Repository{
+		DB: &InMemoryDB{
 			data:    make(map[Entity]uint64),
 			counter: 0,
 		},

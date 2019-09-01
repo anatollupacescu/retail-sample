@@ -1,29 +1,48 @@
 package itemtype
 
+import "sync/atomic"
+
 type (
-	Repository map[ItemType]bool
+	repository struct {
+		data map[ItemType]uint64
+		counter uint64
+	}
 
 	ItemType struct {
 		Name string
-		Qty  int
 	}
 )
 
-func (repository *Repository) ListItemTypes() []ItemType {
-	types := make([]ItemType, 0, len(*repository))
-	for t := range *repository {
+func NewRepository() repository {
+	return repository{
+		data:    make(map[ItemType]uint64),
+		counter: 0,
+	}
+}
+
+func (r *repository) List() []ItemType {
+	types := make([]ItemType, 0, len(r.data))
+	for t := range r.data {
 		types = append(types, t)
 	}
 	return types
 }
 
-func (repository *Repository) AddItemType(s string, i int) {
-	(*repository)[ItemType{Name: s, Qty: i}] = true
+func (r *repository) Add(name string) uint64 {
+	atomic.AddUint64(&r.counter, 1)
+	r.data[ItemType{Name: name}] = r.counter
+	return r.counter
 }
 
-func (repository *Repository) RemoveItemType(s string, i int) {
-	delete(*repository, ItemType{
-		Name: s,
-		Qty:  i,
-	})
+func (r *repository) RemoveItemType(name string, qty int) {
+	delete(r.data, ItemType{Name: name})
+}
+
+func (r *repository) Get(i uint64) ItemType {
+	for itemType, gotID := range r.data {
+		if i == gotID {
+			return itemType
+		}
+	}
+	return ItemType{}
 }

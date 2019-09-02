@@ -3,24 +3,35 @@ package warehouse_test
 import (
 	"testing"
 
-	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype"
 	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse"
+	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse/mocks"
+	
+	itemTypeMocks "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype/mocks"
 	qt "github.com/frankban/quicktest"
+	gomock "github.com/golang/mock/gomock"
 )
-
-func NewTestingWarehouse() warehouse.Repository {
-	return warehouse.Repository{
-		ItemDB:       warehouse.NewInMemoryDB(),
-		ItemTypeRepo: itemtype.NewInMemoryRepository(),
-	}
-}
 
 func TestWarehouse(t *testing.T) {
 
 	t.Run("should reject non existent item type ids", func(t *testing.T) {
 		c := qt.New(t)
-		w := NewTestingWarehouse()
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		itemStore := mocks.NewMockItemStore(mockCtrl)
+		itemStore.EXPECT().Get("blah").Return(nil)
+
+		itemTypeStore := itemTypeMocks.NewMockItemStore(mockCtrl)
+		itemTypeRepository := itemtype.Repository{
+			DB: itemTypeStore,
+		}
+
+		w := warehouse.Repository{
+			ItemStore          itemStore
+			ItemTypeRepository itemTypeRepository
+		}
 		err := w.Add(1, 23)
+		
 		c.Assert(err, qt.Equals, warehouse.ErrItemTypeNotFound)
 	})
 

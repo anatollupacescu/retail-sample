@@ -1,3 +1,4 @@
+//go:generate mockgen -source=warehouse.go -package mocks -destination mocks/warehouse.go
 package warehouse
 
 import "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype"
@@ -12,8 +13,8 @@ type (
 	}
 
 	Repository struct {
-		ItemDB       ItemStore
-		ItemTypeRepo itemtype.Repository
+		ItemStore          ItemStore
+		ItemTypeRepository itemtype.Repository
 	}
 )
 
@@ -27,24 +28,24 @@ var (
 )
 
 func (r *Repository) Add(id uint64, qty int) error {
-	itemType := r.ItemTypeRepo.Get(id)
+	itemType := r.ItemTypeRepository.Get(id)
 	if itemType == zeroItemTypeValue {
 		return ErrItemTypeNotFound
 	}
-	if _, err := r.ItemDB.Get(id); err == nil {
-		r.ItemDB.Update(id, qty)
+	if _, err := r.ItemStore.Get(id); err == nil {
+		r.ItemStore.Update(id, qty)
 		return nil
 	}
-	r.ItemDB.Add(id, qty)
+	r.ItemStore.Add(id, qty)
 	return nil
 }
 
 func (r *Repository) Quantity(i uint64) (int, error) {
-	wantedItemType := r.ItemTypeRepo.Get(i)
+	wantedItemType := r.ItemTypeRepository.Get(i)
 	if wantedItemType == zeroItemTypeValue {
 		return 0, ErrItemTypeNotFound
 	}
-	if qty, err := r.ItemDB.Get(i); err == nil {
+	if qty, err := r.ItemStore.Get(i); err == nil {
 		return qty, nil
 	}
 	return 0, ErrItemNotFound

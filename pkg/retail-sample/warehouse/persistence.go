@@ -2,9 +2,7 @@ package warehouse
 
 import "errors"
 
-type (
-	InMemoryItemDB map[uint64]int
-)
+type InMemoryItemDB map[uint64]int
 
 func NewInMemoryDB() InMemoryItemDB {
 	return make(map[uint64]int)

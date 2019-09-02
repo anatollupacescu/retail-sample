@@ -3,10 +3,6 @@ package itemtype
 import "sync/atomic"
 
 type (
-	Entity struct {
-		name string
-	}
-
 	InMemoryDB struct {
 		data    map[Entity]uint64
 		counter uint64

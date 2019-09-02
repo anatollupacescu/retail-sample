@@ -1,7 +1,13 @@
+//go:generate mockgen -source=repository.go -package mocks -destination mocks/repository.go
 package itemtype
 
 type (
-	ItemTypeDB interface {
+
+	Entity struct {
+		Name string
+	}
+
+	ItemTypeStore interface {
 		Add(string) uint64
 		Get(uint64) Entity
 		Remove(uint64)
@@ -9,7 +15,7 @@ type (
 	}
 
 	Repository struct {
-		DB ItemTypeDB
+		DB ItemTypeStore
 	}
 
 	ItemType struct {
@@ -21,7 +27,7 @@ func (r *Repository) List() []ItemType {
 	var v []ItemType
 	for _, i := range r.DB.List() {
 		v = append(v, ItemType{
-			Name: i.name,
+			Name: i.Name,
 		})
 	}
 	return v
@@ -38,6 +44,6 @@ func (r *Repository) Remove(id uint64) {
 func (r *Repository) Get(i uint64) ItemType {
 	entity := r.DB.Get(i)
 	return ItemType{
-		Name: entity.name,
+		Name: entity.Name,
 	}
 }

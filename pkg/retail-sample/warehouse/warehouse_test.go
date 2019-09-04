@@ -1,13 +1,12 @@
 package warehouse_test
 
 import (
-	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype"
 	itemTypeMocks "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype/mocks"
+	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse/mocks"
 	"testing"
 
 	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse"
-	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse/mocks"
-	
+
 	qt "github.com/frankban/quicktest"
 	"github.com/golang/mock/gomock"
 )
@@ -19,15 +18,11 @@ func TestWarehouse(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
+		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository.EXPECT().Get(uint64(1)).Return("")
+
 		itemStore := mocks.NewMockItemStore(mockCtrl)
-		itemStore.EXPECT().Get("blah").MaxTimes(1)
-
-		itemTypeStore := itemTypeMocks.NewMockItemTypeStore(mockCtrl)
-
-		itemTypeStore.EXPECT().Get(uint64(1)).Return(itemtype.Entity{})
-		itemTypeRepository := itemtype.Repository{
-			DB: itemTypeStore,
-		}
+		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
 			ItemStore:          itemStore,

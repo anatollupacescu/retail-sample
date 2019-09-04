@@ -23,7 +23,7 @@ func TestItemTypeRepository(t *testing.T) {
 		types := d.List()
 		c.Assert(types, qt.HasLen, 1)
 		addedType := types[0]
-		c.Assert(addedType, qt.DeepEquals, itemtype.ItemType{Name: "beans"})
+		c.Assert(addedType, qt.DeepEquals, "beans")
 	})
 
 	t.Run("can not add repeated item types", func(t *testing.T) {
@@ -34,7 +34,7 @@ func TestItemTypeRepository(t *testing.T) {
 		types := d.List()
 		c.Assert(types, qt.HasLen, 1)
 		addedType := types[0]
-		c.Assert(addedType, qt.DeepEquals, itemtype.ItemType{Name: "beans"})
+		c.Assert(addedType, qt.DeepEquals, "beans")
 	})
 
 	t.Run("can remove item types", func(t *testing.T) {
@@ -52,13 +52,13 @@ func TestItemTypeRepository(t *testing.T) {
 		id := d.Add("beans")
 		c.Assert(id, qt.Equals, uint64(1))
 		tp := d.Get(1)
-		c.Assert(tp, qt.DeepEquals, itemtype.ItemType{Name: "beans"})
+		c.Assert(tp, qt.DeepEquals, "beans")
 	})
 
 	t.Run("get non existent type returns zero value", func(t *testing.T) {
 		c := qt.New(t)
 		d := itemtype.NewInMemoryRepository()
 		tp := d.Get(1)
-		c.Assert(tp, qt.DeepEquals, itemtype.ItemType{})
+		c.Assert(tp, qt.DeepEquals, "")
 	})
 }

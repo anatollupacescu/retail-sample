@@ -34,16 +34,19 @@ func (m *MockItemStore) EXPECT() *MockItemStoreMockRecorder {
 
 // Add mocks base method
 func (m *MockItemStore) Add(arg0 uint64, arg1 int) {
+	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Add", arg0, arg1)
 }
 
 // Add indicates an expected call of Add
 func (mr *MockItemStoreMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockItemStore)(nil).Add), arg0, arg1)
 }
 
 // Update mocks base method
 func (m *MockItemStore) Update(arg0 uint64, arg1 int) error {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
@@ -51,11 +54,13 @@ func (m *MockItemStore) Update(arg0 uint64, arg1 int) error {
 
 // Update indicates an expected call of Update
 func (mr *MockItemStoreMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockItemStore)(nil).Update), arg0, arg1)
 }
 
 // Get mocks base method
 func (m *MockItemStore) Get(arg0 uint64) (int, error) {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
@@ -64,5 +69,6 @@ func (m *MockItemStore) Get(arg0 uint64) (int, error) {
 
 // Get indicates an expected call of Get
 func (mr *MockItemStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockItemStore)(nil).Get), arg0)
 }

@@ -13,9 +13,9 @@ var (
 	zeroEntity = Entity{}
 )
 
-func (db *InMemoryDB) Add(s string) uint64 {
+func (db *InMemoryDB) Add(name string) uint64 {
 	id := atomic.AddUint64(&db.counter, 1)
-	db.data[Entity{name: s}] = id
+	db.data[Entity{Name: name}] = id
 	return id
 }
 

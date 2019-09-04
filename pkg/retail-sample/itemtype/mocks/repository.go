@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	x "."
+	itemtype "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -35,6 +35,7 @@ func (m *MockItemTypeStore) EXPECT() *MockItemTypeStoreMockRecorder {
 
 // Add mocks base method
 func (m *MockItemTypeStore) Add(arg0 string) uint64 {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Add", arg0)
 	ret0, _ := ret[0].(uint64)
 	return ret0
@@ -42,39 +43,46 @@ func (m *MockItemTypeStore) Add(arg0 string) uint64 {
 
 // Add indicates an expected call of Add
 func (mr *MockItemTypeStoreMockRecorder) Add(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockItemTypeStore)(nil).Add), arg0)
 }
 
 // Get mocks base method
-func (m *MockItemTypeStore) Get(arg0 uint64) x.Entity {
+func (m *MockItemTypeStore) Get(arg0 uint64) itemtype.Entity {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
-	ret0, _ := ret[0].(x.Entity)
+	ret0, _ := ret[0].(itemtype.Entity)
 	return ret0
 }
 
 // Get indicates an expected call of Get
 func (mr *MockItemTypeStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockItemTypeStore)(nil).Get), arg0)
 }
 
 // Remove mocks base method
 func (m *MockItemTypeStore) Remove(arg0 uint64) {
+	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Remove", arg0)
 }
 
 // Remove indicates an expected call of Remove
 func (mr *MockItemTypeStoreMockRecorder) Remove(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockItemTypeStore)(nil).Remove), arg0)
 }
 
 // List mocks base method
-func (m *MockItemTypeStore) List() []x.Entity {
+func (m *MockItemTypeStore) List() []itemtype.Entity {
+	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "List")
-	ret0, _ := ret[0].([]x.Entity)
+	ret0, _ := ret[0].([]itemtype.Entity)
 	return ret0
 }
 
 // List indicates an expected call of List
 func (mr *MockItemTypeStoreMockRecorder) List() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockItemTypeStore)(nil).List))
 }

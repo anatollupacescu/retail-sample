@@ -35,7 +35,7 @@ func (r *Repository) Add(id uint64, qty int) error {
 
 	if _, err := r.ItemStore.Get(id); err != nil {
 		if err := r.ItemStore.Update(id, qty); err != nil {
-			return err //ErrUpdate
+			return ErrUpdate
 		}
 	}
 

@@ -1,6 +1,7 @@
 package warehouse_test
 
 import (
+	"errors"
 	"testing"
 
 	itemTypeMocks "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype/mocks"
@@ -12,6 +13,12 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
+/*
+testing
+type doesn't exist -> no side effects, returns error
+item type found
+	type present in the store ->
+*/
 func TestWarehouse(t *testing.T) {
 
 	t.Run("should reject non existent item type ids", func(t *testing.T) {
@@ -46,7 +53,7 @@ func TestWarehouse(t *testing.T) {
 		itemStore := mocks.NewMockStore(mockCtrl)
 		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 		itemStore.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
-		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(warehouse.ErrUpdate)
+		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(errors.New("update no go"))
 
 		w := warehouse.Repository{
 			ItemStore:          itemStore,

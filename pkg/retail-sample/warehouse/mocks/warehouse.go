@@ -5,47 +5,48 @@
 package mocks
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
-// MockItemStore is a mock of ItemStore interface
-type MockItemStore struct {
+// MockStore is a mock of Store interface
+type MockStore struct {
 	ctrl     *gomock.Controller
-	recorder *MockItemStoreMockRecorder
+	recorder *MockStoreMockRecorder
 }
 
-// MockItemStoreMockRecorder is the mock recorder for MockItemStore
-type MockItemStoreMockRecorder struct {
-	mock *MockItemStore
+// MockStoreMockRecorder is the mock recorder for MockStore
+type MockStoreMockRecorder struct {
+	mock *MockStore
 }
 
-// NewMockItemStore creates a new mock instance
-func NewMockItemStore(ctrl *gomock.Controller) *MockItemStore {
-	mock := &MockItemStore{ctrl: ctrl}
-	mock.recorder = &MockItemStoreMockRecorder{mock}
+// NewMockStore creates a new mock instance
+func NewMockStore(ctrl *gomock.Controller) *MockStore {
+	mock := &MockStore{ctrl: ctrl}
+	mock.recorder = &MockStoreMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockItemStore) EXPECT() *MockItemStoreMockRecorder {
+func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
 // Add mocks base method
-func (m *MockItemStore) Add(arg0 uint64, arg1 int) {
+func (m *MockStore) Add(arg0 uint64, arg1 int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Add", arg0, arg1)
 }
 
 // Add indicates an expected call of Add
-func (mr *MockItemStoreMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockItemStore)(nil).Add), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockStore)(nil).Add), arg0, arg1)
 }
 
 // Update mocks base method
-func (m *MockItemStore) Update(arg0 uint64, arg1 int) error {
+func (m *MockStore) Update(arg0 uint64, arg1 int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -53,13 +54,13 @@ func (m *MockItemStore) Update(arg0 uint64, arg1 int) error {
 }
 
 // Update indicates an expected call of Update
-func (mr *MockItemStoreMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockItemStore)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockStore)(nil).Update), arg0, arg1)
 }
 
 // Get mocks base method
-func (m *MockItemStore) Get(arg0 uint64) (int, error) {
+func (m *MockStore) Get(arg0 uint64) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(int)
@@ -68,7 +69,7 @@ func (m *MockItemStore) Get(arg0 uint64) (int, error) {
 }
 
 // Get indicates an expected call of Get
-func (mr *MockItemStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockItemStore)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0)
 }

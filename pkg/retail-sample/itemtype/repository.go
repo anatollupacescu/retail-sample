@@ -2,7 +2,6 @@
 package itemtype
 
 type (
-
 	Store interface {
 		Add(string) DTO
 		Get(uint64) DTO
@@ -18,7 +17,7 @@ type (
 	}
 
 	DTO struct {
-		Id uint64
+		Id   uint64
 		Name string
 	}
 

@@ -5,9 +5,10 @@
 package mocks
 
 import (
+	reflect "reflect"
+
 	itemtype "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype"
 	gomock "github.com/golang/mock/gomock"
-	reflect "reflect"
 )
 
 // MockStore is a mock of Store interface

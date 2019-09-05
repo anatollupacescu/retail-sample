@@ -4,10 +4,6 @@ import "errors"
 
 type InMemoryItemDB map[uint64]int
 
-func NewInMemoryDB() InMemoryItemDB {
-	return make(map[uint64]int)
-}
-
 func (s InMemoryItemDB) Add(id uint64, qty int) {
 	s[id] = qty
 }

@@ -15,9 +15,14 @@ import (
 
 /*
 testing
-type doesn't exist -> no side effects, returns error
+type doesn't exist ->
+	no side effects, returns error
 item type found
 	type present in the store ->
+		update successful -> ok
+		update fails -> return
+	type not present ->
+		add item
 */
 func TestWarehouse(t *testing.T) {
 
@@ -27,9 +32,11 @@ func TestWarehouse(t *testing.T) {
 		defer mockCtrl.Finish()
 
 		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		// type not found
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("")
 
 		itemStore := mocks.NewMockStore(mockCtrl)
+		// will not try to add item
 		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
@@ -42,6 +49,30 @@ func TestWarehouse(t *testing.T) {
 		c.Assert(err, qt.Equals, warehouse.ErrItemTypeNotFound)
 	})
 
+	t.Run("should update successfully when item type already in store", func(t *testing.T) {
+		c := qt.New(t)
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
+
+		itemStore := mocks.NewMockStore(mockCtrl)
+		itemStore.EXPECT().Get(uint64(1)).Return(9, nil)
+		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(nil)
+
+		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
+
+		w := warehouse.Repository{
+			ItemStore:          itemStore,
+			ItemTypeRepository: itemTypeRepository,
+		}
+
+		err := w.Add(1, 10)
+
+		c.Assert(err, qt.IsNil)
+	})
+
 	t.Run("should return error when update fails", func(t *testing.T) {
 		c := qt.New(t)
 		mockCtrl := gomock.NewController(t)
@@ -51,9 +82,10 @@ func TestWarehouse(t *testing.T) {
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
 
 		itemStore := mocks.NewMockStore(mockCtrl)
-		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
-		itemStore.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
+		itemStore.EXPECT().Get(uint64(1)).Return(0, nil)
 		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(errors.New("update no go"))
+
+		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
 			ItemStore:          itemStore,

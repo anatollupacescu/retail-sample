@@ -45,20 +45,6 @@ func (r *Repository) Add(id uint64, qty int) error {
 	return nil
 }
 
-func (r *Repository) Quantity(i uint64) (int, error) {
-	wantedItemType := r.ItemTypeRepository.Get(i)
-
-	if wantedItemType == zeroItemTypeValue {
-		return 0, ErrItemTypeNotFound
-	}
-
-	if qty, err := r.ItemStore.Get(i); err == nil {
-		return qty, nil
-	}
-
-	return 0, ErrItemNotFound
-}
-
 type warehouseError string
 
 func (err warehouseError) Error() string {

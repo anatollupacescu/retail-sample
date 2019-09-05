@@ -35,6 +35,29 @@ func TestWarehouse(t *testing.T) {
 		c.Assert(err, qt.Equals, warehouse.ErrItemTypeNotFound)
 	})
 
+	t.Run("should return error when update fails", func(t *testing.T) {
+		c := qt.New(t)
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
+
+		itemStore := mocks.NewMockStore(mockCtrl)
+		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
+		itemStore.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
+		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(warehouse.ErrUpdate)
+
+		w := warehouse.Repository{
+			ItemStore:          itemStore,
+			ItemTypeRepository: itemTypeRepository,
+		}
+
+		err := w.Add(1, 10)
+
+		c.Assert(err, qt.Equals, warehouse.ErrUpdate)
+	})
+
 	/*
 		t.Run("should add item if item type is present", func(t *testing.T) {
 			c := qt.New(t)

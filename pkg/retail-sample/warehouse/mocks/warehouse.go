@@ -10,43 +10,43 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockStore is a mock of Store interface
-type MockStore struct {
+// MockItemRepository is a mock of ItemRepository interface
+type MockItemRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockStoreMockRecorder
+	recorder *MockItemRepositoryMockRecorder
 }
 
-// MockStoreMockRecorder is the mock recorder for MockStore
-type MockStoreMockRecorder struct {
-	mock *MockStore
+// MockItemRepositoryMockRecorder is the mock recorder for MockItemRepository
+type MockItemRepositoryMockRecorder struct {
+	mock *MockItemRepository
 }
 
-// NewMockStore creates a new mock instance
-func NewMockStore(ctrl *gomock.Controller) *MockStore {
-	mock := &MockStore{ctrl: ctrl}
-	mock.recorder = &MockStoreMockRecorder{mock}
+// NewMockItemRepository creates a new mock instance
+func NewMockItemRepository(ctrl *gomock.Controller) *MockItemRepository {
+	mock := &MockItemRepository{ctrl: ctrl}
+	mock.recorder = &MockItemRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockStore) EXPECT() *MockStoreMockRecorder {
+func (m *MockItemRepository) EXPECT() *MockItemRepositoryMockRecorder {
 	return m.recorder
 }
 
 // Add mocks base method
-func (m *MockStore) Add(arg0 uint64, arg1 int) {
+func (m *MockItemRepository) Add(arg0 uint64, arg1 int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Add", arg0, arg1)
 }
 
 // Add indicates an expected call of Add
-func (mr *MockStoreMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockItemRepositoryMockRecorder) Add(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockStore)(nil).Add), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockItemRepository)(nil).Add), arg0, arg1)
 }
 
 // Update mocks base method
-func (m *MockStore) Update(arg0 uint64, arg1 int) error {
+func (m *MockItemRepository) Update(arg0 uint64, arg1 int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -54,13 +54,13 @@ func (m *MockStore) Update(arg0 uint64, arg1 int) error {
 }
 
 // Update indicates an expected call of Update
-func (mr *MockStoreMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockItemRepositoryMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockStore)(nil).Update), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockItemRepository)(nil).Update), arg0, arg1)
 }
 
 // Get mocks base method
-func (m *MockStore) Get(arg0 uint64) (int, error) {
+func (m *MockItemRepository) Get(arg0 uint64) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", arg0)
 	ret0, _ := ret[0].(int)
@@ -69,7 +69,99 @@ func (m *MockStore) Get(arg0 uint64) (int, error) {
 }
 
 // Get indicates an expected call of Get
-func (mr *MockStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
+func (mr *MockItemRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockItemRepository)(nil).Get), arg0)
+}
+
+// MockItemTypeRepository is a mock of ItemTypeRepository interface
+type MockItemTypeRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockItemTypeRepositoryMockRecorder
+}
+
+// MockItemTypeRepositoryMockRecorder is the mock recorder for MockItemTypeRepository
+type MockItemTypeRepositoryMockRecorder struct {
+	mock *MockItemTypeRepository
+}
+
+// NewMockItemTypeRepository creates a new mock instance
+func NewMockItemTypeRepository(ctrl *gomock.Controller) *MockItemTypeRepository {
+	mock := &MockItemTypeRepository{ctrl: ctrl}
+	mock.recorder = &MockItemTypeRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockItemTypeRepository) EXPECT() *MockItemTypeRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Add mocks base method
+func (m *MockItemTypeRepository) Add(arg0 string) uint64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Add", arg0)
+	ret0, _ := ret[0].(uint64)
+	return ret0
+}
+
+// Add indicates an expected call of Add
+func (mr *MockItemTypeRepositoryMockRecorder) Add(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockItemTypeRepository)(nil).Add), arg0)
+}
+
+// Get mocks base method
+func (m *MockItemTypeRepository) Get(arg0 uint64) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Get indicates an expected call of Get
+func (mr *MockItemTypeRepositoryMockRecorder) Get(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockItemTypeRepository)(nil).Get), arg0)
+}
+
+// Remove mocks base method
+func (m *MockItemTypeRepository) Remove(arg0 uint64) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Remove", arg0)
+}
+
+// Remove indicates an expected call of Remove
+func (mr *MockItemTypeRepositoryMockRecorder) Remove(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockItemTypeRepository)(nil).Remove), arg0)
+}
+
+// Find mocks base method
+func (m *MockItemTypeRepository) Find(arg0 string) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Find", arg0)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Find indicates an expected call of Find
+func (mr *MockItemTypeRepositoryMockRecorder) Find(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockItemTypeRepository)(nil).Find), arg0)
+}
+
+// List mocks base method
+func (m *MockItemTypeRepository) List() []string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List")
+	ret0, _ := ret[0].([]string)
+	return ret0
+}
+
+// List indicates an expected call of List
+func (mr *MockItemTypeRepositoryMockRecorder) List() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockItemTypeRepository)(nil).List))
 }

@@ -61,4 +61,21 @@ func TestItemTypeRepository(t *testing.T) {
 		tp := d.Get(1)
 		c.Assert(tp, qt.DeepEquals, "")
 	})
+
+	t.Run("get id by name return id for existent type", func(t *testing.T) {
+		c := qt.New(t)
+		d := itemtype.NewInMemoryRepository()
+		d.Add("beans")
+		tp, err := d.Find("beans")
+		c.Assert(err, qt.IsNil)
+		c.Assert(tp, qt.Equals, uint64(1))
+	})
+
+	t.Run("get id by name returns error for non-existent type", func(t *testing.T) {
+		c := qt.New(t)
+		d := itemtype.NewInMemoryRepository()
+		tp, err := d.Find("rice")
+		c.Assert(err, qt.ErrorMatches, "not found")
+		c.Assert(tp, qt.Equals, uint64(0))
+	})
 }

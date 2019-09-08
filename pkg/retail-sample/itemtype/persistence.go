@@ -1,55 +1,48 @@
 package itemtype
 
-import "sync/atomic"
-
-type (
-	InMemoryDB struct {
-		data    map[string]uint64
-		counter uint64
-	}
+import (
+	"errors"
+	"sync/atomic"
 )
 
-var (
-	zeroDTO = DTO{}
-)
-
-func (db *InMemoryDB) Add(name string) DTO {
-	id := atomic.AddUint64(&db.counter, 1)
-	dto := DTO{Name: name, Id: id}
-	db.data[name] = id
-	return dto
+type InMemoryDB struct {
+	data    map[string]uint64
+	counter uint64
 }
 
-func (db *InMemoryDB) Get(i uint64) DTO {
+func (db *InMemoryDB) Add(name string) uint64 {
+	id := atomic.AddUint64(&db.counter, 1)
+	db.data[name] = id
+	return id
+}
+
+func (db *InMemoryDB) Get(i uint64) string {
 	for itemType, gotID := range db.data {
 		if i == gotID {
-			return DTO{Name: itemType, Id: i}
+			return itemType
 		}
 	}
-	return zeroDTO
+	return ""
 }
 
 func (db *InMemoryDB) Remove(i uint64) {
 	t := db.Get(i)
-	if t != zeroDTO {
-		delete(db.data, t.Name)
+	if t != "" {
+		delete(db.data, t)
 	}
 }
 
-func (db *InMemoryDB) List() []DTO {
-	types := make([]DTO, 0, len(db.data))
-	for k, v := range db.data {
-		types = append(types, DTO{Name: k, Id: v})
+func (db *InMemoryDB) Find(t string) (i uint64, err error) {
+	if _, ok := db.data[t]; !ok {
+		return 0, errors.New("not found")
+	}
+	return db.data[t], nil
+}
+
+func (db *InMemoryDB) List() []string {
+	types := make([]string, 0, len(db.data))
+	for t, _ := range db.data {
+		types = append(types, t)
 	}
 	return types
-}
-
-func NewInMemoryRepository() Repository {
-	store := &InMemoryDB{
-		data:    make(map[string]uint64),
-		counter: 0,
-	}
-	return &repository{
-		store: store,
-	}
 }

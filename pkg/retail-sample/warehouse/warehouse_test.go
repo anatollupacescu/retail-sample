@@ -4,7 +4,6 @@ import (
 	"errors"
 	"testing"
 
-	itemTypeMocks "github.com/anatollupacescu/retail-sample/pkg/retail-sample/itemtype/mocks"
 	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse/mocks"
 
 	"github.com/anatollupacescu/retail-sample/pkg/retail-sample/warehouse"
@@ -24,25 +23,27 @@ Adding:
 			update fails -> return
 		item not present ->
 			add item
-
+Quantity:
+	0 when empty
+	sum when has items
 */
 func TestWarehouse(t *testing.T) {
 
-	t.Run("should reject non existent item type ids", func(t *testing.T) {
+	t.Run("can not Add a type that does not exists", func(t *testing.T) {
 		c := qt.New(t)
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
 		// type not found
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("")
 
-		itemStore := mocks.NewMockStore(mockCtrl)
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
 		// will not try to add item
-		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
+		itemRepository.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
-			ItemStore:          itemStore,
+			ItemRepository:     itemRepository,
 			ItemTypeRepository: itemTypeRepository,
 		}
 
@@ -56,17 +57,17 @@ func TestWarehouse(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
 
-		itemStore := mocks.NewMockStore(mockCtrl)
-		itemStore.EXPECT().Get(uint64(1)).Return(9, nil)
-		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(nil)
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
+		itemRepository.EXPECT().Get(uint64(1)).Return(9, nil)
+		itemRepository.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(nil)
 
-		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
+		itemRepository.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
-			ItemStore:          itemStore,
+			ItemRepository:     itemRepository,
 			ItemTypeRepository: itemTypeRepository,
 		}
 
@@ -80,17 +81,17 @@ func TestWarehouse(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
 
-		itemStore := mocks.NewMockStore(mockCtrl)
-		itemStore.EXPECT().Get(uint64(1)).Return(0, nil)
-		itemStore.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(errors.New("update no go"))
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
+		itemRepository.EXPECT().Get(uint64(1)).Return(0, nil)
+		itemRepository.EXPECT().Update(uint64(1), gomock.Eq(10)).Return(errors.New("update no go"))
 
-		itemStore.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
+		itemRepository.EXPECT().Add(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
-			ItemStore:          itemStore,
+			ItemRepository:     itemRepository,
 			ItemTypeRepository: itemTypeRepository,
 		}
 
@@ -104,18 +105,18 @@ func TestWarehouse(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		itemTypeRepository := itemTypeMocks.NewMockRepository(mockCtrl)
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
 		// type exists
 		itemTypeRepository.EXPECT().Get(uint64(1)).Return("butter")
 
-		itemStore := mocks.NewMockStore(mockCtrl)
-		itemStore.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
-		itemStore.EXPECT().Add(uint64(1), 10).Times(1)
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
+		itemRepository.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
+		itemRepository.EXPECT().Add(uint64(1), 10).Times(1)
 
-		itemStore.EXPECT().Update(gomock.Any(), gomock.Any()).Times(0)
+		itemRepository.EXPECT().Update(gomock.Any(), gomock.Any()).Times(0)
 
 		w := warehouse.Repository{
-			ItemStore:          itemStore,
+			ItemRepository:     itemRepository,
 			ItemTypeRepository: itemTypeRepository,
 		}
 
@@ -123,4 +124,46 @@ func TestWarehouse(t *testing.T) {
 
 		c.Assert(err, qt.IsNil)
 	})
+
+	t.Run("quantity should be zero in empty store for existing type", func(t *testing.T) {
+		c := qt.New(t)
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
+
+		itemRepository.EXPECT().Get(uint64(1)).Return(99, nil)
+
+		w := warehouse.Repository{
+			ItemRepository:     itemRepository,
+			ItemTypeRepository: itemTypeRepository,
+		}
+
+		qty, err := w.Get(uint64(1))
+
+		c.Assert(err, qt.IsNil)
+		c.Assert(qty, qt.Equals, 99)
+	})
+
+	t.Run("should return error when requesting quantity for non-existing type", func(t *testing.T) {
+		c := qt.New(t)
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		itemTypeRepository := mocks.NewMockItemTypeRepository(mockCtrl)
+		itemRepository := mocks.NewMockItemRepository(mockCtrl)
+
+		itemRepository.EXPECT().Get(uint64(1)).Return(0, warehouse.ErrItemNotFound)
+
+		w := warehouse.Repository{
+			ItemRepository:     itemRepository,
+			ItemTypeRepository: itemTypeRepository,
+		}
+
+		_, err := w.Get(uint64(1))
+
+		c.Assert(err, qt.Equals, warehouse.ErrItemNotFound)
+	})
+
 }

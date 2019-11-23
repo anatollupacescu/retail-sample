@@ -17,6 +17,6 @@ jobs:
           USERNAME: ${{ secrets.GITHUB_USERNAME }}
           PASSWORD: ${{ secrets.GITHUB_PERSONAL_TOKEN }}
           REGISTRY: "docker.pkg.github.com"
-          IMAGE_NAME: "${{ secrets.GITHUB_USERNAME }}/retail"
+          IMAGE_NAME: "${{ secrets.GITHUB_USERNAME }}/retail-sample"
           TAG_NAME: "v0.0.1"
           LATEST: "true"

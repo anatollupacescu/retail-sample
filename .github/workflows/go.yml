@@ -12,7 +12,7 @@ jobs:
           fetch-depth: 1
 
       - name: Build & Push to GitHub Package
-        uses: opspresso/action-docker@master
+        uses: opspresso/action-docker@v0.2.1
         env:
           USERNAME: ${{ secrets.GITHUB_USERNAME }}
           PASSWORD: ${{ secrets.GITHUB_PERSONAL_TOKEN }}

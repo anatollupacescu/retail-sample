@@ -4,7 +4,7 @@ on: push
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: docker.pkg.github.com/anatollupacescu/retail-sample/v0.0.1:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -18,5 +18,5 @@ jobs:
           PASSWORD: ${{ secrets.GITHUB_PERSONAL_TOKEN }}
           REGISTRY: "docker.pkg.github.com"
           IMAGE_NAME: "${{ secrets.GITHUB_USERNAME }}/retail-sample"
-          TAG_NAME: "v0.0.1"
+          TAG_NAME: "build"
           LATEST: "true"

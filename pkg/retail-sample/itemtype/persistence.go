@@ -41,7 +41,7 @@ func (db *InMemoryDB) Find(t string) (i uint64, err error) {
 
 func (db *InMemoryDB) List() []string {
 	types := make([]string, 0, len(db.data))
-	for t, _ := range db.data {
+	for t := range db.data {
 		types = append(types, t)
 	}
 	return types

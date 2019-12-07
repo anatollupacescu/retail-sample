@@ -7,6 +7,9 @@ RELEASE?=0.0.0
 COMMIT := git-$(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
+test:
+	go test ./...
+
 build:
 	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build \
 		-ldflags "-s -w -X ${PROJECT}/internal/version.Version=${RELEASE} \

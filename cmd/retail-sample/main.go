@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/anatollupacescu/retail-sample/pkg/warehouse"
 	"net"
 	"net/http"
 	"os"
@@ -30,7 +31,7 @@ func main() {
 
 	diagPort := os.Getenv("DIAG_PORT")
 	if diagPort == "" {
-		logger.Fatal("Diagnostics port is not ste")
+		logger.Fatal("Diagnostics port is not set")
 	}
 
 	r := mux.NewRouter()
@@ -38,6 +39,10 @@ func main() {
 		Addr:    net.JoinHostPort("", port),
 		Handler: r,
 	}
+
+	app := warehouse.App{}
+
+	r.HandleFunc("/inventory", app.InventoryHandler)
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

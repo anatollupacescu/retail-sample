@@ -19,6 +19,7 @@ type (
 var ErrItemTypeNotFound = errors.New("type not found")
 
 func (s Stock) Provision(item InboundItem) (int, error) {
+
 	if !s.hasType(item.Type) {
 		return 0, ErrItemTypeNotFound
 	}
@@ -66,7 +67,7 @@ func (s Stock) Quantity(typeName string) (int, error) {
 }
 
 func (s Stock) ItemTypes() (r []string) {
-	for key, _ := range s.inventory {
+	for key := range s.inventory {
 		r = append(r, string(key))
 	}
 	return

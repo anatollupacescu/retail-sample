@@ -10,19 +10,29 @@ import (
 
 func TestInbound(t *testing.T) {
 
-	assert := assert.New(t)
+	asrt := assert.New(t)
 
 	t.Run("can add type", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureInboundType("milk")
-		assert.NoError(err)
+		asrt.NoError(err)
+	})
+
+	t.Run("newly added types have 0 quantity in stock", func(t *testing.T) {
+		stock := warehouse.Stock{}
+		err := stock.ConfigureInboundType("milk")
+		asrt.NoError(err)
+		qty, err := stock.Quantity("milk")
+		asrt.NoError(err)
+		asrt.Equal(0, qty)
 	})
 
 	t.Run("type must be unique", func(t *testing.T) {
 		stock := warehouse.Stock{}
-		stock.ConfigureInboundType("milk")
 		err := stock.ConfigureInboundType("milk")
-		assert.Equal(warehouse.ErrItemTypePresent, err)
+		asrt.NoError(err)
+		err = stock.ConfigureInboundType("milk")
+		asrt.Equal(warehouse.ErrItemTypePresent, err)
 	})
 
 	t.Run("can add stock item with existent type", func(t *testing.T) {
@@ -30,27 +40,30 @@ func TestInbound(t *testing.T) {
 		err := stock.ConfigureInboundType("milk")
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
 		qty, err := stock.Provision(item)
-		assert.NoError(err)
-		assert.Equal(31, qty)
+		asrt.NoError(err)
+		asrt.Equal(31, qty)
 
 		qty, _ = stock.Quantity("milk")
-		assert.Equal(31, qty)
+		asrt.Equal(31, qty)
 	})
 
 	t.Run("can not add stock item with non existent type", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
 		_, err := stock.Provision(item)
-		assert.Equal(warehouse.ErrItemTypeNotFound, err)
+		asrt.Equal(warehouse.ErrItemTypeNotFound, err)
 	})
 
 	t.Run("stock quantity accumulates", func(t *testing.T) {
 		stock := warehouse.Stock{}
-		stock.ConfigureInboundType("milk")
+		err := stock.ConfigureInboundType("milk")
+		asrt.NoError(err)
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
-		stock.Provision(item)
+		_, err = stock.Provision(item)
+		asrt.NoError(err)
 		item = warehouse.InboundItem{Type: "milk", Qty: 9}
-		qty, _ := stock.Provision(item)
-		assert.Equal(40, qty)
+		qty, err := stock.Provision(item)
+		asrt.NoError(err)
+		asrt.Equal(40, qty)
 	})
 }

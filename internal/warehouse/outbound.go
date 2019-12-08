@@ -82,14 +82,14 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 
 	for _, outboundItem := range config.Items {
 		inventoryQty := s.inventory[outboundItem.ItemType]
-		if outboundItem.Qty > inventoryQty {
+		if outboundItem.Qty * qty > inventoryQty {
 			return ErrNotEnoughStock
 		}
 	}
 
 	for _, outboundItem := range config.Items {
 		inventoryQty := s.inventory[outboundItem.ItemType]
-		inventoryQty -= outboundItem.Qty
+		inventoryQty -= outboundItem.Qty * qty
 		s.inventory[outboundItem.ItemType] = inventoryQty
 	}
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/anatollupacescu/retail-sample/pkg/warehouse"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/warehouse"
 	"net"
 	"net/http"
 	"os"
@@ -40,11 +40,7 @@ func main() {
 		Handler: r,
 	}
 
-	app := warehouse.App{}
-
-	r.HandleFunc("/inventory", app.ListTypes)
-	r.HandleFunc("/inventory/add/{name}", app.ConfigureType)
-	r.HandleFunc("/inventory/provision/{name}/{qty:[0-9]+}", app.Provision)
+	warehouse.ConfigureRoutes(r)
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

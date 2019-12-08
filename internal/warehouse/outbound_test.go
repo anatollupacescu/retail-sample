@@ -115,6 +115,45 @@ func TestOutbound3(t *testing.T) {
 		qty, _ = stock.Quantity("cabbage")
 		assert.Equal(t, 1, qty)
 	})
+
+	t.Run("can place outbound for multiple items", func(t *testing.T) {
+		stock := warehouse.Stock{}
+		stock.ConfigureInboundType("carrot")
+		stock.ConfigureInboundType("cabbage")
+
+		saladConfig := []warehouse.OutboundItemComponent{
+			{
+				ItemType: "carrot",
+				Qty:      1,
+			},
+			{
+				ItemType: "cabbage",
+				Qty: 1,
+			},
+		}
+		stock.ConfigureOutbound("salad", saladConfig)
+
+		twoCarrots := warehouse.InboundItem{
+			Type: "carrot",
+			Qty:  2,
+		}
+		stock.Provision(twoCarrots)
+
+		threeCabbages := warehouse.InboundItem{
+			Type: "cabbage",
+			Qty:  2,
+		}
+		stock.Provision(threeCabbages)
+
+		err := stock.PlaceOutbound("salad", 2)
+		assert.Nil(t, err)
+
+		qty, _ := stock.Quantity("carrot")
+		assert.Equal(t, 0, qty)
+
+		qty, _ = stock.Quantity("cabbage")
+		assert.Equal(t, 0, qty)
+	})
 }
 
 func TestConfigureOutbound(t *testing.T) {

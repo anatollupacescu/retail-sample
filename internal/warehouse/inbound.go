@@ -16,29 +16,36 @@ type (
 	}
 )
 
-var ErrItemTypeNotFound = errors.New("type not found")
+var ErrInboundItemTypeNotFound = errors.New("type not found")
 
 func (s Stock) Provision(item InboundItem) (int, error) {
 
 	if !s.hasType(item.Type) {
-		return 0, ErrItemTypeNotFound
+		return 0, ErrInboundItemTypeNotFound
 	}
 
-	currentQty := s.inventory[item.Type]
-	currentQty += item.Qty
+	currentQty := s.inventory[item.Type] + item.Qty
 
 	s.inventory[item.Type] = currentQty
 
 	return s.inventory[item.Type], nil
 }
 
-var ErrItemTypePresent = errors.New("item type present")
+var (
+	ErrInboundItemTypeDuplicated = errors.New("item type already present")
+	ErrInboundNameNotProvided    = errors.New("name not provided")
+)
 
 func (s *Stock) ConfigureInboundType(typeName string) error {
+
+	if len(typeName) == 0 {
+		return ErrInboundNameNotProvided
+	}
+
 	typeToAdd := InboundType(typeName)
 
 	if s.hasType(typeToAdd) {
-		return ErrItemTypePresent
+		return ErrInboundItemTypeDuplicated
 	}
 
 	if s.inventory == nil {
@@ -56,11 +63,12 @@ func (s Stock) hasType(itemType InboundType) bool {
 }
 
 func (s Stock) Quantity(typeName string) (int, error) {
+
 	itemType := InboundType(typeName)
 	qty, found := s.inventory[itemType]
 
 	if !found {
-		return 0, ErrItemTypePresent
+		return 0, ErrInboundItemTypeDuplicated
 	}
 
 	return qty, nil

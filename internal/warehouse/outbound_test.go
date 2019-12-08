@@ -1,7 +1,7 @@
 package warehouse_test
 
 import (
-	warehouse "github.com/anatollupacescu/retail-sample/internal/warehouse"
+	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -165,13 +165,13 @@ func TestConfigureOutbound(t *testing.T) {
 	t.Run("should reject empty name", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureOutbound("", nil)
-		assert.Equal(warehouse.ErrNameNotProvided, err)
+		assert.Equal(warehouse.ErrOutboundNameNotProvided, err)
 	})
 
 	t.Run("should reject empty list of outbound items", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{})
-		assert.Equal(warehouse.ErrItemsNotProvided, err)
+		assert.Equal(warehouse.ErrOutboundItemsNotProvided, err)
 	})
 
 	t.Run("should reject when request has unknown item types", func(t *testing.T) {
@@ -180,7 +180,7 @@ func TestConfigureOutbound(t *testing.T) {
 			ItemType: "nope",
 			Qty:      1,
 		}})
-		assert.Equal(warehouse.ErrItemTypeNotFound, err)
+		assert.Equal(warehouse.ErrInboundItemTypeNotFound, err)
 	})
 
 	t.Run("should reject when request has zero quantity", func(t *testing.T) {
@@ -190,7 +190,7 @@ func TestConfigureOutbound(t *testing.T) {
 			ItemType: warehouse.InboundType("milk"),
 			Qty:      0,
 		}})
-		assert.Equal(warehouse.ErrZeroQuantityNotAllowed, err)
+		assert.Equal(warehouse.ErrOutboundZeroQuantityNotAllowed, err)
 	})
 
 	t.Run("should accept when configured correctly", func(t *testing.T) {

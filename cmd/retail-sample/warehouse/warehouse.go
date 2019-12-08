@@ -17,7 +17,7 @@ func ConfigureRoutes(r *mux.Router) {
 	a := App{}
 	r.HandleFunc("/inventory", a.ListTypes)
 	r.HandleFunc("/inventory/{name}", a.ConfigureType).Methods("POST")
-	r.HandleFunc("/inventory/provision/{name}/{qty:[0-9]+}", a.Provision).Methods("POST")
+	r.HandleFunc("/inventory/{name}/{qty:[0-9]+}", a.Provision).Methods("POST")
 	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
 	r.HandleFunc("/stock", a.NewOutbound).Methods("POST")
 	r.HandleFunc("/stock/configure", a.ConfigureOutbound).Methods("POST")
@@ -58,6 +58,8 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusAccepted)
+
 	vars := mux.Vars(r)
 	itemTypeName := vars["name"]
 	qtyParam := vars["qty"]
@@ -73,16 +75,16 @@ func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
 		Type: warehouse.InboundType(itemTypeName),
 		Qty:  qty,
 	}
+
 	newQty, err := a.stock.Provision(item)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if _, err := fmt.Fprint(w, "for item type '", item.Type, "' got new qty: ", newQty, "\n"); err != nil {
 		log.Fatal(err)
+		return
 	}
-
-	w.WriteHeader(http.StatusNoContent)
 }

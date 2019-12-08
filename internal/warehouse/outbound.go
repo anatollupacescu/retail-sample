@@ -19,26 +19,27 @@ type (
 )
 
 var (
-	ErrNameNotProvided        = errors.New("name not provided")
-	ErrItemsNotProvided       = errors.New("items not provided")
-	ErrZeroQuantityNotAllowed = errors.New("zero quantity not allowed")
+	ErrOutboundNameNotProvided        = errors.New("name not provided")
+	ErrOutboundItemsNotProvided       = errors.New("items not provided")
+	ErrOutboundZeroQuantityNotAllowed = errors.New("zero quantity not allowed")
 )
 
 func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) error {
+
 	if len(name) == 0 {
-		return ErrNameNotProvided
+		return ErrOutboundNameNotProvided
 	}
 
 	if len(items) == 0 {
-		return ErrItemsNotProvided
+		return ErrOutboundItemsNotProvided
 	}
 
 	for _, item := range items {
 		if !s.hasType(item.ItemType) {
-			return ErrItemTypeNotFound
+			return ErrInboundItemTypeNotFound
 		}
 		if item.Qty == 0 {
-			return ErrZeroQuantityNotAllowed
+			return ErrOutboundZeroQuantityNotAllowed
 		}
 	}
 
@@ -71,18 +72,15 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 
 	outboundType := OutboundType(typeName)
 
-	var (
-		config OutboundItem
-		found  bool
-	)
+	config, found := s.outboundConfiguration[outboundType]
 
-	if config, found = s.outboundConfiguration[outboundType]; !found {
+	if !found {
 		return ErrOutboundTypeNotFound
 	}
 
 	for _, outboundItem := range config.Items {
 		inventoryQty := s.inventory[outboundItem.ItemType]
-		if outboundItem.Qty * qty > inventoryQty {
+		if outboundItem.Qty*qty > inventoryQty {
 			return ErrNotEnoughStock
 		}
 	}

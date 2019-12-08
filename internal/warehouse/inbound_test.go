@@ -10,31 +10,34 @@ import (
 
 func TestConfigureItemType(t *testing.T) {
 
-	asrt := assert.New(t)
+	t.Run("should reject empty name", func(t *testing.T) {
+		stock := warehouse.Stock{}
+		err := stock.ConfigureInboundType("")
+		assert.Equal(t, warehouse.ErrInboundNameNotProvided, err)
+	})
 
 	t.Run("can add type", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureInboundType("milk")
-		asrt.NoError(err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("newly added types have 0 quantity in stock", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureInboundType("milk")
-		asrt.NoError(err)
+		assert.NoError(t, err)
 		qty, err := stock.Quantity("milk")
-		asrt.NoError(err)
-		asrt.Equal(0, qty)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, qty)
 	})
 
-	t.Run("type must be unique", func(t *testing.T) {
+	t.Run("should reject duplicate name", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureInboundType("milk")
-		asrt.NoError(err)
+		assert.NoError(t, err)
 		err = stock.ConfigureInboundType("milk")
-		asrt.Equal(warehouse.ErrItemTypePresent, err)
+		assert.Equal(t, warehouse.ErrInboundItemTypeDuplicated, err)
 	})
-
 }
 
 func TestStockWithoutConfiguredItemTypes(t *testing.T) {
@@ -43,7 +46,7 @@ func TestStockWithoutConfiguredItemTypes(t *testing.T) {
 		stock := warehouse.Stock{}
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
 		_, err := stock.Provision(item)
-		assert.Equal(t, warehouse.ErrItemTypeNotFound, err)
+		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
 	})
 }
 

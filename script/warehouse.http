@@ -10,3 +10,43 @@ GET http://localhost:8080/inventory
 Accept: application/json
 
 ###
+
+POST http://localhost:8080/inventory/banana
+
+###
+
+POST http://localhost:8080/inventory/mango
+
+###
+
+POST http://localhost:8080/inventory/banana/2
+
+###
+
+POST http://localhost:8080/inventory/mango/2
+
+###
+GET http://localhost:8080/stock
+
+###
+
+POST http://localhost:8080/stock/configure
+Content-Type: application/json
+
+{
+    "name": "smoothie",
+    "items": {
+        "banana": 2,
+        "mango": 2
+    }
+}
+
+###
+
+POST http://localhost:8080/stock
+Content-Type: application/json
+
+{
+    "name": "smoothie",
+    "qty": 2
+}

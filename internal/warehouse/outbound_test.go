@@ -6,14 +6,16 @@ import (
 	"testing"
 )
 
-func TestOutbound(t *testing.T) {
-	stock := warehouse.Stock{}
-	err := stock.PlaceOutbound("test", 3)
-	assert.Equal(t, warehouse.ErrOutboundTypeNotFound, err)
+func TestInventoryTypesAreNotConfigured(t *testing.T) {
+	t.Run("should not allow placing outbound order", func(t *testing.T) {
+		stock := warehouse.Stock{}
+		err := stock.PlaceOutbound("test", 3)
+		assert.Equal(t, warehouse.ErrOutboundTypeNotFound, err)
+	})
 }
 
-func TestOutbound1(t *testing.T) {
-	t.Run("can not place outbound order when inventory is empty", func(t *testing.T) {
+func TestInventoryIsEmpty(t *testing.T) {
+	t.Run("not allw placing outbound order", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		stock.ConfigureInboundType("test")
 		items := []warehouse.OutboundItemComponent{
@@ -28,8 +30,8 @@ func TestOutbound1(t *testing.T) {
 	})
 }
 
-func TestOutbound2(t *testing.T) {
-	t.Run("can not place outbound order when inventory is not enough", func(t *testing.T) {
+func TestInventoryDoesNotContainEnoughItems(t *testing.T) {
+	t.Run("can not place outbound order", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		stock.ConfigureInboundType("test")
 		items := []warehouse.OutboundItemComponent{
@@ -51,7 +53,7 @@ func TestOutbound2(t *testing.T) {
 	})
 }
 
-func TestOutbound3(t *testing.T) {
+func TestStockHasEnoughItems(t *testing.T) {
 	t.Run("should update stock when outbound succeeds", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		stock.ConfigureInboundType("carrot")
@@ -89,7 +91,7 @@ func TestOutbound3(t *testing.T) {
 			},
 			{
 				ItemType: "cabbage",
-				Qty: 1,
+				Qty:      1,
 			},
 		}
 		stock.ConfigureOutbound("salad", saladConfig)
@@ -128,7 +130,7 @@ func TestOutbound3(t *testing.T) {
 			},
 			{
 				ItemType: "cabbage",
-				Qty: 1,
+				Qty:      1,
 			},
 		}
 		stock.ConfigureOutbound("salad", saladConfig)
@@ -160,19 +162,19 @@ func TestConfigureOutbound(t *testing.T) {
 
 	assert := assert.New(t)
 
-	t.Run("empty name not accepted", func(t *testing.T) {
+	t.Run("should reject empty name", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureOutbound("", nil)
 		assert.Equal(warehouse.ErrNameNotProvided, err)
 	})
 
-	t.Run("empty list of outbound items not accepted", func(t *testing.T) {
+	t.Run("should reject empty list of outbound items", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{})
 		assert.Equal(warehouse.ErrItemsNotProvided, err)
 	})
 
-	t.Run("can not add finished product that has unknown item types", func(t *testing.T) {
+	t.Run("should reject when request has unknown item types", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
 			ItemType: "nope",
@@ -181,7 +183,7 @@ func TestConfigureOutbound(t *testing.T) {
 		assert.Equal(warehouse.ErrItemTypeNotFound, err)
 	})
 
-	t.Run("can not add finished product that has zero quantity", func(t *testing.T) {
+	t.Run("should reject when request has zero quantity", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		stock.ConfigureInboundType("milk")
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
@@ -191,7 +193,7 @@ func TestConfigureOutbound(t *testing.T) {
 		assert.Equal(warehouse.ErrZeroQuantityNotAllowed, err)
 	})
 
-	t.Run("can add finished product", func(t *testing.T) {
+	t.Run("should accept when configured correctly", func(t *testing.T) {
 		stock := warehouse.Stock{}
 		stock.ConfigureInboundType("milk")
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{

@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 type App struct {
@@ -16,12 +15,12 @@ type App struct {
 
 func ConfigureRoutes(r *mux.Router) {
 	a := App{}
-	r.HandleFunc("/inventory", a.ListTypes).Methods("GET")
-	r.HandleFunc("/inventory", a.ConfigureType).Methods("POST")
-	r.HandleFunc("/inventory/{name}/{qty:[0-9]+}", a.Provision).Methods("POST")
+	r.HandleFunc("/inbound/config", a.ListTypes).Methods("GET")
+	r.HandleFunc("/inbound/config", a.ConfigureType).Methods("POST")
+	r.HandleFunc("/inbound", a.Provision).Methods("POST")
 	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
-	r.HandleFunc("/stock", a.NewOutbound).Methods("POST")
-	r.HandleFunc("/stock/configure", a.ConfigureOutbound).Methods("POST")
+	r.HandleFunc("/outbound", a.NewOutbound).Methods("POST")
+	r.HandleFunc("/outbound/config", a.ConfigureOutbound).Methods("POST")
 }
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
@@ -65,46 +64,56 @@ func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	e := json.NewEncoder(w)
+
+	var response = make(map[string]int)
+
 	for _, itemType := range a.stock.ItemTypes() {
 		qty, err := a.stock.Quantity(itemType)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if _, err := fmt.Fprint(w, "for item type '", itemType, "' got qty: ", qty, "\n"); err != nil {
-			log.Fatal(err)
-		}
+		response[itemType] = qty
+	}
+
+	if err := e.Encode(response); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 }
 
 func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 
-	vars := mux.Vars(r)
-	itemTypeName := vars["name"]
-	qtyParam := vars["qty"]
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields() // catch unwanted fields
 
-	qty, err := strconv.Atoi(qtyParam)
+	var t map[string]int
 
-	if err != nil {
+	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	item := warehouse.InboundItem{
-		Type: warehouse.InboundType(itemTypeName),
-		Qty:  qty,
-	}
-
-	newQty, err := a.stock.Provision(item)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if len(t) == 0 {
+		http.Error(w, "nothing to provision", http.StatusBadRequest)
 		return
 	}
 
-	if _, err := fmt.Fprint(w, "for item type '", item.Type, "' got new qty: ", newQty, "\n"); err != nil {
-		log.Fatal(err)
-		return
+	for key, value := range t {
+		item := warehouse.InboundItem{
+			Type: warehouse.InboundType(key),
+			Qty:  value,
+		}
+
+		_, err := a.stock.Provision(item)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	}
 }

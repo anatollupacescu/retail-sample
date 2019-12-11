@@ -1,0 +1,96 @@
+{
+	"info": {
+		"_postman_id": "8f61005f-0caa-47b9-880b-d34d3d660638",
+		"name": "retail-sample-tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "happy-path-1",
+			"item": [
+				{
+					"name": "create-fruits-inbound-item-types",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 201\", function() {",
+									"    pm.response.to.have.status(201)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"apple\", \"pear\"]"
+						},
+						"url": {
+							"raw": "localhost:8080/inventory",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check-item-type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"exec": [
+									"pm.test(\"response should contain the fruits\", function () {",
+									"    pm.response.to.not.be.error;",
+									"    pm.response.to.be.json;",
+									"    let expectedJsonBody = [\"apple\", \"pear\"]",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.members(expectedJsonBody);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/inventory",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}

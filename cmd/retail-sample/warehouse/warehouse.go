@@ -1,6 +1,7 @@
 package warehouse
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 	"github.com/gorilla/mux"
@@ -15,8 +16,8 @@ type App struct {
 
 func ConfigureRoutes(r *mux.Router) {
 	a := App{}
-	r.HandleFunc("/inventory", a.ListTypes)
-	r.HandleFunc("/inventory/{name}", a.ConfigureType).Methods("POST")
+	r.HandleFunc("/inventory", a.ListTypes).Methods("GET")
+	r.HandleFunc("/inventory", a.ConfigureType).Methods("POST")
 	r.HandleFunc("/inventory/{name}/{qty:[0-9]+}", a.Provision).Methods("POST")
 	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
 	r.HandleFunc("/stock", a.NewOutbound).Methods("POST")
@@ -24,23 +25,42 @@ func ConfigureRoutes(r *mux.Router) {
 }
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	itemTypeName := vars["name"]
-	if err := a.stock.ConfigureInboundType(itemTypeName); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		if _, err = fmt.Fprintf(w, "could not add item type '%s': %v\n", itemTypeName, err); err != nil {
-			log.Fatal(err)
-		}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields() // catch unwanted fields
+
+	var types []string
+
+	if err := d.Decode(&types); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	if len(types) == 0 {
+		http.Error(w, "at least one element expected", http.StatusBadRequest)
+		return
+	}
+
+	for _, t := range types {
+		if err := a.stock.ConfigureInboundType(t); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			if _, err = fmt.Fprintf(w, "could not add item type '%s': %v\n", t, err); err != nil {
+				log.Fatal(err)
+			}
+			return
+		}
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 
 func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
-	for _, itemType := range a.stock.ItemTypes() {
-		if _, err := fmt.Fprintln(w, itemType); err != nil {
-			log.Fatal(err)
-		}
+	w.Header().Set("Content-Type", "application/json")
+
+	e := json.NewEncoder(w)
+
+	if err := e.Encode(a.stock.ItemTypes()); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 }
 

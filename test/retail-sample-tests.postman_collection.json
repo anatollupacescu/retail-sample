@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "d38f3380-0c69-498c-893a-0d0da4827456",
+		"_postman_id": "2f6c6ad4-9f73-4f5d-8e53-cf66f68d715e",
 		"name": "retail-sample-tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "can-create-item-type",
+			"name": "create-item-type",
 			"item": [
 				{
 					"name": "create-fruits-inbound-item-types",
@@ -94,7 +94,7 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "can-provision-stock",
+			"name": "provision-stock",
 			"item": [
 				{
 					"name": "create-fruits-inbound-item-types",
@@ -200,6 +200,283 @@
 									"    pm.response.to.be.json;",
 									"    pm.response.to.have.jsonBody('orange', 3)",
 									"        .and.have.jsonBody('kiwi', 4)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"apple\", \"pear\"]"
+						},
+						"url": {
+							"raw": "localhost:8080/stock",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"stock"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "outbound",
+			"item": [
+				{
+					"name": "create-veggies-inbound-item-types",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 201\", function() {",
+									"    pm.response.to.have.status(201)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"carrot\", \"onion\"]"
+						},
+						"url": {
+							"raw": "localhost:8080/inbound/config",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "provision-fruits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 202\", function() {",
+									"    pm.response.to.have.status(202)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"carrot\": 3, \n\t\"onion\": 4\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/inbound",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "config-outbound",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 201\", function() {",
+									"    pm.response.to.have.status(201)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"salad\",\n\t\"items\": {\n\t\t\"carrot\": 2, \n\t\t\"onion\": 3\n\t}\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/outbound/config",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"outbound",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sell-salad",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 204\", function() {",
+									"    pm.response.to.have.status(204)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"salad\",\n\t\"qty\": 1\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/outbound",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"outbound"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sell-more-salad-fails",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 400\", function() {",
+									"    pm.response.to.have.status(400)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"salad\",\n\t\"qty\": 1\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/outbound",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"outbound"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check-stock-for-fruits",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 200\", function() {",
+									"    pm.response.to.have.status(200)",
+									"})",
+									"",
+									"pm.test(\"Should have oranges and kiwis\", function() {",
+									"    pm.response.to.not.be.error;",
+									"    pm.response.to.be.json;",
+									"    pm.response.to",
+									"        .have.jsonBody('carrot', 1)",
+									"    .and",
+									"        .have.jsonBody('onion', 1)",
 									"})"
 								],
 								"type": "text/javascript"

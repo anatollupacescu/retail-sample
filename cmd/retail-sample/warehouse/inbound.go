@@ -71,8 +71,6 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusAccepted)
-
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -101,4 +99,6 @@ func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	w.WriteHeader(http.StatusAccepted)
 }

@@ -6,7 +6,9 @@ import (
 	"net/http"
 )
 
-func (a *App) NewOutbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -29,11 +31,11 @@ func (a *App) NewOutbound(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
 
 func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusCreated)
+
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -64,6 +66,4 @@ func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	w.WriteHeader(http.StatusCreated)
 }

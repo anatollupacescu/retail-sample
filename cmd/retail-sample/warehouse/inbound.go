@@ -3,9 +3,10 @@ package warehouse
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 	"log"
 	"net/http"
+
+	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +71,7 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
+func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -92,7 +93,7 @@ func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
 			Qty:  value,
 		}
 
-		_, err := a.stock.Provision(item)
+		_, err := a.stock.PlaceInbound(item)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -101,4 +102,31 @@ func (a *App) Provision(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	e := json.NewEncoder(w)
+
+	type inbound struct {
+		Name string `json:"name"`
+		Qty  int    `json:"qty"`
+	}
+
+	var t struct {
+		Inbound []inbound `json:"inbounds"`
+	}
+
+	for _, in := range a.stock.ListInbound() {
+		e := inbound{
+			Name: string(in.Type),
+			Qty:  in.Qty,
+		}
+		t.Inbound = append(t.Inbound, e)
+	}
+
+	if err := e.Encode(t); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 }

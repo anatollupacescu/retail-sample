@@ -10,10 +10,13 @@ type App struct {
 }
 
 func ConfigureRoutes(r *mux.Router) {
-	a := App{}
+	a := App{
+		stock: warehouse.NewStock(),
+	}
 	r.HandleFunc("/inbound/config", a.ListTypes).Methods("GET")
 	r.HandleFunc("/inbound/config", a.ConfigureType).Methods("POST")
-	r.HandleFunc("/inbound", a.Provision).Methods("POST")
+	r.HandleFunc("/inbound", a.PlaceInbound).Methods("POST")
+	r.HandleFunc("/inbound", a.ListInbound).Methods("GET")
 	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
 	r.HandleFunc("/outbound", a.PlaceOutbound).Methods("POST")
 	r.HandleFunc("/outbound/config", a.ConfigureOutbound).Methods("POST")

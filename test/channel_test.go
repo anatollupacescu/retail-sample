@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestProducer(t *testing.T) {
+func _(_ *testing.T) {
 	messages := make(chan int)
 	quit := make(chan struct{})
 

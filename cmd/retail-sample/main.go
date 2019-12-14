@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/warehouse"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/warehouse"
 
 	"github.com/anatollupacescu/retail-sample/internal/version"
 	"github.com/gorilla/mux"

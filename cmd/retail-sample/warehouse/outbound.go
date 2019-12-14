@@ -2,13 +2,12 @@ package warehouse
 
 import (
 	"encoding/json"
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 	"net/http"
+
+	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 )
 
 func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNoContent)
-
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -31,6 +30,8 @@ func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {

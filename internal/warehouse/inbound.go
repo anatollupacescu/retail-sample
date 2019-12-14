@@ -1,11 +1,15 @@
 package warehouse
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type (
 	InboundType string
 
 	Stock struct {
+		inboundLog            map[time.Time]InboundItem
 		inventory             map[InboundType]int
 		outboundConfiguration map[OutboundType]OutboundItem
 	}
@@ -16,9 +20,17 @@ type (
 	}
 )
 
+func NewStock() Stock {
+	return Stock{
+		inboundLog:            make(map[time.Time]InboundItem),
+		inventory:             make(map[InboundType]int),
+		outboundConfiguration: make(map[OutboundType]OutboundItem),
+	}
+}
+
 var ErrInboundItemTypeNotFound = errors.New("type not found")
 
-func (s Stock) Provision(item InboundItem) (int, error) {
+func (s Stock) PlaceInbound(item InboundItem) (int, error) {
 
 	if !s.hasType(item.Type) {
 		return 0, ErrInboundItemTypeNotFound
@@ -28,7 +40,13 @@ func (s Stock) Provision(item InboundItem) (int, error) {
 
 	s.inventory[item.Type] = currentQty
 
+	addLogEntry(s, item)
+
 	return s.inventory[item.Type], nil
+}
+
+func addLogEntry(s Stock, item InboundItem) {
+	s.inboundLog[time.Now()] = item
 }
 
 var (
@@ -46,10 +64,6 @@ func (s *Stock) ConfigureInboundType(typeName string) error {
 
 	if s.hasType(typeToAdd) {
 		return ErrInboundItemTypeDuplicated
-	}
-
-	if s.inventory == nil {
-		s.inventory = make(map[InboundType]int)
 	}
 
 	s.inventory[typeToAdd] = 0
@@ -77,6 +91,13 @@ func (s Stock) Quantity(typeName string) (int, error) {
 func (s Stock) ItemTypes() (r []string) {
 	for key := range s.inventory {
 		r = append(r, string(key))
+	}
+	return
+}
+
+func (s Stock) ListInbound() (r []InboundItem) {
+	for _, item := range s.inboundLog {
+		r = append(r, item)
 	}
 	return
 }

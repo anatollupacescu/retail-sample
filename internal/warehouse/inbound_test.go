@@ -10,20 +10,20 @@ import (
 
 func TestConfigureItemType(t *testing.T) {
 
-	t.Run("should reject empty name", func(t *testing.T) {
-		stock := warehouse.Stock{}
+	t.Run("should reject empty type name", func(t *testing.T) {
+		stock := stock().build()
 		err := stock.ConfigureInboundType("")
 		assert.Equal(t, warehouse.ErrInboundNameNotProvided, err)
 	})
 
-	t.Run("can add type", func(t *testing.T) {
-		stock := warehouse.Stock{}
+	t.Run("should succeed for valid type name", func(t *testing.T) {
+		stock := stock().build()
 		err := stock.ConfigureInboundType("milk")
 		assert.NoError(t, err)
 	})
 
 	t.Run("newly added types have 0 quantity in stock", func(t *testing.T) {
-		stock := warehouse.Stock{}
+		stock := stock().build()
 		err := stock.ConfigureInboundType("milk")
 		assert.NoError(t, err)
 		qty, err := stock.Quantity("milk")
@@ -32,7 +32,7 @@ func TestConfigureItemType(t *testing.T) {
 	})
 
 	t.Run("should reject duplicate name", func(t *testing.T) {
-		stock := warehouse.Stock{}
+		stock := stock().build()
 		err := stock.ConfigureInboundType("milk")
 		assert.NoError(t, err)
 		err = stock.ConfigureInboundType("milk")
@@ -43,20 +43,20 @@ func TestConfigureItemType(t *testing.T) {
 func TestStockWithoutConfiguredItemTypes(t *testing.T) {
 
 	t.Run("can not add stock item with non existent type", func(t *testing.T) {
-		stock := warehouse.Stock{}
+		stock := stock().build()
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
-		_, err := stock.Provision(item)
+		_, err := stock.PlaceInbound(item)
 		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
 	})
 }
 
 func TestStockWithConfiguredItems(t *testing.T) {
 
-	t.Run("should succeed when item type exists", func(t *testing.T) {
-		stock := warehouse.Stock{}
-		err := stock.ConfigureInboundType("milk")
+	t.Run("should place inbound when item type exists", func(t *testing.T) {
+		stock := stock().build()
+		_ = stock.ConfigureInboundType("milk")
 		item := warehouse.InboundItem{Type: "milk", Qty: 31}
-		qty, err := stock.Provision(item)
+		qty, err := stock.PlaceInbound(item)
 		assert.NoError(t, err)
 		assert.Equal(t, 31, qty)
 
@@ -64,17 +64,18 @@ func TestStockWithConfiguredItems(t *testing.T) {
 		assert.Equal(t, 31, qty)
 	})
 
+	t.Run("should add to inbound log", func(t *testing.T) {
+		stock := stock().with("milk", 31).build()
+
+		l := stock.ListInbound()
+		assert.Len(t, l, 1)
+	})
+
 	t.Run("should increment existing stock levels", func(t *testing.T) {
-		stock := warehouse.Stock{}
-		err := stock.ConfigureInboundType("milk")
-		assert.NoError(t, err)
+		stock := stock().with("milk", 31).build()
 
-		item := warehouse.InboundItem{Type: "milk", Qty: 31}
-		_, err = stock.Provision(item)
-		assert.NoError(t, err)
-
-		item = warehouse.InboundItem{Type: "milk", Qty: 9}
-		qty, err := stock.Provision(item)
+		item := warehouse.InboundItem{Type: "milk", Qty: 9}
+		qty, err := stock.PlaceInbound(item)
 		assert.NoError(t, err)
 		assert.Equal(t, 40, qty)
 	})

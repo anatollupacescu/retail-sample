@@ -14,4 +14,4 @@
 .idea/
 .vscode/
 
-test/newman/node_modules
+test/acceptance/node_modules

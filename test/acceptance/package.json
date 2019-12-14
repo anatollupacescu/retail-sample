@@ -1,0 +1,14 @@
+{
+  "name": "acceptance-tests",
+  "version": "1.0.0",
+  "description": "acceptance tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run retail-sample-tests.postman_collection.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^4.5.7"
+  }
+}

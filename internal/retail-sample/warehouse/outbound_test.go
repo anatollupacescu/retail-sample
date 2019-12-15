@@ -46,7 +46,7 @@ func TestInventoryDoesNotContainEnoughItems(t *testing.T) {
 		}
 		_ = stock.ConfigureOutbound("test", items)
 
-		oneTest := warehouse.InboundItem{
+		oneTest := warehouse.Item{
 			Type: "test",
 			Qty:  1,
 		}
@@ -71,7 +71,7 @@ func TestStockHasEnoughItems(t *testing.T) {
 		}
 		_ = stock.ConfigureOutbound("salad", items)
 
-		carrotsInStock := warehouse.InboundItem{
+		carrotsInStock := warehouse.Item{
 			Type: "carrot",
 			Qty:  2,
 		}
@@ -101,13 +101,13 @@ func TestStockHasEnoughItems(t *testing.T) {
 		}
 		_ = stock.ConfigureOutbound("salad", saladConfig)
 
-		twoCarrots := warehouse.InboundItem{
+		twoCarrots := warehouse.Item{
 			Type: "carrot",
 			Qty:  2,
 		}
 		_, _ = stock.PlaceInbound(twoCarrots)
 
-		threeCabbages := warehouse.InboundItem{
+		threeCabbages := warehouse.Item{
 			Type: "cabbage",
 			Qty:  2,
 		}
@@ -140,13 +140,13 @@ func TestStockHasEnoughItems(t *testing.T) {
 		}
 		_ = stock.ConfigureOutbound("salad", saladConfig)
 
-		twoCarrots := warehouse.InboundItem{
+		twoCarrots := warehouse.Item{
 			Type: "carrot",
 			Qty:  2,
 		}
 		_, _ = stock.PlaceInbound(twoCarrots)
 
-		threeCabbages := warehouse.InboundItem{
+		threeCabbages := warehouse.Item{
 			Type: "cabbage",
 			Qty:  2,
 		}

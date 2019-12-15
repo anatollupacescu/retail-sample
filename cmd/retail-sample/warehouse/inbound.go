@@ -3,10 +3,9 @@ package warehouse
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"log"
 	"net/http"
-
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
@@ -88,8 +87,8 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for key, value := range t {
-		item := warehouse.InboundItem{
-			Type: warehouse.InboundType(key),
+		item := warehouse.Item{
+			Type: warehouse.ItemType(key),
 			Qty:  value,
 		}
 

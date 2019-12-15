@@ -43,7 +43,7 @@ func TestStockWithoutConfiguredItemTypes(t *testing.T) {
 
 	t.Run("can not add stock item with non existent type", func(t *testing.T) {
 		stock := stock().build()
-		item := warehouse.InboundItem{Type: "milk", Qty: 31}
+		item := warehouse.Item{Type: "milk", Qty: 31}
 		_, err := stock.PlaceInbound(item)
 		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
 	})
@@ -54,7 +54,7 @@ func TestStockWithConfiguredItems(t *testing.T) {
 	t.Run("should place inbound when item type exists", func(t *testing.T) {
 		stock := stock().build()
 		_ = stock.ConfigureInboundType("milk")
-		item := warehouse.InboundItem{Type: "milk", Qty: 31}
+		item := warehouse.Item{Type: "milk", Qty: 31}
 		qty, err := stock.PlaceInbound(item)
 		assert.NoError(t, err)
 		assert.Equal(t, 31, qty)
@@ -73,7 +73,7 @@ func TestStockWithConfiguredItems(t *testing.T) {
 	t.Run("should increment existing stock levels", func(t *testing.T) {
 		stock := stock().with("milk", 31).build()
 
-		item := warehouse.InboundItem{Type: "milk", Qty: 9}
+		item := warehouse.Item{Type: "milk", Qty: 9}
 		qty, err := stock.PlaceInbound(item)
 		assert.NoError(t, err)
 		assert.Equal(t, 40, qty)

@@ -8,7 +8,7 @@ type (
 	OutboundType string
 
 	OutboundItemComponent struct {
-		ItemType InboundType
+		ItemType ItemType
 		Qty      int
 	}
 

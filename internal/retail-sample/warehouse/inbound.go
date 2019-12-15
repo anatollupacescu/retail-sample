@@ -113,8 +113,5 @@ func (s Stock) ItemTypes() (r []string) {
 }
 
 func (s Stock) ListInbound() (r []InboundItem) {
-	for _, item := range s.inboundLog.List() {
-		r = append(r, item)
-	}
-	return
+	return s.inboundLog.List()
 }

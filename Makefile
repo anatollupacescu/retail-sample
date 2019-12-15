@@ -16,3 +16,5 @@ build:
 		-X ${PROJECT}/internal/version.Commit=${COMMIT} \
 		-X ${PROJECT}/internal/version.BuildTime=${BUILD_TIME}" \
 		-o bin/retail ${PROJECT}/cmd/retail-sample
+
+.PHONY: test

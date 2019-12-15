@@ -8,10 +8,20 @@ import (
 type (
 	InboundType string
 
+	InboundLog interface {
+		Add(time.Time, InboundItem)
+		List() []InboundItem
+	}
+
+	inMemoryInboundLog map[time.Time]InboundItem
+
+	Inventory             map[InboundType]int
+	OutboundConfiguration map[OutboundType]OutboundItem
+
 	Stock struct {
-		inboundLog            map[time.Time]InboundItem
-		inventory             map[InboundType]int
-		outboundConfiguration map[OutboundType]OutboundItem
+		inboundLog            InboundLog
+		inventory             Inventory
+		outboundConfiguration OutboundConfiguration
 	}
 
 	InboundItem struct {
@@ -22,10 +32,21 @@ type (
 
 func NewStock() Stock {
 	return Stock{
-		inboundLog:            make(map[time.Time]InboundItem),
+		inboundLog:            make(inMemoryInboundLog),
 		inventory:             make(map[InboundType]int),
 		outboundConfiguration: make(map[OutboundType]OutboundItem),
 	}
+}
+
+func (i inMemoryInboundLog) Add(k time.Time, v InboundItem) {
+	i[k] = v
+}
+
+func (i inMemoryInboundLog) List() (r []InboundItem) {
+	for _, v := range i {
+		r = append(r, v)
+	}
+	return
 }
 
 var ErrInboundItemTypeNotFound = errors.New("type not found")
@@ -40,13 +61,9 @@ func (s Stock) PlaceInbound(item InboundItem) (int, error) {
 
 	s.inventory[item.Type] = currentQty
 
-	addLogEntry(s, item)
+	s.inboundLog.Add(time.Now(), item)
 
-	return s.inventory[item.Type], nil
-}
-
-func addLogEntry(s Stock, item InboundItem) {
-	s.inboundLog[time.Now()] = item
+	return currentQty, nil
 }
 
 var (
@@ -96,7 +113,7 @@ func (s Stock) ItemTypes() (r []string) {
 }
 
 func (s Stock) ListInbound() (r []InboundItem) {
-	for _, item := range s.inboundLog {
+	for _, item := range s.inboundLog.List() {
 		r = append(r, item)
 	}
 	return

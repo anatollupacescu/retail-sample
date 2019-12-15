@@ -1,8 +1,6 @@
 package warehouse_test
 
-import (
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
-)
+import "github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 
 type TestWrapper struct {
 	stock warehouse.Stock

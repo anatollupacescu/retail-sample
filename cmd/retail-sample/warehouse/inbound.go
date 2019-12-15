@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {

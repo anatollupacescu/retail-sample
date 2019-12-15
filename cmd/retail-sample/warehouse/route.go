@@ -1,7 +1,7 @@
 package warehouse
 
 import (
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"github.com/gorilla/mux"
 )
 

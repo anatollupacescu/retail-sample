@@ -1,11 +1,10 @@
 package warehouse_test
 
 import (
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
 )
 
 func TestConfigureItemType(t *testing.T) {

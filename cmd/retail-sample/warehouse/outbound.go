@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/internal/warehouse"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {

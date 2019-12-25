@@ -10,7 +10,7 @@ type TestWrapper struct {
 
 func stock() TestWrapper {
 	return TestWrapper{
-		stock: warehouse.NewStock(),
+		stock: warehouse.NewInMemoryStock(),
 	}
 }
 

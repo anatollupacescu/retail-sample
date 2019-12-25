@@ -48,20 +48,13 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 		Items: items,
 	}
 
-	if s.outboundConfiguration == nil {
-		s.outboundConfiguration = make(map[string]OutboundItem)
-	}
-
-	s.outboundConfiguration[name] = outboundItem
+	s.outboundConfiguration.add(outboundItem)
 
 	return nil
 }
 
-func (s *Stock) Outbounds() (result []OutboundItem) {
-	for _, v := range s.outboundConfiguration {
-		result = append(result, v)
-	}
-	return
+func (s *Stock) Outbounds() []OutboundItem {
+	return s.outboundConfiguration.list()
 }
 
 var (
@@ -71,20 +64,20 @@ var (
 
 func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 
-	config, found := s.outboundConfiguration[typeName]
-
-	if !found {
+	if !s.outboundConfiguration.hasConfig(typeName) {
 		return ErrOutboundTypeNotFound
 	}
 
-	for _, outboundItem := range config.Items {
+	components := s.outboundConfiguration.components(typeName)
+
+	for _, outboundItem := range components {
 		inventoryQty := s.inventory.qty(outboundItem.ItemType)
 		if outboundItem.Qty*qty > inventoryQty {
 			return ErrNotEnoughStock
 		}
 	}
 
-	for _, outboundItem := range config.Items {
+	for _, outboundItem := range components {
 		inventoryQty := s.inventory.qty(outboundItem.ItemType)
 		inventoryQty -= outboundItem.Qty * qty
 		s.inventory.setQty(outboundItem.ItemType, inventoryQty)

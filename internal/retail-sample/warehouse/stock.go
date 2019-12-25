@@ -6,6 +6,7 @@ import (
 )
 
 type (
+
 	Inventory interface {
 		setQty(string, int)
 		qty(string) int
@@ -14,7 +15,12 @@ type (
 		types() []string
 	}
 
-	OutboundConfiguration map[string]OutboundItem
+	OutboundConfiguration interface {
+		add(OutboundItem)
+		list() []OutboundItem
+		hasConfig(string) bool
+		components(string) []OutboundItemComponent
+	}
 
 	Stock struct {
 		inboundLog            Log
@@ -23,11 +29,11 @@ type (
 	}
 )
 
-func NewStock() Stock {
+func NewInMemoryStock() Stock {
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
 		inventory:             make(InMemoryInventory),
-		outboundConfiguration: make(map[string]OutboundItem),
+		outboundConfiguration: make(InMemoryOutboundConfiguration),
 	}
 }
 

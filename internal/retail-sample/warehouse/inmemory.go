@@ -41,3 +41,29 @@ func (m InMemoryInventory) types() (t []string) {
 
 	return
 }
+
+type InMemoryOutboundConfiguration map[string]OutboundItem
+
+func (m InMemoryOutboundConfiguration) add(o OutboundItem) {
+	m[o.name] = o
+}
+
+func (m InMemoryOutboundConfiguration) list() (o []OutboundItem){
+	for _, v := range m {
+		o = append(o, v)
+	}
+	return
+}
+
+func (m InMemoryOutboundConfiguration) hasConfig(s string) bool {
+	_, f := m[s]
+	return f
+}
+
+func (m InMemoryOutboundConfiguration) components(s string) []OutboundItemComponent {
+	if !m.hasConfig(s) {
+		return nil
+	}
+
+	return m[s].Items
+}

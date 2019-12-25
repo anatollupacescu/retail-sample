@@ -12,7 +12,7 @@ type App struct {
 
 func ConfigureRoutes(r *mux.Router) {
 	a := App{
-		stock: warehouse.NewStock(),
+		stock: warehouse.NewInMemoryStock(),
 	}
 	r.HandleFunc("/inbound/config", a.ListTypes).Methods("GET")
 	r.HandleFunc("/inbound/config", a.ConfigureType).Methods("POST")

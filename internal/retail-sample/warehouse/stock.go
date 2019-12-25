@@ -14,7 +14,7 @@ type (
 		types() []string
 	}
 
-	OutboundConfiguration map[OutboundType]OutboundItem
+	OutboundConfiguration map[string]OutboundItem
 
 	Stock struct {
 		inboundLog            Log
@@ -27,7 +27,7 @@ func NewStock() Stock {
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
 		inventory:             make(InMemoryInventory),
-		outboundConfiguration: make(map[OutboundType]OutboundItem),
+		outboundConfiguration: make(map[string]OutboundItem),
 	}
 }
 

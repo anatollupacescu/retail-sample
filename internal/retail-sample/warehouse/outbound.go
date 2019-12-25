@@ -5,8 +5,6 @@ import (
 )
 
 type (
-	OutboundType string
-
 	OutboundItemComponent struct {
 		ItemType string
 		Qty      int
@@ -51,10 +49,10 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 	}
 
 	if s.outboundConfiguration == nil {
-		s.outboundConfiguration = make(map[OutboundType]OutboundItem)
+		s.outboundConfiguration = make(map[string]OutboundItem)
 	}
 
-	s.outboundConfiguration[OutboundType(name)] = outboundItem
+	s.outboundConfiguration[name] = outboundItem
 
 	return nil
 }
@@ -73,9 +71,7 @@ var (
 
 func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 
-	outboundType := OutboundType(typeName)
-
-	config, found := s.outboundConfiguration[outboundType]
+	config, found := s.outboundConfiguration[typeName]
 
 	if !found {
 		return ErrOutboundTypeNotFound

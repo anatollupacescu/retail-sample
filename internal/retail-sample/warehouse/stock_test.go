@@ -30,12 +30,18 @@ func TestConfigureItemType(t *testing.T) {
 		assert.Equal(t, 0, qty)
 	})
 
+	t.Run("should return err when getting quantity for non existent item", func(t *testing.T) {
+		stock := stock().build()
+		_, err := stock.Quantity("iDoNotExist")
+		assert.Equal(t, warehouse.ErrInventoryItemNotFound, err)
+	})
+
 	t.Run("should reject duplicate name", func(t *testing.T) {
 		stock := stock().build()
 		err := stock.ConfigureInboundType("milk")
 		assert.NoError(t, err)
 		err = stock.ConfigureInboundType("milk")
-		assert.Equal(t, warehouse.ErrInboundItemTypeDuplicated, err)
+		assert.Equal(t, warehouse.ErrInboundItemTypeAlreadyConfigured, err)
 	})
 }
 

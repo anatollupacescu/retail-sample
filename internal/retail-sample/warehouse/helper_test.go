@@ -14,11 +14,11 @@ func stock() TestWrapper {
 	}
 }
 
-func (t TestWrapper) with(n string, q int) TestWrapper {
-	if err := t.stock.ConfigureInboundType(n); err != nil {
+func (t TestWrapper) with(s string, q int) TestWrapper {
+	if err := t.stock.ConfigureInboundType(s); err != nil {
 		panic(err)
 	}
-	item := warehouse.Item{Type: warehouse.ItemType(n), Qty: q}
+	item := warehouse.Item{Type: s, Qty: q}
 	if _, err := t.stock.PlaceInbound(item); err != nil {
 		panic(err)
 	}

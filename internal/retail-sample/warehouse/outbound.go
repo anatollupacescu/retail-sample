@@ -8,7 +8,7 @@ type (
 	OutboundType string
 
 	OutboundItemComponent struct {
-		ItemType ItemType
+		ItemType string
 		Qty      int
 	}
 
@@ -35,9 +35,11 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 	}
 
 	for _, item := range items {
-		if !s.hasType(item.ItemType) {
+
+		if !s.inventory.hasType(item.ItemType) {
 			return ErrInboundItemTypeNotFound
 		}
+
 		if item.Qty == 0 {
 			return ErrOutboundZeroQuantityNotAllowed
 		}
@@ -51,6 +53,7 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 	if s.outboundConfiguration == nil {
 		s.outboundConfiguration = make(map[OutboundType]OutboundItem)
 	}
+
 	s.outboundConfiguration[OutboundType(name)] = outboundItem
 
 	return nil
@@ -79,16 +82,16 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 	}
 
 	for _, outboundItem := range config.Items {
-		inventoryQty := s.inventory[outboundItem.ItemType]
+		inventoryQty := s.inventory.qty(outboundItem.ItemType)
 		if outboundItem.Qty*qty > inventoryQty {
 			return ErrNotEnoughStock
 		}
 	}
 
 	for _, outboundItem := range config.Items {
-		inventoryQty := s.inventory[outboundItem.ItemType]
+		inventoryQty := s.inventory.qty(outboundItem.ItemType)
 		inventoryQty -= outboundItem.Qty * qty
-		s.inventory[outboundItem.ItemType] = inventoryQty
+		s.inventory.setQty(outboundItem.ItemType, inventoryQty)
 	}
 
 	return nil

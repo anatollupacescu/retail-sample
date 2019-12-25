@@ -88,7 +88,7 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 
 	for key, value := range t {
 		item := warehouse.Item{
-			Type: warehouse.ItemType(key),
+			Type: key,
 			Qty:  value,
 		}
 

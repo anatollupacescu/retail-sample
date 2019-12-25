@@ -48,7 +48,7 @@ func (m InMemoryOutboundConfiguration) add(o OutboundItem) {
 	m[o.name] = o
 }
 
-func (m InMemoryOutboundConfiguration) list() (o []OutboundItem){
+func (m InMemoryOutboundConfiguration) list() (o []OutboundItem) {
 	for _, v := range m {
 		o = append(o, v)
 	}

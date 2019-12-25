@@ -10,51 +10,72 @@ import (
 
 func TestInventoryTypesAreNotConfigured(t *testing.T) {
 
-	t.Run("should not allow placing outbound order", func(t *testing.T) {
-		stock := stock().build()
-		err := stock.PlaceOutbound("test", 3)
-		assert.Equal(t, warehouse.ErrOutboundTypeNotFound, err)
+	t.Run("tst", func(t *testing.T) {
+		return //hierarchical thing
+		assert.True(t, false)
 	})
-}
 
-func TestInventoryIsEmpty(t *testing.T) {
-
-	t.Run("should not allow placing outbound order", func(t *testing.T) {
+	t.Run("given an inventory and a non existent outbound type", func(t *testing.T) {
 		stock := stock().build()
-		_ = stock.ConfigureInboundType("test")
-		items := []warehouse.OutboundItemComponent{
-			{
-				ItemType: "test",
-				Qty:      1,
-			},
-		}
-		_ = stock.ConfigureOutbound("goesOut", items)
-		err := stock.PlaceOutbound("goesOut", 3)
-		assert.Equal(t, warehouse.ErrNotEnoughStock, err)
+		orderType := "test"
+
+		t.Run("when adding an outbound order", func(t *testing.T) {
+			err := stock.PlaceOutbound(orderType, 3)
+
+			t.Run("should reject action with error", func(t *testing.T) {
+				assert.Equal(t, warehouse.ErrOutboundTypeNotFound, err)
+			})
+		})
 	})
-}
 
-func TestInventoryDoesNotContainEnoughItems(t *testing.T) {
-
-	t.Run("should not allow placing outbound order", func(t *testing.T) {
+	t.Run("given an empty inventory and an outbound order with an existent type", func(t *testing.T) {
 		stock := stock().build()
-		_ = stock.ConfigureInboundType("test")
-		items := []warehouse.OutboundItemComponent{
-			{
-				ItemType: "test",
-				Qty:      2,
-			},
-		}
-		_ = stock.ConfigureOutbound("test", items)
 
-		oneTest := warehouse.Item{
-			Type: "test",
-			Qty:  1,
-		}
-		_, _ = stock.PlaceInbound(oneTest)
+		t.Run("when placing outbound order", func(t *testing.T) {
+			_ = stock.ConfigureInboundType("test")
+			items := []warehouse.OutboundItemComponent{
+				{
+					ItemType: "test",
+					Qty:      1,
+				},
+			}
+			_ = stock.ConfigureOutbound("goesOut", items)
+			err := stock.PlaceOutbound("goesOut", 3)
 
-		err := stock.PlaceOutbound("test", 1)
-		assert.Equal(t, warehouse.ErrNotEnoughStock, err)
+			t.Run("should reject with error", func(t *testing.T) {
+				assert.Equal(t, warehouse.ErrNotEnoughStock, err)
+			})
+		})
+	})
+
+	t.Run("given a stock with not enough items", func(t *testing.T) {
+		stock := stock().build()
+
+		//one potato in stock, two to sell
+		{
+			_ = stock.ConfigureInboundType("potato")
+			items := []warehouse.OutboundItemComponent{
+				{
+					ItemType: "potato",
+					Qty:      2,
+				},
+			}
+			_ = stock.ConfigureOutbound("chips", items)
+
+			oneTest := warehouse.Item{
+				Type: "potato",
+				Qty:  1,
+			}
+			_, _ = stock.PlaceInbound(oneTest)
+		}
+
+		t.Run("when placing outbound order", func(t *testing.T) {
+			err := stock.PlaceOutbound("chips", 1)
+
+			t.Run("should reject with error", func(t *testing.T) {
+				assert.Equal(t, warehouse.ErrNotEnoughStock, err)
+			})
+		})
 	})
 }
 
@@ -242,10 +263,13 @@ func TestConfigureItemType(t *testing.T) {
 	})
 
 	t.Run("should reject duplicate name", func(t *testing.T) {
-		stock := stock().build()
-		err := stock.ConfigureInboundType("milk")
-		assert.NoError(t, err)
-		err = stock.ConfigureInboundType("milk")
+		mockInventory := warehouse.MockedInventory{}
+		name := "milk"
+		mockInventory.On("hasType", name).Return(true)
+
+		stock := warehouse.NewStock(nil, mockInventory, nil)
+
+		err := stock.ConfigureInboundType(name)
 		assert.Equal(t, warehouse.ErrInboundItemTypeAlreadyConfigured, err)
 	})
 }

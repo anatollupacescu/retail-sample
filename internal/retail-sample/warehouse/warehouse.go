@@ -51,6 +51,14 @@ type Stock struct {
 	outboundConfiguration OutboundConfiguration
 }
 
+func NewStock(log Log, inv Inventory, config OutboundConfiguration) Stock {
+	return Stock{
+		inboundLog:            log,
+		inventory:             inv,
+		outboundConfiguration: config,
+	}
+}
+
 func NewInMemoryStock() Stock {
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),

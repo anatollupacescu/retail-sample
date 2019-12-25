@@ -3,9 +3,10 @@ package warehouse
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"log"
 	"net/http"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {

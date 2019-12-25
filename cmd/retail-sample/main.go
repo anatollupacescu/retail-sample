@@ -11,9 +11,10 @@ import (
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/warehouse"
 
-	"github.com/anatollupacescu/retail-sample/internal/version"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
 func main() {

@@ -1,8 +1,9 @@
 package warehouse_test
 
 import (
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"testing"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 
 	"github.com/stretchr/testify/assert"
 )

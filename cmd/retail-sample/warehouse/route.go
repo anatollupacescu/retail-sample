@@ -1,8 +1,9 @@
 package warehouse
 
 import (
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"github.com/gorilla/mux"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 type App struct {

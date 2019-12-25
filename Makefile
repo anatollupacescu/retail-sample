@@ -13,6 +13,9 @@ format:
 test:
 	go test ./...
 
+docker/lint:
+	docker build .
+
 build:
 	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build \
 		-ldflags "-s -w -X ${PROJECT}/internal/version.Version=${RELEASE} \
@@ -20,4 +23,4 @@ build:
 		-X ${PROJECT}/internal/version.BuildTime=${BUILD_TIME}" \
 		-o bin/retail ${PROJECT}/cmd/retail-sample
 
-.PHONY: test format
+.PHONY: test format docker/lint

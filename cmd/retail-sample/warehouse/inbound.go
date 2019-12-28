@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
@@ -41,9 +42,25 @@ func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	type itm struct {
+		ID   string `json:"id"`
+		Type string `json:"type"`
+	}
+
+	var result struct {
+		Data []itm `json:"data"`
+	}
+
+	for i, tp := range a.stock.ItemTypes() {
+		result.Data = append(result.Data, itm{
+			ID:   strconv.Itoa(i + 1),
+			Type: tp,
+		})
+	}
+
 	e := json.NewEncoder(w)
 
-	if err := e.Encode(a.stock.ItemTypes()); err != nil {
+	if err := e.Encode(result); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

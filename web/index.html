@@ -86,9 +86,8 @@
     <table id="stock" class="ui celled table dataTable">
 
 		<thead>
-		<tr>
-			<th>office</th>
-			<th>extn</th>
+			<th>ID</th>
+			<th>Type</th>
 		</tr>
 		</thead>
 
@@ -144,10 +143,10 @@
 <script>
     $(document).ready(function () {
         $('#stock').DataTable({
-            ajax: "http://127.0.0.1:8080/web/objects.json",
+            ajax: "http://127.0.0.1:8080/inbound/config",
             "columns": [
-                { "data": "office" },
-                { "data": "extn" }
+                { "data": "id" },
+                { "data": "type" }
             ]
         });
     });

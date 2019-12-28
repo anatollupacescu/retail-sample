@@ -136,7 +136,7 @@ func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
 
 	for _, in := range a.stock.ListInbound() {
 		e := inbound{
-			Name: string(in.Type),
+			Name: in.Type,
 			Qty:  in.Qty,
 		}
 		t.Inbound = append(t.Inbound, e)

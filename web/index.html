@@ -81,6 +81,22 @@
         </div>
     </div>
 </div>
+
+<div class="ui main text container">
+    <div class="example">
+        <form class="ui form" id="addNew">
+            <div class="two fields">
+
+            <div class="field">
+                <label>Item Name</label>
+                <input type="text" id="type" placeholder="Item name">
+            </div>
+            </div>
+            <button class="ui button" type="submit">Add new</button>
+        </form>
+    </div>
+</div>
+
 <div class="ui main text container">
     <h1 class="ui header">Inventory items</h1>
     <table id="stock" class="ui celled table dataTable">
@@ -142,12 +158,32 @@
 
 <script>
     $(document).ready(function () {
-        $('#stock').DataTable({
+        var t = $('#stock').DataTable({
             ajax: "http://127.0.0.1:8080/inbound/config",
             "columns": [
                 { "data": "id" },
                 { "data": "type" }
             ]
+        });
+
+        $("#addNew").submit(function(e) {
+            e.preventDefault();
+            var data = [ $('#type').val() ]
+            $.ajax({
+                type: "POST",
+                url: '/inbound/config',
+                data: JSON.stringify(data),
+                contentType : "application/json",
+                statusCode: {
+                    201: this.success
+                },
+                success: function() {
+                    t.ajax.reload();
+                },
+                error: function(resp) {
+                    console.log(resp.statusText)
+                },
+            });
         });
     });
 </script>

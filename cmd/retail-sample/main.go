@@ -37,11 +37,16 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+
 	server := http.Server{
 		Addr:    net.JoinHostPort("", port),
 		Handler: r,
 	}
 
+	//static
+	r.PathPrefix("/web/").Handler(http.StripPrefix("/web/", http.FileServer(http.Dir("./web"))))
+
+	//app
 	warehouse.ConfigureRoutes(r)
 
 	diagRouter := mux.NewRouter()

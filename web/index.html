@@ -174,9 +174,6 @@
                 url: '/inbound/config',
                 data: JSON.stringify(data),
                 contentType : "application/json",
-                statusCode: {
-                    201: this.success
-                },
                 success: function() {
                     t.ajax.reload();
                 },

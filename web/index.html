@@ -1,161 +1,87 @@
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en-US">
-
-<head profile="http://www.w3.org/2005/10/profile">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<link type="text/css" id="dark-mode" rel="stylesheet" href="" />
+<style type="text/css" id="dark-mode-custom-style"></style>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
     <link rel="icon"
           type="image/png"
           href="./images/favicon.png">
-    <meta charset="utf-8"/>
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no"
-    />
-    <meta
-            name="description"
-            content="Semantic-UI-Forest, collection of design, themes and templates for Semantic-UI."
-    />
-    <meta name="keywords" content="Semantic-UI, Theme, Design, Template"/>
-    <meta name="author" content="PPType"/>
-    <meta name="theme-color" content="#ffffff"/>
-    <title>Fixed Menu Template for Semantic-UI</title>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-          type="text/css"
-    />
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.10.20/css/dataTables.semanticui.min.css"
-          type="text/css"
-    />
-    <style type="text/css">
-        body {
-            -webkit-font-smoothing: antialiased;
-            -moz-font-smoothing: grayscale;
-        }
 
-        .ui.menu .item img.ui.mini.image {
-            margin-right: 1.5em;
-        }
+    <title>Cover Template for Bootstrap</title>
 
-        .ui.main.text.container {
-            margin-top: 7em;
-        }
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/cover/">
 
-        .ui.main.text.container .ui.image {
-            margin-top: 2em;
-        }
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css" rel="stylesheet">
 
-        .ui.footer.segment {
-            margin: 5em 0em 0em;
-            padding: 5em 0em;
-        }
-    </style>
-</head>
+    <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 
-<body id="root">
-<div class="ui top fixed inverted menu">
-    <div class="ui container">
-        <a class="header item" href="#root">
-            <img class="ui mini image" src="./images/logo.png"/> Project
-            Name
-        </a>
-        <a class="item" href="#root">Home</a>
-        <div class="ui simple dropdown item">
-            Dropdown <i class="dropdown icon"></i>
-            <div class="menu">
-                <a class="item" href="#root">Link Item</a>
-                <a class="item" href="#root">Link Item</a>
-                <div class="divider"></div>
-                <div class="header">Header Item</div>
-                <div class="item">
-                    Sub Menu <i class="dropdown icon"></i>
-                    <div class="menu">
-                        <a class="item" href="#root">Link Item</a>
-                        <a class="item" href="#root">Link Item</a>
-                    </div>
-                </div>
-                <a class="item" href="#root">Link Item</a>
-            </div>
-        </div>
+    <!-- Custom styles for this template -->
+    <link href="css/cover.css" rel="stylesheet">
+  </head>
+
+<body class="text-center">
+
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+  <header class="masthead mb-auto">
+    <div class="inner">
+      <h3 class="masthead-brand">Cover</h3>
+      <nav class="nav nav-masthead justify-content-center">
+        <a class="nav-link active" href="#">Home</a>
+        <a class="nav-link" href="#">Features</a>
+        <a class="nav-link" href="#">Contact</a>
+      </nav>
     </div>
-</div>
+  </header>
 
-<div class="ui main text container">
-    <div class="example">
-        <form class="ui form" id="addNew">
-            <div class="two fields">
+  <div class="container-fluid">
+      <div class="row">
+          <form class="form-inline" id="addNew">
+              <div class="col">
+                  <div class="form-group">
+                      <label for="inputItemType">New item type</label>
+                      <input type="text" class="form-control" id="type" aria-describedby="itemTypeHelp">
+                      <small id="itemTypeHelp" class="form-text text-muted">Item type has to be unique</small>
+                  </div>
+              </div>
+              <div class="col">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+          </form>
+      </div>
 
-            <div class="field">
-                <label>Item Name</label>
-                <input type="text" id="type" placeholder="Item name">
-            </div>
-            </div>
-            <button class="ui button" type="submit">Add new</button>
-        </form>
+      <div class="row">
+          <table id="stock" class="table table-striped table-bordered">
+
+              <thead>
+              <th>ID</th>
+              <th>Type</th>
+              </tr>
+              </thead>
+
+          </table>
+      </div>
+
+  </div>
+
+  <footer class="mastfoot mt-auto">
+    <div class="inner">
+      <p>Cover template for <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
     </div>
+  </footer>
 </div>
 
-<div class="ui main text container">
-    <h1 class="ui header">Inventory items</h1>
-    <table id="stock" class="ui celled table dataTable">
-
-		<thead>
-			<th>ID</th>
-			<th>Type</th>
-		</tr>
-		</thead>
-
-	</table>
-</div>
-
-<div class="ui inverted vertical footer segment">
-    <div class="ui center aligned container">
-        <div class="ui stackable inverted divided grid">
-            <div class="three wide column">
-                <h4 class="ui inverted header">Group 1</h4>
-                <div class="ui inverted link list">
-                    <a class="item" href="#root">Link One</a>
-                </div>
-            </div>
-            <div class="three wide column">
-                <h4 class="ui inverted header">Group 2</h4>
-                <div class="ui inverted link list">
-                    <a class="item" href="#root">Link Two</a>
-                </div>
-            </div>
-            <div class="three wide column">
-                <h4 class="ui inverted header">Group 3</h4>
-                <div class="ui inverted link list">
-                    <a class="item" href="#root">Link Three</a>
-                </div>
-            </div>
-            <div class="seven wide column">
-                <h4 class="ui inverted header">Footer Header</h4>
-                <p>
-                    Extra space for a call to action inside the footer that could help
-                    re-engage users.
-                </p>
-            </div>
-        </div>
-        <div class="ui inverted section divider"></div>
-        <img class="ui centered mini image" src="./images/logo.png"/>
-        <div class="ui horizontal inverted small divided link list">
-            <a class="item" href="#root">Site Map</a>
-            <a class="item" href="#root">Contact Us</a>
-            <a class="item" href="#root">Terms and Conditions</a>
-            <a class="item" href="#root">Privacy Policy</a>
-        </div>
-    </div>
-</div>
-
-<!-- javascript js -->
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
 <script src="https://pagecdn.io/lib/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.20/js/dataTables.semanticui.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js"></script>
-
+<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
 <script>
     $(document).ready(function () {
         var t = $('#stock').DataTable({

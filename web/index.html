@@ -46,7 +46,7 @@
 
 <body class="bg-light">
 
-    <div class="container">
+    <main role="main" class="container">
         <div class="py-5 text-center">
             <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
                 alt="" width="72" height="72">
@@ -54,14 +54,14 @@
             <p class="lead">Add or remove items</p>
         </div>
 
-        <form>
+        <form id="addNew">
             <div class="form-group row">
-                <label for="inputEmail3" class="col-sm-2 col-form-label">Item name</label>
+                <label for="name" class="col-sm-2 col-form-label">Item name</label>
                 <div class="col-sm-3">
-                    <input type="email" class="form-control" id="inputEmail3">
+                    <input type="text" class="form-control" id="name">
                 </div>
                 <div class="col-sm-3">
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button typ="submit" class="btn btn-primary">Add</button>
                 </div>
             </div>
 
@@ -80,48 +80,50 @@
 
             </table>
         </div>
-        <footer class="my-5 pt-5 text-muted text-center text-small">
-            <p class="mb-1">&copy; TRUMP 2020</p>
-            <ul class="list-inline">
-                <li class="list-inline-item"><a href="#">Privacy</a></li>
-                <li class="list-inline-item"><a href="#">Terms</a></li>
-                <li class="list-inline-item"><a href="#">Support</a></li>
-            </ul>
-        </footer>
+    </main>
 
-        <!-- Bootstrap core JavaScript -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script src="https://pagecdn.io/lib/jquery/3.4.1/jquery.min.js"></script>
-        <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
-        <script>
-            $(document).ready(function() {
-                var t = $('#stock').DataTable({
-                    ajax: "http://127.0.0.1:8080/inbound/config",
-                    "columns": [
-                        { "data": "id" },
-                        { "data": "type" }
-                    ]
-                });
+    <footer class="my-5 pt-5 text-muted text-center text-small">
+        <p class="mb-1">&copy; TRUMP 2020</p>
+        <ul class="list-inline">
+            <li class="list-inline-item"><a href="#">Privacy</a></li>
+            <li class="list-inline-item"><a href="#">Terms</a></li>
+            <li class="list-inline-item"><a href="#">Support</a></li>
+        </ul>
+    </footer>
 
-                $("#addNew").submit(function(e) {
-                    e.preventDefault();
-                    var data = [$('#type').val()]
-                    $.ajax({
-                        type: "POST",
-                        url: '/inbound/config',
-                        data: JSON.stringify(data),
-                        contentType: "application/json",
-                        success: function() {
-                            t.ajax.reload();
-                        },
-                        error: function(resp) {
-                            console.log(resp.statusText)
-                        },
-                    });
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://pagecdn.io/lib/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var t = $('#stock').DataTable({
+                ajax: "http://127.0.0.1:8080/inbound/config",
+                "columns": [
+                    { "data": "id" },
+                    { "data": "type" }
+                ]
+            });
+
+            $("#addNew").submit(function(e) {
+                e.preventDefault();
+                var data = [$('#name').val()]
+                $.ajax({
+                    type: "POST",
+                    url: '/inbound/config',
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    success: function() {
+                        t.ajax.reload();
+                    },
+                    error: function(resp) {
+                        console.log(resp.statusText)
+                    }
                 });
             });
-        </script>
+        });
+    </script>
 </body>
 
 </html>

@@ -68,7 +68,7 @@ func main() {
 	shutdown := make(chan error, 2)
 
 	go func() {
-		logger.Info("Business logic server is preparing...")
+		logger.Info("Business logic server is preparing on port ", port)
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			shutdown <- err
@@ -76,7 +76,7 @@ func main() {
 	}()
 
 	go func() {
-		logger.Info("Diagnostics server is preparing...")
+		logger.Info("Diagnostics server is preparing on port ", diagPort)
 		err := diag.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			shutdown <- err

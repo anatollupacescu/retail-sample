@@ -63,11 +63,14 @@
 									"pm.test(\"response should contain the fruits\", function () {",
 									"    pm.response.to.not.be.error;",
 									"    pm.response.to.be.json;",
-									"    let expectedJsonBody = [\"apple\", \"pear\"]",
-									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData).to.have.members(expectedJsonBody);",
+									"    ",
+									"    let jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data.map(toType)).to.include.members([\"apple\", \"pear\"]);",
 									"});",
-									""
+									"",
+									"function toType(i) {",
+									"    return i.type",
+									"}"
 								],
 								"type": "text/javascript"
 							}

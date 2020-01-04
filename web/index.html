@@ -21,33 +21,6 @@
         .container {
             max-width: 960px;
         }
-
-        .bd-example {
-            padding: 1.5rem;
-            margin-right: 0;
-            margin-left: 0;
-            border-width: .2rem;
-        }
-
-        .border-top {
-            border-top: 1px solid #e5e5e5;
-        }
-
-        .border-bottom {
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .border-top-gray {
-            border-top-color: #adb5bd;
-        }
-
-        .box-shadow {
-            box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-        }
-
-        .lh-condensed {
-            line-height: 1.25;
-        }
     </style>
 </head>
 
@@ -61,7 +34,7 @@
             <p class="lead">Add or remove items</p>
         </div>
 
-        <div class="bd-example">
+        <div class="py-1">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a class="nav-link active" href="#">Active</a>
@@ -78,17 +51,25 @@
             </ul>
         </div>
 
-        <div class="bd-example">
-            <form id="addNew" class="form-inline" _lpchecked="1">
-                <div class="form-group mx-sm-3 mb-2">
-                    <label for="name" class="sr-only">Item name</label>
-                    <input type="text" class="form-control" id="name" />
+        <form id="addNew">
+            <div class="py-2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-3 d-flex flex-column-reverse justify-content-start align-items-start flex-grow-1" style="">
+                            <div class="form-group mb-1">
+                                <label>Item type</label>
+                                <input type="text" class="form-control" id="name">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex flex-column-reverse justify-content-start align-items-start flex-grow-1" style="">
+                            <button type="submit" class="btn shadow-none mb-1 btn-primary">Add</button>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Add</button>
-            </form>
-        </div>
+            </div>
+        </form>
 
-        <div class="bd-example">
+        <div class="py-1">
             <table id="stock" class="table table-striped table-bordered">
 
                 <thead>

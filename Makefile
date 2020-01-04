@@ -23,4 +23,7 @@ build:
 		-X ${PROJECT}/internal/version.BuildTime=${BUILD_TIME}" \
 		-o bin/retail ${PROJECT}/cmd/retail-sample
 
-.PHONY: test format docker/lint
+run:
+	PORT=8080 DIAG_PORT=8081 go run cmd/retail-sample/main.go
+
+.PHONY: test format docker/lint run

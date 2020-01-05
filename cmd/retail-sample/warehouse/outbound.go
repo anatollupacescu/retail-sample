@@ -68,3 +68,25 @@ func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (a *App) ListOutbound(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	type itm struct {
+		Name  string `json:"name"`
+		Count int    `json:"count"`
+	}
+
+	var result struct {
+		Data []itm `json:"data"`
+	}
+
+	result.Data = []itm{}
+
+	e := json.NewEncoder(w)
+
+	if err := e.Encode(result); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}

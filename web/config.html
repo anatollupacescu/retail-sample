@@ -68,11 +68,11 @@
                           </div>
                       </div>
                       <div class="row pb-4">
-                          <div class="col-md-12"><button id="add" class="btn btn-secondary">Submit</button></div>
+                          <div class="col-md-12"><button id="add" class="btn btn-secondary">Add to list</button></div>
                       </div>
                       <div class="row">
                           <div class="col-md-12">
-                              <table id="stock" class="table table-striped table-bordered">
+                              <table id="items" class="table table-striped table-bordered">
                                   <thead>
                                   <tr>
                                       <th>Name</th>
@@ -82,8 +82,18 @@
                               </table>
                           </div>
                       </div>
+                      <hr />
+                      <div class="row">
+                          <div class="col-md-3">
+                              <div class="form-group">
+                                  <label for="inputpasswordh" class="">Finished product name<br>
+                                  </label>
+                                  <input type="text" class="form-control" id="finishedProductName">
+                              </div>
+                          </div>
+                      </div>
                       <div class="row pb-4">
-                          <div class="col-md-12"><button id="add" class="btn btn-secondary">Done</button></div>
+                          <div class="col-md-12"><button id="createNew" class="btn btn-secondary">Save new finished product</button></div>
                       </div>
                   </div>
               </div>
@@ -125,42 +135,79 @@
 
   <script>
     $(document).ready(function() {
-      var table = $('#stock').DataTable({
+        var fpTable = $("#finishedProducts").DataTable({
+            ajax: "http://127.0.0.1:8080/outbound/config",
+            columns: [{"data": "name"}, {"data": "count"}]
+        });
+
+      var items = $('#items').DataTable({
         "columns": [{ "data": "name" }, { "data": "count" }]
       });
 
-      var finishedProducts = $("#finishedProducts").DataTable({
-          ajax: "http://127.0.0.1:8080/outbound/config",
-          columns: [{"data": "name"}, {"data": "count"}]
+      var reloadItemNameList = function() {
+          $.ajax({
+              type: "GET",
+              url: '/inbound/config',
+              accept: "application/json",
+              success: function (data) {
+                  let items = data.data;
+                  if (items) {
+                      $("#itemType").empty();
+                      items.map(function (item) {
+                          $("#itemType").append(new Option(item.type));
+                      })
+                  }
+              },
+              error: function (resp) {
+                  console.log(resp.statusText)
+              }
+          });
+      };
+
+      reloadItemNameList();
+
+      $("#createNew").on('click', function () {
+          var tableData = items.rows().data();
+          var fpName = $("#finishedProductName").val();
+          if (tableData && fpName) {
+              var cs = {};
+              tableData.each(function (i) {
+                  cs[i.name] = Number.parseInt(i.count)
+              });
+              var payload = {
+                  name: fpName,
+                  items: cs
+              };
+              $.ajax({
+                  type: "POST",
+                  url: '/outbound/config',
+                  data: JSON.stringify(payload),
+                  contentType: "application/json",
+                  success: function() {
+                      items.clear().draw();
+                      fpTable.ajax.reload();
+                      $("#finishedProductName").val('');
+                      reloadItemNameList()
+                  },
+                  error: function(resp) {
+                      console.log(resp.statusText)
+                  }
+              });
+          }
       });
 
-      $.ajax({
-        type: "GET",
-        url: '/inbound/config',
-        accept: "application/json",
-        success: function(data) {
-          let items = data.data;
-          if (items) {
-            $("#itemType").empty();
-            items.map(function(item) {
-              $("#itemType").append(new Option(item.type));
-            })
-          }
-        },
-        error: function(resp) {
-          console.log(resp.statusText)
-        }
-      });
       $("#add").on('click', function() {
-        var name = $("#itemType option:selected").text();
-        var count = $("#count").val()
+        let selectedItemName = $("#itemType option:selected");
+        var name = selectedItemName.text();
+        let itemCount = $("#count");
+        var count = itemCount.val();
         if (name && count) {
-          table.row.add({
+          items.row.add({
             "name": name,
             "count": count
           }).draw();
-          $("#itemType option:selected").remove()
-          $("#count").val('')
+          selectedItemName.remove();
+          itemCount.val('')
         }
       })
     });

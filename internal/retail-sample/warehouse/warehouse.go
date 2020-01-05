@@ -19,7 +19,7 @@ type ( //outbound
 	}
 
 	OutboundItem struct {
-		name  string
+		Name  string
 		Items []OutboundItemComponent
 	}
 )
@@ -151,7 +151,7 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 	}
 
 	outboundItem := OutboundItem{
-		name:  name,
+		Name:  name,
 		Items: items,
 	}
 
@@ -160,7 +160,7 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 	return nil
 }
 
-func (s *Stock) Outbounds() []OutboundItem {
+func (s *Stock) OutboundConfigurations() []OutboundItem {
 	return s.outboundConfiguration.list()
 }
 

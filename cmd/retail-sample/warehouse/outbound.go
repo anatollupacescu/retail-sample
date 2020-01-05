@@ -81,7 +81,12 @@ func (a *App) ListOutbound(w http.ResponseWriter, _ *http.Request) {
 		Data []itm `json:"data"`
 	}
 
-	result.Data = []itm{}
+	for _, v := range a.stock.OutboundConfigurations() {
+		result.Data = append(result.Data, itm{
+			Name:  v.Name,
+			Count: len(v.Items),
+		})
+	}
 
 	e := json.NewEncoder(w)
 

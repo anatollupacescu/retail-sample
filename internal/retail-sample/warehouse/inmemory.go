@@ -45,7 +45,7 @@ func (m InMemoryInventory) types() (t []string) {
 type InMemoryOutboundConfiguration map[string]OutboundItem
 
 func (m InMemoryOutboundConfiguration) add(o OutboundItem) {
-	m[o.name] = o
+	m[o.Name] = o
 }
 
 func (m InMemoryOutboundConfiguration) list() (o []OutboundItem) {

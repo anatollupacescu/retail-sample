@@ -51,10 +51,9 @@ func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
 		Data []itm `json:"data"`
 	}
 
+	result.Data = make([]itm, 0)
+
 	inboundTypes := a.stock.ItemTypes()
-
-	result.Data = make([]itm, len(inboundTypes))
-
 	for i, tp := range inboundTypes {
 		result.Data = append(result.Data, itm{
 			ID:   strconv.Itoa(i + 1),

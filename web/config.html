@@ -137,7 +137,7 @@
     $(document).ready(function() {
         var fpTable = $("#finishedProducts").DataTable({
             ajax: "http://127.0.0.1:8080/outbound/config",
-            columns: [{"data": "name"}, {"data": "count"}]
+            columns: [{"data": "name"}, {"data": "count", "searchable": false}]
         });
 
       var items = $('#items').DataTable({

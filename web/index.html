@@ -58,12 +58,13 @@
         </form>
 
         <div class="py-1">
-            <table id="stock" class="table table-striped table-bordered">
+            <table id="inventoryTable" class="table table-hover table-bordered">
 
                 <thead>
+                <tr>
                     <th>ID</th>
                     <th>Type</th>
-                    </tr>
+                </tr>
                 </thead>
 
             </table>
@@ -84,15 +85,23 @@
     <script src="https://pagecdn.io/lib/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
     <script>
         $(document).ready(function() {
-            var t = $('#stock').DataTable({
+            var t = $('#inventoryTable').DataTable({
                 ajax: "http://127.0.0.1:8080/inbound/config",
                 "columns": [
                     { "data": "id" },
                     { "data": "type" }
                 ]
             });
+
+            $('#inventoryTable tbody').on( 'click', 'tr', function () {
+                $(this).toggleClass('list-group-item-dark');
+            } );
 
             $("#addNew").submit(function(e) {
                 e.preventDefault();

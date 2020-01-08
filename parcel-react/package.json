@@ -1,20 +1,37 @@
 {
+  "name": "radix-calculator",
+  "version": "0.1.0",
+  "license": "MIT",
   "dependencies": {
-    "core-js": "^3.1.3",
-    "react": "^16.6.3",
-    "react-dom": "^16.4.2"
+    "core-js": "^3",
+    "npm-check-updates": "^4.0.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
     "@babel/preset-react": "^7.7.4",
-    "@types/node": "^10.7.0",
-    "@types/react": "^16.7.17",
-    "@types/react-dom": "^16.0.7",
-    "parcel-bundler": "1.10.0",
-    "typescript": "^3.0.1"
+    "@types/node": "^13.1.4",
+    "@types/react": "^16.9.17",
+    "@types/react-dom": "^16.9.4",
+    "parcel-bundler": "1.12.4",
+    "typescript": "^3.7.4",
+    "npm-check-updates": "^4.0.1"
   },
   "scripts": {
-    "build": "$(npm bin)/parcel build ./src/index.html",
+    "build": "$(npm bin)/parcel build --public-url ./ ./src/index.html",
     "start": "./start.sh"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

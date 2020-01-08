@@ -17,5 +17,6 @@
 test/acceptance/node_modules
 parcel-react/dist
 parcel-react/node_modules
+parcel-react/.cache
 
 

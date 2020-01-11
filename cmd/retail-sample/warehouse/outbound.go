@@ -3,6 +3,7 @@ package warehouse
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
@@ -35,41 +36,42 @@ func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
+	w.WriteHeader(http.StatusOK)
+
+	var (
+		outbounds []warehouse.SoldItem
+		err       error
+	)
+
+	if outbounds, err = a.stock.ListOutbound(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	type itm struct {
-		Name *string `json:"name"` // pointer so we can test for field absence
-		Qty  *int    `json:"qty"`
+		Date time.Time `json:"date"`
+		Name string    `json:"name"`
+		Qty  int       `json:"qty"`
 	}
 
 	var result struct {
 		Data []itm `json:"data"`
 	}
 
-	var (
-		outbounds []warehouse.OutboundItem
-		err       error
-	)
-	
-	if outbounds, err = a.stock.ListOutbound(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	for _, outbound := range outbounds {
+	for _, o := range outbounds {
 		result.Data = append(result.Data, itm{
-			Name: outbound.Name,
-			Qty:  nil,
+			Date: o.Date,
+			Name: o.Name,
+			Qty:  o.Qty,
 		})
 	}
+
 	e := json.NewEncoder(w)
+
 	if err := e.Encode(result); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
 
 func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
@@ -78,10 +80,10 @@ func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	t := struct {
+	var t struct {
 		Name  *string        `json:"name"` // pointer so we can test for field absence
 		Items map[string]int `json:"items"`
-	}{}
+	}
 
 	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

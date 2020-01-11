@@ -17,7 +17,7 @@ func TestPlaceOutbound(t *testing.T) {
 		config := warehouse.MockOutboundConfig{}
 		config.On("hasConfig", chips).Return(false)
 
-		stock := warehouse.NewStock(nil, nil, &config)
+		stock := warehouse.NewStock(nil, nil, &config, nil)
 
 		err := stock.PlaceOutbound(chips, 0)
 
@@ -39,7 +39,7 @@ func TestPlaceOutbound(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("qty", potato).Return(3)
 
-		stock := warehouse.NewStock(nil, &inventory, &config)
+		stock := warehouse.NewStock(nil, &inventory, &config, nil)
 
 		err := stock.PlaceOutbound(chips, 2)
 
@@ -62,12 +62,16 @@ func TestPlaceOutbound(t *testing.T) {
 		inventory.On("qty", potato).Return(5)
 		inventory.On("setQty", potato, 1).Times(1)
 
-		stock := warehouse.NewStock(nil, &inventory, &config)
+		outboundLog := warehouse.MockOutboundLog{}
+		outboundLog.On("Add", mock.Anything).Times(1)
+		stock := warehouse.NewStock(nil, &inventory, &config, &outboundLog)
 
 		err := stock.PlaceOutbound(chips, 2)
 
 		assert.NoError(t, err)
+		config.AssertExpectations(t)
 		inventory.AssertExpectations(t)
+		outboundLog.AssertExpectations(t)
 	})
 }
 
@@ -90,7 +94,7 @@ func TestConfigureOutbound(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(false)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
 			ItemType: milk,
@@ -106,7 +110,7 @@ func TestConfigureOutbound(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(true)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
 			ItemType: "milk",
@@ -125,7 +129,7 @@ func TestConfigureOutbound(t *testing.T) {
 		outboundConfig := warehouse.MockOutboundConfig{}
 		outboundConfig.On("add", mock.AnythingOfType("warehouse.OutboundItem")).Times(1)
 
-		stock := warehouse.NewStock(nil, &inventory, &outboundConfig)
+		stock := warehouse.NewStock(nil, &inventory, &outboundConfig, nil)
 
 		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
 			ItemType: "milk",
@@ -151,7 +155,7 @@ func TestConfigureInboundType(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(true)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		err := stock.ConfigureInboundType(milk)
 
@@ -165,7 +169,7 @@ func TestConfigureInboundType(t *testing.T) {
 		inventory.On("hasType", milk).Return(false)
 		inventory.On("addType", milk).Times(1)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		err := stock.ConfigureInboundType(milk)
 
@@ -178,7 +182,7 @@ func TestConfigureInboundType(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(false)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		_, err := stock.Quantity(milk)
 
@@ -194,7 +198,7 @@ func TestPlaceInbound(t *testing.T) {
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(false)
 
-		stock := warehouse.NewStock(nil, &inventory, nil)
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
 		item := warehouse.Item{Type: milk, Qty: 31}
 		_, err := stock.PlaceInbound(item)
@@ -212,7 +216,7 @@ func TestPlaceInbound(t *testing.T) {
 
 		inboundLog := warehouse.MockInboundLog{}
 		inboundLog.On("Add", mock.Anything, mock.Anything).Times(1)
-		stock := warehouse.NewStock(&inboundLog, &inventory, nil)
+		stock := warehouse.NewStock(&inboundLog, &inventory, nil, nil)
 
 		item := warehouse.Item{Type: milk, Qty: 31}
 		qty, err := stock.PlaceInbound(item)

@@ -13,6 +13,7 @@ type ( //outbound
 		hasConfig(string) bool
 		components(string) []OutboundItemComponent
 	}
+
 	OutboundItemComponent struct {
 		ItemType string
 		Qty      int
@@ -39,6 +40,11 @@ type ( //inventory
 		List() []Item
 	}
 
+	OutboundLog interface {
+		Add(SoldItem)
+		List() []SoldItem
+	}
+
 	Item struct {
 		Type string
 		Qty  int
@@ -47,13 +53,15 @@ type ( //inventory
 
 type Stock struct {
 	inboundLog            Log
+	soldItems             OutboundLog
 	inventory             Inventory
 	outboundConfiguration OutboundConfiguration
 }
 
-func NewStock(log Log, inv Inventory, config OutboundConfiguration) Stock {
+func NewStock(log Log, inv Inventory, config OutboundConfiguration, outboundItemLog OutboundLog) Stock {
 	return Stock{
 		inboundLog:            log,
+		soldItems:             outboundItemLog,
 		inventory:             inv,
 		outboundConfiguration: config,
 	}
@@ -62,6 +70,7 @@ func NewStock(log Log, inv Inventory, config OutboundConfiguration) Stock {
 func NewInMemoryStock() Stock {
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
+		soldItems:             make(InMemoryOutboundLog),
 		inventory:             make(InMemoryInventory),
 		outboundConfiguration: make(InMemoryOutboundConfiguration),
 	}
@@ -190,9 +199,21 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 		s.inventory.setQty(outboundItem.ItemType, inventoryQty)
 	}
 
+	s.soldItems.Add(SoldItem{
+		Date: time.Now(),
+		Name: typeName,
+		Qty:  qty,
+	})
+
 	return nil
 }
 
-func (s *Stock) ListOutbound() ([]OutboundPlacement, error) {
+type SoldItem struct {
+	Date time.Time
+	Name string
+	Qty  int
+}
 
+func (s *Stock) ListOutbound() ([]SoldItem, error) {
+	return s.soldItems.List(), nil
 }

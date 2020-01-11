@@ -68,3 +68,17 @@ func (m *MockInboundLog) Add(t time.Time, i Item) {
 func (m *MockInboundLog) List() []Item {
 	return nil
 }
+
+//outbound log
+
+type MockOutboundLog struct {
+	mock.Mock
+}
+
+func (m *MockOutboundLog) Add(i SoldItem) {
+	_ = m.Called(i)
+}
+
+func (m *MockOutboundLog) List() []SoldItem {
+	return nil
+}

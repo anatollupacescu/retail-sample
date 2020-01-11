@@ -67,3 +67,16 @@ func (m InMemoryOutboundConfiguration) components(s string) []OutboundItemCompon
 
 	return m[s].Items
 }
+
+type InMemoryOutboundLog map[time.Time]SoldItem
+
+func (m InMemoryOutboundLog) Add(i SoldItem) {
+	m[i.Date] = i
+}
+
+func (m InMemoryOutboundLog) List() (r []SoldItem) {
+	for _, v := range m {
+		r = append(r, v)
+	}
+	return
+}

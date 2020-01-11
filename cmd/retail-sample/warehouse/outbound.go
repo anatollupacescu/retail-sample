@@ -34,6 +34,44 @@ func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields() // catch unwanted fields
+
+	type itm struct {
+		Name *string `json:"name"` // pointer so we can test for field absence
+		Qty  *int    `json:"qty"`
+	}
+
+	var result struct {
+		Data []itm `json:"data"`
+	}
+
+	var (
+		outbounds []warehouse.OutboundItem
+		err       error
+	)
+	
+	if outbounds, err = a.stock.ListOutbound(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for _, outbound := range outbounds {
+		result.Data = append(result.Data, itm{
+			Name: outbound.Name,
+			Qty:  nil,
+		})
+	}
+	e := json.NewEncoder(w)
+	if err := e.Encode(result); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
@@ -69,7 +107,7 @@ func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) ListOutbound(w http.ResponseWriter, _ *http.Request) {
+func (a *App) ListOutboundConfig(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type itm struct {

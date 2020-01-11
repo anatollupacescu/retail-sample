@@ -20,6 +20,7 @@ func ConfigureRoutes(r *mux.Router) {
 	r.HandleFunc("/inbound", a.ListInbound).Methods("GET")
 	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
 	r.HandleFunc("/outbound", a.PlaceOutbound).Methods("POST")
+	r.HandleFunc("/outbound", a.ListOutbound).Methods("GET")
 	r.HandleFunc("/outbound/config", a.ConfigureOutbound).Methods("POST")
-	r.HandleFunc("/outbound/config", a.ListOutbound).Methods("GET")
+	r.HandleFunc("/outbound/config", a.ListOutboundConfig).Methods("GET")
 }

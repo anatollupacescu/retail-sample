@@ -192,3 +192,7 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 
 	return nil
 }
+
+func (s *Stock) ListOutbound() ([]OutboundPlacement, error) {
+
+}

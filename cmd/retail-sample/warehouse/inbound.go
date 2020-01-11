@@ -72,9 +72,16 @@ func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
 func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	e := json.NewEncoder(w)
+	type itm struct {
+		Name string `json:"name"`
+		Qty  int    `json:"qty"`
+	}
 
-	var response = make(map[string]int)
+	var result struct {
+		Data []itm `json:"data"`
+	}
+
+	result.Data = make([]itm, 0)
 
 	for _, itemType := range a.stock.ItemTypes() {
 		qty, err := a.stock.Quantity(itemType)
@@ -82,10 +89,14 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		response[itemType] = qty
+		result.Data = append(result.Data, itm{
+			Name: itemType,
+			Qty:  qty,
+		})
 	}
 
-	if err := e.Encode(response); err != nil {
+	e := json.NewEncoder(w)
+	if err := e.Encode(result); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

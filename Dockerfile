@@ -69,4 +69,6 @@ COPY --from=builder /retail/bin/retail /retail
 EXPOSE $PORT
 EXPOSE $DIAG_PORT
 
+ADD web /web
+
 CMD ["/retail"]

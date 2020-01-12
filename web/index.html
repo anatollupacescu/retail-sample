@@ -19,60 +19,79 @@
 <body class="bg-light">
     <main role="main" class="container">
         <div class="py-5 text-center">
-            <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
-                alt="" width="72" height="72">
-            <h2>Inventory</h2>
-            <p class="lead">Add or remove items</p>
+            <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+            <h2>Outbound items</h2>
+            <p class="lead">Register new inventory types</p>
         </div>
-
-        <div class="py-1">
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link active disabled" href="#">Inventory</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="config.html">Finished products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="stock.html">Stock</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="outbound.html">Outbound</a>
-                  </li>
-            </ul>
+    </main>
+    <div class="container">
+        <div class="row pb-4">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active disabled" href="index.html">Inventory</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="config.html">Finished products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="stock.html">Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="outbound.html">Outbound</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </div>
+    <div class="container">
+        <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            Register new
+                        </button>
+                    </h5>
+                </div>
 
-        <form id="addNew">
-            <div class="py-2">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-3 d-flex flex-column-reverse justify-content-start align-items-start flex-grow-1" style="">
-                            <div class="form-group mb-1">
-                                <label>Item type</label>
-                                <input type="text" class="form-control" id="name">
+                <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="inputmailh" class="">Inbound item name</label>
+                                    <input type="text" class="form-control" id="name">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6 d-flex flex-column-reverse justify-content-start align-items-start flex-grow-1" style="">
-                            <button type="submit" class="btn shadow-none mb-1 btn-primary">Add</button>
+                        <div class="row pb-4">
+                            <div class="col-md-12">
+                                <button id="add" class="btn btn-secondary">Add</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
-
-        <div class="py-1">
-            <table id="inventoryTable" class="table table-hover table-bordered">
-
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                </tr>
-                </thead>
-
-            </table>
         </div>
-    </main>
+    </div>
+
+    <div class="container">
+        <div class="row pt-3">
+            <div class="col-md-12">
+                <table id="inventoryTable" class="table table-hover table-bordered">
+
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                    </tr>
+                    </thead>
+
+                </table>
+            </div>
+        </div>
+    </div>
 
     <footer class="my-5 pt-5 text-muted text-center text-small">
         <p class="mb-1">&copy; TRUMP 2020</p>
@@ -106,8 +125,7 @@
                 $(this).toggleClass('list-group-item-dark');
             } );
 
-            $("#addNew").submit(function(e) {
-                e.preventDefault();
+            $("#add").on('click', function() {
                 var data = [$('#name').val()]
                 $.ajax({
                     type: "POST",

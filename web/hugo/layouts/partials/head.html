@@ -1,17 +1,28 @@
 <div class="header">
-	<h1 class="site-title"><a href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a></h1>
-	<div class="site-description">
-		{{- if isset .Site.Params "subtitle" -}}
-		<h2>{{ .Site.Params.Subtitle | markdownify }}</h2>
-		{{- end -}}
-		<nav class="nav social">
-			<ul class="flat">
-				{{- range $index, $key := .Site.Params.Social -}}
-				<a href="{{ $key.url }}" title="{{ $key.name }}"><i data-feather="{{ $key.icon }}"></i></a>
-				{{- end -}}
-			</ul>
-		</nav>
-	</div>
+    <main role="main" class="container">
+        <div class="py-5 text-center">
+            <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
+                alt="" width="72" height="72">
+            <h2>Inventory</h2>
+            <p class="lead">Add or remove items</p>
+        </div>
+
+        <div class="py-1">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active disabled" href="#">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="config.html">Finished products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="stock.html">Stock</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="outbound.html">Outbound</a>
+                  </li>
+            </ul>
+        </div>
 
 	<nav class="nav">
 		<ul class="flat">

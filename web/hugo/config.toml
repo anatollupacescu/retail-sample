@@ -9,8 +9,8 @@ pygmentsstyle = "solarized-dark"
 pygmentscodefences = true
 pygmentscodefencesguesssyntax = true
 
-googleAnalytics = "UA-123-45"
-disqusShortname = "ezhil-demo"
+# This options specify where to look for the images
+assetDir = "static"
 
 [params]
 	subtitle = "Clean and minimal personal [blog theme for Hugo](https://github.com/vividvilla/ezhil)"
@@ -21,18 +21,25 @@ disqusShortname = "ezhil-demo"
 	# customDarkCSS = "css/custom-dark.css"  # Custom styles applied to dark mode css.
 	customJS = ["https://code.jquery.com/jquery-3.4.1.js"]  # Custom JS scripts.
 
+[params.assets]
+js = ["js/main.js"]
+
 [[menu.main]]
+identifier = "home"
 name = "Home"
 url = "/"
 weight = 1
 
 [[menu.main]]
-identifier = "fkn"
-name = "fkn"
-url = "/fkn"
+identifier = "inventory"
+name = "Inventory"
+url = "/inventory"
 weight = 2
 
 [[menu.main]]
+identifier = "about"
 name = "About"
 url = "/about"
 weight = 3
+
+[taxonomies]

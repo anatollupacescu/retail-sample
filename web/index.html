@@ -128,7 +128,7 @@
 
             $('#inventoryTable tbody').on( 'click', 'tr', function () {
                 $(this).toggleClass('list-group-item-dark');
-            } );
+            });
 
             var nameInput = $('#name');
 
@@ -155,7 +155,7 @@
                     contentType: "application/json",
                     success: function() {
                         t.ajax.reload();
-                        $('#name').val('')
+                        nameInput.val('');
                     },
                     error: function(resp) {
                         console.log(resp.statusText)

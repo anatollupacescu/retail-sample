@@ -1,36 +1,28 @@
-<div class="header">
-    <main role="main" class="container">
-        <div class="py-5 text-center">
-            <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
-                alt="" width="72" height="72">
-            <h2>Inventory</h2>
-            <p class="lead">Add or remove items</p>
-        </div>
+<main role="main" class="container">
+    <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg"
+            alt="" width="72" height="72">
+        <h2>{{ .Params.title }}</h2>
+        <p class="lead">{{ .Params.description}}</p>
+    </div>
+</main>
 
-        <div class="py-1">
+<div class="container">
+    <div class="row pb-4">
+        <div class="col-md-12">
             <ul class="nav nav-tabs">
+                {{- $current := .Params.Id -}}
+                {{- $class := "" -}}
+                {{ range .Site.Menus.main }}
                 <li class="nav-item">
-                    <a class="nav-link active disabled" href="#">Inventory</a>
+                    {{- if eq .Identifier $current -}}
+                        <a id="{{ .Identifier }}" class="nav-link active disabled" href="{{ .URL }}">{{ .Name }}</a>
+                    {{- else -}}
+                        <a id="{{ .Identifier }}" class="nav-link {{ $class }}" href="{{ .URL }}">{{ .Name }}</a>
+                    {{- end -}}
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="config.html">Finished products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="stock.html">Stock</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="outbound.html">Outbound</a>
-                  </li>
+                {{ end }}
             </ul>
         </div>
-
-	<nav class="nav">
-		<ul class="flat">
-			{{ range .Site.Menus.main }}
-			<li>
-				<a href="{{ .URL }}">{{ .Name }}</a>
-			</li>
-			{{ end }}
-		</ul>
-	</nav>
+    </div>
 </div>

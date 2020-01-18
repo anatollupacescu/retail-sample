@@ -55,23 +55,28 @@
                     </h5>
                 </div>
 
-                <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="inputmailh" class="">Inbound item name</label>
-                                    <input type="text" class="form-control" id="name">
+                <form id="mainForm">
+                    <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="name" class="">Inbound item name</label>
+                                        <input type="text" class="form-control" id="name">
+                                        <div class="invalid-feedback">
+                                            Please choose a valid type name
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row pb-4">
+                                <div class="col-md-12">
+                                    <button type="submit" id="add" class="btn btn-secondary">Add</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="row pb-4">
-                            <div class="col-md-12">
-                                <button id="add" class="btn btn-secondary">Add</button>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -125,12 +130,28 @@
                 $(this).toggleClass('list-group-item-dark');
             } );
 
-            $("#add").on('click', function() {
-                var data = [$('#name').val()]
+            var nameInput = $('#name');
+
+            nameInput.keyup(function() {
+                $(".invalid-feedback").removeClass("d-block");
+            })
+
+            var form = $("#mainForm");
+
+            form.on('submit', function(e) {
+                e.preventDefault();
+
+                var data = nameInput.val();
+
+                if (!data) {
+                    $(".invalid-feedback").addClass("d-block");
+                    return
+                }
+
                 $.ajax({
                     type: "POST",
                     url: '/inbound/config',
-                    data: JSON.stringify(data),
+                    data: JSON.stringify([data]),
                     contentType: "application/json",
                     success: function() {
                         t.ajax.reload();

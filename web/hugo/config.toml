@@ -22,7 +22,7 @@ assetDir = "static"
 	customJS = ["https://code.jquery.com/jquery-3.4.1.js"]  # Custom JS scripts.
 
 [params.assets]
-js = ["js/main.js"]
+css = ["css/bootstrap.css", "css/dataTables.css"]
 
 [[menu.main]]
 identifier = "home"
@@ -37,9 +37,21 @@ url = "/inventory"
 weight = 2
 
 [[menu.main]]
-identifier = "about"
-name = "About"
-url = "/about"
+identifier = "outbound-config"
+name = "Outbound"
+url = "/outbound-config"
 weight = 3
+
+[[menu.main]]
+identifier = "outbound-new"
+name = "New outbound"
+url = "/outbound-new"
+weight = 4
+
+[[menu.main]]
+identifier = "stock"
+name = "Stock"
+url = "/stock"
+weight = 5
 
 [taxonomies]

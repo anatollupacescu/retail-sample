@@ -8,7 +8,21 @@
     <title>{{ .Params.Title }}</title>
     <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/checkout/">
 
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    {{- $css := "" -}}
+    {{- range site.Params.assets.css -}}
+        {{- $customcss := resources.Get . -}}
+        {{- if $customcss -}}
+            {{- if eq $css "" -}}
+                {{- $css = $customcss -}}
+            {{- else -}}
+                {{- $css = slice $css $customcss | resources.Concat (printf "%s.tmp_custom.css" .) -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- if ne $css "" -}}
+        {{- $corecss := slice $css ("" | resources.FromString "css/_core.css") | resources.Concat "css/core.css" -}}
+        {{- $corecss = $corecss | resources.Minify | resources.Fingerprint "sha384" -}}
+    <link href="{{- $corecss.RelPermalink -}}" integrity="{{- $corecss.Data.Integrity -}}" rel="stylesheet" />
+    {{- end -}}
 </head>

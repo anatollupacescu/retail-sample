@@ -15,31 +15,42 @@ func (i InMemoryInboundLog) List() (r []Item) {
 	return
 }
 
-type InMemoryInventory map[string]int
+type InMemoryInventory struct {
+	config map[string]bool
+	data   map[string]int
+}
 
 func (m InMemoryInventory) setQty(s string, i int) {
-	m[s] = i
+	m.data[s] = i
 }
 
 func (m InMemoryInventory) qty(s string) int {
-	return m[s]
+	return m.data[s]
 }
 
 func (m InMemoryInventory) addType(s string) {
-	m[s] = 0
+	m.data[s] = 0
 }
 
 func (m InMemoryInventory) hasType(s string) bool {
-	_, f := m[s]
+	_, f := m.config[s]
 	return f
 }
 
 func (m InMemoryInventory) types() (t []string) {
-	for k := range m {
+	for k := range m.data {
 		t = append(t, k)
 	}
 
 	return
+}
+
+func (m InMemoryInventory) disable(s string) {
+	if !m.hasType(s) {
+		return
+	}
+
+	m.config[s] = true
 }
 
 type InMemoryOutboundConfiguration map[string]OutboundItem

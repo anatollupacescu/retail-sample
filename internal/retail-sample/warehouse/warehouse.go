@@ -33,6 +33,7 @@ type ( //inventory
 		addType(string)
 		hasType(string) bool
 		types() []string
+		disable(string)
 	}
 
 	Log interface {
@@ -46,8 +47,9 @@ type ( //inventory
 	}
 
 	Item struct {
-		Type string
-		Qty  int
+		Type     string
+		Qty      int
+		Disabled bool
 	}
 )
 
@@ -71,12 +73,26 @@ func NewInMemoryStock() Stock {
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
 		soldItems:             make(InMemoryOutboundLog),
-		inventory:             make(InMemoryInventory),
 		outboundConfiguration: make(InMemoryOutboundConfiguration),
+		inventory: &InMemoryInventory{
+			data:   make(map[string]int),
+			config: make(map[string]bool),
+		},
 	}
 }
 
 var ErrInboundItemTypeNotFound = errors.New("type not found")
+
+func (s Stock) Disable(item string) error {
+
+	if !s.inventory.hasType(item) {
+		return ErrInboundItemTypeNotFound
+	}
+
+	s.inventory.disable(item)
+
+	return nil
+}
 
 func (s Stock) PlaceInbound(item Item) (int, error) {
 	if !s.inventory.hasType(item.Type) {

@@ -189,6 +189,34 @@ func TestConfigureInboundType(t *testing.T) {
 		assert.Equal(t, warehouse.ErrInventoryItemNotFound, err)
 		inventory.AssertExpectations(t)
 	})
+
+	t.Run("should not allow disabling if item type does not exist", func(t *testing.T) {
+		milk := "milk"
+		inventory := warehouse.MockInventory{}
+		inventory.On("hasType", milk).Return(false)
+
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
+
+		err := stock.Disable(milk)
+
+		assert.Equal(t, err, warehouse.ErrInboundItemTypeNotFound)
+		inventory.AssertExpectations(t)
+	})
+
+	t.Run("should allow disabling item types", func(t *testing.T) {
+		milk := "milk"
+		inventory := warehouse.MockInventory{}
+
+		inventory.On("hasType", milk).Return(true)
+		inventory.On("disable", milk).Once()
+
+		stock := warehouse.NewStock(nil, &inventory, nil, nil)
+
+		err := stock.Disable(milk)
+
+		assert.Nil(t, err)
+		inventory.AssertExpectations(t)
+	})
 }
 
 func TestPlaceInbound(t *testing.T) {

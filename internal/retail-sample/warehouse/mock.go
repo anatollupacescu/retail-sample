@@ -31,6 +31,10 @@ func (m *MockInventory) types() []string {
 	return nil
 }
 
+func (m *MockInventory) disable(s string) {
+	m.Called(s)
+}
+
 //outbound
 
 type MockOutboundConfig struct {

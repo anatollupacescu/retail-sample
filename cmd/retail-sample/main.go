@@ -43,11 +43,11 @@ func main() {
 		Handler: r,
 	}
 
-	//static
-	r.PathPrefix("/web/").Handler(http.StripPrefix("/web/", http.FileServer(http.Dir("./web"))))
-
 	//app
 	warehouse.ConfigureRoutes(r)
+
+	//static
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web"))))
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

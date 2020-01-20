@@ -35,6 +35,7 @@ func (m InMemoryInventory) addType(s string) {
 
 func (m InMemoryInventory) hasType(s string) bool {
 	_, f := m.config[s]
+
 	return f
 }
 

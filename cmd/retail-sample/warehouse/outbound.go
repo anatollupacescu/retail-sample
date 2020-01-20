@@ -75,15 +75,13 @@ func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
-
 	var t struct {
 		Name  *string        `json:"name"` // pointer so we can test for field absence
 		Items map[string]int `json:"items"`
 	}
+
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields() // catch unwanted fields
 
 	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -107,6 +105,8 @@ func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (a *App) ListOutboundConfig(w http.ResponseWriter, _ *http.Request) {

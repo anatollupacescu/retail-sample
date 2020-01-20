@@ -15,6 +15,10 @@ func ConfigureRoutes(r *mux.Router) {
 		stock: warehouse.NewInMemoryStock(),
 	}
 	r.HandleFunc("/inbound/config", a.ListTypes).Methods("GET")
+	r.HandleFunc("/inbound/config/{name}", a.GetType).Methods("GET")
+
+	r.HandleFunc("/inbound/config/{name}/disable", a.DisableType).Methods("PATCH")
+
 	r.HandleFunc("/inbound/config", a.ConfigureType).Methods("POST")
 	r.HandleFunc("/inbound", a.PlaceInbound).Methods("POST")
 	r.HandleFunc("/inbound", a.ListInbound).Methods("GET")

@@ -228,7 +228,13 @@ func TestPlaceInbound(t *testing.T) {
 
 		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
-		item := warehouse.Item{Type: milk, Qty: 31}
+		item := warehouse.Item{
+			ItemConfig: warehouse.ItemConfig{
+				Type: milk,
+			},
+			Qty: 31,
+		}
+
 		_, err := stock.PlaceInbound(item)
 
 		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
@@ -246,7 +252,13 @@ func TestPlaceInbound(t *testing.T) {
 		inboundLog.On("Add", mock.Anything, mock.Anything).Times(1)
 		stock := warehouse.NewStock(&inboundLog, &inventory, nil, nil)
 
-		item := warehouse.Item{Type: milk, Qty: 31}
+		item := warehouse.Item{
+			ItemConfig: warehouse.ItemConfig{
+				Type: milk,
+			},
+			Qty: 31,
+		}
+
 		qty, err := stock.PlaceInbound(item)
 
 		assert.NoError(t, err)

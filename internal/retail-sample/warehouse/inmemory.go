@@ -30,6 +30,7 @@ func (m InMemoryInventory) qty(s string) int {
 
 func (m InMemoryInventory) addType(s string) {
 	m.data[s] = 0
+	m.config[s] = false
 }
 
 func (m InMemoryInventory) hasType(s string) bool {
@@ -37,9 +38,12 @@ func (m InMemoryInventory) hasType(s string) bool {
 	return f
 }
 
-func (m InMemoryInventory) types() (t []string) {
+func (m InMemoryInventory) types() (t []ItemConfig) {
 	for k := range m.data {
-		t = append(t, k)
+		t = append(t, ItemConfig{
+			Type:     k,
+			Disabled: m.config[k],
+		})
 	}
 
 	return

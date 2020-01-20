@@ -32,7 +32,7 @@ type ( //inventory
 		qty(string) int
 		addType(string)
 		hasType(string) bool
-		types() []string
+		types() []ItemConfig
 		disable(string)
 	}
 
@@ -46,10 +46,14 @@ type ( //inventory
 		List() []SoldItem
 	}
 
-	Item struct {
+	ItemConfig struct {
 		Type     string
-		Qty      int
 		Disabled bool
+	}
+
+	Item struct {
+		ItemConfig
+		Qty int
 	}
 )
 
@@ -82,6 +86,16 @@ func NewInMemoryStock() Stock {
 }
 
 var ErrInboundItemTypeNotFound = errors.New("type not found")
+
+func (s Stock) GetType(name string) ItemConfig {
+	for _, i := range s.inventory.types() {
+		if i.Type == name {
+			return i
+		}
+	}
+
+	return ItemConfig{}
+}
 
 func (s Stock) Disable(item string) error {
 
@@ -141,7 +155,11 @@ func (s Stock) Quantity(typeName string) (int, error) {
 }
 
 func (s Stock) ItemTypes() (r []string) {
-	return s.inventory.types()
+	types := s.inventory.types()
+	for _, t := range types {
+		r = append(r, t.Type)
+	}
+	return
 }
 
 func (s Stock) ListInbound() (r []Item) {

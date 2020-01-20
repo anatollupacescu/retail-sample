@@ -27,7 +27,7 @@ func (m *MockInventory) hasType(s string) bool {
 	return args.Bool(0)
 }
 
-func (m *MockInventory) types() []string {
+func (m *MockInventory) types() []ItemConfig {
 	return nil
 }
 

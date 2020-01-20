@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
+	"github.com/gorilla/mux"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +38,49 @@ func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (a *App) GetType(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	t := a.stock.GetType(name)
+
+	var zeroItemConfig warehouse.ItemConfig
+
+	if t == zeroItemConfig {
+		http.Error(w, "item type not found", http.StatusNotFound)
+		return
+	}
+
+	payload := struct {
+		Disabled bool `json:"disabled"`
+	}{
+		Disabled: t.Disabled,
+	}
+
+	e := json.NewEncoder(w)
+
+	if err := e.Encode(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a *App) DisableType(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	if err := a.stock.Disable(name); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
@@ -120,8 +164,10 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 
 	for key, value := range t {
 		item := warehouse.Item{
-			Type: key,
-			Qty:  value,
+			ItemConfig: warehouse.ItemConfig{
+				Type: key,
+			},
+			Qty: value,
 		}
 
 		_, err := a.stock.PlaceInbound(item)

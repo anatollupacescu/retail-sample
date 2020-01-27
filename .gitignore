@@ -19,4 +19,4 @@ parcel-react/dist
 parcel-react/node_modules
 parcel-react/.cache
 
-
+web/ts/node_modules/

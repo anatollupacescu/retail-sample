@@ -1,16 +1,18 @@
 {
   "name": "ts",
-  "version": "1.0.0",
-  "description": "",
-  "main": "scr.js",
-  "dependencies": {
-    "prettier": "^1.19.1"
+  "version": "0.1.0",
+  "description": "nothing to see here",
+  "main": "index.js",
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.5"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write --parser typescript \"*.ts\""
+    "format": "prettier --write --parser typescript \"**/src/*.ts\"",
+    "compile": "tsc src/index.ts"
   },
-  "author": "",
+  "author": "me",
   "license": "ISC"
 }

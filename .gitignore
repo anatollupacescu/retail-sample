@@ -20,3 +20,6 @@ parcel-react/node_modules
 parcel-react/.cache
 
 web/ts/node_modules/
+web/ts/.cache/
+web/ts/dist/
+web/ts/*.lock

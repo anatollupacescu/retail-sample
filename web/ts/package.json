@@ -4,14 +4,17 @@
   "description": "nothing to see here",
   "main": "index.js",
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.8.3",
     "prettier": "^1.19.1",
+    "cross-env": "^7.0.0",
+    "npm-check-updates": "^4.0.1",
+    "parcel-bundler": "^1.12.4",
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write --parser typescript \"**/src/*.ts\"",
-    "compile": "tsc src/index.ts"
+    "start": "parcel serve src/index.html",
+    "build": "cross-env NODE_ENV=production parcel build src/index.html --public-url .",
+    "watch": "parcel watch src/index.html"
   },
   "author": "me",
   "license": "ISC"

@@ -1,4 +1,3 @@
-
 export function lol(): string {
-  return "lol"
+  return "lol";
 }

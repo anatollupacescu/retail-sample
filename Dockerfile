@@ -1,23 +1,10 @@
 # Build site
-FROM node:buster as site
-
-RUN npm init -y
-RUN npm install mustache --save
-
-ENV PATH="${PWD}/node_modules/.bin:${PATH}"
-
-RUN which mustache
-
+FROM golang:1.13 as site
+RUN go get github.com/cbroglie/mustache/...
 ADD web /web
-
 WORKDIR /web
+RUN ./gen_static.sh
 
-RUN chmod +x gen_static.sh
-RUN chmod +x data.sh
-
-RUN bash -c "./data.sh index | mustache index.mustache > index.html"
-
-RUN "ls *.html"
 # linter
 FROM golang:1.13 as tester
 

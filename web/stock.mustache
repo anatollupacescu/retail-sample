@@ -8,106 +8,125 @@
 {{> partial/header}}
 
 <div class="container">
-    <div id="accordion">
-        <div class="card">
-            <div class="card-header" id="headingOne">
-                <h5 class="mb-0">
-                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        Register new
-                    </button>
-                </h5>
-            </div>
+  <div id="accordion">
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button
+            class="btn btn-link"
+            data-toggle="collapse"
+            data-target="#collapseOne"
+            aria-expanded="true"
+            aria-controls="collapseOne">
+            Provision stock
+          </button>
+        </h5>
+      </div>
 
-            <form id="mainForm">
-                <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="name" class="">Inbound item name</label>
-                                    <input type="text" class="form-control" id="name">
-                                    <div class="invalid-feedback">
-                                        Please choose a valid type name
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row pb-4">
-                            <div class="col-md-12">
-                                <button type="submit" id="add" class="btn btn-secondary">Add</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
+      <div
+        id="collapseOne"
+        class="collapse hide"
+        aria-labelledby="headingOne"
+        data-parent="#accordion">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="inventoryItemType" class="">Outbound product<br/>
+                </label>
+                <select
+                  class="form-control custom-select"
+                  id="inventoryItemType">
+                  <option selected="">Choose one</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-1">
+              <div class="form-group">
+                <label for="count" class="">Count<br /></label>
+                <input type="number" class="form-control" id="count" />
+              </div>
+            </div>
+          </div>
+          <div class="row pb-4">
+            <div class="col-md-12">
+              <button id="add" class="btn btn-secondary">Add</button>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="container">
-    <div class="row pt-3">
-        <div class="col-md-12">
-            <table id="inventoryTable" class="table table-hover table-bordered">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                </tr>
-                </thead>
-            </table>
-        </div>
+  <div class="row pt-3">
+    <div class="col-md-12">
+      <table id="stock" class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+      </table>
     </div>
+  </div>
 </div>
+
 
 {{> partial/footer}}
 
 <script>
-    $(document).ready(function() {
-        var t = $('#inventoryTable').DataTable({
-            ajax: "http://127.0.0.1:8080/inbound/config",
-            "columns": [
-                { "data": "id" },
-                { "data": "type" }
-            ]
-        });
-
-        $('#inventoryTable tbody').on( 'click', 'tr', function () {
-            $(this).toggleClass('list-group-item-dark');
-        });
-
-        var nameInput = $('#name');
-
-        nameInput.keyup(function() {
-            $(".invalid-feedback").removeClass("d-block");
-        })
-
-        var form = $("#mainForm");
-
-        form.on('submit', function(e) {
-            e.preventDefault();
-
-            var data = nameInput.val();
-
-            if (!data) {
-                $(".invalid-feedback").addClass("d-block");
-                return
-            }
-
-            $.ajax({
-                type: "POST",
-                url: '/inbound/config',
-                data: JSON.stringify([data]),
-                contentType: "application/json",
-                success: function() {
-                    t.ajax.reload();
-                    nameInput.val('');
-                },
-                error: function(resp) {
-                    console.log(resp.statusText)
-                }
-            });
-        });
+$(document).ready(function() {
+    var stockTable = $("#stock").DataTable({
+        ajax: "http://127.0.0.1:8080/stock",
+        columns: [{"data": "name"}, {"data": "qty", "searchable": false}]
     });
+
+    var dropDown = $("#inventoryItemType");
+
+    $.ajax({
+        type: "GET",
+        url: '/inbound/config',
+        accept: "application/json",
+        success: function (data) {
+            let items = data.data;
+            if (items) {
+                dropDown.empty();
+                items.map(function (item) {
+                    dropDown.append(new Option(item.type));
+                })
+            }
+        },
+        error: function (resp) {
+            console.log(resp.statusText)
+        }
+    });
+
+    $("#add").on('click', function () {
+        var name = dropDown.val();
+        var qty = $("#count").val();
+        if (!name || !qty) {
+            console.log("name and quantity mandatory")
+            return
+        }
+        var payload = {};
+        payload[name] = Number.parseInt(qty)
+        $.ajax({
+            type: "POST",
+            url: '/inbound',
+            data: JSON.stringify(payload),
+            contentType: "application/json",
+            success: function() {
+            stockTable.ajax.reload();
+            },
+            error: function(resp) {
+            console.log(resp.statusText)
+            }
+        });
+    })
+});
 </script>
 </body>
 

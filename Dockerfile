@@ -57,7 +57,6 @@ WORKDIR /retail
 # Build the binary with go build
 RUN GOOS=linux GOARCH=amd64 make build
 
-
 # Final stage: Run the binary
 FROM scratch
 

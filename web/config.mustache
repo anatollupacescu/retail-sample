@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+{{> partial/head}}
+
+<body class="bg-light">
+
+{{> partial/header}}
+
+<div class="container">
+    <div id="accordion">
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Register new
+                    </button>
+                </h5>
+            </div>
+
+            <form id="mainForm">
+                <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="name" class="">Inbound item name</label>
+                                    <input type="text" class="form-control" id="name">
+                                    <div class="invalid-feedback">
+                                        Please choose a valid type name
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row pb-4">
+                            <div class="col-md-12">
+                                <button type="submit" id="add" class="btn btn-secondary">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row pt-3">
+        <div class="col-md-12">
+            <table id="inventoryTable" class="table table-hover table-bordered">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+{{> partial/footer}}
+
+<script>
+    $(document).ready(function() {
+        var t = $('#inventoryTable').DataTable({
+            ajax: "http://127.0.0.1:8080/inbound/config",
+            "columns": [
+                { "data": "id" },
+                { "data": "type" }
+            ]
+        });
+
+        $('#inventoryTable tbody').on( 'click', 'tr', function () {
+            $(this).toggleClass('list-group-item-dark');
+        });
+
+        var nameInput = $('#name');
+
+        nameInput.keyup(function() {
+            $(".invalid-feedback").removeClass("d-block");
+        })
+
+        var form = $("#mainForm");
+
+        form.on('submit', function(e) {
+            e.preventDefault();
+
+            var data = nameInput.val();
+
+            if (!data) {
+                $(".invalid-feedback").addClass("d-block");
+                return
+            }
+
+            $.ajax({
+                type: "POST",
+                url: '/inbound/config',
+                data: JSON.stringify([data]),
+                contentType: "application/json",
+                success: function() {
+                    t.ajax.reload();
+                    nameInput.val('');
+                },
+                error: function(resp) {
+                    console.log(resp.statusText)
+                }
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

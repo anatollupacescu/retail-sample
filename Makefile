@@ -13,7 +13,7 @@ format:
 test:
 	go test ./...
 
-docker/lint:
+docker/build:
 	docker build .
 
 build:
@@ -25,8 +25,5 @@ build:
 
 run:
 	PORT=8080 DIAG_PORT=8081 go run cmd/retail-sample/main.go
-
-gen:
-	@script/data.sh index | mustache web/index.mustache > web/index.html
 
 .PHONY: test format docker/lint run gen

@@ -1,3 +1,23 @@
+# Build site
+FROM node:buster as site
+
+RUN npm init -y
+RUN npm install mustache --save
+
+ENV PATH="${PWD}/node_modules/.bin:${PATH}"
+
+RUN which mustache
+
+ADD web /web
+
+WORKDIR /web
+
+RUN chmod +x gen_static.sh
+RUN chmod +x data.sh
+
+RUN bash -c "./data.sh index | mustache index.mustache > index.html"
+
+RUN "ls *.html"
 # linter
 FROM golang:1.13 as tester
 
@@ -50,6 +70,7 @@ WORKDIR /retail
 # Build the binary with go build
 RUN GOOS=linux GOARCH=amd64 make build
 
+
 # Final stage: Run the binary
 FROM scratch
 
@@ -66,9 +87,9 @@ USER myapp
 # and finally the binary
 COPY --from=builder /retail/bin/retail /retail
 
+COPY --from=site /web/*.html /web/
+
 EXPOSE $PORT
 EXPOSE $DIAG_PORT
-
-ADD web /web
 
 CMD ["/retail"]

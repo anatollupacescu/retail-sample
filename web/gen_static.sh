@@ -4,5 +4,5 @@ files=(index config stock outbound)
 
 for file in ${files[*]}
 do 
-    ./data.sh $file | mustache $file.mustache > $file.html
+    ./data.sh $file | mustache template/$file.mustache > src/$file.html
 done

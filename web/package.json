@@ -11,11 +11,14 @@
     "typescript": "^3.7.5"
   },
   "scripts": {
-    "format": "prettier --write --parser typescript \"**/src/*.ts\"",
+    "format": "prettier --write --parser typescript \"src/*.ts\"",
     "start": "parcel serve src/index.html",
-    "build": "cross-env NODE_ENV=production parcel build src/index.html --public-url .",
+    "build": "cross-env NODE_ENV=production parcel build --public-url . src/index.html",
     "watch": "parcel watch src/index.html"
   },
   "author": "me",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.4.1"
+  }
 }

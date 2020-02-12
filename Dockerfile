@@ -1,9 +1,16 @@
 # Build site
-FROM golang:1.13 as site
+FROM golang:1.13 as mustache
+
 RUN go get github.com/cbroglie/mustache/...
+
+FROM node:13 as site
+
+COPY --from=mustache /go/bin/mustache /bin
+
 ADD web /web
 WORKDIR /web
 RUN ./gen_static.sh
+RUN yarn build
 
 # linter
 FROM golang:1.13 as tester
@@ -73,7 +80,7 @@ USER myapp
 # and finally the binary
 COPY --from=builder /retail/bin/retail /retail
 
-COPY --from=site /web/*.html /web/
+COPY --from=site /web/dist/* /web/
 
 EXPOSE $PORT
 EXPOSE $DIAG_PORT

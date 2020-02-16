@@ -18,6 +18,7 @@ import (
 )
 
 func main() {
+
 	logger := logrus.New().WithField("version", version.Version)
 
 	logger.Infof(
@@ -36,18 +37,18 @@ func main() {
 		logger.Fatal("Diagnostics port is not set")
 	}
 
-	r := mux.NewRouter()
+	businessRouter := mux.NewRouter()
 
 	server := http.Server{
 		Addr:    net.JoinHostPort("", port),
-		Handler: r,
+		Handler: businessRouter,
 	}
 
 	//app
-	warehouse.ConfigureRoutes(r)
+	warehouse.ConfigureRoutes(businessRouter)
 
 	//static
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web"))))
+	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -69,6 +70,7 @@ func main() {
 
 	go func() {
 		logger.Info("Business logic server is preparing on port ", port)
+
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			shutdown <- err

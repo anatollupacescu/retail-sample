@@ -80,7 +80,7 @@ USER myapp
 # and finally the binary
 COPY --from=builder /retail/bin/retail /retail
 
-COPY --from=site /web/dist/* /web/
+COPY --from=site /web/dist/ /web/dist/
 
 EXPOSE $PORT
 EXPOSE $DIAG_PORT

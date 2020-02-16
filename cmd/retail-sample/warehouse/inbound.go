@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 	"github.com/gorilla/mux"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {

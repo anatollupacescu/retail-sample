@@ -1,6 +1,8 @@
 package warehouse
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
@@ -14,17 +16,19 @@ func ConfigureRoutes(r *mux.Router) {
 	a := App{
 		stock: warehouse.NewInMemoryStock(),
 	}
-	r.HandleFunc("/inbound/config", a.ListTypes).Methods("GET")
-	r.HandleFunc("/inbound/config/{name}", a.GetType).Methods("GET")
 
-	r.HandleFunc("/inbound/config/{name}/disable", a.DisableType).Methods("PATCH")
+	r.HandleFunc("/inbound", a.PlaceInbound).Methods(http.MethodPost)
+	r.HandleFunc("/inbound", a.ListInbound).Methods(http.MethodGet)
 
-	r.HandleFunc("/inbound/config", a.ConfigureType).Methods("POST")
-	r.HandleFunc("/inbound", a.PlaceInbound).Methods("POST")
-	r.HandleFunc("/inbound", a.ListInbound).Methods("GET")
-	r.HandleFunc("/stock", a.ShowStock).Methods("GET")
-	r.HandleFunc("/outbound", a.PlaceOutbound).Methods("POST")
-	r.HandleFunc("/outbound", a.ListOutbound).Methods("GET")
-	r.HandleFunc("/outbound/config", a.ConfigureOutbound).Methods("POST")
-	r.HandleFunc("/outbound/config", a.ListOutboundConfig).Methods("GET")
+	r.HandleFunc("/inbound/config", a.ListTypes).Methods(http.MethodGet)
+	r.HandleFunc("/inbound/config/{name}", a.GetType).Methods(http.MethodGet)
+	r.HandleFunc("/inbound/config", a.ConfigureType).Methods(http.MethodPost)
+	r.HandleFunc("/inbound/config/{name}/disable", a.DisableType).Methods(http.MethodPatch)
+
+	r.HandleFunc("/stock", a.ShowStock).Methods(http.MethodGet)
+
+	r.HandleFunc("/outbound", a.PlaceOutbound).Methods(http.MethodPost)
+	r.HandleFunc("/outbound", a.ListOutbound).Methods(http.MethodGet)
+	r.HandleFunc("/outbound/config", a.ConfigureOutbound).Methods(http.MethodPost)
+	r.HandleFunc("/outbound/config", a.ListOutboundConfig).Methods(http.MethodGet)
 }

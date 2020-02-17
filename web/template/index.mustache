@@ -34,8 +34,11 @@
                     <div class="form-group">
                       <label for="name" class="">Inbound item name</label>
                       <input type="text" class="form-control" id="name" />
-                      <div class="invalid-feedback">
+                      <div id="nonempty" class="invalid-feedback">
                         Please choose a valid type name
+                      </div>
+                      <div id="unique" class="invalid-feedback">
+                        Please choose a unique type name
                       </div>
                     </div>
                   </div>

@@ -12,18 +12,19 @@ $(document).ready(function () {
   var nameInput = $('#name')
 
   nameInput.keyup(function () {
-    $('.invalid-feedback').removeClass('d-block')
+    $('#nonempty.invalid-feedback').removeClass('d-block')
+    $('#unique.invalid-feedback').removeClass('d-block')
   })
 
   var form = $('#mainForm')
 
-  form.on('submit', function (e) {
+  form.on('submit', function (e: { preventDefault: () => void }) {
     e.preventDefault()
 
     var data = nameInput.val()
 
     if (!data) {
-      $('.invalid-feedback').addClass('d-block')
+      $('#nonempty.invalid-feedback').addClass('d-block')
       return
     }
 
@@ -37,8 +38,11 @@ $(document).ready(function () {
         t.ajax.reload()
         nameInput.val('')
       },
-      error: function (resp) {
-        console.log(resp.statusText)
+      error: function (resp: { responseText: string }) {
+        if (resp.responseText === 'ERR_UNIQUE') {
+          $('#unique.invalid-feedback').addClass('d-block')
+        }
+        console.log(JSON.stringify(resp))
       }
     })
   })

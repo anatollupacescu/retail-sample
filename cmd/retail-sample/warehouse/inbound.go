@@ -12,6 +12,9 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
+const ErrUnique = "ERR_UNIQUE"
+const ErrNoName = "ERR_NO_NAME"
+
 func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
@@ -31,7 +34,17 @@ func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 	for _, t := range types {
 		if err := a.stock.ConfigureInboundType(t); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			if _, err = fmt.Fprintf(w, "could not add item type '%s': %v\n", t, err); err != nil {
+			var msg string
+			switch err {
+			case warehouse.ErrInboundNameNotProvided:
+				msg = ErrNoName
+			case warehouse.ErrInboundItemTypeAlreadyConfigured:
+				msg = ErrUnique
+			default:
+				http.Error(w, "Server error", http.StatusInternalServerError)
+				return
+			}
+			if _, err = fmt.Fprint(w, msg); err != nil {
 				log.Fatal(err)
 			}
 			return

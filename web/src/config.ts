@@ -1,5 +1,6 @@
 $(document).ready(function () {
   let apiUrl = process.env.API_URL
+
   var fpTable = $('#finishedProducts').DataTable({
     ajax: `${apiUrl}/outbound/config`,
     columns: [{ data: 'name' }, { data: 'count', searchable: false }]
@@ -34,6 +35,13 @@ $(document).ready(function () {
   $('#createNew').on('click', function () {
     var tableData = items.rows().data()
     var fpName = $('#finishedProductName').val()
+    console.log('data gt', JSON.stringify(tableData))
+    if (!items.rows().count()) {
+      $('#noRowsErr.invalid-feedback').addClass('d-block')
+    }
+    if (!fpName) {
+      $('#noNameErr.invalid-feedback').addClass('d-block')
+    }
     if (tableData && fpName) {
       var cs = {}
       tableData.each(function (i) {
@@ -55,10 +63,20 @@ $(document).ready(function () {
           reloadItemNameList()
         },
         error: function (resp) {
-          console.log(resp.statusText)
+          if (resp.responseText === 'ERR_UNIQUE') {
+            $('#unique.invalid-feedback').addClass('d-block')
+          }
         }
       })
     }
+  })
+
+  $('#count').on('change', function () {
+    $('#countErr.invalid-feedback').removeClass('d-block')
+  })
+
+  $('#finishedProductName').on('keyup', function () {
+    $('#noNameErr.invalid-feedback').removeClass('d-block')
   })
 
   $('#add').on('click', function () {
@@ -66,15 +84,26 @@ $(document).ready(function () {
     var name = selectedItemName.text()
     let itemCount = $('#count')
     var count = itemCount.val()
-    if (name && count) {
-      items.row
-        .add({
-          name: name,
-          count: count
-        })
-        .draw()
-      selectedItemName.remove()
-      itemCount.val('')
+    if (!count) {
+      $('#countErr.invalid-feedback').addClass('d-block')
+      return
     }
+    if (!name) {
+      $('#nameErr.invalid-feedback').addClass('d-block')
+      return
+    }
+    items.row
+      .add({
+        name: name,
+        count: count
+      })
+      .draw()
+    selectedItemName.remove()
+    let remaining = $('#itemType').find('option').length
+    if (remaining === 0) {
+      $('#add').prop('disabled', true)
+    }
+    $('#noRowsErr.invalid-feedback').removeClass('d-block')
+    itemCount.val('')
   })
 })

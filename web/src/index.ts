@@ -42,7 +42,6 @@ $(document).ready(function () {
         if (resp.responseText === 'ERR_UNIQUE') {
           $('#unique.invalid-feedback').addClass('d-block')
         }
-        console.log(JSON.stringify(resp))
       }
     })
   })

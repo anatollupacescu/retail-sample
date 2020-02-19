@@ -10,11 +10,14 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
-const ErrUnique = "ERR_UNIQUE"
-const ErrNoName = "ERR_NO_NAME"
+const (
+	ErrUnique = "ERR_UNIQUE"
+	ErrNoName = "ERR_NO_NAME"
+)
 
 func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
@@ -37,9 +40,9 @@ func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {
-			case warehouse.ErrInboundNameNotProvided:
+			case inventory.ErrEmptyName:
 				msg = ErrNoName
-			case warehouse.ErrInboundItemTypeAlreadyConfigured:
+			case inventory.ErrDuplicateName:
 				msg = ErrUnique
 			default:
 				http.Error(w, "Server error", http.StatusInternalServerError)

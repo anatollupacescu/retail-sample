@@ -3,6 +3,8 @@ package warehouse
 import (
 	"errors"
 	"time"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
 
 type ( //outbound
@@ -28,12 +30,9 @@ type ( //outbound
 type ( //inventory
 
 	Inventory interface {
-		setQty(string, int)
-		qty(string) int
-		addType(string) int
-		hasType(string) bool
-		types() []ItemConfig
-		disable(string)
+		Add(string) (int, error)
+		All() []inventory.Record
+		Get(string) int
 	}
 
 	Log interface {
@@ -59,10 +58,11 @@ type ( //inventory
 )
 
 type Stock struct {
+	inventory             Inventory
 	inboundLog            Log
 	soldItems             OutboundLog
-	inventory             Inventory
 	outboundConfiguration OutboundConfiguration
+	data                  map[int]int
 }
 
 func NewStock(log Log, inv Inventory, config OutboundConfiguration, outboundItemLog OutboundLog) Stock {
@@ -74,73 +74,78 @@ func NewStock(log Log, inv Inventory, config OutboundConfiguration, outboundItem
 	}
 }
 
+func NewStockWithData(log Log, inv Inventory, config OutboundConfiguration, outboundItemLog OutboundLog, d map[int]int) Stock {
+	return Stock{
+		inboundLog:            log,
+		soldItems:             outboundItemLog,
+		inventory:             inv,
+		outboundConfiguration: config,
+		data:                  d,
+	}
+}
+
 func NewInMemoryStock() Stock {
-	zero := 0
+	inMemoryStore := inventory.NewInMemoryStore()
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
 		soldItems:             make(InMemoryOutboundLog),
 		outboundConfiguration: make(InMemoryOutboundConfiguration),
-		inventory: &InMemoryInventory{
-			data:    make(map[string]int),
-			config:  make(map[string]bool),
-			ids:     make(map[string]int),
-			counter: &zero,
-		},
+		inventory:             inventory.NewInventory(inMemoryStore),
 	}
 }
 
 var ErrInboundItemTypeNotFound = errors.New("type not found")
 
 func (s Stock) GetType(name string) ItemConfig {
-	for _, i := range s.inventory.types() {
-		if i.Type == name {
-			return i
+	for _, i := range s.inventory.All() {
+		if string(i.Name) == name {
+			return ItemConfig{
+				Type:     name,
+				Disabled: false,
+			}
 		}
 	}
 
 	return ItemConfig{}
 }
 
+func isPresent(i Inventory, n string) bool {
+	return i.Get(n) != 0
+}
+
 func (s Stock) Disable(item string) error {
 
-	if !s.inventory.hasType(item) {
+	if !isPresent(s.inventory, item) {
 		return ErrInboundItemTypeNotFound
 	}
 
-	s.inventory.disable(item)
+	// s.inventory.disable(item)
 
 	return nil
 }
 
 func (s Stock) PlaceInbound(item ProvisionEntry) (int, error) {
-	if !s.inventory.hasType(item.Type) {
+	if !isPresent(s.inventory, item.Type) {
 		return 0, ErrInboundItemTypeNotFound
 	}
 
-	newQty := s.inventory.qty(item.Type) + item.Qty
+	id := s.inventory.Get(item.Type)
 
-	s.inventory.setQty(item.Type, newQty)
+	newQty := s.data[id] + item.Qty
+
+	s.data[id] = newQty
 
 	s.inboundLog.Add(time.Now(), item)
 
 	return newQty, nil
 }
 
-var (
-	ErrInboundItemTypeAlreadyConfigured = errors.New("item type already present")
-	ErrInboundNameNotProvided           = errors.New("name not provided")
-)
-
 func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
-	if len(typeName) == 0 {
-		return 0, ErrInboundNameNotProvided
-	}
+	id, err := s.inventory.Add(typeName)
 
-	if s.inventory.hasType(typeName) {
-		return 0, ErrInboundItemTypeAlreadyConfigured
+	if err != nil {
+		return 0, err
 	}
-
-	id := s.inventory.addType(typeName)
 
 	return id, nil
 }
@@ -148,20 +153,21 @@ func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
 var ErrInventoryItemNotFound = errors.New("inventory item not found")
 
 func (s Stock) Quantity(typeName string) (int, error) {
-
-	if !s.inventory.hasType(typeName) {
+	if !isPresent(s.inventory, typeName) {
 		return 0, ErrInventoryItemNotFound
 	}
 
-	qty := s.inventory.qty(typeName)
+	id := s.inventory.Get(typeName)
+
+	qty := s.data[id]
 
 	return qty, nil
 }
 
 func (s Stock) ItemTypes() (r []string) {
-	types := s.inventory.types()
+	types := s.inventory.All()
 	for _, t := range types {
-		r = append(r, t.Type)
+		r = append(r, string(t.Name))
 	}
 	return
 }
@@ -188,7 +194,7 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 
 	for _, item := range items {
 
-		if !s.inventory.hasType(item.ItemType) {
+		if !isPresent(s.inventory, item.ItemType) {
 			return ErrInboundItemTypeNotFound
 		}
 
@@ -225,16 +231,18 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 	components := s.outboundConfiguration.components(typeName)
 
 	for _, outboundItem := range components {
-		inventoryQty := s.inventory.qty(outboundItem.ItemType)
+		id := s.inventory.Get(outboundItem.ItemType)
+		inventoryQty := s.data[id]
 		if outboundItem.Qty*qty > inventoryQty {
 			return ErrNotEnoughStock
 		}
 	}
 
 	for _, outboundItem := range components {
-		inventoryQty := s.inventory.qty(outboundItem.ItemType)
+		id := s.inventory.Get(outboundItem.ItemType)
+		inventoryQty := s.data[id]
 		inventoryQty -= outboundItem.Qty * qty
-		s.inventory.setQty(outboundItem.ItemType, inventoryQty)
+		s.data[id] = inventoryQty
 	}
 
 	s.soldItems.Add(SoldItem{

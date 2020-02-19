@@ -4,36 +4,27 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
 
 type MockInventory struct {
 	mock.Mock
 }
 
-func (m *MockInventory) setQty(s string, number int) {
-	_ = m.Called(s, number)
+func (m *MockInventory) Add(s string) (int, error) {
+	args := m.Called(s)
+	return args.Int(0), args.Error(1)
 }
 
-func (m *MockInventory) qty(s string) int {
-	return m.Called(s).Int(0)
+func (m *MockInventory) All() []inventory.Record {
+	args := m.Called()
+	return args.Get(0).([]inventory.Record)
 }
 
-func (m *MockInventory) addType(s string) int {
+func (m *MockInventory) Get(s string) int {
 	args := m.Called(s)
 	return args.Int(0)
-}
-
-func (m *MockInventory) hasType(s string) bool {
-	args := m.Called(s)
-	return args.Bool(0)
-}
-
-func (m *MockInventory) types() []ItemConfig {
-	return nil
-}
-
-func (m *MockInventory) disable(s string) {
-	m.Called(s)
 }
 
 //outbound

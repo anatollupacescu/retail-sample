@@ -8,7 +8,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
-func (a *App) PlaceOutbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -74,7 +74,7 @@ func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) ConfigureOutbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 	var t struct {
 		Name  *string        `json:"name"` // pointer so we can test for field absence
 		Items map[string]int `json:"items"`

@@ -13,7 +13,7 @@ format:
 test:
 	go test ./...
 
-docker/build:
+build/docker:
 	docker build .
 
 build:

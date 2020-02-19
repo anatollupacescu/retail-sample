@@ -146,7 +146,7 @@ func TestConfigureInboundType(t *testing.T) {
 
 	t.Run("should reject empty inbound type name", func(t *testing.T) {
 		stock := warehouse.Stock{}
-		err := stock.ConfigureInboundType("")
+		_, err := stock.ConfigureInboundType("")
 		assert.Equal(t, warehouse.ErrInboundNameNotProvided, err)
 	})
 
@@ -157,7 +157,7 @@ func TestConfigureInboundType(t *testing.T) {
 
 		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
-		err := stock.ConfigureInboundType(milk)
+		_, err := stock.ConfigureInboundType(milk)
 
 		assert.Equal(t, warehouse.ErrInboundItemTypeAlreadyConfigured, err)
 		inventory.AssertExpectations(t)
@@ -167,13 +167,14 @@ func TestConfigureInboundType(t *testing.T) {
 		milk := "milk"
 		inventory := warehouse.MockInventory{}
 		inventory.On("hasType", milk).Return(false)
-		inventory.On("addType", milk).Times(1)
+		inventory.On("addType", milk).Return(1)
 
 		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
-		err := stock.ConfigureInboundType(milk)
+		id, err := stock.ConfigureInboundType(milk)
 
 		assert.NoError(t, err)
+		assert.Equal(t, id, 1)
 		inventory.AssertExpectations(t)
 	})
 
@@ -228,11 +229,9 @@ func TestPlaceInbound(t *testing.T) {
 
 		stock := warehouse.NewStock(nil, &inventory, nil, nil)
 
-		item := warehouse.Item{
-			ItemConfig: warehouse.ItemConfig{
-				Type: milk,
-			},
-			Qty: 31,
+		item := warehouse.ProvisionEntry{
+			Type: milk,
+			Qty:  31,
 		}
 
 		_, err := stock.PlaceInbound(item)
@@ -252,11 +251,9 @@ func TestPlaceInbound(t *testing.T) {
 		inboundLog.On("Add", mock.Anything, mock.Anything).Times(1)
 		stock := warehouse.NewStock(&inboundLog, &inventory, nil, nil)
 
-		item := warehouse.Item{
-			ItemConfig: warehouse.ItemConfig{
-				Type: milk,
-			},
-			Qty: 31,
+		item := warehouse.ProvisionEntry{
+			Type: milk,
+			Qty:  31,
 		}
 
 		qty, err := stock.PlaceInbound(item)

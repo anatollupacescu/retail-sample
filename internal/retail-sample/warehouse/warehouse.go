@@ -30,15 +30,15 @@ type ( //inventory
 	Inventory interface {
 		setQty(string, int)
 		qty(string) int
-		addType(string)
+		addType(string) int
 		hasType(string) bool
 		types() []ItemConfig
 		disable(string)
 	}
 
 	Log interface {
-		Add(time.Time, Item)
-		List() []Item
+		Add(time.Time, ProvisionEntry)
+		List() []ProvisionEntry
 	}
 
 	OutboundLog interface {
@@ -51,9 +51,10 @@ type ( //inventory
 		Disabled bool
 	}
 
-	Item struct {
-		ItemConfig
-		Qty int
+	ProvisionEntry struct {
+		Time time.Time
+		Type string
+		Qty  int
 	}
 )
 
@@ -74,13 +75,16 @@ func NewStock(log Log, inv Inventory, config OutboundConfiguration, outboundItem
 }
 
 func NewInMemoryStock() Stock {
+	zero := 0
 	return Stock{
 		inboundLog:            make(InMemoryInboundLog),
 		soldItems:             make(InMemoryOutboundLog),
 		outboundConfiguration: make(InMemoryOutboundConfiguration),
 		inventory: &InMemoryInventory{
-			data:   make(map[string]int),
-			config: make(map[string]bool),
+			data:    make(map[string]int),
+			config:  make(map[string]bool),
+			ids:     make(map[string]int),
+			counter: &zero,
 		},
 	}
 }
@@ -108,7 +112,7 @@ func (s Stock) Disable(item string) error {
 	return nil
 }
 
-func (s Stock) PlaceInbound(item Item) (int, error) {
+func (s Stock) PlaceInbound(item ProvisionEntry) (int, error) {
 	if !s.inventory.hasType(item.Type) {
 		return 0, ErrInboundItemTypeNotFound
 	}
@@ -127,18 +131,18 @@ var (
 	ErrInboundNameNotProvided           = errors.New("name not provided")
 )
 
-func (s *Stock) ConfigureInboundType(typeName string) error {
+func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
 	if len(typeName) == 0 {
-		return ErrInboundNameNotProvided
+		return 0, ErrInboundNameNotProvided
 	}
 
 	if s.inventory.hasType(typeName) {
-		return ErrInboundItemTypeAlreadyConfigured
+		return 0, ErrInboundItemTypeAlreadyConfigured
 	}
 
-	s.inventory.addType(typeName)
+	id := s.inventory.addType(typeName)
 
-	return nil
+	return id, nil
 }
 
 var ErrInventoryItemNotFound = errors.New("inventory item not found")
@@ -162,7 +166,7 @@ func (s Stock) ItemTypes() (r []string) {
 	return
 }
 
-func (s Stock) ListInbound() (r []Item) {
+func (s Stock) ListInbound() (r []ProvisionEntry) {
 	return s.inboundLog.List()
 }
 

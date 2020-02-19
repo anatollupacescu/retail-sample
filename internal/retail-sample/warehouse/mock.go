@@ -18,8 +18,9 @@ func (m *MockInventory) qty(s string) int {
 	return m.Called(s).Int(0)
 }
 
-func (m *MockInventory) addType(s string) {
-	m.Called(s)
+func (m *MockInventory) addType(s string) int {
+	args := m.Called(s)
+	return args.Int(0)
 }
 
 func (m *MockInventory) hasType(s string) bool {
@@ -65,11 +66,11 @@ type MockInboundLog struct {
 	mock.Mock
 }
 
-func (m *MockInboundLog) Add(t time.Time, i Item) {
+func (m *MockInboundLog) Add(t time.Time, i ProvisionEntry) {
 	_ = m.Called(t, i)
 }
 
-func (m *MockInboundLog) List() []Item {
+func (m *MockInboundLog) List() []ProvisionEntry {
 	return nil
 }
 

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2f6c6ad4-9f73-4f5d-8e53-cf66f68d715e",
+		"_postman_id": "706b79fb-396b-41aa-b6aa-2ab3251aded2",
 		"name": "retail-sample-tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -92,6 +92,197 @@
 						}
 					},
 					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "disable-create-item-type",
+			"item": [
+				{
+					"name": "create-item-type-banana",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 201\", function() {",
+									"    pm.response.to.have.status(201)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"banana\"]"
+						},
+						"url": {
+							"raw": "localhost:8080/inbound/config",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound",
+								"config"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disable-item-type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 201\", function() {",
+									"    pm.response.to.have.status(202)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\tdisabled: true\n}\n"
+						},
+						"url": {
+							"raw": "localhost:8080/inbound/config/banana/disable",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound",
+								"config",
+								"banana",
+								"disable"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check-item-type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"exec": [
+									"pm.test(\"response should contain the fruits\", function () {",
+									"    pm.response.to.not.be.error;",
+									"    pm.response.to.be.json;",
+									"    ",
+									"    let jsonData = pm.response.json();",
+									"    pm.expect(jsonData.disabled).to.equal(true)",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/inbound/config/banana",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound",
+								"config",
+								"banana"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check-non-existent-item-type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"exec": [
+									"pm.test(\"Should return NOT FOUND\", function() {",
+									"    pm.response.to.have.status(404)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/inbound/config/dragonfruit",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inbound",
+								"config",
+								"dragonfruit"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "fbdb746d-26ac-45fa-a142-835f45f0feb0",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "02a75e41-3e50-46bd-bf2a-dc6de7d338ff",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -214,10 +405,17 @@
 									"        }",
 									"    ]",
 									"",
-									"    pm.expect(body.inbounds).to.be.an('array')",
+									"    pm.expect(body.inbounds.map(dropTime)).to.be.an('array')",
 									"       .that.deep.includes(expected[0])",
 									"        .and.deep.includes(expected[1])",
-									"})"
+									"})",
+									"",
+									"function dropTime(e) {",
+									"    return {",
+									"        name: e.name,",
+									"        qty: e.qty",
+									"    }",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -609,6 +807,39 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "health",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+						"exec": [
+							"pm.test(\"response should be 200\", function () {",
+							"    pm.response.to.be.ok;",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8081/health",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}

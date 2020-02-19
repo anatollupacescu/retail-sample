@@ -2,13 +2,13 @@ package warehouse
 
 import "time"
 
-type InMemoryInboundLog map[time.Time]Item
+type InMemoryInboundLog map[time.Time]ProvisionEntry
 
-func (i InMemoryInboundLog) Add(k time.Time, v Item) {
+func (i InMemoryInboundLog) Add(k time.Time, v ProvisionEntry) {
 	i[k] = v
 }
 
-func (i InMemoryInboundLog) List() (r []Item) {
+func (i InMemoryInboundLog) List() (r []ProvisionEntry) {
 	for _, v := range i {
 		r = append(r, v)
 	}
@@ -16,8 +16,10 @@ func (i InMemoryInboundLog) List() (r []Item) {
 }
 
 type InMemoryInventory struct {
-	config map[string]bool
-	data   map[string]int
+	config  map[string]bool
+	data    map[string]int
+	ids     map[string]int
+	counter *int
 }
 
 func (m InMemoryInventory) setQty(s string, i int) {
@@ -28,9 +30,12 @@ func (m InMemoryInventory) qty(s string) int {
 	return m.data[s]
 }
 
-func (m InMemoryInventory) addType(s string) {
+func (m InMemoryInventory) addType(s string) int {
 	m.data[s] = 0
 	m.config[s] = false
+	*m.counter += 1
+	m.ids[s] = *m.counter
+	return *m.counter
 }
 
 func (m InMemoryInventory) hasType(s string) bool {

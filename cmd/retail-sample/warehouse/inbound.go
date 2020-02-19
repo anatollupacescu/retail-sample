@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
@@ -15,7 +16,7 @@ import (
 const ErrUnique = "ERR_UNIQUE"
 const ErrNoName = "ERR_NO_NAME"
 
-func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -32,7 +33,7 @@ func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, t := range types {
-		if err := a.stock.ConfigureInboundType(t); err != nil {
+		if _, err := a.stock.ConfigureInboundType(t); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {
@@ -54,7 +55,7 @@ func (a *App) ConfigureType(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a *App) GetType(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetInboundConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -83,7 +84,7 @@ func (a *App) GetType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) DisableType(w http.ResponseWriter, r *http.Request) {
+func (a *App) DisableInboundConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -97,7 +98,7 @@ func (a *App) DisableType(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (a *App) ListTypes(w http.ResponseWriter, _ *http.Request) {
+func (a *App) ListInboundConfig(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type itm struct {
@@ -177,11 +178,10 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for key, value := range t {
-		item := warehouse.Item{
-			ItemConfig: warehouse.ItemConfig{
-				Type: key,
-			},
-			Qty: value,
+		item := warehouse.ProvisionEntry{
+			Type: key,
+			Time: time.Now(),
+			Qty:  value,
 		}
 
 		_, err := a.stock.PlaceInbound(item)
@@ -200,8 +200,9 @@ func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
 	e := json.NewEncoder(w)
 
 	type inbound struct {
-		Name string `json:"name"`
-		Qty  int    `json:"qty"`
+		Time time.Time `json:"time"`
+		Name string    `json:"name"`
+		Qty  int       `json:"qty"`
 	}
 
 	var t struct {
@@ -210,6 +211,7 @@ func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
 
 	for _, in := range a.stock.ListInbound() {
 		e := inbound{
+			Time: in.Time,
 			Name: in.Type,
 			Qty:  in.Qty,
 		}

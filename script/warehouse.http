@@ -11,6 +11,26 @@ Accept: application/json
 
 ###
 
+POST http://localhost:8080/inbound/config
+Content-Type: application/json
+
+["gold", "silver"]
+
+###
+
+PATCH http://localhost:8080/inbound/config/gold/disable
+
+###
+
+GET http://localhost:8080/inbound/config/gold
+Accept: application/json
+
+###
+
 GET http://localhost:8080/outbound
+
+###
+
+GET http://localhost:8080/stock
 
 ###

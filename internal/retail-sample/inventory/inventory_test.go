@@ -8,7 +8,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
 
-func TestConfigureInboundType(t *testing.T) {
+func TestInventory(t *testing.T) {
 
 	t.Run("should have no registered names on creation", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
@@ -27,7 +27,7 @@ func TestConfigureInboundType(t *testing.T) {
 
 		mockStore.On("find", inventory.Name("test")).Return(inventory.ID(0))
 
-		id := i.Get("test")
+		id := i.Find("test")
 
 		assert.Equal(t, id, 0)
 		mockStore.AssertExpectations(t)
@@ -111,7 +111,7 @@ func TestConfigureInboundType(t *testing.T) {
 
 		mockStore.On("find", inventory.Name("test")).Return(inventory.ID(1))
 
-		id := i.Get("test")
+		id := i.Find("test")
 		assert.Equal(t, id, 1)
 
 		mockStore.AssertExpectations(t)

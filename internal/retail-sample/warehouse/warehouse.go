@@ -17,8 +17,8 @@ type ( //outbound
 	}
 
 	OutboundItemComponent struct {
-		ItemType string
-		Qty      int
+		Name string
+		Qty  int
 	}
 
 	OutboundItem struct {
@@ -32,7 +32,8 @@ type ( //inventory
 	Inventory interface {
 		Add(string) (int, error)
 		All() []inventory.Record
-		Get(string) int
+		Get(int) string
+		Find(string) int
 	}
 
 	Log interface {
@@ -109,8 +110,10 @@ func (s Stock) GetType(name string) ItemConfig {
 	return ItemConfig{}
 }
 
-func isPresent(i Inventory, n string) bool {
-	return i.Get(n) != 0
+var zeroID = 0
+
+func isPresent(i Inventory, s string) bool {
+	return i.Find(s) != zeroID
 }
 
 func (s Stock) Disable(item string) error {
@@ -129,7 +132,7 @@ func (s Stock) PlaceInbound(item ProvisionEntry) (int, error) {
 		return 0, ErrInboundItemTypeNotFound
 	}
 
-	id := s.inventory.Get(item.Type)
+	id := s.inventory.Find(item.Type)
 
 	newQty := s.data[id] + item.Qty
 
@@ -157,7 +160,7 @@ func (s Stock) Quantity(typeName string) (int, error) {
 		return 0, ErrInventoryItemNotFound
 	}
 
-	id := s.inventory.Get(typeName)
+	id := s.inventory.Find(typeName)
 
 	qty := s.data[id]
 
@@ -194,7 +197,7 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 
 	for _, item := range items {
 
-		if !isPresent(s.inventory, item.ItemType) {
+		if !isPresent(s.inventory, item.Name) {
 			return ErrInboundItemTypeNotFound
 		}
 
@@ -231,7 +234,7 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 	components := s.outboundConfiguration.components(typeName)
 
 	for _, outboundItem := range components {
-		id := s.inventory.Get(outboundItem.ItemType)
+		id := s.inventory.Find(outboundItem.Name)
 		inventoryQty := s.data[id]
 		if outboundItem.Qty*qty > inventoryQty {
 			return ErrNotEnoughStock
@@ -239,7 +242,7 @@ func (s *Stock) PlaceOutbound(typeName string, qty int) error {
 	}
 
 	for _, outboundItem := range components {
-		id := s.inventory.Get(outboundItem.ItemType)
+		id := s.inventory.Find(outboundItem.Name)
 		inventoryQty := s.data[id]
 		inventoryQty -= outboundItem.Qty * qty
 		s.data[id] = inventoryQty

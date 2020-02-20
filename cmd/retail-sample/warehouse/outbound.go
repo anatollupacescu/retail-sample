@@ -96,8 +96,8 @@ func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 	var components []warehouse.OutboundItemComponent
 	for itemType, qty := range t.Items {
 		components = append(components, warehouse.OutboundItemComponent{
-			ItemType: itemType,
-			Qty:      qty,
+			Name: itemType,
+			Qty:  qty,
 		})
 	}
 

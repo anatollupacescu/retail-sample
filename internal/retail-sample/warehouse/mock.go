@@ -22,7 +22,12 @@ func (m *MockInventory) All() []inventory.Record {
 	return args.Get(0).([]inventory.Record)
 }
 
-func (m *MockInventory) Get(s string) int {
+func (m *MockInventory) Get(s int) string {
+	args := m.Called(s)
+	return args.String(0)
+}
+
+func (m *MockInventory) Find(s string) int {
 	args := m.Called(s)
 	return args.Int(0)
 }

@@ -54,6 +54,10 @@ func (i Inventory) All() (r []Record) {
 	return i.store.all()
 }
 
-func (i Inventory) Get(s string) int {
+func (i Inventory) Find(s string) int {
 	return int(i.store.find(Name(s)))
+}
+
+func (i Inventory) Get(id int) string {
+	return ""
 }

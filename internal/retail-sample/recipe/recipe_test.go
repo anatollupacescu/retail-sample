@@ -1,0 +1,85 @@
+package recipe_test
+
+import (
+	"errors"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
+)
+
+func TestAddRecipe(t *testing.T) {
+
+	t.Run("should reject empty name", func(t *testing.T) {
+		b := recipe.Book{}
+		err := b.Add("", nil)
+		assert.Equal(t, recipe.ErrEmptyName, err)
+	})
+
+	t.Run("should reject empty list of ingredients", func(t *testing.T) {
+		b := recipe.Book{}
+		err := b.Add("test", nil)
+		assert.Equal(t, recipe.ErrNoIngredients, err)
+	})
+
+	t.Run("should reject missing quantity", func(t *testing.T) {
+		b := recipe.Book{}
+		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 0}})
+		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
+	})
+
+	t.Run("should return error if incredients are no present in inventory", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+
+		i := &recipe.MockInventory{}
+		b := recipe.Book{Store: s, Inventory: i}
+
+		i.On("Get", 1).Return("")
+
+		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+
+		assert.Equal(t, recipe.ErrIgredientNotFound, err)
+
+		s.AssertExpectations(t)
+		i.AssertExpectations(t)
+	})
+
+	t.Run("should propagate downstream failure", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+		i := &recipe.MockInventory{}
+		b := recipe.Book{Store: s, Inventory: i}
+
+		i.On("Get", 1).Return("milk")
+
+		var expectedErr = errors.New("could not save")
+		s.On("add", mock.Anything).Return(recipe.ID(0), expectedErr)
+
+		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+
+		assert.Equal(t, expectedErr, err)
+
+		s.AssertExpectations(t)
+		i.AssertExpectations(t)
+	})
+
+	t.Run("should succeed with correct name and components", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+		i := &recipe.MockInventory{}
+		b := recipe.Book{Store: s, Inventory: i}
+
+		i.On("Get", 1).Return("milk")
+		s.On("add", mock.Anything).Return(recipe.ID(1), nil)
+
+		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		assert.NoError(t, err)
+
+		s.AssertExpectations(t)
+		i.AssertExpectations(t)
+	})
+}
+
+func TestGetRecipe(t *testing.T) {
+	t.Skip()
+}

@@ -10,7 +10,7 @@ import (
 
 func TestConfigureInboundType(t *testing.T) {
 
-	t.Run("should have no types on creation", func(t *testing.T) {
+	t.Run("should have no registered names on creation", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
 
 		var emptyResp []inventory.Record
@@ -33,7 +33,7 @@ func TestConfigureInboundType(t *testing.T) {
 		mockStore.AssertExpectations(t)
 	})
 
-	t.Run("should reject empty inbound type name", func(t *testing.T) {
+	t.Run("should reject empty name", func(t *testing.T) {
 		var mockStore inventory.Store
 		i := inventory.NewInventory(mockStore)
 		_, err := i.Add("")
@@ -41,7 +41,7 @@ func TestConfigureInboundType(t *testing.T) {
 		assert.Equal(t, inventory.ErrEmptyName, err)
 	})
 
-	t.Run("should reject duplicate inbound type name", func(t *testing.T) {
+	t.Run("should reject duplicate name", func(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
@@ -56,7 +56,7 @@ func TestConfigureInboundType(t *testing.T) {
 		mockStore.AssertExpectations(t)
 	})
 
-	t.Run("should persist when given a valid inbound type name", func(t *testing.T) {
+	t.Run("should persist when given a valid name", func(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}

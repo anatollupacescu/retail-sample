@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 
 	"github.com/stretchr/testify/assert"
@@ -12,69 +13,61 @@ import (
 
 func TestPlaceOutbound(t *testing.T) {
 
-	t.Run("should reject outbound order with non existent type", func(t *testing.T) {
-		chips := "chips"
-		config := warehouse.MockOutboundConfig{}
-		config.On("hasConfig", chips).Return(false)
+	t.Run("should reject order with non existent id", func(t *testing.T) {
+		b := warehouse.MockRecipeBoook{}
 
-		stock := warehouse.NewStock(nil, nil, &config, nil)
+		var zeroRecipe recipe.Recipe
+		b.On("Get", 1).Return(zeroRecipe)
 
-		err := stock.PlaceOutbound(chips, 0)
+		stock := warehouse.NewStock(nil, nil, &b, nil)
 
-		assert.Equal(t, warehouse.ErrOutboundTypeNotFound, err)
-		config.AssertExpectations(t)
+		err := stock.PlaceOutbound(1, 10)
+
+		assert.Equal(t, warehouse.ErrRecipeNotFound, err)
+		b.AssertExpectations(t)
 	})
 
 	t.Run("should reject outbound when not enough stock", func(t *testing.T) {
-		chips := "chips"
-		potato := "potato"
+		b := warehouse.MockRecipeBoook{}
 
-		config := warehouse.MockOutboundConfig{}
-		config.On("hasConfig", chips).Return(true)
-		config.On("components", chips).Return([]warehouse.OutboundItemComponent{{
-			Name: potato,
-			Qty:  2,
-		}})
+		b.On("Get", 1).Return(recipe.Recipe{
+			Name:        "test",
+			Ingredients: []recipe.Ingredient{{ID: 51, Qty: 2}},
+		})
 
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", potato).Return(3)
+		data := map[int]int{
+			51: 9,
+		}
+		stock := warehouse.NewStockWithData(nil, nil, &b, nil, data)
 
-		stock := warehouse.NewStock(nil, &mockInv, &config, nil)
-
-		err := stock.PlaceOutbound(chips, 2)
+		err := stock.PlaceOutbound(1, 5)
 
 		assert.Equal(t, warehouse.ErrNotEnoughStock, err)
-		mockInv.AssertExpectations(t)
+		b.AssertExpectations(t)
 	})
 
 	t.Run("should update inventory on success", func(t *testing.T) {
-		chips := "chips"
-		potato := "potato"
+		b := warehouse.MockRecipeBoook{}
 
-		config := warehouse.MockOutboundConfig{}
-		config.On("hasConfig", chips).Return(true)
-		config.On("components", chips).Return([]warehouse.OutboundItemComponent{{
-			Name: potato,
-			Qty:  2,
-		}})
+		b.On("Get", 1).Return(recipe.Recipe{
+			Name:        "test",
+			Ingredients: []recipe.Ingredient{{ID: 51, Qty: 2}},
+		})
 
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", potato).Return(5).Times(2)
-
-		outboundLog := warehouse.MockOutboundLog{}
-		outboundLog.On("Add", mock.Anything).Times(1)
+		ol := warehouse.MockOutboundLog{}
+		ol.On("Add", mock.Anything).Times(1)
 
 		data := map[int]int{
-			5: 5,
+			51: 11,
 		}
-		stock := warehouse.NewStockWithData(nil, &mockInv, &config, &outboundLog, data)
+		stock := warehouse.NewStockWithData(nil, nil, &b, &ol, data)
 
-		err := stock.PlaceOutbound(chips, 2)
+		err := stock.PlaceOutbound(1, 5)
 
 		assert.NoError(t, err)
-		config.AssertExpectations(t)
-		mockInv.AssertExpectations(t)
-		outboundLog.AssertExpectations(t)
+
+		assert.Equal(t, 1, data[51])
+		b.AssertExpectations(t)
 	})
 }
 
@@ -87,100 +80,77 @@ func TestConfigureOutbound(t *testing.T) {
 	})
 
 	t.Run("should reject empty list of outbound items", func(t *testing.T) {
-		stock := warehouse.Stock{}
-		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{})
+		stock := warehouse.NewStock(nil, nil, nil, nil)
+		var noIngredients []recipe.Ingredient
+		err := stock.ConfigureOutbound("test", noIngredients)
 		assert.Equal(t, warehouse.ErrOutboundItemsNotProvided, err)
 	})
 
 	t.Run("should reject when request has unknown item types", func(t *testing.T) {
-		milk := "milk"
 		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", milk).Return(0)
+		mockInv.On("Get", 1).Return("")
 
 		stock := warehouse.NewStock(nil, &mockInv, nil, nil)
 
-		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
-			Name: milk,
-			Qty:  1,
-		}})
-
-		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
+		err := stock.ConfigureOutbound("test", []recipe.Ingredient{{ID: 1}})
+		assert.Equal(t, warehouse.ErrInventoryNameNotFound, err)
 		mockInv.AssertExpectations(t)
 	})
 
 	t.Run("should reject when request has zero quantity", func(t *testing.T) {
-		milk := "milk"
 		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", milk).Return(1)
+		mockInv.On("Get", 1).Return("oange")
 
 		stock := warehouse.NewStock(nil, &mockInv, nil, nil)
 
-		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
-			Name: "milk",
-			Qty:  0,
-		}})
-
+		err := stock.ConfigureOutbound("OJ", []recipe.Ingredient{{ID: 1}})
 		assert.Equal(t, warehouse.ErrOutboundZeroQuantityNotAllowed, err)
 		mockInv.AssertExpectations(t)
 	})
 
 	t.Run("should accept when configured correctly", func(t *testing.T) {
-		milk := "milk"
 		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", milk).Return(1)
-
-		outboundConfig := warehouse.MockOutboundConfig{}
-		outboundConfig.On("add", mock.AnythingOfType("warehouse.OutboundItem")).Times(1)
-
-		stock := warehouse.NewStock(nil, &mockInv, &outboundConfig, nil)
-
-		err := stock.ConfigureOutbound("mocha", []warehouse.OutboundItemComponent{{
-			Name: "milk",
-			Qty:  5,
-		}})
-		assert.Nil(t, err)
-
+		_ = warehouse.NewStock(nil, &mockInv, nil, nil)
 		mockInv.AssertExpectations(t)
-		outboundConfig.AssertExpectations(t)
 	})
 }
 
 func TestPlaceInbound(t *testing.T) {
 
 	t.Run("should reject stock item with non existent type", func(t *testing.T) {
-		milk := "milk"
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", milk).Return(0)
+		i := warehouse.MockInventory{}
+		i.On("Get", 1).Return("")
 
-		stock := warehouse.NewStock(nil, &mockInv, nil, nil)
+		data := map[int]int{1: 0}
+		stock := warehouse.NewStockWithData(nil, &i, nil, nil, data)
 
 		item := warehouse.ProvisionEntry{
-			Type: milk,
-			Qty:  31,
+			ID:  1,
+			Qty: 31,
 		}
 
 		_, err := stock.PlaceInbound(item)
 
-		assert.Equal(t, warehouse.ErrInboundItemTypeNotFound, err)
-		mockInv.AssertExpectations(t)
+		assert.Equal(t, warehouse.ErrInventoryNameNotFound, err)
+		i.AssertExpectations(t)
 	})
 
 	t.Run("should place inbound when item type exists", func(t *testing.T) {
 		milk := "milk"
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Find", milk).Return(1)
+		i := warehouse.MockInventory{}
+		i.On("Get", 51).Return(milk)
 
 		inboundLog := warehouse.MockInboundLog{}
 		inboundLog.On("Add", mock.Anything, mock.Anything).Times(1)
 
 		data := map[int]int{
-			1: 9,
+			51: 9,
 		}
-		stock := warehouse.NewStockWithData(&inboundLog, &mockInv, nil, nil, data)
+		stock := warehouse.NewStockWithData(&inboundLog, &i, nil, nil, data)
 
 		item := warehouse.ProvisionEntry{
-			Type: milk,
-			Qty:  31,
+			ID:  51,
+			Qty: 31,
 		}
 
 		qty, err := stock.PlaceInbound(item)
@@ -189,6 +159,6 @@ func TestPlaceInbound(t *testing.T) {
 		assert.Equal(t, 40, qty)
 
 		inboundLog.AssertExpectations(t)
-		mockInv.AssertExpectations(t)
+		i.AssertExpectations(t)
 	})
 }

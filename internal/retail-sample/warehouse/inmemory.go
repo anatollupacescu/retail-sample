@@ -1,6 +1,23 @@
 package warehouse
 
-import "time"
+import (
+	"time"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
+)
+
+func NewInMemoryStock() Stock {
+	inMemoryStore := inventory.NewInMemoryStore()
+	inMemoryRecipeStore := recipe.NewInMemoryStore()
+
+	return Stock{
+		inboundLog:  make(InMemoryInboundLog),
+		outboundLog: make(InMemoryOutboundLog),
+		recipeBook:  recipe.Book{Store: &inMemoryRecipeStore},
+		inventory:   inventory.NewInventory(inMemoryStore),
+	}
+}
 
 type InMemoryInboundLog map[time.Time]ProvisionEntry
 
@@ -13,32 +30,6 @@ func (i InMemoryInboundLog) List() (r []ProvisionEntry) {
 		r = append(r, v)
 	}
 	return
-}
-
-type InMemoryOutboundConfiguration map[string]OutboundItem
-
-func (m InMemoryOutboundConfiguration) add(o OutboundItem) {
-	m[o.Name] = o
-}
-
-func (m InMemoryOutboundConfiguration) list() (o []OutboundItem) {
-	for _, v := range m {
-		o = append(o, v)
-	}
-	return
-}
-
-func (m InMemoryOutboundConfiguration) hasConfig(s string) bool {
-	_, f := m[s]
-	return f
-}
-
-func (m InMemoryOutboundConfiguration) components(s string) []OutboundItemComponent {
-	if !m.hasConfig(s) {
-		return nil
-	}
-
-	return m[s].Items
 }
 
 type InMemoryOutboundLog map[time.Time]SoldItem

@@ -6,7 +6,24 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
+
+//recipe book
+
+type MockRecipeBoook struct {
+	mock.Mock
+}
+
+func (b *MockRecipeBoook) Add(name string, is []recipe.Ingredient) error {
+	return b.Called(name, is).Error(0)
+}
+
+func (b *MockRecipeBoook) Get(id int) recipe.Recipe {
+	return b.Called(id).Get(0).(recipe.Recipe)
+}
+
+// inventory
 
 type MockInventory struct {
 	mock.Mock
@@ -30,30 +47,6 @@ func (m *MockInventory) Get(s int) string {
 func (m *MockInventory) Find(s string) int {
 	args := m.Called(s)
 	return args.Int(0)
-}
-
-//outbound
-
-type MockOutboundConfig struct {
-	mock.Mock
-}
-
-func (m *MockOutboundConfig) add(i OutboundItem) {
-	_ = m.Called(i)
-}
-
-func (m *MockOutboundConfig) list() []OutboundItem {
-	return nil
-}
-
-func (m *MockOutboundConfig) hasConfig(s string) bool {
-	return m.Called(s).Bool(0)
-}
-
-func (m *MockOutboundConfig) components(s string) []OutboundItemComponent {
-	args := m.Called(s)
-	res := args.Get(0)
-	return res.([]OutboundItemComponent)
 }
 
 //inbound log

@@ -70,7 +70,10 @@ func TestAddRecipe(t *testing.T) {
 		b := recipe.Book{Store: s, Inventory: i}
 
 		i.On("Get", 1).Return("milk")
-		s.On("add", mock.Anything).Return(recipe.ID(1), nil)
+		s.On("add", recipe.Recipe{
+			Name:        "test",
+			Ingredients: []recipe.Ingredient{{ID: 1, Qty: 2}},
+		}).Return(recipe.ID(1), nil)
 
 		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 		assert.NoError(t, err)
@@ -81,5 +84,36 @@ func TestAddRecipe(t *testing.T) {
 }
 
 func TestGetRecipe(t *testing.T) {
-	t.Skip()
+
+	t.Run("should return zero value for non existent", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+		b := recipe.Book{Store: s}
+
+		var zeroValueRecipe = recipe.Recipe{}
+		s.On("get", recipe.ID(1)).Return(zeroValueRecipe)
+
+		r := b.Get(1)
+		assert.Equal(t, r, zeroValueRecipe)
+
+		s.AssertExpectations(t)
+	})
+
+	t.Run("should fetch stored recipe for valid id", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+		b := recipe.Book{Store: s}
+
+		var foundRecipe = recipe.Recipe{
+			Name: "test",
+			Ingredients: []recipe.Ingredient{{
+				ID:  1,
+				Qty: 2,
+			}},
+		}
+		s.On("get", recipe.ID(1)).Return(foundRecipe)
+
+		r := b.Get(1)
+		assert.Equal(t, r, foundRecipe)
+
+		s.AssertExpectations(t)
+	})
 }

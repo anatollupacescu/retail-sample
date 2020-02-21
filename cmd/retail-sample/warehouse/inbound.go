@@ -90,13 +90,14 @@ func (a *App) GetInboundConfig(w http.ResponseWriter, r *http.Request) {
 func (a *App) DisableInboundConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	/* disable on hold
 	vars := mux.Vars(r)
 	name := vars["name"]
-
 	if err := a.stock.Disable(name); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	*/
 
 	w.WriteHeader(http.StatusAccepted)
 }
@@ -168,7 +169,7 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	var t map[string]int
+	var t map[int]int
 
 	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -182,7 +183,7 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 
 	for key, value := range t {
 		item := warehouse.ProvisionEntry{
-			Type: key,
+			ID:   key,
 			Time: time.Now(),
 			Qty:  value,
 		}
@@ -215,8 +216,8 @@ func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
 	for _, in := range a.stock.ListInbound() {
 		e := inbound{
 			Time: in.Time,
-			Name: in.Type,
-			Qty:  in.Qty,
+			// Name: in.Type,
+			Qty: in.Qty,
 		}
 		t.Inbound = append(t.Inbound, e)
 	}

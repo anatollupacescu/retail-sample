@@ -5,38 +5,23 @@ import (
 	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
 
-type ( //outbound
+type Inventory interface {
+	Add(string) (int, error)
+	All() []inventory.Record
+	Get(int) string
+	Find(string) int
+}
 
-	OutboundConfiguration interface {
-		add(OutboundItem)
-		list() []OutboundItem
-		hasConfig(string) bool
-		components(string) []OutboundItemComponent
-	}
+type RecipeBook interface {
+	Add(string, []recipe.Ingredient) error
+	Get(int) recipe.Recipe
+}
 
-	OutboundItemComponent struct {
-		Name string
-		Qty  int
-	}
-
-	OutboundItem struct {
-		Name  string
-		Items []OutboundItemComponent
-	}
-)
-
-type ( //inventory
-
-	Inventory interface {
-		Add(string) (int, error)
-		All() []inventory.Record
-		Get(int) string
-		Find(string) int
-	}
-
-	Log interface {
+type ( //log
+	InboundLog interface {
 		Add(time.Time, ProvisionEntry)
 		List() []ProvisionEntry
 	}
@@ -53,86 +38,56 @@ type ( //inventory
 
 	ProvisionEntry struct {
 		Time time.Time
-		Type string
+		ID   int
 		Qty  int
 	}
 )
 
 type Stock struct {
-	inventory             Inventory
-	inboundLog            Log
-	soldItems             OutboundLog
-	outboundConfiguration OutboundConfiguration
-	data                  map[int]int
+	inventory   Inventory
+	inboundLog  InboundLog
+	outboundLog OutboundLog
+	recipeBook  RecipeBook
+	data        map[int]int
 }
 
-func NewStock(log Log, inv Inventory, config OutboundConfiguration, outboundItemLog OutboundLog) Stock {
+func NewStock(log InboundLog, inv Inventory, config RecipeBook, outboundItemLog OutboundLog) Stock {
 	return Stock{
-		inboundLog:            log,
-		soldItems:             outboundItemLog,
-		inventory:             inv,
-		outboundConfiguration: config,
+		inboundLog:  log,
+		outboundLog: outboundItemLog,
+		inventory:   inv,
+		recipeBook:  config,
 	}
 }
 
-func NewStockWithData(log Log, inv Inventory, config OutboundConfiguration, outboundItemLog OutboundLog, d map[int]int) Stock {
+func NewStockWithData(log InboundLog, inv Inventory, config RecipeBook, outboundItemLog OutboundLog, d map[int]int) Stock {
 	return Stock{
-		inboundLog:            log,
-		soldItems:             outboundItemLog,
-		inventory:             inv,
-		outboundConfiguration: config,
-		data:                  d,
+		inboundLog:  log,
+		outboundLog: outboundItemLog,
+		inventory:   inv,
+		recipeBook:  config,
+		data:        d,
 	}
 }
 
-func NewInMemoryStock() Stock {
-	inMemoryStore := inventory.NewInMemoryStore()
-	return Stock{
-		inboundLog:            make(InMemoryInboundLog),
-		soldItems:             make(InMemoryOutboundLog),
-		outboundConfiguration: make(InMemoryOutboundConfiguration),
-		inventory:             inventory.NewInventory(inMemoryStore),
-	}
-}
+var ErrInventoryNameNotFound = errors.New("name not found")
 
-var ErrInboundItemTypeNotFound = errors.New("type not found")
-
-func (s Stock) GetType(name string) ItemConfig {
-	for _, i := range s.inventory.All() {
-		if string(i.Name) == name {
-			return ItemConfig{
-				Type:     name,
-				Disabled: false,
-			}
-		}
-	}
-
+func (s Stock) GetType(_ string) ItemConfig {
 	return ItemConfig{}
 }
 
-var zeroID = 0
+var zeroValueName = ""
 
-func isPresent(i Inventory, s string) bool {
-	return i.Find(s) != zeroID
-}
-
-func (s Stock) Disable(item string) error {
-
-	if !isPresent(s.inventory, item) {
-		return ErrInboundItemTypeNotFound
-	}
-
-	// s.inventory.disable(item)
-
-	return nil
+func isPresent(i Inventory, id int) bool {
+	return i.Get(id) != zeroValueName
 }
 
 func (s Stock) PlaceInbound(item ProvisionEntry) (int, error) {
-	if !isPresent(s.inventory, item.Type) {
-		return 0, ErrInboundItemTypeNotFound
+	if !isPresent(s.inventory, item.ID) {
+		return 0, ErrInventoryNameNotFound
 	}
 
-	id := s.inventory.Find(item.Type)
+	id := item.ID
 
 	newQty := s.data[id] + item.Qty
 
@@ -155,12 +110,14 @@ func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
 
 var ErrInventoryItemNotFound = errors.New("inventory item not found")
 
+var zeroValueID = 0
+
 func (s Stock) Quantity(typeName string) (int, error) {
-	if !isPresent(s.inventory, typeName) {
+	id := s.inventory.Find(typeName)
+
+	if id == zeroValueID {
 		return 0, ErrInventoryItemNotFound
 	}
-
-	id := s.inventory.Find(typeName)
 
 	qty := s.data[id]
 
@@ -185,8 +142,7 @@ var (
 	ErrOutboundZeroQuantityNotAllowed = errors.New("zero quantity not allowed")
 )
 
-func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) error {
-
+func (s *Stock) ConfigureOutbound(name string, items []recipe.Ingredient) error {
 	if len(name) == 0 {
 		return ErrOutboundNameNotProvided
 	}
@@ -197,8 +153,8 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 
 	for _, item := range items {
 
-		if !isPresent(s.inventory, item.Name) {
-			return ErrInboundItemTypeNotFound
+		if !isPresent(s.inventory, item.ID) {
+			return ErrInventoryNameNotFound
 		}
 
 		if item.Qty == 0 {
@@ -206,51 +162,45 @@ func (s *Stock) ConfigureOutbound(name string, items []OutboundItemComponent) er
 		}
 	}
 
-	outboundItem := OutboundItem{
-		Name:  name,
-		Items: items,
-	}
-
-	s.outboundConfiguration.add(outboundItem)
-
-	return nil
+	return s.recipeBook.Add(name, nil)
 }
 
-func (s *Stock) OutboundConfigurations() []OutboundItem {
-	return s.outboundConfiguration.list()
-}
+// func (s *Stock) OutboundConfigurations() []OutboundItem {
+// return s.outboundConfiguration.list()
+// }
 
 var (
-	ErrOutboundTypeNotFound = errors.New("outbound type not found")
-	ErrNotEnoughStock       = errors.New("not enough stock")
+	ErrRecipeNotFound = errors.New("outbound type not found")
+	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-func (s *Stock) PlaceOutbound(typeName string, qty int) error {
+var zeroValueRecipe = recipe.Recipe{}
 
-	if !s.outboundConfiguration.hasConfig(typeName) {
-		return ErrOutboundTypeNotFound
+func (s *Stock) PlaceOutbound(id int, qty int) error {
+	r := s.recipeBook.Get(id)
+
+	ingredients := r.Ingredients
+
+	if r.Ingredients == nil {
+		return ErrRecipeNotFound
 	}
 
-	components := s.outboundConfiguration.components(typeName)
-
-	for _, outboundItem := range components {
-		id := s.inventory.Find(outboundItem.Name)
-		inventoryQty := s.data[id]
-		if outboundItem.Qty*qty > inventoryQty {
+	for _, i := range ingredients {
+		presentQty := s.data[i.ID]
+		requestedQty := i.Qty * qty
+		if requestedQty > presentQty {
 			return ErrNotEnoughStock
 		}
 	}
 
-	for _, outboundItem := range components {
-		id := s.inventory.Find(outboundItem.Name)
-		inventoryQty := s.data[id]
-		inventoryQty -= outboundItem.Qty * qty
-		s.data[id] = inventoryQty
+	for _, i := range ingredients {
+		presentQty := s.data[i.ID]
+		requestedQty := i.Qty * qty
+		s.data[i.ID] = presentQty - requestedQty
 	}
 
-	s.soldItems.Add(SoldItem{
+	s.outboundLog.Add(SoldItem{
 		Date: time.Now(),
-		Name: typeName,
 		Qty:  qty,
 	})
 
@@ -264,5 +214,5 @@ type SoldItem struct {
 }
 
 func (s *Stock) ListOutbound() ([]SoldItem, error) {
-	return s.soldItems.List(), nil
+	return s.outboundLog.List(), nil
 }

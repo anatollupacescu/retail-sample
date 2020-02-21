@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
@@ -13,8 +14,8 @@ func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
 	d.DisallowUnknownFields() // catch unwanted fields
 
 	t := struct {
-		Name *string `json:"name"` // pointer so we can test for field absence
-		Qty  *int    `json:"qty"`
+		ID  *int `json:"name"` // pointer so we can test for field absence
+		Qty *int `json:"qty"`
 	}{}
 
 	if err := d.Decode(&t); err != nil {
@@ -22,12 +23,12 @@ func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if t.Name == nil || t.Qty == nil {
+	if t.ID == nil || t.Qty == nil {
 		http.Error(w, "please provide valid name and quantity", http.StatusBadRequest)
 		return
 	}
 
-	if err := a.stock.PlaceOutbound(*t.Name, *t.Qty); err != nil {
+	if err := a.stock.PlaceOutbound(*t.ID, *t.Qty); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -76,8 +77,8 @@ func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 	var t struct {
-		Name  *string        `json:"name"` // pointer so we can test for field absence
-		Items map[string]int `json:"items"`
+		Name  *string     `json:"name"` // pointer so we can test for field absence
+		Items map[int]int `json:"items"`
 	}
 
 	d := json.NewDecoder(r.Body)
@@ -93,15 +94,15 @@ func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var components []warehouse.OutboundItemComponent
-	for itemType, qty := range t.Items {
-		components = append(components, warehouse.OutboundItemComponent{
-			Name: itemType,
-			Qty:  qty,
+	var ingredients []recipe.Ingredient
+	for id, qty := range t.Items {
+		ingredients = append(ingredients, recipe.Ingredient{
+			ID:  id,
+			Qty: qty,
 		})
 	}
 
-	if err := a.stock.ConfigureOutbound(*t.Name, components); err != nil {
+	if err := a.stock.ConfigureOutbound(*t.Name, ingredients); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -121,10 +122,10 @@ func (a *App) ListOutboundConfig(w http.ResponseWriter, _ *http.Request) {
 		Data []itm `json:"data"`
 	}
 
-	for _, v := range a.stock.OutboundConfigurations() {
+	for _ = range /*on hold*/ []int{} {
 		result.Data = append(result.Data, itm{
-			Name:  v.Name,
-			Count: len(v.Items),
+			// Name:  v.Name,
+			// Count: len(v.Items),
 		})
 	}
 

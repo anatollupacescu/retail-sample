@@ -12,19 +12,20 @@ type (
 		Get(int) string
 	}
 
-	Book struct {
-		Store     Store
-		Inventory Inventory
-	}
-
 	Recipe struct {
-		Name string
+		Name        string
+		Ingredients []Ingredient
 	}
 
 	Store interface {
 		add(Recipe) (ID, error)
 		all() []Recipe
 		get(ID) Recipe
+	}
+
+	Book struct {
+		Store     Store
+		Inventory Inventory
 	}
 
 	Ingredient struct {
@@ -64,8 +65,13 @@ func (b Book) Add(name string, ingredients []Ingredient) error {
 	}
 
 	_, err := b.Store.add(Recipe{
-		Name: name,
+		Name:        name,
+		Ingredients: ingredients,
 	})
 
 	return err
+}
+
+func (b Book) Get(id int) Recipe {
+	return b.Store.get(ID(id))
 }

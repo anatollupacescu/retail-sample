@@ -122,13 +122,6 @@ func (a *App) ListOutboundConfig(w http.ResponseWriter, _ *http.Request) {
 		Data []itm `json:"data"`
 	}
 
-	for _ = range /*on hold*/ []int{} {
-		result.Data = append(result.Data, itm{
-			// Name:  v.Name,
-			// Count: len(v.Items),
-		})
-	}
-
 	e := json.NewEncoder(w)
 
 	if err := e.Encode(result); err != nil {

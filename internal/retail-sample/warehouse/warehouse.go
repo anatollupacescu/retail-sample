@@ -174,8 +174,6 @@ var (
 	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-var zeroValueRecipe = recipe.Recipe{}
-
 func (s *Stock) PlaceOutbound(id int, qty int) error {
 	r := s.recipeBook.Get(id)
 

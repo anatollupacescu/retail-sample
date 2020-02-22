@@ -1,8 +1,7 @@
 package inventory
 
 type Entry struct {
-	Name     Name
-	Disabled bool
+	Name Name
 }
 
 type InMemoryStore struct {
@@ -40,9 +39,24 @@ func (m InMemoryStore) find(s Name) ID {
 	return ID(0)
 }
 
-func (m InMemoryStore) all() (t []Record) {
+var zeroValueItem = Item{}
+
+func (m InMemoryStore) get(wantedID ID) Item {
+	for id, v := range m.data {
+		if wantedID == id {
+			return Item{
+				ID:   id,
+				Name: v.Name,
+			}
+		}
+	}
+
+	return zeroValueItem
+}
+
+func (m InMemoryStore) all() (t []Item) {
 	for k, v := range m.data {
-		t = append(t, Record{
+		t = append(t, Item{
 			ID:   k,
 			Name: v.Name,
 		})

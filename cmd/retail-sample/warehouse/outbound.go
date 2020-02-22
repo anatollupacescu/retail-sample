@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
-func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -28,7 +27,7 @@ func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.stock.PlaceOutbound(*t.ID, *t.Qty); err != nil {
+	if err := a.stock.PlaceOrder(*t.ID, *t.Qty); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -36,18 +35,8 @@ func (a *App) CreateOutbound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetOrderLog(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-
-	var (
-		outbounds []warehouse.SoldItem
-		err       error
-	)
-
-	if outbounds, err = a.stock.ListOutbound(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
 	type itm struct {
 		Date time.Time `json:"date"`
@@ -59,7 +48,7 @@ func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
 		Data []itm `json:"data"`
 	}
 
-	for _, o := range outbounds {
+	for _, o := range a.stock.OrderLog() {
 		result.Data = append(result.Data, itm{
 			Date: o.Date,
 			Name: o.Name,
@@ -75,7 +64,7 @@ func (a *App) ListOutbound(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	var t struct {
 		Name  *string     `json:"name"` // pointer so we can test for field absence
 		Items map[int]int `json:"items"`
@@ -102,7 +91,7 @@ func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	if err := a.stock.ConfigureOutbound(*t.Name, ingredients); err != nil {
+	if err := a.stock.AddRecipe(*t.Name, ingredients); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -110,7 +99,7 @@ func (a *App) CreateOutboundConfig(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a *App) ListOutboundConfig(w http.ResponseWriter, _ *http.Request) {
+func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type itm struct {

@@ -10,8 +10,8 @@ import (
 
 type Inventory interface {
 	Add(string) (int, error)
-	All() []inventory.Record
-	Get(int) string
+	All() []inventory.Item
+	Get(int) inventory.Item
 	Find(string) int
 }
 
@@ -22,24 +22,13 @@ type RecipeBook interface {
 
 type ( //log
 	InboundLog interface {
-		Add(time.Time, ProvisionEntry)
+		Add(ProvisionEntry)
 		List() []ProvisionEntry
 	}
 
 	OutboundLog interface {
-		Add(SoldItem)
-		List() []SoldItem
-	}
-
-	ItemConfig struct {
-		Type     string
-		Disabled bool
-	}
-
-	ProvisionEntry struct {
-		Time time.Time
-		ID   int
-		Qty  int
+		Add(OrderLogEntry)
+		List() []OrderLogEntry
 	}
 )
 
@@ -70,35 +59,54 @@ func NewStockWithData(log InboundLog, inv Inventory, config RecipeBook, outbound
 	}
 }
 
-var ErrInventoryNameNotFound = errors.New("name not found")
-
-func (s Stock) GetType(_ string) ItemConfig {
-	return ItemConfig{}
-}
-
-var zeroValueName = ""
-
 func isPresent(i Inventory, id int) bool {
-	return i.Get(id) != zeroValueName
+	return i.Get(id) != inventory.Item{}
 }
 
-func (s Stock) PlaceInbound(item ProvisionEntry) (int, error) {
-	if !isPresent(s.inventory, item.ID) {
-		return 0, ErrInventoryNameNotFound
+type Position struct {
+	Name string
+	Qty  int
+}
+
+func (s Stock) CurrentState() (ps []Position) {
+	for _, item := range s.inventory.All() {
+		itemID := int(item.ID)
+		qty := s.Quantity(itemID)
+		ps = append(ps, Position{
+			Name: string(item.Name),
+			Qty:  qty,
+		})
 	}
 
-	id := item.ID
+	return
+}
 
-	newQty := s.data[id] + item.Qty
+var ErrInventoryItemNotFound = errors.New("inventory item not found")
+
+type ProvisionEntry struct {
+	Time time.Time
+	ID   int
+	Qty  int
+}
+
+func (s Stock) Provision(id, qty int) (int, error) {
+	if !isPresent(s.inventory, id) {
+		return 0, ErrInventoryItemNotFound
+	}
+
+	newQty := s.data[id] + qty
 
 	s.data[id] = newQty
 
-	s.inboundLog.Add(time.Now(), item)
+	s.inboundLog.Add(ProvisionEntry{
+		ID:  id,
+		Qty: qty,
+	})
 
 	return newQty, nil
 }
 
-func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
+func (s *Stock) AddInventoryName(typeName string) (int, error) {
 	id, err := s.inventory.Add(typeName)
 
 	if err != nil {
@@ -108,73 +116,57 @@ func (s *Stock) ConfigureInboundType(typeName string) (int, error) {
 	return id, nil
 }
 
-var ErrInventoryItemNotFound = errors.New("inventory item not found")
-
-var zeroValueID = 0
-
-func (s Stock) Quantity(typeName string) (int, error) {
-	id := s.inventory.Find(typeName)
-
-	if id == zeroValueID {
-		return 0, ErrInventoryItemNotFound
-	}
-
-	qty := s.data[id]
-
-	return qty, nil
+func (s Stock) Quantity(id int) int {
+	return s.data[id]
 }
 
-func (s Stock) ItemTypes() (r []string) {
-	types := s.inventory.All()
-	for _, t := range types {
-		r = append(r, string(t.Name))
-	}
+func (s Stock) InventoryItems() (r []inventory.Item) {
+	r = append(r, s.inventory.All()...)
+
 	return
 }
 
-func (s Stock) ListInbound() (r []ProvisionEntry) {
-	return s.inboundLog.List()
+func (s Stock) ProvisionLog() (r []ProvisionEntry) {
+	r = append(r, s.inboundLog.List()...)
+
+	return
 }
 
 var (
-	ErrOutboundNameNotProvided        = errors.New("name not provided")
-	ErrOutboundItemsNotProvided       = errors.New("items not provided")
-	ErrOutboundZeroQuantityNotAllowed = errors.New("zero quantity not allowed")
+	ErrOutboundNameNotProvided = errors.New("name not provided")
+	ErrIngredientsNotProvided  = errors.New("items not provided")
+	ErrZeroQuantityNotAllowed  = errors.New("zero quantity not allowed")
 )
 
-func (s *Stock) ConfigureOutbound(name string, items []recipe.Ingredient) error {
+func (s *Stock) AddRecipe(name string, items []recipe.Ingredient) error {
 	if len(name) == 0 {
 		return ErrOutboundNameNotProvided
 	}
 
 	if len(items) == 0 {
-		return ErrOutboundItemsNotProvided
+		return ErrIngredientsNotProvided
 	}
 
 	for _, item := range items {
 
 		if !isPresent(s.inventory, item.ID) {
-			return ErrInventoryNameNotFound
+			return ErrInventoryItemNotFound
 		}
 
 		if item.Qty == 0 {
-			return ErrOutboundZeroQuantityNotAllowed
+			return ErrZeroQuantityNotAllowed
 		}
 	}
 
 	return s.recipeBook.Add(name, nil)
 }
 
-// func (s *Stock) OutboundConfigurations() []OutboundItem {
-// return s.outboundConfiguration.list()
-// }
-
 var (
 	ErrRecipeNotFound = errors.New("outbound type not found")
 	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-func (s *Stock) PlaceOutbound(id int, qty int) error {
+func (s *Stock) PlaceOrder(id int, qty int) error {
 	r := s.recipeBook.Get(id)
 
 	ingredients := r.Ingredients
@@ -197,7 +189,7 @@ func (s *Stock) PlaceOutbound(id int, qty int) error {
 		s.data[i.ID] = presentQty - requestedQty
 	}
 
-	s.outboundLog.Add(SoldItem{
+	s.outboundLog.Add(OrderLogEntry{
 		Date: time.Now(),
 		Qty:  qty,
 	})
@@ -205,12 +197,14 @@ func (s *Stock) PlaceOutbound(id int, qty int) error {
 	return nil
 }
 
-type SoldItem struct {
+type OrderLogEntry struct {
 	Date time.Time
 	Name string
 	Qty  int
 }
 
-func (s *Stock) ListOutbound() ([]SoldItem, error) {
-	return s.outboundLog.List(), nil
+func (s *Stock) OrderLog() (r []OrderLogEntry) {
+	r = append(r, s.outboundLog.List()...)
+
+	return
 }

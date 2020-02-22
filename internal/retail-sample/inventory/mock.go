@@ -18,7 +18,12 @@ func (m *MockStore) find(s Name) ID {
 	return args.Get(0).(ID)
 }
 
-func (m *MockStore) all() []Record {
+func (m *MockStore) all() []Item {
 	args := m.Called()
-	return args.Get(0).([]Record)
+	return args.Get(0).([]Item)
+}
+
+func (m *MockStore) get(id ID) Item {
+	args := m.Called()
+	return args.Get(0).(Item)
 }

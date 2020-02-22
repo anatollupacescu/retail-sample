@@ -7,7 +7,7 @@ type ( //inventory
 	Name string
 	ID   int
 
-	Record struct {
+	Item struct {
 		ID   ID
 		Name Name
 	}
@@ -15,7 +15,8 @@ type ( //inventory
 	Store interface {
 		add(Name) ID
 		find(Name) ID
-		all() []Record
+		get(ID) Item
+		all() []Item
 	}
 
 	Inventory struct {
@@ -50,7 +51,7 @@ func (i Inventory) Add(s string) (int, error) {
 	return int(newID), nil
 }
 
-func (i Inventory) All() (r []Record) {
+func (i Inventory) All() (r []Item) {
 	return i.store.all()
 }
 
@@ -58,6 +59,6 @@ func (i Inventory) Find(s string) int {
 	return int(i.store.find(Name(s)))
 }
 
-func (i Inventory) Get(id int) string {
-	return ""
+func (i Inventory) Get(id int) Item {
+	return i.store.get(ID(id))
 }

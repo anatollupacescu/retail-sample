@@ -1,8 +1,6 @@
 package warehouse
 
 import (
-	"time"
-
 	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
@@ -34,14 +32,14 @@ func (m *MockInventory) Add(s string) (int, error) {
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockInventory) All() []inventory.Record {
+func (m *MockInventory) All() []inventory.Item {
 	args := m.Called()
-	return args.Get(0).([]inventory.Record)
+	return args.Get(0).([]inventory.Item)
 }
 
-func (m *MockInventory) Get(s int) string {
+func (m *MockInventory) Get(s int) inventory.Item {
 	args := m.Called(s)
-	return args.String(0)
+	return args.Get(0).(inventory.Item)
 }
 
 func (m *MockInventory) Find(s string) int {
@@ -55,8 +53,8 @@ type MockInboundLog struct {
 	mock.Mock
 }
 
-func (m *MockInboundLog) Add(t time.Time, i ProvisionEntry) {
-	_ = m.Called(t, i)
+func (m *MockInboundLog) Add(i ProvisionEntry) {
+	_ = m.Called(i)
 }
 
 func (m *MockInboundLog) List() []ProvisionEntry {
@@ -69,10 +67,10 @@ type MockOutboundLog struct {
 	mock.Mock
 }
 
-func (m *MockOutboundLog) Add(i SoldItem) {
+func (m *MockOutboundLog) Add(i OrderLogEntry) {
 	_ = m.Called(i)
 }
 
-func (m *MockOutboundLog) List() []SoldItem {
+func (m *MockOutboundLog) List() []OrderLogEntry {
 	return nil
 }

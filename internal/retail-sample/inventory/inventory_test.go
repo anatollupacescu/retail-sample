@@ -13,7 +13,7 @@ func TestInventory(t *testing.T) {
 	t.Run("should have no registered names on creation", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
 
-		var emptyResp []inventory.Record
+		var emptyResp []inventory.Item
 		mockStore.On("all").Return(emptyResp)
 
 		i := inventory.NewInventory(mockStore)
@@ -92,7 +92,7 @@ func TestInventory(t *testing.T) {
 		mockStore := &inventory.MockStore{}
 		i := inventory.NewInventory(mockStore)
 
-		mockStore.On("all").Return([]inventory.Record{
+		mockStore.On("all").Return([]inventory.Item{
 			{
 				ID:   1,
 				Name: "test",

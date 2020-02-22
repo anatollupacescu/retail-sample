@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
 const (
@@ -19,7 +15,7 @@ const (
 	ErrNoName = "ERR_NO_NAME"
 )
 
-func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
+func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -36,7 +32,7 @@ func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, t := range types {
-		if _, err := a.stock.ConfigureInboundType(t); err != nil {
+		if _, err := a.stock.AddInventoryName(t); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {
@@ -58,69 +54,24 @@ func (a *App) CreateInboundConfig(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a *App) GetInboundConfig(w http.ResponseWriter, r *http.Request) {
+func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	vars := mux.Vars(r)
-	name := vars["name"]
-
-	t := a.stock.GetType(name)
-
-	var zeroItemConfig warehouse.ItemConfig
-
-	if t == zeroItemConfig {
-		http.Error(w, "item type not found", http.StatusNotFound)
-		return
-	}
-
-	payload := struct {
-		Disabled bool `json:"disabled"`
-	}{
-		Disabled: t.Disabled,
-	}
-
-	e := json.NewEncoder(w)
-
-	if err := e.Encode(payload); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func (a *App) DisableInboundConfig(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	/* disable on hold
-	vars := mux.Vars(r)
-	name := vars["name"]
-	if err := a.stock.Disable(name); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	*/
-
-	w.WriteHeader(http.StatusAccepted)
-}
-
-func (a *App) ListInboundConfig(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	type itm struct {
+	type Record struct {
 		ID   string `json:"id"`
-		Type string `json:"type"`
+		Name string `json:"type"`
 	}
 
 	var result struct {
-		Data []itm `json:"data"`
+		Data []Record `json:"data"`
 	}
 
-	result.Data = make([]itm, 0)
+	result.Data = make([]Record, 0)
 
-	inboundTypes := a.stock.ItemTypes()
-	for i, tp := range inboundTypes {
-		result.Data = append(result.Data, itm{
-			ID:   strconv.Itoa(i + 1),
-			Type: tp,
+	for _, tp := range a.stock.InventoryItems() {
+		result.Data = append(result.Data, Record{
+			ID:   string(tp.ID),
+			Name: string(tp.Name),
 		})
 	}
 
@@ -132,7 +83,7 @@ func (a *App) ListInboundConfig(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
+func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type itm struct {
@@ -146,15 +97,10 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 
 	result.Data = make([]itm, 0)
 
-	for _, itemType := range a.stock.ItemTypes() {
-		qty, err := a.stock.Quantity(itemType)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	for _, position := range a.stock.CurrentState() {
 		result.Data = append(result.Data, itm{
-			Name: itemType,
-			Qty:  qty,
+			Name: position.Name,
+			Qty:  position.Qty,
 		})
 	}
 
@@ -165,7 +111,7 @@ func (a *App) ShowStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
+func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -181,14 +127,8 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for key, value := range t {
-		item := warehouse.ProvisionEntry{
-			ID:   key,
-			Time: time.Now(),
-			Qty:  value,
-		}
-
-		_, err := a.stock.PlaceInbound(item)
+	for id, qty := range t {
+		_, err := a.stock.Provision(id, qty)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -199,13 +139,13 @@ func (a *App) PlaceInbound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
+func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	e := json.NewEncoder(w)
 
 	type inbound struct {
 		Time time.Time `json:"time"`
-		Name string    `json:"name"`
+		ID   string    `json:"id"`
 		Qty  int       `json:"qty"`
 	}
 
@@ -213,11 +153,11 @@ func (a *App) ListInbound(w http.ResponseWriter, _ *http.Request) {
 		Inbound []inbound `json:"inbounds"`
 	}
 
-	for _, in := range a.stock.ListInbound() {
+	for _, in := range a.stock.ProvisionLog() {
 		e := inbound{
 			Time: in.Time,
-			// Name: in.Type,
-			Qty: in.Qty,
+			ID:   string(in.ID),
+			Qty:  in.Qty,
 		}
 		t.Inbound = append(t.Inbound, e)
 	}

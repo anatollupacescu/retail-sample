@@ -31,7 +31,6 @@ RUN curl -L "https://github.com/golangci/golangci-lint/releases/download/v${VERS
 RUN rm -rf CHECKSUM "golangci-lint-${VERSION}-linux-amd64.tar.gz"
 
 RUN mkdir -p /retail
-RUN git status
 ADD . /retail
 WORKDIR /retail
 

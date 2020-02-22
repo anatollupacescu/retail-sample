@@ -1,6 +1,10 @@
 package recipe
 
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+)
 
 type MockRecipeStore struct {
 	mock.Mock
@@ -25,6 +29,6 @@ type MockInventory struct {
 	mock.Mock
 }
 
-func (m *MockInventory) Get(i int) string {
-	return m.Called(i).String(0)
+func (m *MockInventory) Get(i int) inventory.Item {
+	return m.Called(i).Get(0).(inventory.Item)
 }

@@ -58,8 +58,8 @@ func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type Record struct {
-		ID   string `json:"id"`
-		Name string `json:"type"`
+		ID   int    `json:"id"`
+		Name string `json:"name"`
 	}
 
 	var result struct {
@@ -70,7 +70,7 @@ func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	for _, tp := range a.stock.InventoryItems() {
 		result.Data = append(result.Data, Record{
-			ID:   string(tp.ID),
+			ID:   int(tp.ID),
 			Name: string(tp.Name),
 		})
 	}
@@ -145,7 +145,7 @@ func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 
 	type inbound struct {
 		Time time.Time `json:"time"`
-		ID   string    `json:"id"`
+		ID   int       `json:"id"`
 		Qty  int       `json:"qty"`
 	}
 
@@ -156,7 +156,7 @@ func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	for _, in := range a.stock.ProvisionLog() {
 		e := inbound{
 			Time: in.Time,
-			ID:   string(in.ID),
+			ID:   int(in.ID),
 			Qty:  in.Qty,
 		}
 		t.Inbound = append(t.Inbound, e)

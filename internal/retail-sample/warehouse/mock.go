@@ -21,6 +21,10 @@ func (b *MockRecipeBoook) Get(id int) recipe.Recipe {
 	return b.Called(id).Get(0).(recipe.Recipe)
 }
 
+func (b *MockRecipeBoook) Names() []string {
+	return b.Called().Get(0).([]string)
+}
+
 // inventory
 
 type MockInventory struct {

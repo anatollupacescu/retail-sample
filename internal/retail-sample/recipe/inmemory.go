@@ -20,8 +20,12 @@ func (m *InMemoryStore) add(r Recipe) (ID, error) {
 	return ID(id), nil
 }
 
-func (m *InMemoryStore) all() []Recipe {
-	return nil
+func (m *InMemoryStore) all() (r []Recipe) {
+	for _, rp := range m.data {
+		r = append(r, rp)
+	}
+
+	return
 }
 
 func (m *InMemoryStore) get(id ID) Recipe {

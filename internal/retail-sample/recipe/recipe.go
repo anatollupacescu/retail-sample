@@ -2,6 +2,8 @@ package recipe
 
 import (
 	"errors"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
 
 type (
@@ -9,7 +11,7 @@ type (
 	ID   int
 
 	Inventory interface {
-		Get(int) string
+		Get(int) inventory.Item
 	}
 
 	Recipe struct {
@@ -41,10 +43,6 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-var (
-	zero = ""
-)
-
 func (b Book) Add(name string, ingredients []Ingredient) error {
 	if name == "" {
 		return ErrEmptyName
@@ -54,12 +52,14 @@ func (b Book) Add(name string, ingredients []Ingredient) error {
 		return ErrNoIngredients
 	}
 
+	var zeroItem inventory.Item
+
 	for _, v := range ingredients {
 		if v.Qty == 0 {
 			return ErrQuantityNotProvided
 		}
 
-		if b.Inventory.Get(v.ID) == zero {
+		if b.Inventory.Get(v.ID) == zeroItem {
 			return ErrIgredientNotFound
 		}
 	}
@@ -74,4 +74,12 @@ func (b Book) Add(name string, ingredients []Ingredient) error {
 
 func (b Book) Get(id int) Recipe {
 	return b.Store.get(ID(id))
+}
+
+func (b Book) Names() (r []string) {
+	for _, rp := range b.Store.all() {
+		r = append(r, rp.Name)
+	}
+
+	return
 }

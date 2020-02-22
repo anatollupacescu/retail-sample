@@ -9,7 +9,7 @@
 			"name": "create-item-type",
 			"item": [
 				{
-					"name": "create-fruits-inbound-item-types",
+					"name": "create apples and pears",
 					"event": [
 						{
 							"listen": "test",
@@ -39,21 +39,20 @@
 							"raw": "[ \"apple\", \"pear\"]"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound/config",
+							"raw": "localhost:8080/inventory",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound",
-								"config"
+								"inventory"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "check-item-type",
+					"name": "check for apples and pears",
 					"event": [
 						{
 							"listen": "test",
@@ -69,7 +68,7 @@
 									"});",
 									"",
 									"function toType(i) {",
-									"    return i.type",
+									"    return i.name",
 									"}"
 								],
 								"type": "text/javascript"
@@ -80,209 +79,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8080/inbound/config",
+							"raw": "localhost:8080/inventory",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound",
-								"config"
+								"inventory"
 							]
 						}
 					},
 					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "disable-create-item-type",
-			"item": [
-				{
-					"name": "create-item-type-banana",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(201)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "[ \"banana\"]"
-						},
-						"url": {
-							"raw": "localhost:8080/inbound/config",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inbound",
-								"config"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "disable-item-type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(202)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\tdisabled: true\n}\n"
-						},
-						"url": {
-							"raw": "localhost:8080/inbound/config/banana/disable",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inbound",
-								"config",
-								"banana",
-								"disable"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check-item-type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
-								"exec": [
-									"pm.test(\"response should contain the fruits\", function () {",
-									"    pm.response.to.not.be.error;",
-									"    pm.response.to.be.json;",
-									"    ",
-									"    let jsonData = pm.response.json();",
-									"    pm.expect(jsonData.disabled).to.equal(true)",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/inbound/config/banana",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inbound",
-								"config",
-								"banana"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check-non-existent-item-type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
-								"exec": [
-									"pm.test(\"Should return NOT FOUND\", function() {",
-									"    pm.response.to.have.status(404)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/inbound/config/dragonfruit",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inbound",
-								"config",
-								"dragonfruit"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"id": "fbdb746d-26ac-45fa-a142-835f45f0feb0",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"id": "02a75e41-3e50-46bd-bf2a-dc6de7d338ff",
-						"type": "text/javascript",
-						"exec": [
-							""
-						]
-					}
 				}
 			],
 			"protocolProfileBehavior": {}
@@ -291,7 +98,7 @@
 			"name": "provision-stock",
 			"item": [
 				{
-					"name": "create-fruits-inbound-item-types",
+					"name": "create oranges and kiwis",
 					"event": [
 						{
 							"listen": "test",
@@ -321,21 +128,20 @@
 							"raw": "[ \"orange\", \"kiwi\"]"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound/config",
+							"raw": "localhost:8080/inventory",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound",
-								"config"
+								"inventory"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "provision-fruits",
+					"name": "provision stock with oranges and kiwis",
 					"event": [
 						{
 							"listen": "test",
@@ -362,23 +168,23 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"orange\": 3, \n\t\"kiwi\": 4\n}"
+							"raw": "{\n\t\"3\": 3, \n\t\"4\": 4\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound",
+							"raw": "localhost:8080/stock",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound"
+								"stock"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "list-inbound",
+					"name": "check provisions were accepted",
 					"event": [
 						{
 							"listen": "test",
@@ -396,11 +202,11 @@
 									"    ",
 									"    let expected = [",
 									"        {",
-									"            name: \"orange\",",
+									"            id: 3,",
 									"            qty: 3",
 									"        },",
 									"        {",
-									"            name: 'kiwi',",
+									"            id: 4,",
 									"            qty: 4",
 									"        }",
 									"    ]",
@@ -412,7 +218,7 @@
 									"",
 									"function dropTime(e) {",
 									"    return {",
-									"        name: e.name,",
+									"        id: e.id,",
 									"        qty: e.qty",
 									"    }",
 									"}"
@@ -438,20 +244,21 @@
 							"raw": "{\n\t\"orange\": 3, \n\t\"kiwi\": 4\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound",
+							"raw": "localhost:8080/log/provision",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound"
+								"log",
+								"provision"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "check-stock-for-fruits",
+					"name": "check updated stock",
 					"event": [
 						{
 							"listen": "test",
@@ -523,7 +330,7 @@
 			"name": "outbound",
 			"item": [
 				{
-					"name": "create-veggies-inbound-item-types",
+					"name": "create carrots and onions",
 					"event": [
 						{
 							"listen": "test",
@@ -553,21 +360,20 @@
 							"raw": "[ \"carrot\", \"onion\"]"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound/config",
+							"raw": "localhost:8080/inventory",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound",
-								"config"
+								"inventory"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "provision-fruits",
+					"name": "provision stock with carrots and onions",
 					"event": [
 						{
 							"listen": "test",
@@ -594,23 +400,23 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"carrot\": 3, \n\t\"onion\": 4\n}"
+							"raw": "{\n\t\"5\": 3, \n\t\"6\": 4\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/inbound",
+							"raw": "localhost:8080/stock",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"inbound"
+								"stock"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "config-outbound",
+					"name": "create salad recipe",
 					"event": [
 						{
 							"listen": "test",
@@ -637,24 +443,69 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"salad\",\n\t\"items\": {\n\t\t\"carrot\": 2, \n\t\t\"onion\": 3\n\t}\n}"
+							"raw": "{\n\t\"name\": \"salad\",\n\t\"items\": {\n\t\t\"5\": 2, \n\t\t\"6\": 3\n\t}\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/outbound/config",
+							"raw": "localhost:8080/recipe",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"outbound",
-								"config"
+								"recipe"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "sell-salad",
+					"name": "check salad recipe was created",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 200\", function() {",
+									"    pm.response.to.have.status(200)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8080/recipe",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"recipe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sell one salad",
 					"event": [
 						{
 							"listen": "test",
@@ -681,23 +532,23 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"salad\",\n\t\"qty\": 1\n}"
+							"raw": "{\n\t\"id\": 1,\n\t\"qty\": 1\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/outbound",
+							"raw": "localhost:8080/order",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"outbound"
+								"order"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "sell-more-salad-fails",
+					"name": "sell more salad than we have stock",
 					"event": [
 						{
 							"listen": "test",
@@ -724,23 +575,23 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"salad\",\n\t\"qty\": 1\n}"
+							"raw": "{\n\t\"id\": 1,\n\t\"qty\": 1\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/outbound",
+							"raw": "localhost:8080/order",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"outbound"
+								"order"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "check-stock-for-fruits",
+					"name": "show stock",
 					"event": [
 						{
 							"listen": "test",

@@ -13,7 +13,7 @@ func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	d.DisallowUnknownFields() // catch unwanted fields
 
 	t := struct {
-		ID  *int `json:"name"` // pointer so we can test for field absence
+		ID  *int `json:"id"` // pointer so we can test for field absence
 		Qty *int `json:"qty"`
 	}{}
 
@@ -78,11 +78,6 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if t.Name == nil {
-		http.Error(w, "name must not be empty", http.StatusBadRequest)
-		return
-	}
-
 	var ingredients []recipe.Ingredient
 	for id, qty := range t.Items {
 		ingredients = append(ingredients, recipe.Ingredient{
@@ -102,14 +97,13 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	type itm struct {
-		Name  string `json:"name"`
-		Count int    `json:"count"`
+	var result struct {
+		Data []string `json:"data"`
 	}
 
-	var result struct {
-		Data []itm `json:"data"`
-	}
+	recipeNames := a.stock.RecipeNames()
+	result.Data = make([]string, 0)
+	result.Data = append(result.Data, recipeNames...)
 
 	e := json.NewEncoder(w)
 

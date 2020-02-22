@@ -18,6 +18,7 @@ type Inventory interface {
 type RecipeBook interface {
 	Add(string, []recipe.Ingredient) error
 	Get(int) recipe.Recipe
+	Names() []string
 }
 
 type ( //log
@@ -40,21 +41,21 @@ type Stock struct {
 	data        map[int]int
 }
 
-func NewStock(log InboundLog, inv Inventory, config RecipeBook, outboundItemLog OutboundLog) Stock {
+func NewStock(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog) Stock {
 	return Stock{
 		inboundLog:  log,
 		outboundLog: outboundItemLog,
 		inventory:   inv,
-		recipeBook:  config,
+		recipeBook:  recipeBook,
 	}
 }
 
-func NewStockWithData(log InboundLog, inv Inventory, config RecipeBook, outboundItemLog OutboundLog, d map[int]int) Stock {
+func NewStockWithData(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog, d map[int]int) Stock {
 	return Stock{
 		inboundLog:  log,
 		outboundLog: outboundItemLog,
 		inventory:   inv,
-		recipeBook:  config,
+		recipeBook:  recipeBook,
 		data:        d,
 	}
 }
@@ -138,16 +139,16 @@ var (
 	ErrZeroQuantityNotAllowed  = errors.New("zero quantity not allowed")
 )
 
-func (s *Stock) AddRecipe(name string, items []recipe.Ingredient) error {
+func (s *Stock) AddRecipe(name string, ingredients []recipe.Ingredient) error {
 	if len(name) == 0 {
 		return ErrOutboundNameNotProvided
 	}
 
-	if len(items) == 0 {
+	if len(ingredients) == 0 {
 		return ErrIngredientsNotProvided
 	}
 
-	for _, item := range items {
+	for _, item := range ingredients {
 
 		if !isPresent(s.inventory, item.ID) {
 			return ErrInventoryItemNotFound
@@ -158,7 +159,7 @@ func (s *Stock) AddRecipe(name string, items []recipe.Ingredient) error {
 		}
 	}
 
-	return s.recipeBook.Add(name, nil)
+	return s.recipeBook.Add(name, ingredients)
 }
 
 var (
@@ -205,6 +206,12 @@ type OrderLogEntry struct {
 
 func (s *Stock) OrderLog() (r []OrderLogEntry) {
 	r = append(r, s.outboundLog.List()...)
+
+	return
+}
+
+func (s *Stock) RecipeNames() (r []string) {
+	r = append(r, s.recipeBook.Names()...)
 
 	return
 }

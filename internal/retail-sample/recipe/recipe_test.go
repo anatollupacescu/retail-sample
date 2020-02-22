@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
 
@@ -36,7 +37,8 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
-		i.On("Get", 1).Return("")
+		var zeroInventoryItem inventory.Item
+		i.On("Get", 1).Return(zeroInventoryItem)
 
 		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
@@ -51,7 +53,9 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
-		i.On("Get", 1).Return("milk")
+		i.On("Get", 1).Return(inventory.Item{
+			ID: 1,
+		})
 
 		var expectedErr = errors.New("could not save")
 		s.On("add", mock.Anything).Return(recipe.ID(0), expectedErr)
@@ -69,7 +73,9 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
-		i.On("Get", 1).Return("milk")
+		i.On("Get", 1).Return(inventory.Item{
+			ID: 1,
+		})
 		s.On("add", recipe.Recipe{
 			Name:        "test",
 			Ingredients: []recipe.Ingredient{{ID: 1, Qty: 2}},
@@ -116,4 +122,18 @@ func TestGetRecipe(t *testing.T) {
 
 		s.AssertExpectations(t)
 	})
+}
+
+func TestGetRecipeNames(t *testing.T) {
+	s := &recipe.MockRecipeStore{}
+	b := recipe.Book{Store: s}
+
+	s.On("all").Return([]recipe.Recipe{{
+		Name: "glintwine",
+	}})
+
+	r := b.Names()
+	assert.Equal(t, r, []string{"glintwine"})
+
+	s.AssertExpectations(t)
 }

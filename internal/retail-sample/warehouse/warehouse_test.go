@@ -112,9 +112,23 @@ func TestAddRecipe(t *testing.T) {
 	})
 
 	t.Run("should accept when configured correctly", func(t *testing.T) {
-		mockInv := warehouse.MockInventory{}
-		_ = warehouse.NewStock(nil, &mockInv, nil, nil)
-		mockInv.AssertExpectations(t)
+		var ingredients = []recipe.Ingredient{{ID: 1, Qty: 10}}
+
+		i := warehouse.MockInventory{}
+		i.On("Get", 1).Return(inventory.Item{
+			ID: 1,
+		})
+
+		rb := warehouse.MockRecipeBoook{}
+		rb.On("Add", "OJ", ingredients).Return(nil)
+
+		stock := warehouse.NewStock(nil, &i, &rb, nil)
+		err := stock.AddRecipe("OJ", ingredients)
+
+		assert.NoError(t, err)
+
+		i.AssertExpectations(t)
+		rb.AssertExpectations(t)
 	})
 }
 
@@ -156,4 +170,17 @@ func TestProvision(t *testing.T) {
 		inboundLog.AssertExpectations(t)
 		i.AssertExpectations(t)
 	})
+}
+
+func TestListRecipeNames(t *testing.T) {
+	var names = []string{"uno", "dos"}
+
+	rb := warehouse.MockRecipeBoook{}
+	rb.On("Names").Return(names)
+
+	stock := warehouse.NewStock(nil, nil, &rb, nil)
+
+	recipes := stock.RecipeNames()
+	assert.Equal(t, names, recipes)
+	rb.AssertExpectations(t)
 }

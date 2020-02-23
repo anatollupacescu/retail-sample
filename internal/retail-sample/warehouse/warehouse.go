@@ -33,37 +33,6 @@ type ( //log
 	}
 )
 
-type Stock struct {
-	inventory   Inventory
-	inboundLog  InboundLog
-	outboundLog OutboundLog
-	recipeBook  RecipeBook
-	data        map[int]int
-}
-
-func NewStock(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog) Stock {
-	return Stock{
-		inboundLog:  log,
-		outboundLog: outboundItemLog,
-		inventory:   inv,
-		recipeBook:  recipeBook,
-	}
-}
-
-func NewStockWithData(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog, d map[int]int) Stock {
-	return Stock{
-		inboundLog:  log,
-		outboundLog: outboundItemLog,
-		inventory:   inv,
-		recipeBook:  recipeBook,
-		data:        d,
-	}
-}
-
-func isPresent(i Inventory, id int) bool {
-	return i.Get(id) != inventory.Item{}
-}
-
 type Position struct {
 	Name string
 	Qty  int
@@ -91,7 +60,8 @@ type ProvisionEntry struct {
 }
 
 func (s Stock) Provision(id, qty int) (int, error) {
-	if !isPresent(s.inventory, id) {
+	var zeroInventoryItem inventory.Item
+	if s.inventory.Get(id) == zeroInventoryItem {
 		return 0, ErrInventoryItemNotFound
 	}
 
@@ -107,8 +77,8 @@ func (s Stock) Provision(id, qty int) (int, error) {
 	return newQty, nil
 }
 
-func (s *Stock) AddInventoryName(typeName string) (int, error) {
-	id, err := s.inventory.Add(typeName)
+func (s *Stock) AddInventoryName(name string) (int, error) {
+	id, err := s.inventory.Add(name)
 
 	if err != nil {
 		return 0, err
@@ -133,32 +103,7 @@ func (s Stock) ProvisionLog() (r []ProvisionEntry) {
 	return
 }
 
-var (
-	ErrOutboundNameNotProvided = errors.New("name not provided")
-	ErrIngredientsNotProvided  = errors.New("items not provided")
-	ErrZeroQuantityNotAllowed  = errors.New("zero quantity not allowed")
-)
-
 func (s *Stock) AddRecipe(name string, ingredients []recipe.Ingredient) error {
-	if len(name) == 0 {
-		return ErrOutboundNameNotProvided
-	}
-
-	if len(ingredients) == 0 {
-		return ErrIngredientsNotProvided
-	}
-
-	for _, item := range ingredients {
-
-		if !isPresent(s.inventory, item.ID) {
-			return ErrInventoryItemNotFound
-		}
-
-		if item.Qty == 0 {
-			return ErrZeroQuantityNotAllowed
-		}
-	}
-
 	return s.recipeBook.Add(name, ingredients)
 }
 
@@ -172,7 +117,7 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 
 	ingredients := r.Ingredients
 
-	if r.Ingredients == nil {
+	if ingredients == nil {
 		return ErrRecipeNotFound
 	}
 

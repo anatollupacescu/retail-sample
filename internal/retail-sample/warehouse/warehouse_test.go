@@ -1,6 +1,7 @@
 package warehouse_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -73,61 +74,30 @@ func TestPlaceOrder(t *testing.T) {
 }
 
 func TestAddRecipe(t *testing.T) {
-
-	t.Run("should reject empty name", func(t *testing.T) {
-		stock := warehouse.Stock{}
-		err := stock.AddRecipe("", nil)
-		assert.Equal(t, warehouse.ErrOutboundNameNotProvided, err)
-	})
-
-	t.Run("should reject empty list of outbound items", func(t *testing.T) {
-		stock := warehouse.NewStock(nil, nil, nil, nil)
-		var noIngredients []recipe.Ingredient
-		err := stock.AddRecipe("test", noIngredients)
-		assert.Equal(t, warehouse.ErrIngredientsNotProvided, err)
-	})
-
-	t.Run("should reject when request has unknown item types", func(t *testing.T) {
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Get", 1).Return(inventory.Item{})
-
-		stock := warehouse.NewStock(nil, &mockInv, nil, nil)
-
-		err := stock.AddRecipe("test", []recipe.Ingredient{{ID: 1}})
-		assert.Equal(t, warehouse.ErrInventoryItemNotFound, err)
-		mockInv.AssertExpectations(t)
-	})
-
-	t.Run("should reject when request has zero quantity", func(t *testing.T) {
-		mockInv := warehouse.MockInventory{}
-		mockInv.On("Get", 1).Return(inventory.Item{
-			ID: 1,
-		})
-
-		stock := warehouse.NewStock(nil, &mockInv, nil, nil)
-
-		err := stock.AddRecipe("OJ", []recipe.Ingredient{{ID: 1}})
-		assert.Equal(t, warehouse.ErrZeroQuantityNotAllowed, err)
-		mockInv.AssertExpectations(t)
-	})
-
-	t.Run("should accept when configured correctly", func(t *testing.T) {
-		var ingredients = []recipe.Ingredient{{ID: 1, Qty: 10}}
-
-		i := warehouse.MockInventory{}
-		i.On("Get", 1).Return(inventory.Item{
-			ID: 1,
-		})
-
+	t.Run("should pass down to recipe book", func(t *testing.T) {
 		rb := warehouse.MockRecipeBoook{}
-		rb.On("Add", "OJ", ingredients).Return(nil)
+		var ingredients []recipe.Ingredient
+		rb.On("Add", "any", ingredients).Return(nil).Times(1)
 
-		stock := warehouse.NewStock(nil, &i, &rb, nil)
-		err := stock.AddRecipe("OJ", ingredients)
+		stock := warehouse.NewStock(nil, nil, &rb, nil)
+
+		err := stock.AddRecipe("any", ingredients)
 
 		assert.NoError(t, err)
+		rb.AssertExpectations(t)
+	})
 
-		i.AssertExpectations(t)
+	t.Run("should propagate the error", func(t *testing.T) {
+		rb := warehouse.MockRecipeBoook{}
+		var ingredients []recipe.Ingredient
+		var expectedErr error = errors.New("test err")
+		rb.On("Add", "any", ingredients).Return(expectedErr)
+
+		stock := warehouse.NewStock(nil, nil, &rb, nil)
+
+		err := stock.AddRecipe("any", ingredients)
+		assert.Equal(t, expectedErr, err)
+
 		rb.AssertExpectations(t)
 	})
 }
@@ -181,6 +151,7 @@ func TestListRecipeNames(t *testing.T) {
 	stock := warehouse.NewStock(nil, nil, &rb, nil)
 
 	recipes := stock.RecipeNames()
+
 	assert.Equal(t, names, recipes)
 	rb.AssertExpectations(t)
 }

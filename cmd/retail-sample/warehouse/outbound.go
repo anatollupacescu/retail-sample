@@ -65,14 +65,13 @@ func (a *App) GetOrderLog(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields() // catch unwanted fields
+
 	var t struct {
 		Name  *string     `json:"name"` // pointer so we can test for field absence
 		Items map[int]int `json:"items"`
 	}
-
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
-
 	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

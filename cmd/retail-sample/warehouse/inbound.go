@@ -26,13 +26,10 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(types) == 0 {
-		http.Error(w, "at least one element expected", http.StatusBadRequest)
-		return
-	}
-
+	var createdID int
 	for _, t := range types {
-		if _, err := a.stock.AddInventoryName(t); err != nil {
+		var err error
+		if createdID, err = a.stock.AddInventoryName(t); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {
@@ -49,6 +46,11 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
+	}
+
+	if createdID == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -122,18 +124,21 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(t) == 0 {
-		http.Error(w, "nothing to provision", http.StatusBadRequest)
-		return
-	}
+	var (
+		provisionID int
+		err         error
+	)
 
 	for id, qty := range t {
-		_, err := a.stock.Provision(id, qty)
-
-		if err != nil {
+		if provisionID, err = a.stock.Provision(id, qty); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+	}
+
+	if provisionID == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)

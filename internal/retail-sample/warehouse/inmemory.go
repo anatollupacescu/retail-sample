@@ -8,18 +8,16 @@ import (
 )
 
 func NewInMemoryStock() Stock {
-	inMemoryStore := inventory.NewInMemoryStore()
-	inMemoryRecipeStore := recipe.NewInMemoryStore()
-
-	inventory := inventory.NewInventory(inMemoryStore)
-	data := make(map[int]int)
-
+	inventoryStore := inventory.NewInMemoryStore()
+	inventory := inventory.Inventory{Store: &inventoryStore}
+	recipeStore := recipe.NewInMemoryStore()
+	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
 	return Stock{
-		inboundLog:  make(InMemoryInboundLog),
-		outboundLog: make(InMemoryOutboundLog),
-		recipeBook:  recipe.Book{Store: &inMemoryRecipeStore, Inventory: &inventory},
-		inventory:   inventory,
-		data:        data,
+		InboundLog:  make(InMemoryInboundLog),
+		OutboundLog: make(InMemoryOutboundLog),
+		RecipeBook:  recipeBook,
+		Inventory:   inventory,
+		Data:        make(map[int]int),
 	}
 }
 

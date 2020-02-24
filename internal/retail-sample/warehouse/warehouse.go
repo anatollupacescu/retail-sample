@@ -22,9 +22,21 @@ type RecipeBook interface {
 }
 
 type ( //log
+	ProvisionEntry struct {
+		Time time.Time
+		ID   int
+		Qty  int
+	}
+
 	InboundLog interface {
 		Add(ProvisionEntry)
 		List() []ProvisionEntry
+	}
+
+	OrderLogEntry struct {
+		Date time.Time
+		Name string
+		Qty  int
 	}
 
 	OutboundLog interface {
@@ -39,7 +51,7 @@ type Position struct {
 }
 
 func (s Stock) CurrentState() (ps []Position) {
-	for _, item := range s.inventory.All() {
+	for _, item := range s.Inventory.All() {
 		itemID := int(item.ID)
 		qty := s.Quantity(itemID)
 		ps = append(ps, Position{
@@ -53,23 +65,18 @@ func (s Stock) CurrentState() (ps []Position) {
 
 var ErrInventoryItemNotFound = errors.New("inventory item not found")
 
-type ProvisionEntry struct {
-	Time time.Time
-	ID   int
-	Qty  int
-}
-
 func (s Stock) Provision(id, qty int) (int, error) {
 	var zeroInventoryItem inventory.Item
-	if s.inventory.Get(id) == zeroInventoryItem {
+
+	if s.Inventory.Get(id) == zeroInventoryItem {
 		return 0, ErrInventoryItemNotFound
 	}
 
-	newQty := s.data[id] + qty
+	newQty := s.Data[id] + qty
 
-	s.data[id] = newQty
+	s.Data[id] = newQty
 
-	s.inboundLog.Add(ProvisionEntry{
+	s.InboundLog.Add(ProvisionEntry{
 		ID:  id,
 		Qty: qty,
 	})
@@ -77,34 +84,14 @@ func (s Stock) Provision(id, qty int) (int, error) {
 	return newQty, nil
 }
 
-func (s *Stock) AddInventoryName(name string) (int, error) {
-	id, err := s.inventory.Add(name)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
-}
-
 func (s Stock) Quantity(id int) int {
-	return s.data[id]
-}
-
-func (s Stock) InventoryItems() (r []inventory.Item) {
-	r = append(r, s.inventory.All()...)
-
-	return
+	return s.Data[id]
 }
 
 func (s Stock) ProvisionLog() (r []ProvisionEntry) {
-	r = append(r, s.inboundLog.List()...)
+	r = append(r, s.InboundLog.List()...)
 
 	return
-}
-
-func (s *Stock) AddRecipe(name string, ingredients []recipe.Ingredient) error {
-	return s.recipeBook.Add(name, ingredients)
 }
 
 var (
@@ -113,7 +100,7 @@ var (
 )
 
 func (s *Stock) PlaceOrder(id int, qty int) error {
-	r := s.recipeBook.Get(id)
+	r := s.RecipeBook.Get(id)
 
 	ingredients := r.Ingredients
 
@@ -122,7 +109,7 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	}
 
 	for _, i := range ingredients {
-		presentQty := s.data[i.ID]
+		presentQty := s.Data[i.ID]
 		requestedQty := i.Qty * qty
 		if requestedQty > presentQty {
 			return ErrNotEnoughStock
@@ -130,12 +117,12 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	}
 
 	for _, i := range ingredients {
-		presentQty := s.data[i.ID]
+		presentQty := s.Data[i.ID]
 		requestedQty := i.Qty * qty
-		s.data[i.ID] = presentQty - requestedQty
+		s.Data[i.ID] = presentQty - requestedQty
 	}
 
-	s.outboundLog.Add(OrderLogEntry{
+	s.OutboundLog.Add(OrderLogEntry{
 		Date: time.Now(),
 		Qty:  qty,
 	})
@@ -143,20 +130,8 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	return nil
 }
 
-type OrderLogEntry struct {
-	Date time.Time
-	Name string
-	Qty  int
-}
-
 func (s *Stock) OrderLog() (r []OrderLogEntry) {
-	r = append(r, s.outboundLog.List()...)
-
-	return
-}
-
-func (s *Stock) RecipeNames() (r []string) {
-	r = append(r, s.recipeBook.Names()...)
+	r = append(r, s.OutboundLog.List()...)
 
 	return
 }

@@ -20,45 +20,39 @@ type ( //inventory
 	}
 
 	Inventory struct {
-		store Store
+		Store Store
 	}
 )
-
-func NewInventory(s Store) Inventory {
-	return Inventory{
-		store: s,
-	}
-}
 
 var (
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
-)
 
-var zero = 0
+	zero = 0
+)
 
 func (i Inventory) Add(s string) (int, error) {
 	if s == "" {
 		return zero, ErrEmptyName
 	}
 
-	if i.store.find(Name(s)) != ID(zero) {
+	if i.Store.find(Name(s)) != ID(zero) {
 		return zero, ErrDuplicateName
 	}
 
-	newID := i.store.add(Name(s))
+	newID := i.Store.add(Name(s))
 
 	return int(newID), nil
 }
 
 func (i Inventory) All() (r []Item) {
-	return i.store.all()
+	return i.Store.all()
 }
 
 func (i Inventory) Find(s string) int {
-	return int(i.store.find(Name(s)))
+	return int(i.Store.find(Name(s)))
 }
 
 func (i Inventory) Get(id int) Item {
-	return i.store.get(ID(id))
+	return i.Store.get(ID(id))
 }

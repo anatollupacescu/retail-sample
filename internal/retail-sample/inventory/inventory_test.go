@@ -16,14 +16,14 @@ func TestInventory(t *testing.T) {
 		var emptyResp []inventory.Item
 		mockStore.On("all").Return(emptyResp)
 
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 		names := i.All()
 		assert.Len(t, names, 0)
 	})
 
 	t.Run("should return zero ID for missing name", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("find", inventory.Name("test")).Return(inventory.ID(0))
 
@@ -35,7 +35,7 @@ func TestInventory(t *testing.T) {
 
 	t.Run("should reject empty name", func(t *testing.T) {
 		var mockStore inventory.Store
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 		_, err := i.Add("")
 
 		assert.Equal(t, inventory.ErrEmptyName, err)
@@ -45,7 +45,7 @@ func TestInventory(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("find", inventory.Name(milk)).Return(inventory.ID(1))
 
@@ -60,7 +60,7 @@ func TestInventory(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("find", inventory.Name(milk)).Return(inventory.ID(0))
 		mockStore.On("add", inventory.Name(milk)).Return(inventory.ID(1))
@@ -76,7 +76,7 @@ func TestInventory(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("find", inventory.Name(milk)).Return(inventory.ID(0))
 		mockStore.On("add", inventory.Name(milk)).Return(inventory.ID(1))
@@ -90,7 +90,7 @@ func TestInventory(t *testing.T) {
 
 	t.Run("should provide full list of names", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("all").Return([]inventory.Item{
 			{
@@ -107,7 +107,7 @@ func TestInventory(t *testing.T) {
 
 	t.Run("should return ID for correct name", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.NewInventory(mockStore)
+		i := inventory.Inventory{Store: mockStore}
 
 		mockStore.On("find", inventory.Name("test")).Return(inventory.ID(1))
 

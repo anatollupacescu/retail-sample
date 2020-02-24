@@ -1,7 +1,6 @@
 package warehouse_test
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -14,7 +13,6 @@ import (
 )
 
 func TestPlaceOrder(t *testing.T) {
-
 	t.Run("should reject order with non existent id", func(t *testing.T) {
 		b := warehouse.MockRecipeBoook{}
 
@@ -73,35 +71,6 @@ func TestPlaceOrder(t *testing.T) {
 	})
 }
 
-func TestAddRecipe(t *testing.T) {
-	t.Run("should pass down to recipe book", func(t *testing.T) {
-		rb := warehouse.MockRecipeBoook{}
-		var ingredients []recipe.Ingredient
-		rb.On("Add", "any", ingredients).Return(nil).Times(1)
-
-		stock := warehouse.NewStock(nil, nil, &rb, nil)
-
-		err := stock.AddRecipe("any", ingredients)
-
-		assert.NoError(t, err)
-		rb.AssertExpectations(t)
-	})
-
-	t.Run("should propagate the error", func(t *testing.T) {
-		rb := warehouse.MockRecipeBoook{}
-		var ingredients []recipe.Ingredient
-		var expectedErr error = errors.New("test err")
-		rb.On("Add", "any", ingredients).Return(expectedErr)
-
-		stock := warehouse.NewStock(nil, nil, &rb, nil)
-
-		err := stock.AddRecipe("any", ingredients)
-		assert.Equal(t, expectedErr, err)
-
-		rb.AssertExpectations(t)
-	})
-}
-
 func TestProvision(t *testing.T) {
 	t.Run("should reject stock item with non existent type", func(t *testing.T) {
 		i := warehouse.MockInventory{}
@@ -140,18 +109,4 @@ func TestProvision(t *testing.T) {
 		inboundLog.AssertExpectations(t)
 		i.AssertExpectations(t)
 	})
-}
-
-func TestListRecipeNames(t *testing.T) {
-	var names = []string{"uno", "dos"}
-
-	rb := warehouse.MockRecipeBoook{}
-	rb.On("Names").Return(names)
-
-	stock := warehouse.NewStock(nil, nil, &rb, nil)
-
-	recipes := stock.RecipeNames()
-
-	assert.Equal(t, names, recipes)
-	rb.AssertExpectations(t)
 }

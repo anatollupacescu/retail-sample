@@ -1,28 +1,28 @@
 package warehouse
 
 type Stock struct {
-	inventory   Inventory
-	inboundLog  InboundLog
-	outboundLog OutboundLog
-	recipeBook  RecipeBook
-	data        map[int]int
+	Inventory   Inventory
+	InboundLog  InboundLog
+	OutboundLog OutboundLog
+	RecipeBook  RecipeBook
+	Data        map[int]int
 }
 
 func NewStock(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog) Stock {
 	return Stock{
-		inboundLog:  log,
-		outboundLog: outboundItemLog,
-		inventory:   inv,
-		recipeBook:  recipeBook,
+		InboundLog:  log,
+		OutboundLog: outboundItemLog,
+		Inventory:   inv,
+		RecipeBook:  recipeBook,
 	}
 }
 
 func NewStockWithData(log InboundLog, inv Inventory, recipeBook RecipeBook, outboundItemLog OutboundLog, d map[int]int) Stock {
 	return Stock{
-		inboundLog:  log,
-		outboundLog: outboundItemLog,
-		inventory:   inv,
-		recipeBook:  recipeBook,
-		data:        d,
+		InboundLog:  log,
+		OutboundLog: outboundItemLog,
+		Inventory:   inv,
+		RecipeBook:  recipeBook,
+		Data:        d,
 	}
 }

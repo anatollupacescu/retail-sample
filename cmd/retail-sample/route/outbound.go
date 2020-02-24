@@ -23,7 +23,7 @@ func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if t.ID == nil || t.Qty == nil {
-		http.Error(w, "please provide valid name and quantity", http.StatusBadRequest)
+		http.Error(w, "name and quantity not provided", http.StatusBadRequest)
 		return
 	}
 
@@ -35,7 +35,7 @@ func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (a *App) GetOrderLog(w http.ResponseWriter, r *http.Request) {
+func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	type itm struct {
@@ -77,6 +77,11 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if t.Name == nil {
+		http.Error(w, "name can not be empty", http.StatusBadRequest)
+		return
+	}
+
 	var ingredients []recipe.Ingredient
 	for id, qty := range t.Items {
 		ingredients = append(ingredients, recipe.Ingredient{
@@ -85,7 +90,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	if err := a.stock.AddRecipe(*t.Name, ingredients); err != nil {
+	if err := a.recipe.Add(*t.Name, ingredients); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -100,7 +105,7 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		Data []string `json:"data"`
 	}
 
-	recipeNames := a.stock.RecipeNames()
+	recipeNames := a.recipe.Names()
 	result.Data = make([]string, 0)
 	result.Data = append(result.Data, recipeNames...)
 

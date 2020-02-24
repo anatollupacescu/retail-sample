@@ -29,7 +29,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	var createdID int
 	for _, t := range types {
 		var err error
-		if createdID, err = a.stock.AddInventoryName(t); err != nil {
+		if createdID, err = a.inventory.Add(t); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {
@@ -70,7 +70,7 @@ func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	result.Data = make([]Record, 0)
 
-	for _, tp := range a.stock.InventoryItems() {
+	for _, tp := range a.inventory.All() {
 		result.Data = append(result.Data, Record{
 			ID:   int(tp.ID),
 			Name: string(tp.Name),

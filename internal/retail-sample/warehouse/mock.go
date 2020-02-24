@@ -13,16 +13,16 @@ type MockRecipeBoook struct {
 	mock.Mock
 }
 
-func (b *MockRecipeBoook) Add(name string, is []recipe.Ingredient) error {
+func (b *MockRecipeBoook) Add(name recipe.Name, is []recipe.Ingredient) error {
 	return b.Called(name, is).Error(0)
 }
 
-func (b *MockRecipeBoook) Get(id int) recipe.Recipe {
+func (b *MockRecipeBoook) Get(id recipe.ID) recipe.Recipe {
 	return b.Called(id).Get(0).(recipe.Recipe)
 }
 
-func (b *MockRecipeBoook) Names() []string {
-	return b.Called().Get(0).([]string)
+func (b *MockRecipeBoook) Names() []recipe.Name {
+	return b.Called().Get(0).([]recipe.Name)
 }
 
 // inventory

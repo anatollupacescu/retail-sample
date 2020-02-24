@@ -129,11 +129,11 @@ func TestGetRecipeNames(t *testing.T) {
 	b := recipe.Book{Store: s}
 
 	s.On("all").Return([]recipe.Recipe{{
-		Name: "glintwine",
+		Name: recipe.Name("glintwine"),
 	}})
 
 	r := b.Names()
-	assert.Equal(t, r, []string{"glintwine"})
+	assert.Equal(t, r, []recipe.Name{recipe.Name("glintwine")})
 
 	s.AssertExpectations(t)
 }

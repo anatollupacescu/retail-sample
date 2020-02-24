@@ -17,7 +17,7 @@ func TestPlaceOrder(t *testing.T) {
 		b := warehouse.MockRecipeBoook{}
 
 		var zeroRecipe recipe.Recipe
-		b.On("Get", 1).Return(zeroRecipe)
+		b.On("Get", recipe.ID(1)).Return(zeroRecipe)
 
 		stock := warehouse.NewStock(nil, nil, &b, nil)
 
@@ -30,7 +30,7 @@ func TestPlaceOrder(t *testing.T) {
 	t.Run("should reject outbound when not enough stock", func(t *testing.T) {
 		b := warehouse.MockRecipeBoook{}
 
-		b.On("Get", 1).Return(recipe.Recipe{
+		b.On("Get", recipe.ID(1)).Return(recipe.Recipe{
 			Name:        "test",
 			Ingredients: []recipe.Ingredient{{ID: 51, Qty: 2}},
 		})
@@ -49,8 +49,8 @@ func TestPlaceOrder(t *testing.T) {
 	t.Run("should update inventory on success", func(t *testing.T) {
 		b := warehouse.MockRecipeBoook{}
 
-		b.On("Get", 1).Return(recipe.Recipe{
-			Name:        "test",
+		b.On("Get", recipe.ID(1)).Return(recipe.Recipe{
+			Name:        recipe.Name("test"),
 			Ingredients: []recipe.Ingredient{{ID: 51, Qty: 2}},
 		})
 

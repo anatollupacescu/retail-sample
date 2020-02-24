@@ -16,9 +16,9 @@ type Inventory interface {
 }
 
 type RecipeBook interface {
-	Add(string, []recipe.Ingredient) error
-	Get(int) recipe.Recipe
-	Names() []string
+	Add(recipe.Name, []recipe.Ingredient) error
+	Get(recipe.ID) recipe.Recipe
+	Names() []recipe.Name
 }
 
 type ( //log
@@ -102,7 +102,8 @@ var (
 )
 
 func (s *Stock) PlaceOrder(id int, qty int) error {
-	r := s.RecipeBook.Get(id)
+	recipeID := recipe.ID(id)
+	r := s.RecipeBook.Get(recipeID)
 
 	ingredients := r.Ingredients
 

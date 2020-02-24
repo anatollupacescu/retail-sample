@@ -90,7 +90,8 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	if err := a.recipe.Add(*t.Name, ingredients); err != nil {
+	var recipeName = recipe.Name(*t.Name)
+	if err := a.recipe.Add(recipeName, ingredients); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -105,12 +106,13 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		Data []string `json:"data"`
 	}
 
-	recipeNames := a.recipe.Names()
 	result.Data = make([]string, 0)
-	result.Data = append(result.Data, recipeNames...)
+
+	for _, name := range a.recipe.Names() {
+		result.Data = append(result.Data, string(name))
+	}
 
 	e := json.NewEncoder(w)
-
 	if err := e.Encode(result); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

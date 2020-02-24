@@ -74,7 +74,7 @@ func TestPlaceOrder(t *testing.T) {
 func TestProvision(t *testing.T) {
 	t.Run("should reject stock item with non existent type", func(t *testing.T) {
 		i := warehouse.MockInventory{}
-		i.On("Get", 1).Return(inventory.Item{})
+		i.On("Get", inventory.ID(1)).Return(inventory.Item{})
 
 		data := map[int]int{1: 0}
 		stock := warehouse.NewStockWithData(nil, &i, nil, nil, data)
@@ -88,7 +88,7 @@ func TestProvision(t *testing.T) {
 	t.Run("should place inbound when item type exists", func(t *testing.T) {
 		milk := "milk"
 		i := warehouse.MockInventory{}
-		i.On("Get", 51).Return(inventory.Item{
+		i.On("Get", inventory.ID(51)).Return(inventory.Item{
 			ID:   51,
 			Name: inventory.Name(milk),
 		})

@@ -29,6 +29,6 @@ type MockInventory struct {
 	mock.Mock
 }
 
-func (m *MockInventory) Get(i int) inventory.Item {
+func (m *MockInventory) Get(i inventory.ID) inventory.Item {
 	return m.Called(i).Get(0).(inventory.Item)
 }

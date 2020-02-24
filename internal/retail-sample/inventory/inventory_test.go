@@ -29,7 +29,7 @@ func TestInventory(t *testing.T) {
 
 		id := i.Find("test")
 
-		assert.Equal(t, id, 0)
+		assert.Equal(t, id, inventory.ID(0))
 		mockStore.AssertExpectations(t)
 	})
 
@@ -42,7 +42,7 @@ func TestInventory(t *testing.T) {
 	})
 
 	t.Run("should reject duplicate name", func(t *testing.T) {
-		milk := "milk"
+		milk := inventory.Name("milk")
 
 		mockStore := &inventory.MockStore{}
 		i := inventory.Inventory{Store: mockStore}
@@ -57,7 +57,7 @@ func TestInventory(t *testing.T) {
 	})
 
 	t.Run("should persist when given a valid name", func(t *testing.T) {
-		milk := "milk"
+		milk := inventory.Name("milk")
 
 		mockStore := &inventory.MockStore{}
 		i := inventory.Inventory{Store: mockStore}
@@ -68,12 +68,12 @@ func TestInventory(t *testing.T) {
 		id, err := i.Add(milk)
 
 		assert.NoError(t, err)
-		assert.Equal(t, id, 1)
+		assert.Equal(t, id, inventory.ID(1))
 		mockStore.AssertExpectations(t)
 	})
 
 	t.Run("should log successfully added name", func(t *testing.T) {
-		milk := "milk"
+		milk := inventory.Name("milk")
 
 		mockStore := &inventory.MockStore{}
 		i := inventory.Inventory{Store: mockStore}
@@ -84,7 +84,7 @@ func TestInventory(t *testing.T) {
 		id, err := i.Add(milk)
 
 		assert.NoError(t, err)
-		assert.Equal(t, id, 1)
+		assert.Equal(t, id, inventory.ID(1))
 		mockStore.AssertExpectations(t)
 	})
 
@@ -112,7 +112,7 @@ func TestInventory(t *testing.T) {
 		mockStore.On("find", inventory.Name("test")).Return(inventory.ID(1))
 
 		id := i.Find("test")
-		assert.Equal(t, id, 1)
+		assert.Equal(t, id, inventory.ID(1))
 
 		mockStore.AssertExpectations(t)
 	})

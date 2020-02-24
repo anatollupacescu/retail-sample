@@ -28,31 +28,31 @@ var (
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 
-	zero = 0
+	zeroID = ID(0)
 )
 
-func (i Inventory) Add(s string) (int, error) {
-	if s == "" {
-		return zero, ErrEmptyName
+func (i Inventory) Add(name Name) (ID, error) {
+	if name == "" {
+		return zeroID, ErrEmptyName
 	}
 
-	if i.Store.find(Name(s)) != ID(zero) {
-		return zero, ErrDuplicateName
+	if i.Store.find(name) != zeroID {
+		return zeroID, ErrDuplicateName
 	}
 
-	newID := i.Store.add(Name(s))
+	newID := i.Store.add(name)
 
-	return int(newID), nil
+	return newID, nil
 }
 
 func (i Inventory) All() (r []Item) {
 	return i.Store.all()
 }
 
-func (i Inventory) Find(s string) int {
-	return int(i.Store.find(Name(s)))
+func (i Inventory) Find(name Name) ID {
+	return i.Store.find(name)
 }
 
-func (i Inventory) Get(id int) Item {
-	return i.Store.get(ID(id))
+func (i Inventory) Get(id ID) Item {
+	return i.Store.get(id)
 }

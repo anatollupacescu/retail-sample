@@ -19,17 +19,18 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	var types []string
+	var names []string
 
-	if err := d.Decode(&types); err != nil {
+	if err := d.Decode(&names); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	var createdID int
-	for _, t := range types {
+	var createdID inventory.ID
+	for _, name := range names {
 		var err error
-		if createdID, err = a.inventory.Add(t); err != nil {
+		itemName := inventory.Name(name)
+		if createdID, err = a.inventory.Add(itemName); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			var msg string
 			switch err {

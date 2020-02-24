@@ -31,9 +31,9 @@ type MockInventory struct {
 	mock.Mock
 }
 
-func (m *MockInventory) Add(s string) (int, error) {
+func (m *MockInventory) Add(s inventory.Name) (inventory.ID, error) {
 	args := m.Called(s)
-	return args.Int(0), args.Error(1)
+	return args.Get(0).(inventory.ID), args.Error(1)
 }
 
 func (m *MockInventory) All() []inventory.Item {
@@ -41,14 +41,14 @@ func (m *MockInventory) All() []inventory.Item {
 	return args.Get(0).([]inventory.Item)
 }
 
-func (m *MockInventory) Get(s int) inventory.Item {
+func (m *MockInventory) Get(s inventory.ID) inventory.Item {
 	args := m.Called(s)
 	return args.Get(0).(inventory.Item)
 }
 
-func (m *MockInventory) Find(s string) int {
+func (m *MockInventory) Find(s inventory.Name) inventory.ID {
 	args := m.Called(s)
-	return args.Int(0)
+	return args.Get(0).(inventory.ID)
 }
 
 //inbound log

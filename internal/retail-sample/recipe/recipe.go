@@ -11,7 +11,7 @@ type (
 	ID   int
 
 	Inventory interface {
-		Get(int) inventory.Item
+		Get(inventory.ID) inventory.Item
 	}
 
 	Recipe struct {
@@ -59,7 +59,9 @@ func (b Book) Add(name string, ingredients []Ingredient) error {
 			return ErrQuantityNotProvided
 		}
 
-		if b.Inventory.Get(v.ID) == zeroItem {
+		itemID := inventory.ID(v.ID)
+
+		if b.Inventory.Get(itemID) == zeroItem {
 			return ErrIgredientNotFound
 		}
 	}

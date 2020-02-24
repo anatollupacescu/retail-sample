@@ -9,10 +9,10 @@ import (
 )
 
 type Inventory interface {
-	Add(string) (int, error)
+	Add(inventory.Name) (inventory.ID, error)
 	All() []inventory.Item
-	Get(int) inventory.Item
-	Find(string) int
+	Get(inventory.ID) inventory.Item
+	Find(inventory.Name) inventory.ID
 }
 
 type RecipeBook interface {
@@ -68,7 +68,9 @@ var ErrInventoryItemNotFound = errors.New("inventory item not found")
 func (s Stock) Provision(id, qty int) (int, error) {
 	var zeroInventoryItem inventory.Item
 
-	if s.Inventory.Get(id) == zeroInventoryItem {
+	itemID := inventory.ID(id)
+
+	if s.Inventory.Get(itemID) == zeroInventoryItem {
 		return 0, ErrInventoryItemNotFound
 	}
 

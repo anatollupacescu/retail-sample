@@ -1,4 +1,4 @@
-package warehouse
+package route
 
 import (
 	"encoding/json"

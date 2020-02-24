@@ -9,11 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/warehouse"
-
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/route"
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
@@ -45,7 +44,7 @@ func main() {
 	}
 
 	//app
-	warehouse.ConfigureRoutes(businessRouter)
+	route.ConfigureRoutes(businessRouter)
 
 	//static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))

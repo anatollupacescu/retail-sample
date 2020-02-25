@@ -4,36 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 )
 
-type App struct {
-	inventory inventory.Inventory
-	recipe    recipe.Book
-	stock     warehouse.Stock
-}
-
 func ConfigureRoutes(r *mux.Router) {
-	inventryStore := inventory.NewInMemoryStore()
-	inventory := inventory.Inventory{Store: &inventryStore}
-
-	recipeStore := recipe.NewInMemoryStore()
-	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
-
-	webApp := App{
-		inventory: inventory,
-		recipe:    recipeBook,
-		stock: warehouse.Stock{
-			Inventory:   inventory,
-			RecipeBook:  recipeBook,
-			InboundLog:  make(warehouse.InMemoryInboundLog),
-			OutboundLog: make(warehouse.InMemoryOutboundLog),
-			Data:        make(map[int]int),
-		},
-	}
+	webApp := newInMemoryApp()
 
 	r.HandleFunc("/log/provision", webApp.GetProvisionLog).Methods(http.MethodGet)
 	r.HandleFunc("/log/order", webApp.ListOrders).Methods(http.MethodGet)

@@ -2,24 +2,7 @@ package warehouse
 
 import (
 	"time"
-
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
-
-func NewInMemoryStock() Stock {
-	inventoryStore := inventory.NewInMemoryStore()
-	inventory := inventory.Inventory{Store: &inventoryStore}
-	recipeStore := recipe.NewInMemoryStore()
-	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
-	return Stock{
-		InboundLog:  make(InMemoryInboundLog),
-		OutboundLog: make(InMemoryOutboundLog),
-		RecipeBook:  recipeBook,
-		Inventory:   inventory,
-		Data:        make(map[int]int),
-	}
-}
 
 type InMemoryInboundLog map[time.Time]ProvisionEntry
 

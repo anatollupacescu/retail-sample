@@ -12,12 +12,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/route"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/web"
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
 func main() {
-
 	logger := logrus.New().WithField("version", version.Version)
 
 	logger.Infof(
@@ -44,7 +43,7 @@ func main() {
 	}
 
 	//app
-	route.ConfigureRoutes(businessRouter)
+	web.ConfigureRoutes(businessRouter)
 
 	//static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))

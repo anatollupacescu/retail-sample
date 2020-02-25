@@ -1,4 +1,4 @@
-package route
+package web
 
 import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"

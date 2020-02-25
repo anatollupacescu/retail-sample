@@ -1,4 +1,4 @@
-package route
+package web
 
 import (
 	"encoding/json"

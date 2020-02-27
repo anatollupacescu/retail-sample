@@ -16,6 +16,8 @@ const (
 )
 
 func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -26,12 +28,20 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var createdID inventory.ID
+	type EntityDescriptor struct {
+		ID   inventory.ID   `json:"id"`
+		Name inventory.Name `json:"name"`
+	}
+
+	type DescriptorEntity map[inventory.Name]inventory.ID
+
+	descriptors := make(DescriptorEntity, len(names))
+
 	for _, name := range names {
-		var err error
 		itemName := inventory.Name(name)
-		if createdID, err = a.inventory.Add(itemName); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+		createdID, err := a.inventory.Add(itemName)
+
+		if err != nil {
 			var msg string
 			switch err {
 			case inventory.ErrEmptyName:
@@ -42,19 +52,37 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Server error", http.StatusInternalServerError)
 				return
 			}
+
+			w.WriteHeader(http.StatusBadRequest)
+
 			if _, err = fmt.Fprint(w, msg); err != nil {
 				log.Fatal(err)
 			}
+
 			return
 		}
+
+		descriptors[itemName] = createdID
 	}
 
-	if createdID == 0 {
+	if len(descriptors) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
+	var result = struct {
+		Data DescriptorEntity `json:"data"`
+	}{
+		Data: descriptors,
+	}
+
 	w.WriteHeader(http.StatusCreated)
+
+	err := json.NewEncoder(w).Encode(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {

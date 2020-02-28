@@ -65,6 +65,8 @@ func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -72,6 +74,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		Name  *string     `json:"name"` // pointer so we can test for field absence
 		Items map[int]int `json:"items"`
 	}
+
 	if err := d.Decode(&t); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -91,12 +94,31 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var recipeName = recipe.Name(*t.Name)
-	if err := a.recipe.Add(recipeName, ingredients); err != nil {
+
+	recipeID, err := a.recipe.Add(recipeName, ingredients)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	type DescriptorEntity map[recipe.Name]recipe.ID
+
+	var result = struct {
+		Data DescriptorEntity `json:"data"`
+	}{
+		Data: DescriptorEntity{
+			recipeName: recipeID,
+		},
+	}
+
 	w.WriteHeader(http.StatusCreated)
+
+	err = json.NewEncoder(w).Encode(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {

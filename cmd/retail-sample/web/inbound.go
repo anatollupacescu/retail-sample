@@ -28,11 +28,6 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type EntityDescriptor struct {
-		ID   inventory.ID   `json:"id"`
-		Name inventory.Name `json:"name"`
-	}
-
 	type DescriptorEntity map[inventory.Name]inventory.ID
 
 	descriptors := make(DescriptorEntity, len(names))
@@ -143,6 +138,8 @@ func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -153,24 +150,38 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var (
-		provisionID int
-		err         error
-	)
+	type DescriptorEntity map[int]int
+	descriptors := make(DescriptorEntity, len(t))
 
 	for id, qty := range t {
-		if provisionID, err = a.stock.Provision(id, qty); err != nil {
+		newQty, err := a.stock.Provision(id, qty)
+
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		descriptors[id] = newQty
 	}
 
-	if provisionID == 0 {
+	var result = struct {
+		Data DescriptorEntity `json:"data"`
+	}{
+		Data: descriptors,
+	}
+
+	switch len(descriptors) {
+	case 0:
 		w.WriteHeader(http.StatusNoContent)
-		return
+	default:
+		w.WriteHeader(http.StatusAccepted)
 	}
 
-	w.WriteHeader(http.StatusAccepted)
+	err := json.NewEncoder(w).Encode(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {

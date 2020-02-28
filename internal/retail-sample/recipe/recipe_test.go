@@ -15,19 +15,19 @@ func TestAddRecipe(t *testing.T) {
 
 	t.Run("should reject empty name", func(t *testing.T) {
 		b := recipe.Book{}
-		err := b.Add("", nil)
+		_, err := b.Add("", nil)
 		assert.Equal(t, recipe.ErrEmptyName, err)
 	})
 
 	t.Run("should reject empty list of ingredients", func(t *testing.T) {
 		b := recipe.Book{}
-		err := b.Add("test", nil)
+		_, err := b.Add("test", nil)
 		assert.Equal(t, recipe.ErrNoIngredients, err)
 	})
 
 	t.Run("should reject missing quantity", func(t *testing.T) {
 		b := recipe.Book{}
-		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 0}})
+		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 0}})
 		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
 	})
 
@@ -40,7 +40,7 @@ func TestAddRecipe(t *testing.T) {
 		var zeroInventoryItem inventory.Item
 		i.On("Get", inventory.ID(1)).Return(zeroInventoryItem)
 
-		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
 		assert.Equal(t, recipe.ErrIgredientNotFound, err)
 
@@ -60,7 +60,7 @@ func TestAddRecipe(t *testing.T) {
 		var expectedErr = errors.New("could not save")
 		s.On("add", mock.Anything).Return(recipe.ID(0), expectedErr)
 
-		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
 		assert.Equal(t, expectedErr, err)
 
@@ -81,8 +81,10 @@ func TestAddRecipe(t *testing.T) {
 			Ingredients: []recipe.Ingredient{{ID: 1, Qty: 2}},
 		}).Return(recipe.ID(1), nil)
 
-		err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		recipeID, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+
 		assert.NoError(t, err)
+		assert.Equal(t, recipe.ID(1), recipeID)
 
 		s.AssertExpectations(t)
 		i.AssertExpectations(t)

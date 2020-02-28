@@ -13,8 +13,9 @@ type MockRecipeBoook struct {
 	mock.Mock
 }
 
-func (b *MockRecipeBoook) Add(name recipe.Name, is []recipe.Ingredient) error {
-	return b.Called(name, is).Error(0)
+func (b *MockRecipeBoook) Add(name recipe.Name, is []recipe.Ingredient) (recipe.ID, error) {
+	args := b.Called(name, is)
+	return args.Get(0).(recipe.ID), args.Error(0)
 }
 
 func (b *MockRecipeBoook) Get(id recipe.ID) recipe.Recipe {

@@ -16,7 +16,7 @@ type Inventory interface {
 }
 
 type RecipeBook interface {
-	Add(recipe.Name, []recipe.Ingredient) error
+	Add(recipe.Name, []recipe.Ingredient) (recipe.ID, error)
 	Get(recipe.ID) recipe.Recipe
 	Names() []recipe.Name
 }

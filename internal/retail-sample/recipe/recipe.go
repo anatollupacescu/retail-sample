@@ -43,35 +43,37 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-func (b Book) Add(name Name, ingredients []Ingredient) error {
+var (
+	zeroRecipeID = ID(0)
+
+	zeroItem inventory.Item
+)
+
+func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	if name == "" {
-		return ErrEmptyName
+		return zeroRecipeID, ErrEmptyName
 	}
 
 	if len(ingredients) == 0 {
-		return ErrNoIngredients
+		return zeroRecipeID, ErrNoIngredients
 	}
-
-	var zeroItem inventory.Item
 
 	for _, v := range ingredients {
 		if v.Qty == 0 {
-			return ErrQuantityNotProvided
+			return zeroRecipeID, ErrQuantityNotProvided
 		}
 
 		itemID := inventory.ID(v.ID)
 
 		if b.Inventory.Get(itemID) == zeroItem {
-			return ErrIgredientNotFound
+			return zeroRecipeID, ErrIgredientNotFound
 		}
 	}
 
-	_, err := b.Store.add(Recipe{
+	return b.Store.add(Recipe{
 		Name:        name,
 		Ingredients: ingredients,
 	})
-
-	return err
 }
 
 func (b Book) Get(id ID) Recipe {

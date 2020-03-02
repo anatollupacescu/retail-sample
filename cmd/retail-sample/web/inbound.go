@@ -174,7 +174,7 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	case 0:
 		w.WriteHeader(http.StatusNoContent)
 	default:
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusCreated)
 	}
 
 	err := json.NewEncoder(w).Encode(result)

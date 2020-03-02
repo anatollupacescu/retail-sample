@@ -6,19 +6,46 @@
 	},
 	"item": [
 		{
-			"name": "create-item-type",
+			"name": "add inventory types",
 			"item": [
 				{
-					"name": "create apples and pears",
+					"name": "create inventory item",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(201)",
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
 									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"descriptor entity has an id\", function() {",
+									"    let itemName = pm.environment.get(\"inventory_item_name\")",
+									"",
+									"    let responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data[itemName]).to.be.above(0)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "25053f10-b9df-4ca6-bb35-6a5ba019f934",
+								"exec": [
+									"let uuid = require('uuid')",
+									"pm.environment.set(\"inventory_item_name\", uuid())",
 									""
 								],
 								"type": "text/javascript"
@@ -36,7 +63,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"apple\", \"pear\"]"
+							"raw": "[ \"{{inventory_item_name}}\" ]"
 						},
 						"url": {
 							"raw": "localhost:8080/inventory",
@@ -52,19 +79,29 @@
 					"response": []
 				},
 				{
-					"name": "check for apples and pears",
+					"name": "check inventory item was created",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
 								"exec": [
-									"pm.test(\"response should contain the fruits\", function () {",
-									"    pm.response.to.not.be.error;",
+									"pm.test(\"status is 200 OK\", function() {",
+									"    pm.response.to.have.status(200);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
 									"    pm.response.to.be.json;",
-									"    ",
+									"})",
+									"",
+									"pm.test(\"body contains newly created item name\", function () {",
 									"    let jsonData = pm.response.json();",
-									"    pm.expect(jsonData.data.map(toType)).to.include.members([\"apple\", \"pear\"]);",
+									"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
+									"    pm.expect(jsonData.data.map(toType)).to.include.members([expectedItemName]);",
 									"});",
 									"",
 									"function toType(i) {",
@@ -95,19 +132,54 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "provision-stock",
+			"name": "provision stock",
 			"item": [
 				{
-					"name": "create oranges and kiwis",
+					"name": "create two inventory items",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(201)",
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
 									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"save response ids to env\", function() {",
+									"    pm.response.to.be.json;",
+									"    ",
+									"    let name1 = pm.environment.get(\"inventory_item_name_1\");",
+									"    let name2 = pm.environment.get(\"inventory_item_name_2\");",
+									"    ",
+									"    let responseJson = pm.response.json();",
+									"    let id1 = responseJson.data[name1]",
+									"    let id2 = responseJson.data[name2]",
+									"",
+									"    pm.environment.set(\"inventory_item_id_1\", id1)",
+									"    pm.environment.set(\"inventory_item_id_2\", id2)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
+								"exec": [
+									"let uuid = require('uuid')",
+									"pm.environment.set(\"inventory_item_name_1\", uuid())",
+									"pm.environment.set(\"inventory_item_name_2\", uuid())",
 									""
 								],
 								"type": "text/javascript"
@@ -125,7 +197,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"orange\", \"kiwi\"]"
+							"raw": "[ \"{{inventory_item_name_1}}\", \"{{inventory_item_name_2}}\"]"
 						},
 						"url": {
 							"raw": "localhost:8080/inventory",
@@ -141,16 +213,43 @@
 					"response": []
 				},
 				{
-					"name": "provision stock with oranges and kiwis",
+					"name": "provision stock",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 202\", function() {",
-									"    pm.response.to.have.status(202)",
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
 									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"contains updated values\", function() {",
+									"    let id1 = pm.environment.get(\"inventory_item_id_1\")",
+									"    let id2 = pm.environment.get(\"inventory_item_id_2\")",
+									"",
+									"    let responseJson = pm.response.json();",
+									"    pm.expect(responseJson.data[id1]).to.eql(3)",
+									"    pm.expect(responseJson.data[id2]).to.eql(4)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ac3bdd1c-d58b-4718-be4a-d2762bb66b0a",
+								"exec": [
 									""
 								],
 								"type": "text/javascript"
@@ -168,7 +267,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"3\": 3, \n\t\"4\": 4\n}"
+							"raw": "{\n\t\"{{inventory_item_id_1}}\": 3, \n\t\"{{inventory_item_id_2}}\": 4\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/stock",
@@ -184,29 +283,35 @@
 					"response": []
 				},
 				{
-					"name": "check provisions were accepted",
+					"name": "check provisions log",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should succeed\", function() {",
-									"    pm.response.to.have.status(200)",
+									"pm.test(\"status is OK\", function() {",
+									"    pm.response.to.have.status(200);",
 									"})",
 									"",
-									"pm.test(\"Should have oranges and kiwis provisions\", function() {",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"body contains the log records\", function() {",
 									"    pm.response.to.not.be.error;",
 									"    pm.response.to.be.json;",
 									"    let body = JSON.parse(responseBody);",
 									"    ",
-									"    let expected = [",
-									"        {",
-									"            id: 3,",
+									"    let expected = [{",
+									"            id: pm.environment.get(\"inventory_item_id_1\"),",
 									"            qty: 3",
-									"        },",
-									"        {",
-									"            id: 4,",
+									"        },{",
+									"            id: pm.environment.get(\"inventory_item_id_2\"),",
 									"            qty: 4",
 									"        }",
 									"    ]",
@@ -241,7 +346,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"orange\": 3, \n\t\"kiwi\": 4\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "localhost:8080/log/provision",
@@ -265,23 +370,33 @@
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 200\", function() {",
-									"    pm.response.to.have.status(200)",
+									"pm.test(\"status is OK\", function() {",
+									"    pm.response.to.have.status(200);",
 									"})",
 									"",
-									"pm.test(\"Should have oranges and kiwis\", function() {",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"body contains updated quantities\", function() {",
 									"    pm.response.to.not.be.error;",
 									"    pm.response.to.be.json;",
 									"        ",
 									"    let body = JSON.parse(responseBody);",
+									"    let name1 = pm.environment.get(\"inventory_item_name_1\")",
+									"    let name2 = pm.environment.get(\"inventory_item_name_2\")",
 									"    ",
 									"    let orange = {",
-									"        name: \"orange\",",
+									"        name: name1,",
 									"        qty: 3",
 									"    }",
-									"    ",
+									"",
 									"    let kiwi = {",
-									"        name: 'kiwi',",
+									"        name: name2,",
 									"        qty: 4",
 									"    }",
 									"",
@@ -308,7 +423,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"apple\", \"pear\"]"
+							"raw": ""
 						},
 						"url": {
 							"raw": "localhost:8080/stock",
@@ -330,15 +445,86 @@
 			"name": "outbound",
 			"item": [
 				{
-					"name": "create carrots and onions",
+					"name": "create two inventory items",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(201)",
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
+									"})",
+									"",
+									"",
+									"pm.test(\"save response ids to env\", function() {",
+									"    pm.response.to.be.json;",
+									"    ",
+									"    let name1 = pm.environment.get(\"test_outbound_inventory_item_name_1\");",
+									"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
+									"    ",
+									"    let responseJson = pm.response.json();",
+									"    let id1 = responseJson.data[name1]",
+									"    let id2 = responseJson.data[name2]",
+									"",
+									"    pm.environment.set(\"test_outbound_inventory_item_id_1\", id1)",
+									"    pm.environment.set(\"test_outbound_inventory_item_id_2\", id2)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "b148d126-c063-4799-ad11-1c952ac52d8f",
+								"exec": [
+									"let uuid = require('uuid')",
+									"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
+									"pm.environment.set(\"test_outbound_inventory_item_name_2\", uuid())",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"{{test_outbound_inventory_item_name_1}}\", \"{{test_outbound_inventory_item_name_2}}\"]"
+						},
+						"url": {
+							"raw": "localhost:8080/inventory",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "provision stock",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"status is 202 ACCEPTED\", function() {",
+									"    pm.response.to.have.status(201);",
 									"})",
 									""
 								],
@@ -357,50 +543,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"carrot\", \"onion\"]"
-						},
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "provision stock with carrots and onions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 202\", function() {",
-									"    pm.response.to.have.status(202)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"5\": 3, \n\t\"6\": 4\n}"
+							"raw": "{\n\t\"{{test_outbound_inventory_item_id_1}}\": 3, \n\t\"{{test_outbound_inventory_item_id_2}}\": 4\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/stock",
@@ -423,9 +566,36 @@
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 201\", function() {",
-									"    pm.response.to.have.status(201)",
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
 									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"save descriptor entity to env\", function() {",
+									"    let recipeName = pm.environment.get(\"test_outbound_recipe_name\");",
+									"    let responseJson = pm.response.json();",
+									"    let recipeID =  responseJson.data[recipeName]",
+									"    pm.environment.set(\"test_outbound_recipe_id\", recipeID)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "c45830f6-0b0d-4f14-a92a-3876f01b251c",
+								"exec": [
+									"let uuid = require('uuid')",
+									"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
 									""
 								],
 								"type": "text/javascript"
@@ -443,7 +613,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"name\": \"salad\",\n\t\"items\": {\n\t\t\"5\": 2, \n\t\t\"6\": 3\n\t}\n}"
+							"raw": "{\n\t\"name\": \"{{test_outbound_recipe_name}}\",\n\t\"items\": {\n\t\t\"{{test_outbound_inventory_item_id_1}}\": 2, \n\t\t\"{{test_outbound_inventory_item_id_2}}\": 3\n\t}\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/recipe",
@@ -532,7 +702,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": 1,\n\t\"qty\": 1\n}"
+							"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/order",
@@ -575,7 +745,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"id\": 1,\n\t\"qty\": 1\n}"
+							"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/order",
@@ -609,12 +779,12 @@
 									"    let body = JSON.parse(responseBody);",
 									"    ",
 									"    let oneCarrot = {",
-									"        name: \"carrot\",",
+									"        name: pm.environment.get(\"test_outbound_inventory_item_name_1\"),",
 									"        qty: 1",
 									"    }",
 									"    ",
 									"    let oneOnion = {",
-									"        name: 'onion',",
+									"        name: pm.environment.get(\"test_outbound_inventory_item_name_2\"),",
 									"        qty: 1",
 									"    }",
 									"",

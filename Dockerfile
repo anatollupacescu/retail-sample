@@ -1,5 +1,5 @@
 # Build site
-FROM golang:1.13 as mustache
+FROM golang:1.14 as mustache
 
 RUN go get github.com/cbroglie/mustache/...
 
@@ -13,7 +13,7 @@ RUN ./gen_static.sh
 RUN yarn build
 
 # linter
-FROM golang:1.13 as tester
+FROM golang:1.14 as tester
 
 ENV VERSION 1.18.0
 ENV CHECKSUM 0ef2c502035d5f12d6d3a30a7c4469cfcae4dd3828d15fbbfb799c8331cd51c4
@@ -39,13 +39,13 @@ RUN golangci-lint run --issues-exit-code=1 --deadline=600s ./...
 RUN go test -timeout=600s -v --race ./...
 
 # modules
-FROM golang:1.13 as modules
+FROM golang:1.14 as modules
 
 ADD go.mod go.sum /m/
 RUN cd /m && go mod download
 
 # Intermediate stage: Build the binary
-FROM golang:1.13 as builder
+FROM golang:1.14 as builder
 
 COPY --from=modules /go/pkg /go/pkg
 

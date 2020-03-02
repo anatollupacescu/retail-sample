@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
@@ -80,7 +83,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
+func (a *App) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -99,6 +102,56 @@ func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 			ID:   int(tp.ID),
 			Name: string(tp.Name),
 		})
+	}
+
+	err := json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func isValidItemID(rid string) bool {
+	if len(rid) == 0 {
+		return false
+	}
+
+	if i, err := strconv.Atoi(rid); err != nil || i == 0 {
+		return false
+	}
+
+	return true
+}
+
+func (a *App) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["itemID"]
+
+	if !isValidItemID(rid) {
+		http.Error(w, "invalid item id provided", http.StatusBadRequest)
+		return
+	}
+
+	i, _ := strconv.Atoi(rid)
+
+	inventoyID := inventory.ID(i)
+
+	inventoryItem := a.inventory.Get(inventoyID)
+
+	type entry struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+
+	var response = struct {
+		Data entry `json:"data"`
+	}{
+		Data: entry{
+			ID:   int(inventoryItem.ID),
+			Name: string(inventoryItem.Name),
+		},
 	}
 
 	err := json.NewEncoder(w).Encode(response)

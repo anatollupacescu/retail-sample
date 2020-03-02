@@ -29,10 +29,13 @@
 									"})",
 									"",
 									"pm.test(\"descriptor entity has an id\", function() {",
-									"    let itemName = pm.environment.get(\"inventory_item_name\")",
+									"    let itemName = pm.environment.get(\"inventory_item_name\");",
 									"",
 									"    let responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data[itemName]).to.be.above(0)",
+									"    let itemID = responseJson.data[itemName];",
+									"    pm.expect(itemID).to.be.above(0)",
+									"",
+									"    pm.environment.set(\"inventory_item_id\", itemID)",
 									"})",
 									""
 								],
@@ -80,6 +83,60 @@
 				},
 				{
 					"name": "check inventory item was created",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"exec": [
+									"pm.test(\"status is 200 OK\", function() {",
+									"    pm.response.to.have.status(200);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"body contains newly created item name\", function () {",
+									"    let jsonData = pm.response.json();",
+									"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
+									"    ",
+									"    let obj = {",
+									"        id: pm.environment.get(\"inventory_item_id\"),",
+									"        name: pm.environment.get(\"inventory_item_name\")",
+									"    }",
+									"    ",
+									"    pm.expect(jsonData.data).to.deep.include(obj);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/inventory/{{inventory_item_id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory",
+								"{{inventory_item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check item is present in list",
 					"event": [
 						{
 							"listen": "test",

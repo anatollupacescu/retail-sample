@@ -12,7 +12,8 @@ func ConfigureRoutes(r *mux.Router) {
 	r.HandleFunc("/log/provision", webApp.GetProvisionLog).Methods(http.MethodGet)
 	r.HandleFunc("/log/order", webApp.ListOrders).Methods(http.MethodGet)
 
-	r.HandleFunc("/inventory", webApp.GetInventoryItems).Methods(http.MethodGet)
+	r.HandleFunc("/inventory", webApp.GetAllInventoryItems).Methods(http.MethodGet)
+	r.HandleFunc("/inventory/{itemID}", webApp.GetInventoryItem).Methods(http.MethodGet)
 	r.HandleFunc("/inventory", webApp.CreateInventoryItem).Methods(http.MethodPost)
 
 	r.HandleFunc("/stock", webApp.GetStock).Methods(http.MethodGet)

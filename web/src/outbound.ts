@@ -1,60 +1,60 @@
-$(document).ready(function () {
-  let apiUrl = process.env.API_URL
-  var outboundTable = $('#outboundList').DataTable({
+$(document).ready(function() {
+  let apiUrl = process.env.API_URL;
+  var outboundTable = $("#outboundList").DataTable({
     ajax: `${apiUrl}/outbound`,
     columns: [
-      { data: 'date' },
-      { data: 'name' },
-      { data: 'qty', searchable: false }
+      { data: "date" },
+      { data: "name" },
+      { data: "qty", searchable: false }
     ]
-  })
+  });
 
-  var dropDown = $('#outboundItemType')
-  var reloadItemNameList = function () {
+  var dropDown = $("#outboundItemType");
+  var reloadItemNameList = function() {
     $.ajax({
-      type: 'GET',
+      type: "GET",
       url: `${apiUrl}/outbound/config`,
-      accept: 'application/json',
-      success: function (data) {
-        let items = data.data
+      accept: "application/json",
+      success: function(data) {
+        let items = data.data;
         if (items) {
-          dropDown.empty()
-          items.map(function (item) {
-            dropDown.append(new Option(item.name))
-          })
+          dropDown.empty();
+          items.map(function(item) {
+            dropDown.append(new Option(item.name));
+          });
         }
       },
-      error: function (resp) {
-        console.log(resp.statusText)
+      error: function(resp) {
+        console.log(resp.statusText);
       }
-    })
-  }
+    });
+  };
 
-  reloadItemNameList()
+  reloadItemNameList();
 
-  $('#sell').on('click', function () {
-    var name = dropDown.val()
-    var qty = $('#count').val()
+  $("#sell").on("click", function() {
+    var name = dropDown.val();
+    var qty = $("#count").val();
     if (!name || !qty) {
-      console.log('name and quantity mandatory')
-      return
+      console.log("name and quantity mandatory");
+      return;
     }
     var payload = {
       name: name,
       qty: Number.parseInt(qty)
-    }
+    };
     $.ajax({
-      type: 'POST',
+      type: "POST",
       url: `${apiUrl}/outbound`,
       data: JSON.stringify(payload),
-      contentType: 'application/json',
-      success: function () {
-        outboundTable.ajax.reload()
-        reloadItemNameList()
+      contentType: "application/json",
+      success: function() {
+        outboundTable.ajax.reload();
+        reloadItemNameList();
       },
-      error: function (resp) {
-        console.log(resp.statusText)
+      error: function(resp) {
+        console.log(resp.statusText);
       }
-    })
-  })
-})
+    });
+  });
+});

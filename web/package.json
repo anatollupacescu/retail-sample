@@ -5,16 +5,17 @@
   "main": "index.js",
   "devDependencies": {
     "cross-env": "^7.0.0",
-    "npm-check-updates": "^4.0.1",
+    "npm-check-updates": "^4.0.3",
     "parcel-bundler": "^1.12.4",
     "prettier": "^1.19.1",
-    "typescript": "^3.7.5"
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "format": "prettier --write --parser typescript \"src/*.ts\"",
     "start": "parcel serve src/index.html",
     "build": "cross-env NODE_ENV=production parcel build --public-url . src/index.html",
-    "watch": "parcel watch src/index.html"
+    "watch": "parcel watch src/index.html",
+    "update-dependencies": "ncu -u"
   },
   "author": "me",
   "license": "ISC",

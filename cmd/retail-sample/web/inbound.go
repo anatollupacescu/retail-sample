@@ -112,28 +112,30 @@ func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	type itm struct {
+	type Entry struct {
+		ID   int    `json:"id"`
 		Name string `json:"name"`
 		Qty  int    `json:"qty"`
 	}
 
-	var result struct {
-		Data []itm `json:"data"`
+	var Response struct {
+		Data []Entry `json:"data"`
 	}
 
-	result.Data = make([]itm, 0)
+	Response.Data = make([]Entry, 0)
 
 	for _, position := range a.stock.CurrentState() {
-		result.Data = append(result.Data, itm{
+		Response.Data = append(Response.Data, Entry{
+			ID:   position.ID,
 			Name: position.Name,
 			Qty:  position.Qty,
 		})
 	}
 
-	e := json.NewEncoder(w)
-	if err := e.Encode(result); err != nil {
+	err := json.NewEncoder(w).Encode(Response)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 }
 
@@ -195,7 +197,7 @@ func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	var t struct {
-		Inbound []inbound `json:"inbounds"`
+		Inbound []inbound `json:"data"`
 	}
 
 	for _, in := range a.stock.ProvisionLog() {

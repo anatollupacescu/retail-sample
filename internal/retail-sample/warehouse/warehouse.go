@@ -46,6 +46,7 @@ type ( //log
 )
 
 type Position struct {
+	ID   int
 	Name string
 	Qty  int
 }
@@ -55,6 +56,7 @@ func (s Stock) CurrentState() (ps []Position) {
 		itemID := int(item.ID)
 		qty := s.Quantity(itemID)
 		ps = append(ps, Position{
+			ID:   itemID,
 			Name: string(item.Name),
 			Qty:  qty,
 		})

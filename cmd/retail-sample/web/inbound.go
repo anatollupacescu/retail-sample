@@ -65,7 +65,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var result = struct {
+	var response = struct {
 		Data DescriptorEntity `json:"data"`
 	}{
 		Data: descriptors,
@@ -73,7 +73,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	err := json.NewEncoder(w).Encode(result)
+	err := json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -83,56 +83,55 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 func (a *App) GetInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	type Record struct {
+	type entry struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	}
 
-	var result struct {
-		Data []Record `json:"data"`
+	var response struct {
+		Data []entry `json:"data"`
 	}
 
-	result.Data = make([]Record, 0)
+	response.Data = make([]entry, 0)
 
 	for _, tp := range a.inventory.All() {
-		result.Data = append(result.Data, Record{
+		response.Data = append(response.Data, entry{
 			ID:   int(tp.ID),
 			Name: string(tp.Name),
 		})
 	}
 
-	e := json.NewEncoder(w)
+	err := json.NewEncoder(w).Encode(response)
 
-	if err := e.Encode(result); err != nil {
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 }
 
 func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	type Entry struct {
+	type entry struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 		Qty  int    `json:"qty"`
 	}
 
-	var Response struct {
-		Data []Entry `json:"data"`
+	var response struct {
+		Data []entry `json:"data"`
 	}
 
-	Response.Data = make([]Entry, 0)
+	response.Data = make([]entry, 0)
 
 	for _, position := range a.stock.CurrentState() {
-		Response.Data = append(Response.Data, Entry{
+		response.Data = append(response.Data, entry{
 			ID:   position.ID,
 			Name: position.Name,
 			Qty:  position.Qty,
 		})
 	}
 
-	err := json.NewEncoder(w).Encode(Response)
+	err := json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -145,17 +144,17 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	var t map[int]int
+	var requestBody map[int]int
 
-	if err := d.Decode(&t); err != nil {
+	if err := d.Decode(&requestBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	type DescriptorEntity map[int]int
-	descriptors := make(DescriptorEntity, len(t))
+	descriptors := make(DescriptorEntity, len(requestBody))
 
-	for id, qty := range t {
+	for id, qty := range requestBody {
 		newQty, err := a.stock.Provision(id, qty)
 
 		if err != nil {
@@ -166,7 +165,7 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		descriptors[id] = newQty
 	}
 
-	var result = struct {
+	var response = struct {
 		Data DescriptorEntity `json:"data"`
 	}{
 		Data: descriptors,
@@ -179,7 +178,7 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 	}
 
-	err := json.NewEncoder(w).Encode(result)
+	err := json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -188,29 +187,28 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	e := json.NewEncoder(w)
 
-	type inbound struct {
+	type entry struct {
 		Time time.Time `json:"time"`
 		ID   int       `json:"id"`
 		Qty  int       `json:"qty"`
 	}
 
-	var t struct {
-		Inbound []inbound `json:"data"`
+	var response struct {
+		Data []entry `json:"data"`
 	}
 
 	for _, in := range a.stock.ProvisionLog() {
-		e := inbound{
+		response.Data = append(response.Data, entry{
 			Time: in.Time,
 			ID:   int(in.ID),
 			Qty:  in.Qty,
-		}
-		t.Inbound = append(t.Inbound, e)
+		})
 	}
 
-	if err := e.Encode(t); err != nil {
+	err := json.NewEncoder(w).Encode(response)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 }

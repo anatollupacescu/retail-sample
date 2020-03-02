@@ -70,30 +70,30 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	var t struct {
+	var requestBody struct {
 		Name  *string     `json:"name"` // pointer so we can test for field absence
 		Items map[int]int `json:"items"`
 	}
 
-	if err := d.Decode(&t); err != nil {
+	if err := d.Decode(&requestBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if t.Name == nil {
+	if requestBody.Name == nil {
 		http.Error(w, "name can not be empty", http.StatusBadRequest)
 		return
 	}
 
 	var ingredients []recipe.Ingredient
-	for id, qty := range t.Items {
+	for id, qty := range requestBody.Items {
 		ingredients = append(ingredients, recipe.Ingredient{
 			ID:  id,
 			Qty: qty,
 		})
 	}
 
-	var recipeName = recipe.Name(*t.Name)
+	var recipeName = recipe.Name(*requestBody.Name)
 
 	recipeID, err := a.recipe.Add(recipeName, ingredients)
 
@@ -104,7 +104,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	type DescriptorEntity map[recipe.Name]recipe.ID
 
-	var result = struct {
+	var response = struct {
 		Data DescriptorEntity `json:"data"`
 	}{
 		Data: DescriptorEntity{
@@ -114,7 +114,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 
-	err = json.NewEncoder(w).Encode(result)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -124,19 +124,19 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var result struct {
+	var response struct {
 		Data []string `json:"data"`
 	}
 
-	result.Data = make([]string, 0)
+	response.Data = make([]string, 0)
 
 	for _, name := range a.recipe.Names() {
-		result.Data = append(result.Data, string(name))
+		response.Data = append(response.Data, string(name))
 	}
 
-	e := json.NewEncoder(w)
-	if err := e.Encode(result); err != nil {
+	err := json.NewEncoder(w).Encode(response)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 }

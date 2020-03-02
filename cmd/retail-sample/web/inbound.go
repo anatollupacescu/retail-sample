@@ -191,6 +191,40 @@ func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+func (a *App) GetStockPosition(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["itemID"]
+
+	itemID, err := strconv.Atoi(rid)
+
+	if err != nil {
+		http.Error(w, "invalid item id provided", http.StatusBadRequest)
+		return
+	}
+
+	type entry struct {
+		Qty int `json:"qty"`
+	}
+
+	qty := a.stock.Quantity(itemID)
+
+	var response = struct {
+		Data entry `json:"data"`
+	}{
+		Data: entry{
+			Qty: qty,
+		},
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
 func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -204,8 +238,8 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type DescriptorEntity map[int]int
-	descriptors := make(DescriptorEntity, len(requestBody))
+	type entry map[int]int
+	data := make(entry, len(requestBody))
 
 	for id, qty := range requestBody {
 		newQty, err := a.stock.Provision(id, qty)
@@ -215,16 +249,16 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		descriptors[id] = newQty
+		data[id] = newQty
 	}
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data entry `json:"data"`
 	}{
-		Data: descriptors,
+		Data: data,
 	}
 
-	switch len(descriptors) {
+	switch len(data) {
 	case 0:
 		w.WriteHeader(http.StatusNoContent)
 	default:

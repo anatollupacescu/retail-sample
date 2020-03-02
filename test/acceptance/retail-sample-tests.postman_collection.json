@@ -420,6 +420,72 @@
 					"response": []
 				},
 				{
+					"name": "check stock position for first item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"status is OK\", function() {",
+									"    pm.response.to.have.status(200);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"body contains updated quantities\", function() {",
+									"    pm.response.to.not.be.error;",
+									"    pm.response.to.be.json;",
+									"        ",
+									"    let body = JSON.parse(responseBody);",
+									"",
+									"    let expectedObj = {",
+									"        qty: 3",
+									"    }",
+									"    pm.expect(body.data).to.eql(expectedObj)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8080/stock/{{inventory_item_id_1}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"stock",
+								"{{inventory_item_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "check updated stock",
 					"event": [
 						{
@@ -690,7 +756,7 @@
 					"response": []
 				},
 				{
-					"name": "check salad recipe was created",
+					"name": "check recipe was created",
 					"event": [
 						{
 							"listen": "test",
@@ -736,7 +802,53 @@
 					"response": []
 				},
 				{
-					"name": "sell one salad",
+					"name": "check recipe present in the collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 200\", function() {",
+									"    pm.response.to.have.status(200)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8080/recipe",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"recipe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "place order for recipe",
 					"event": [
 						{
 							"listen": "test",
@@ -779,7 +891,53 @@
 					"response": []
 				},
 				{
-					"name": "sell more salad than we have stock",
+					"name": "check order is present in log",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"Should return 200\", function() {",
+									"    pm.response.to.have.status(200)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8080/recipe",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"recipe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "place more orders than there is stock",
 					"event": [
 						{
 							"listen": "test",

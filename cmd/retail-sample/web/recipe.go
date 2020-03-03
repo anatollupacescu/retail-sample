@@ -3,66 +3,9 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
-
-func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
-
-	t := struct {
-		ID  *int `json:"id"` // pointer so we can test for field absence
-		Qty *int `json:"qty"`
-	}{}
-
-	if err := d.Decode(&t); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if t.ID == nil || t.Qty == nil {
-		http.Error(w, "name and quantity not provided", http.StatusBadRequest)
-		return
-	}
-
-	if err := a.stock.PlaceOrder(*t.ID, *t.Qty); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-
-	type itm struct {
-		Date time.Time `json:"date"`
-		Name string    `json:"name"`
-		Qty  int       `json:"qty"`
-	}
-
-	var result struct {
-		Data []itm `json:"data"`
-	}
-
-	for _, o := range a.stock.OrderLog() {
-		result.Data = append(result.Data, itm{
-			Date: o.Date,
-			Name: o.Name,
-			Qty:  o.Qty,
-		})
-	}
-
-	e := json.NewEncoder(w)
-
-	if err := e.Encode(result); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-}
 
 func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -128,7 +71,7 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		Data []string `json:"data"`
 	}
 
-	response.Data = make([]string, 0)
+	response.Data = make([]string, 0) //to have  '[]' instead of null
 
 	for _, name := range a.recipe.Names() {
 		response.Data = append(response.Data, string(name))
@@ -139,4 +82,8 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+}
+
+func (a *App) GetRecipe(w http.ResponseWriter, _ *http.Request) {
+	panic("should return recipe entity")
 }

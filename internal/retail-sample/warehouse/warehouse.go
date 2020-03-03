@@ -34,9 +34,9 @@ type ( //log
 	}
 
 	OrderLogEntry struct {
-		Date time.Time
-		Name string
-		Qty  int
+		RecipeID int
+		Date     time.Time
+		Qty      int
 	}
 
 	OutboundLog interface {
@@ -128,8 +128,9 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	}
 
 	s.OutboundLog.Add(OrderLogEntry{
-		Date: time.Now(),
-		Qty:  qty,
+		RecipeID: id,
+		Date:     time.Now(),
+		Qty:      qty,
 	})
 
 	return nil

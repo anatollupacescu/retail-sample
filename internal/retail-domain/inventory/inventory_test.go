@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 func TestInventory(t *testing.T) {

@@ -3,7 +3,7 @@ package recipe
 import (
 	"errors"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 type (

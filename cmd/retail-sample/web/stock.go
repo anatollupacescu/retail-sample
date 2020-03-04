@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
+func (a *WebAdapter) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -24,7 +24,7 @@ func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, position := range a.stock.CurrentState() {
+	for _, position := range a.CurrentStock() {
 		response.Data = append(response.Data, entry{
 			ID:   position.ID,
 			Name: position.Name,
@@ -39,7 +39,7 @@ func (a *App) GetStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *App) GetStockPosition(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -56,7 +56,7 @@ func (a *App) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 		Qty int `json:"qty"`
 	}
 
-	qty := a.stock.Quantity(itemID)
+	qty := a.Quantity(itemID)
 
 	var response = struct {
 		Data entry `json:"data"`
@@ -73,7 +73,7 @@ func (a *App) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -90,7 +90,7 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	data := make(entry, len(requestBody))
 
 	for id, qty := range requestBody {
-		newQty, err := a.stock.Provision(id, qty)
+		newQty, err := a.Provision(id, qty)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -120,7 +120,7 @@ func (a *App) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
+func (a *WebAdapter) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -133,7 +133,7 @@ func (a *App) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 		Data []entry `json:"data"`
 	}
 
-	for _, in := range a.stock.ProvisionLog() {
+	for _, in := range a.App.GetProvisionLog() {
 		response.Data = append(response.Data, entry{
 			Time: in.Time,
 			ID:   int(in.ID),

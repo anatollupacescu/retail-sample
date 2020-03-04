@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	ErrNoName = "ERR_NO_NAME"
 )
 
-func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -36,7 +36,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 
 	for _, name := range names {
 		itemName := inventory.Name(name)
-		createdID, err := a.inventory.Add(itemName)
+		createdID, err := a.Inventory.Add(itemName)
 
 		if err != nil {
 			var msg string
@@ -82,7 +82,7 @@ func (a *App) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
+func (a *WebAdapter) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -96,7 +96,7 @@ func (a *App) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, tp := range a.inventory.All() {
+	for _, tp := range a.Inventory.All() {
 		response.Data = append(response.Data, entry{
 			ID:   int(tp.ID),
 			Name: string(tp.Name),
@@ -122,7 +122,7 @@ func isValidItemID(rid string) bool {
 	return true
 }
 
-func (a *App) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -137,7 +137,7 @@ func (a *App) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 
 	inventoyID := inventory.ID(i)
 
-	inventoryItem := a.inventory.Get(inventoyID)
+	inventoryItem := a.Inventory.Get(inventoyID)
 
 	type entry struct {
 		ID   int    `json:"id"`

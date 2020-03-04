@@ -1,29 +1,29 @@
-package warehouse
+package retailsampleapp1
 
 import (
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
 //recipe book
 
-type MockRecipeBoook struct {
+type MockRecipeBook struct {
 	mock.Mock
 }
 
-func (b *MockRecipeBoook) Add(name recipe.Name, is []recipe.Ingredient) (recipe.ID, error) {
+func (b *MockRecipeBook) Add(name recipe.Name, is []recipe.Ingredient) (recipe.ID, error) {
 	args := b.Called(name, is)
 	return args.Get(0).(recipe.ID), args.Error(0)
 }
 
-func (b *MockRecipeBoook) Get(id recipe.ID) recipe.Recipe {
+func (b *MockRecipeBook) Get(id recipe.ID) recipe.Recipe {
 	return b.Called(id).Get(0).(recipe.Recipe)
 }
 
-func (b *MockRecipeBoook) Names() []recipe.Name {
+func (b *MockRecipeBook) Names() []recipe.Name {
 	return b.Called().Get(0).([]recipe.Name)
 }
 
@@ -73,4 +73,8 @@ type MockOrders struct {
 
 func (m *MockOrders) Add(oe order.OrderEntry) order.ID {
 	return m.Called(oe).Get(0).(order.ID)
+}
+
+func (m *MockOrders) All() []order.Order {
+	return m.Called().Get(0).([]order.Order)
 }

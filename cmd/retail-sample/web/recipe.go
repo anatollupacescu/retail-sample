@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -29,6 +29,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var ingredients []recipe.Ingredient
+
 	for id, qty := range requestBody.Items {
 		ingredients = append(ingredients, recipe.Ingredient{
 			ID:  id,
@@ -38,7 +39,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	var recipeName = recipe.Name(*requestBody.Name)
 
-	recipeID, err := a.recipe.Add(recipeName, ingredients)
+	recipeID, err := a.RecipeBook.Add(recipeName, ingredients)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -64,7 +65,7 @@ func (a *App) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
+func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var response struct {
@@ -73,7 +74,7 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]string, 0) //to have  '[]' instead of null
 
-	for _, name := range a.recipe.Names() {
+	for _, name := range a.RecipeBook.Names() {
 		response.Data = append(response.Data, string(name))
 	}
 
@@ -84,6 +85,6 @@ func (a *App) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *App) GetRecipe(w http.ResponseWriter, _ *http.Request) {
-	panic("should return recipe entity")
+func (a *WebAdapter) GetRecipe(w http.ResponseWriter, _ *http.Request) {
+	panic("not implemented")
 }

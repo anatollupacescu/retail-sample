@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
 func TestAddRecipe(t *testing.T) {

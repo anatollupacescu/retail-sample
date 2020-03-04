@@ -1,4 +1,4 @@
-package warehouse
+package retailsampleapp1
 
 import (
 	"time"

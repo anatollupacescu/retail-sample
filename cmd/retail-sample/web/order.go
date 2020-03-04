@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -25,7 +25,7 @@ func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.stock.PlaceOrder(*requestBody.ID, *requestBody.Qty); err != nil {
+	if err := a.App.PlaceOrder(*requestBody.ID, *requestBody.Qty); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -33,11 +33,11 @@ func (a *App) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (a *App) GetOrder(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) GetOrder(w http.ResponseWriter, r *http.Request) {
 	panic("should return order entity")
 }
 
-func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
+func (a *WebAdapter) ListOrders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	type entry struct {
@@ -52,7 +52,7 @@ func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, o := range a.orders.All() {
+	for _, o := range a.Orders.All() {
 		e := entry{
 			Date:     o.Date,
 			RecipeID: o.RecipeID,

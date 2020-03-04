@@ -1,35 +1,38 @@
-package warehouse_test
+package retailsampleapp1_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+
+	warehouse "github.com/anatollupacescu/retail-sample/internal/retail-sample1"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPlaceOrder(t *testing.T) {
 	t.Run("should reject order with non existent id", func(t *testing.T) {
-		b := warehouse.MockRecipeBoook{}
+		b := warehouse.MockRecipeBook{}
 
 		var zeroRecipe recipe.Recipe
 		b.On("Get", recipe.ID(1)).Return(zeroRecipe)
 
-		stock := warehouse.NewStock(nil, &b, nil, nil)
+		app := warehouse.App{
+			RecipeBook: &b,
+		}
 
-		err := stock.PlaceOrder(1, 10)
+		err := app.PlaceOrder(1, 10)
 
 		assert.Equal(t, warehouse.ErrRecipeNotFound, err)
 		b.AssertExpectations(t)
 	})
 
 	t.Run("should reject outbound when not enough stock", func(t *testing.T) {
-		b := warehouse.MockRecipeBoook{}
+		b := warehouse.MockRecipeBook{}
 
 		b.On("Get", recipe.ID(1)).Return(recipe.Recipe{
 			Name:        "test",
@@ -39,16 +42,20 @@ func TestPlaceOrder(t *testing.T) {
 		data := map[int]int{
 			51: 9,
 		}
-		stock := warehouse.NewStockWithData(nil, &b, nil, nil, data)
 
-		err := stock.PlaceOrder(1, 5)
+		app := warehouse.App{
+			RecipeBook: &b,
+			Stock:      warehouse.NewStockWithData(data),
+		}
+
+		err := app.PlaceOrder(1, 5)
 
 		assert.Equal(t, warehouse.ErrNotEnoughStock, err)
 		b.AssertExpectations(t)
 	})
 
 	t.Run("should update inventory on success", func(t *testing.T) {
-		b := warehouse.MockRecipeBoook{}
+		b := warehouse.MockRecipeBook{}
 
 		b.On("Get", recipe.ID(1)).Return(recipe.Recipe{
 			Name:        recipe.Name("test"),
@@ -61,9 +68,14 @@ func TestPlaceOrder(t *testing.T) {
 		data := map[int]int{
 			51: 11,
 		}
-		stock := warehouse.NewStockWithData(nil, &b, nil, &ol, data)
 
-		err := stock.PlaceOrder(1, 5)
+		app := warehouse.App{
+			RecipeBook: &b,
+			Orders:     &ol,
+			Stock:      warehouse.NewStockWithData(data),
+		}
+
+		err := app.PlaceOrder(1, 5)
 
 		assert.NoError(t, err)
 
@@ -78,9 +90,13 @@ func TestProvision(t *testing.T) {
 		i.On("Get", inventory.ID(1)).Return(inventory.Item{})
 
 		data := map[int]int{1: 0}
-		stock := warehouse.NewStockWithData(&i, nil, nil, nil, data)
 
-		_, err := stock.Provision(1, 31)
+		app := warehouse.App{
+			Inventory: &i,
+			Stock:     warehouse.NewStockWithData(data),
+		}
+
+		_, err := app.Provision(1, 31)
 
 		assert.Equal(t, warehouse.ErrInventoryItemNotFound, err)
 		i.AssertExpectations(t)
@@ -94,20 +110,25 @@ func TestProvision(t *testing.T) {
 			Name: inventory.Name(milk),
 		})
 
-		inboundLog := warehouse.MockInboundLog{}
-		inboundLog.On("Add", mock.Anything, mock.Anything).Times(1)
+		provisionLog := warehouse.MockInboundLog{}
+		provisionLog.On("Add", mock.Anything, mock.Anything).Times(1)
 
 		data := map[int]int{
 			51: 9,
 		}
-		stock := warehouse.NewStockWithData(&i, nil, &inboundLog, nil, data)
 
-		qty, err := stock.Provision(51, 31)
+		app := warehouse.App{
+			Inventory:    &i,
+			ProvisionLog: &provisionLog,
+			Stock:        warehouse.NewStockWithData(data),
+		}
+
+		qty, err := app.Provision(51, 31)
 
 		assert.NoError(t, err)
 		assert.Equal(t, 40, qty)
 
-		inboundLog.AssertExpectations(t)
+		provisionLog.AssertExpectations(t)
 		i.AssertExpectations(t)
 	})
 }

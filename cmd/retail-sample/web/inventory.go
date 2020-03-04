@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 	"github.com/gorilla/mux"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
 )
 
 const (

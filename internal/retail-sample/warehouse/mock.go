@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
 
@@ -66,16 +67,10 @@ func (m *MockInboundLog) List() []ProvisionEntry {
 	return nil
 }
 
-//outbound log
-
-type MockOutboundLog struct {
+type MockOrders struct {
 	mock.Mock
 }
 
-func (m *MockOutboundLog) Add(i OrderLogEntry) {
-	_ = m.Called(i)
-}
-
-func (m *MockOutboundLog) List() []OrderLogEntry {
-	return nil
+func (m *MockOrders) Add(oe order.OrderEntry) order.ID {
+	return m.Called(oe).Get(0).(order.ID)
 }

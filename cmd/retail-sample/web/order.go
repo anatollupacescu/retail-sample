@@ -52,7 +52,7 @@ func (a *App) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, o := range a.stock.OrderLog() {
+	for _, o := range a.orders.All() {
 		e := entry{
 			Date:     o.Date,
 			RecipeID: o.RecipeID,

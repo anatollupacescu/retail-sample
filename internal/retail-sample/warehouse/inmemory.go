@@ -20,16 +20,3 @@ func (i InMemoryProvisionLog) List() (r []ProvisionEntry) {
 	}
 	return
 }
-
-type InMemoryOrderLog map[time.Time]OrderLogEntry
-
-func (m InMemoryOrderLog) Add(i OrderLogEntry) {
-	m[i.Date] = i
-}
-
-func (m InMemoryOrderLog) List() (r []OrderLogEntry) {
-	for _, v := range m {
-		r = append(r, v)
-	}
-	return
-}

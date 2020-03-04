@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/warehouse"
 
@@ -54,8 +55,8 @@ func TestPlaceOrder(t *testing.T) {
 			Ingredients: []recipe.Ingredient{{ID: 51, Qty: 2}},
 		})
 
-		ol := warehouse.MockOutboundLog{}
-		ol.On("Add", mock.Anything).Times(1)
+		ol := warehouse.MockOrders{}
+		ol.On("Add", mock.Anything).Return(order.ID(1))
 
 		data := map[int]int{
 			51: 11,

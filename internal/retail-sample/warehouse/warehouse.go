@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/recipe"
 )
 
@@ -21,6 +22,10 @@ type RecipeBook interface {
 	Names() []recipe.Name
 }
 
+type Orders interface {
+	Add(order.OrderEntry) order.ID
+}
+
 type ( //log
 	ProvisionEntry struct {
 		Time time.Time
@@ -31,17 +36,6 @@ type ( //log
 	ProvisionLog interface {
 		Add(ProvisionEntry)
 		List() []ProvisionEntry
-	}
-
-	OrderLogEntry struct {
-		RecipeID int
-		Date     time.Time
-		Qty      int
-	}
-
-	OrderLog interface {
-		Add(OrderLogEntry)
-		List() []OrderLogEntry
 	}
 )
 
@@ -113,6 +107,8 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 		return ErrRecipeNotFound
 	}
 
+	//TODO zero qty?
+
 	for _, i := range ingredients {
 		presentQty := s.data[i.ID]
 		requestedQty := i.Qty * qty
@@ -127,17 +123,10 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 		s.data[i.ID] = presentQty - requestedQty
 	}
 
-	s.orderLog.Add(OrderLogEntry{
+	s.orders.Add(order.OrderEntry{
 		RecipeID: id,
-		Date:     time.Now(),
 		Qty:      qty,
 	})
 
 	return nil
-}
-
-func (s *Stock) OrderLog() (r []OrderLogEntry) {
-	r = append(r, s.orderLog.List()...)
-
-	return
 }

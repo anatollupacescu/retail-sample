@@ -855,8 +855,8 @@
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 204\", function() {",
-									"    pm.response.to.have.status(204)",
+									"pm.test(\"response is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201)",
 									"})",
 									""
 								],

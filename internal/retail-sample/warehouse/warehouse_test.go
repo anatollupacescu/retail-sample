@@ -19,7 +19,7 @@ func TestPlaceOrder(t *testing.T) {
 		var zeroRecipe recipe.Recipe
 		b.On("Get", recipe.ID(1)).Return(zeroRecipe)
 
-		stock := warehouse.NewStock(nil, nil, &b, nil)
+		stock := warehouse.NewStock(nil, &b, nil, nil)
 
 		err := stock.PlaceOrder(1, 10)
 
@@ -38,7 +38,7 @@ func TestPlaceOrder(t *testing.T) {
 		data := map[int]int{
 			51: 9,
 		}
-		stock := warehouse.NewStockWithData(nil, nil, &b, nil, data)
+		stock := warehouse.NewStockWithData(nil, &b, nil, nil, data)
 
 		err := stock.PlaceOrder(1, 5)
 
@@ -60,7 +60,7 @@ func TestPlaceOrder(t *testing.T) {
 		data := map[int]int{
 			51: 11,
 		}
-		stock := warehouse.NewStockWithData(nil, nil, &b, &ol, data)
+		stock := warehouse.NewStockWithData(nil, &b, nil, &ol, data)
 
 		err := stock.PlaceOrder(1, 5)
 
@@ -77,7 +77,7 @@ func TestProvision(t *testing.T) {
 		i.On("Get", inventory.ID(1)).Return(inventory.Item{})
 
 		data := map[int]int{1: 0}
-		stock := warehouse.NewStockWithData(nil, &i, nil, nil, data)
+		stock := warehouse.NewStockWithData(&i, nil, nil, nil, data)
 
 		_, err := stock.Provision(1, 31)
 
@@ -99,7 +99,7 @@ func TestProvision(t *testing.T) {
 		data := map[int]int{
 			51: 9,
 		}
-		stock := warehouse.NewStockWithData(&inboundLog, &i, nil, nil, data)
+		stock := warehouse.NewStockWithData(&i, nil, &inboundLog, nil, data)
 
 		qty, err := stock.Provision(51, 31)
 

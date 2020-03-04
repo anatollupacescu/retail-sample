@@ -4,13 +4,13 @@ import (
 	"time"
 )
 
-type InMemoryInboundLog map[time.Time]ProvisionEntry
+type InMemoryProvisionLog map[time.Time]ProvisionEntry
 
-func (i InMemoryInboundLog) Add(v ProvisionEntry) {
+func (i InMemoryProvisionLog) Add(v ProvisionEntry) {
 	i[time.Now()] = v
 }
 
-func (i InMemoryInboundLog) List() (r []ProvisionEntry) {
+func (i InMemoryProvisionLog) List() (r []ProvisionEntry) {
 	for t, v := range i {
 		r = append(r, ProvisionEntry{
 			Time: t,
@@ -21,13 +21,13 @@ func (i InMemoryInboundLog) List() (r []ProvisionEntry) {
 	return
 }
 
-type InMemoryOutboundLog map[time.Time]OrderLogEntry
+type InMemoryOrderLog map[time.Time]OrderLogEntry
 
-func (m InMemoryOutboundLog) Add(i OrderLogEntry) {
+func (m InMemoryOrderLog) Add(i OrderLogEntry) {
 	m[i.Date] = i
 }
 
-func (m InMemoryOutboundLog) List() (r []OrderLogEntry) {
+func (m InMemoryOrderLog) List() (r []OrderLogEntry) {
 	for _, v := range m {
 		r = append(r, v)
 	}

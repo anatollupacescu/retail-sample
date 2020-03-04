@@ -28,7 +28,7 @@ type ( //log
 		Qty  int
 	}
 
-	InboundLog interface {
+	ProvisionLog interface {
 		Add(ProvisionEntry)
 		List() []ProvisionEntry
 	}
@@ -39,7 +39,7 @@ type ( //log
 		Qty      int
 	}
 
-	OutboundLog interface {
+	OrderLog interface {
 		Add(OrderLogEntry)
 		List() []OrderLogEntry
 	}
@@ -52,7 +52,7 @@ type Position struct {
 }
 
 func (s Stock) CurrentState() (ps []Position) {
-	for _, item := range s.Inventory.All() {
+	for _, item := range s.inventory.All() {
 		itemID := int(item.ID)
 		qty := s.Quantity(itemID)
 		ps = append(ps, Position{
@@ -72,15 +72,15 @@ func (s Stock) Provision(id, qty int) (int, error) {
 
 	itemID := inventory.ID(id)
 
-	if s.Inventory.Get(itemID) == zeroInventoryItem {
+	if s.inventory.Get(itemID) == zeroInventoryItem {
 		return 0, ErrInventoryItemNotFound
 	}
 
-	newQty := s.Data[id] + qty
+	newQty := s.data[id] + qty
 
-	s.Data[id] = newQty
+	s.data[id] = newQty
 
-	s.InboundLog.Add(ProvisionEntry{
+	s.provisionLog.Add(ProvisionEntry{
 		ID:  id,
 		Qty: qty,
 	})
@@ -89,11 +89,11 @@ func (s Stock) Provision(id, qty int) (int, error) {
 }
 
 func (s Stock) Quantity(id int) int {
-	return s.Data[id]
+	return s.data[id]
 }
 
 func (s Stock) ProvisionLog() (r []ProvisionEntry) {
-	r = append(r, s.InboundLog.List()...)
+	r = append(r, s.provisionLog.List()...)
 
 	return
 }
@@ -105,7 +105,7 @@ var (
 
 func (s *Stock) PlaceOrder(id int, qty int) error {
 	recipeID := recipe.ID(id)
-	r := s.RecipeBook.Get(recipeID)
+	r := s.recipeBook.Get(recipeID)
 
 	ingredients := r.Ingredients
 
@@ -114,7 +114,7 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	}
 
 	for _, i := range ingredients {
-		presentQty := s.Data[i.ID]
+		presentQty := s.data[i.ID]
 		requestedQty := i.Qty * qty
 		if requestedQty > presentQty {
 			return ErrNotEnoughStock
@@ -122,12 +122,12 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 	}
 
 	for _, i := range ingredients {
-		presentQty := s.Data[i.ID]
+		presentQty := s.data[i.ID]
 		requestedQty := i.Qty * qty
-		s.Data[i.ID] = presentQty - requestedQty
+		s.data[i.ID] = presentQty - requestedQty
 	}
 
-	s.OutboundLog.Add(OrderLogEntry{
+	s.orderLog.Add(OrderLogEntry{
 		RecipeID: id,
 		Date:     time.Now(),
 		Qty:      qty,
@@ -137,7 +137,7 @@ func (s *Stock) PlaceOrder(id int, qty int) error {
 }
 
 func (s *Stock) OrderLog() (r []OrderLogEntry) {
-	r = append(r, s.OutboundLog.List()...)
+	r = append(r, s.orderLog.List()...)
 
 	return
 }

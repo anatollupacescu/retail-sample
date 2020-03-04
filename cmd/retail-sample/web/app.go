@@ -19,15 +19,13 @@ func newInMemoryApp() App {
 	recipeStore := recipe.NewInMemoryStore()
 	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
 
+	provisionLog := make(warehouse.InMemoryProvisionLog)
+	orderLog := make(warehouse.InMemoryOrderLog)
+	stock := warehouse.NewStock(inventory, recipeBook, provisionLog, orderLog)
+
 	return App{
 		inventory: inventory,
 		recipe:    recipeBook,
-		stock: warehouse.Stock{
-			Inventory:   inventory,
-			RecipeBook:  recipeBook,
-			InboundLog:  make(warehouse.InMemoryInboundLog),
-			OutboundLog: make(warehouse.InMemoryOutboundLog),
-			Data:        make(map[int]int),
-		},
+		stock:     stock,
 	}
 }

@@ -6,6 +6,45 @@
 	},
 	"item": [
 		{
+			"name": "initial",
+			"item": [
+				{
+					"name": "health check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"exec": [
+									"pm.test(\"response should be 200\", function () {",
+									"    pm.response.to.be.ok;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8081/health",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "add inventory types",
 			"item": [
 				{
@@ -1049,39 +1088,6 @@
 				}
 			],
 			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "health",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
-						"exec": [
-							"pm.test(\"response should be 200\", function () {",
-							"    pm.response.to.be.ok;",
-							"});",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:8081/health",
-					"host": [
-						"localhost"
-					],
-					"port": "8081",
-					"path": [
-						"health"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}

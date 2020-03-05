@@ -13,12 +13,12 @@ type (
 	Order struct {
 		OrderEntry
 		Date time.Time
-		id   ID
+		ID   ID
 	}
 
 	store interface {
-		add(OrderEntry) ID
-		all() []OrderEntry
+		add(Order) ID
+		all() []Order
 	}
 
 	Orders struct {
@@ -27,13 +27,14 @@ type (
 )
 
 func (o Orders) Add(oe OrderEntry) ID {
-	return o.Store.add(oe)
+	ord := Order{
+		OrderEntry: oe,
+		Date:       time.Now(),
+	}
+
+	return o.Store.add(ord)
 }
 
-func (o Orders) Get(ID) Order {
-	return Order{}
-}
-
-func (Orders) All() (os []Order) {
-	return
+func (o Orders) All() (os []Order) {
+	return o.Store.all()
 }

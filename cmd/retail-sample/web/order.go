@@ -34,7 +34,7 @@ func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *WebAdapter) GetOrder(w http.ResponseWriter, r *http.Request) {
-	panic("should return order entity")
+	panic("not implemented")
 }
 
 func (a *WebAdapter) ListOrders(w http.ResponseWriter, r *http.Request) {

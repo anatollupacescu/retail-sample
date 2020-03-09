@@ -1,48 +1,80 @@
-$(document).ready(function() {
-  let apiUrl = process.env.API_URL;
-  var t = $("#inventoryTable").DataTable({
-    ajax: `${apiUrl}/inbound/config`,
-    columns: [{ data: "id" }, { data: "type" }]
-  });
+import $ from 'jquery'
+import axios from 'axios'
 
-  $("#inventoryTable tbody").on("click", "tr", function() {
-    $(this).toggleClass("list-group-item-dark");
-  });
+function fetchInventoryData (apiUrl: string) {
+  axios
+    .get(`${apiUrl}/inventory`)
+    .then(function (response) {
+      populateTable(response.data)
+    })
+    .catch(function (error) {
+      console.error(error)
+    })
+    .then(function () {
+      console.log('done fetching')
+    })
+}
 
-  var nameInput = $("#name");
+interface inventoryItem {
+  id: number
+  name: string
+}
 
-  nameInput.keyup(function() {
-    $("#nonempty.invalid-feedback").removeClass("d-block");
-    $("#unique.invalid-feedback").removeClass("d-block");
-  });
+function populateTable (req: any) {
+  let table = $('#inventoryTable tbody')[0]
+  let rows = req.data.sort((i1: inventoryItem, i2: inventoryItem) => {
+    return i1.id > i2.id
+  })
+  rows.forEach((element: inventoryItem) => {
+    let row = table.insertRow(0)
+    row.insertCell(0).innerHTML = element.id
+    row.insertCell(1).innerHTML = element.name
+  })
+}
 
-  var form = $("#mainForm");
+$(document).ready(function () {
+  let apiUrl = process.env.API_URL
 
-  form.on("submit", function(e: { preventDefault: () => void }) {
-    e.preventDefault();
+  if (!apiUrl) {
+    return
+  }
 
-    var data = nameInput.val();
+  fetchInventoryData(apiUrl)
+
+  $('#inventoryTable tbody').on('click', 'tr', function () {
+    $(this).toggleClass('list-group-item-dark')
+  })
+
+  let nameInput = $('#name')
+
+  nameInput.keyup(function () {
+    $('#nonempty.invalid-feedback').removeClass('d-block')
+    $('#unique.invalid-feedback').removeClass('d-block')
+  })
+
+  var form = $('#mainForm')
+
+  form.on('submit', function (e: { preventDefault: () => void }) {
+    e.preventDefault()
+
+    var data = nameInput.val()
 
     if (!data) {
-      $("#nonempty.invalid-feedback").addClass("d-block");
-      return;
+      $('#nonempty.invalid-feedback').addClass('d-block')
+      return
     }
 
-    $.ajax({
-      type: "POST",
-      crossDomain: true,
-      url: `${apiUrl}/inbound/config`,
-      data: JSON.stringify([data]),
-      contentType: "application/json",
-      success: function() {
-        t.ajax.reload();
-        nameInput.val("");
-      },
-      error: function(resp: { responseText: string }) {
-        if (resp.responseText === "ERR_UNIQUE") {
-          $("#unique.invalid-feedback").addClass("d-block");
+    axios
+      .post(`${apiUrl}/inventory`, [data])
+      .then(function () {
+        $('#inventoryTable tbody tr').remove()
+        fetchInventoryData(apiUrl)
+        nameInput.val('')
+      })
+      .catch(function (resp) {
+        if (resp.response.data === 'ERR_UNIQUE') {
+          $('#unique.invalid-feedback').addClass('d-block')
         }
-      }
-    });
-  });
-});
+      })
+  })
+})

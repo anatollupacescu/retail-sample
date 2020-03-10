@@ -14,6 +14,8 @@ import (
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/web"
 	"github.com/anatollupacescu/retail-sample/internal/version"
+
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -59,9 +61,11 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	corsDiagRouter := cors.Default().Handler(diagRouter)
+
 	diag := http.Server{
 		Addr:    net.JoinHostPort("", diagPort),
-		Handler: diagRouter,
+		Handler: corsDiagRouter,
 	}
 
 	shutdown := make(chan error, 2)

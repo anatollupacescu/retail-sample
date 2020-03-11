@@ -1,42 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
-
-{{> partial/head}}
-
-<body class="bg-light">
-
-{{> partial/header}}
-
 <div class="container">
   <div id="accordion">
     <div class="card">
       <div class="card-header" id="headingOne">
         <h5 class="mb-0">
-          <button
-            class="btn btn-link"
-            data-toggle="collapse"
-            data-target="#collapseOne"
-            aria-expanded="true"
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
             aria-controls="collapseOne">
-            Provision stock
+            New sale
           </button>
         </h5>
       </div>
 
-      <div
-        id="collapseOne"
-        class="collapse hide"
-        aria-labelledby="headingOne"
-        data-parent="#accordion">
+      <div id="collapseOne" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordion">
         <div class="card-body">
           <div class="row">
             <div class="col-md-3">
               <div class="form-group">
-                <label for="inventoryItemType" class="">Outbound product<br/>
-                </label>
-                <select
-                  class="form-control custom-select"
-                  id="inventoryItemType">
+                <label for="outboundItemType" class="">Outbound product<br /></label>
+                <select class="form-control custom-select" id="outboundItemType">
                   <option selected="">Choose one</option>
                 </select>
               </div>
@@ -50,7 +30,7 @@
           </div>
           <div class="row pb-4">
             <div class="col-md-12">
-              <button id="add" class="btn btn-secondary">Add</button>
+              <button id="sell" class="btn btn-secondary">Sell</button>
             </div>
           </div>
         </div>
@@ -62,9 +42,10 @@
 <div class="container">
   <div class="row pt-3">
     <div class="col-md-12">
-      <table id="stock" class="table table-striped table-bordered">
+      <table id="outboundList" class="table table-striped table-bordered">
         <thead>
           <tr>
+            <th>Time</th>
             <th>Name</th>
             <th>Count</th>
           </tr>
@@ -73,11 +54,3 @@
     </div>
   </div>
 </div>
-
-{{> partial/footer}}
-
-<script lang="application/javascript" src="./stock.ts"></script>
-
-</body>
-
-</html>

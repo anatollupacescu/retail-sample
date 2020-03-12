@@ -3,26 +3,39 @@ interface inventoryItem {
   id: number
 }
 
-interface adapters {
-  fetchInventoryState: Function
+export class apiAdapter {
+  fetchInventoryState!: Function
+  addInventoryItem!: Function
 }
 
 export default class RetailUI {
-  inventory: inventoryItem[]
-  apiURL: string
-  adapters: adapters
+  private inventory: inventoryItem[]
+  apiAdapter: apiAdapter
 
-  constructor (apiURL: string, adapters: adapters) {
+  constructor (apiAdapter: apiAdapter) {
     this.inventory = []
-    this.apiURL = apiURL
-    this.adapters = adapters
+    this.apiAdapter = apiAdapter
   }
 
   fetchInventoryState () {
-    this.adapters.fetchInventoryState()
+    return this.apiAdapter.fetchInventoryState()
   }
 
   addInventoryItem (itemName: string) {
-    console.log(itemName)
+    if (!itemName || itemName.length === 0) {
+      return 'name empty'
+    }
+    if (!this.nameIsUnique(itemName)) {
+      return 'name present'
+    }
+    let addedItem = this.apiAdapter.addInventoryItem(itemName)
+
+    this.inventory.push(addedItem)
+    return ''
+  }
+
+  private nameIsUnique (name: string) {
+    let found = this.inventory.find(item => item.name === name)
+    return found === undefined
   }
 }

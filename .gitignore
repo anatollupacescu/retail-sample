@@ -23,3 +23,5 @@ web/node_modules/
 web/.cache/
 web/dist/
 web/*.lock
+web/src/index.html
+web/lib

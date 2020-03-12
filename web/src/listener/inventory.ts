@@ -1,9 +1,9 @@
 import axios from 'axios'
 import $ = require('jquery')
 
-export function initInventory (api: string) {
-  fetchInventoryData(api)
+import RetailApp from '../retailapp/main'
 
+export function registerInventoryListeners (app: RetailApp) {
   $('#inventoryTable tbody').on('click', 'tr', function () {
     $(this).toggleClass('list-group-item-dark')
   })

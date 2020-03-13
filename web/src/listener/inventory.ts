@@ -1,8 +1,8 @@
 import $ = require('jquery')
 
-import RetailInventory from '../retailapp/inventory'
+import InventoryClient from '../retailapp/inventory'
 
-export function initializeInventory(app: RetailInventory) {
+export function initializeInventory(app: InventoryClient) {
   app.fetchInventoryState().then(() => {
     populateTable(app.getInventory())
   })
@@ -55,13 +55,13 @@ interface inventoryItem {
 }
 
 function populateTable(items: inventoryItem[]) {
-  let table = $('#inventoryTable tbody')[0]
+  let table = <HTMLTableElement>$('#inventoryTable tbody')[0]
   let rows = items.sort((i1: inventoryItem, i2: inventoryItem) => {
     return i1.id - i2.id
   })
   rows.forEach((element: inventoryItem) => {
-    let row = table.insertRow(0)
-    row.insertCell(0).innerHTML = element.id
+    let row = <HTMLTableRowElement>table.insertRow(0)
+    row.insertCell(0).innerHTML = `${element.id}`
     row.insertCell(1).innerHTML = element.name
   })
 }

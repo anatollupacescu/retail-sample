@@ -1,14 +1,15 @@
 import 'mocha'
-import RetailInventory from './inventory'
 import chai = require('chai')
 import spies = require('chai-spies')
+
+import InventoryClient from './inventory'
 
 chai.use(spies)
 let expect = chai.expect
 
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
-    let app = new RetailInventory('')
+    let app = new InventoryClient('')
 
     it('Should err', async () => {
       // no done
@@ -19,7 +20,7 @@ describe('saving a new item', () => {
   })
 
   describe('when item name is already present', () => {
-    let app = new RetailInventory('')
+    let app = new InventoryClient('')
 
     let mockApi = chai.spy.on(app, 'apiAddInventoryItem', () => ({
       data: {
@@ -39,7 +40,7 @@ describe('saving a new item', () => {
   })
 
   describe('when item name is unique', () => {
-    let app = new RetailInventory('')
+    let app = new InventoryClient('')
 
     let mockApiResponses = [
       {
@@ -71,7 +72,7 @@ describe('saving a new item', () => {
 })
 
 describe('fetching inventory state', () => {
-  let app = new RetailInventory('')
+  let app = new InventoryClient('')
 
   var mockApi = chai.spy.on(app, 'apiFetchInventoryState', () => ({
     data: {

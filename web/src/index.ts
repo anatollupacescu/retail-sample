@@ -1,7 +1,7 @@
 import $ = require('jquery')
 import { initializeInventory } from './listener/inventory'
 import { apiIsHealthy } from './health'
-import RetailInventory from './retailapp/inventory'
+import InventoryClient from './retailapp/inventory'
 
 $(document).ready(async () => {
   $('a[data-toggle="tab"]').on('click', function(e) {
@@ -24,7 +24,7 @@ $(document).ready(async () => {
   }
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let retailInventory = new RetailInventory(apiEndpoint)
+  let retailInventory = new InventoryClient(apiEndpoint)
 
   //register page listeners and load initial data
   initializeInventory(retailInventory)

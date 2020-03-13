@@ -5,7 +5,7 @@ interface inventoryItem {
   id: number
 }
 
-export default class RetailInventory {
+export default class InventoryClient {
   private endpoint: string
   private inventory: inventoryItem[] = []
 

@@ -1,25 +1,25 @@
-import { lol } from './health'
+import { lol } from "./health";
 
 class Student {
-  fullName: string
+  fullName: string;
 
-  constructor (
+  constructor(
     public firstName: string,
     public middleInitial: string,
     public lastName: string
   ) {
-    this.fullName = firstName + ' ' + middleInitial + ' ' + lastName
+    this.fullName = firstName + " " + middleInitial + " " + lastName;
   }
 
-  doGreet () {
-    return this.fullName + ' says ' + lol()
+  doGreet() {
+    return this.fullName + " says " + lol();
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelector('#message')?.addEventListener('keyup', function () {
-    let msg = document.querySelector('#message') as HTMLInputElement
-    let user = new Student('Jane', msg.value, 'Shapokleak')
-    console.log(user.doGreet())
-  })
-})
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelector("#message")?.addEventListener("keyup", function() {
+    let msg = document.querySelector("#message") as HTMLInputElement;
+    let user = new Student("Jane", msg.value, "Shapokleak");
+    console.log(user.doGreet());
+  });
+});

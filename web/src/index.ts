@@ -1,9 +1,9 @@
 import $ = require('jquery')
-import { registerInventoryListeners } from './listener/inventory'
+import { initializeInventory } from './listener/inventory'
 import { apiIsHealthy } from './health'
-import RetailUI from './retailapp/main'
+import RetailInventory from './retailapp/inventory'
 
-$(document).ready(function () {
+$(document).ready(async () => {
   $('a[data-toggle="tab"]').on('click', function (e) {
     console.log('current tab', e.target.id) // newly activated tab
   })
@@ -17,17 +17,15 @@ $(document).ready(function () {
   }
 
   let diagEndpoint = `${apiUrl}:${diagPort}`
-  if (!apiIsHealthy(diagEndpoint)) {
+  let apiStatus = await apiIsHealthy(diagEndpoint)
+  if (!apiStatus) {
     console.error('diagnostic check failed', diagEndpoint)
     return
   }
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let retailApp = new RetailUI(apiEndpoint)
+  let retailInventory = new RetailInventory(apiEndpoint)
 
-  //register page listeners...
-  registerInventoryListeners(retailApp)
-
-  //fetch initial state
-  retailApp.fetchInventoryState()
+  //register page listeners and load initial data
+  initializeInventory(retailInventory)
 })

@@ -1,74 +1,67 @@
-import axios from 'axios'
-import $ = require('jquery')
+import $ = require("jquery");
 
-import RetailApp from '../retailapp/main'
+import RetailInventory from "../retailapp/inventory";
 
-export function registerInventoryListeners (app: RetailApp) {
-  $('#inventoryTable tbody').on('click', 'tr', function () {
-    $(this).toggleClass('list-group-item-dark')
-  })
+export function initializeInventory(app: RetailInventory) {
+  app.fetchInventoryState().then(() => {
+    populateTable(app.getInventory());
+  });
 
-  let nameInput = $('#name')
+  $("#inventoryTable tbody").on("click", "tr", function() {
+    $(this).toggleClass("list-group-item-dark");
+  });
 
-  nameInput.keyup(function () {
-    $('#nonempty.invalid-feedback').removeClass('d-block')
-    $('#unique.invalid-feedback').removeClass('d-block')
-  })
+  let nameInput = $("#name");
 
-  var form = $('#mainForm')
+  nameInput.keyup(function() {
+    $("#nonempty.invalid-feedback").removeClass("d-block");
+    $("#unique.invalid-feedback").removeClass("d-block");
+  });
 
-  form.on('submit', function (e: { preventDefault: () => void }) {
-    e.preventDefault()
+  $("#mainForm").on("submit", function(e) {
+    e.preventDefault();
 
-    var data = nameInput.val()
+    var data = <string>nameInput.val();
 
-    if (!data) {
-      $('#nonempty.invalid-feedback').addClass('d-block')
-      return
-    }
-
-    axios
-      .post(`${api}/inventory`, [data])
-      .then(function () {
-        $('#inventoryTable tbody tr').remove()
-        fetchInventoryData(api)
-        nameInput.val('')
-      })
-      .catch(function (resp) {
-        if (resp.response.data === 'ERR_UNIQUE') {
-          $('#unique.invalid-feedback').addClass('d-block')
+    app
+      .addInventoryItem(data)
+      .then(rsp => {
+        if (rsp === "name empty") {
+          $("#nonempty.invalid-feedback").addClass("d-block");
+          return;
         }
+        if (rsp === "name present") {
+          $("#unique.invalid-feedback").addClass("d-block");
+          return;
+        }
+        $("#inventoryTable tbody tr").remove();
+        populateTable(app.getInventory());
+        nameInput.val("");
       })
-  })
-}
-
-function fetchInventoryData (apiUrl: string) {
-  axios
-    .get(`${apiUrl}/inventory`)
-    .then(function (response) {
-      populateTable(response.data)
-    })
-    .catch(function (error) {
-      console.error(error)
-    })
-    .then(function () {
-      console.log('done fetching')
-    })
+      .catch(err => {
+        if (err === "ERR_EMPTY") {
+          $("#nonempty.invalid-feedback").addClass("d-block");
+        }
+        if (err === "ERR_UNIQUE") {
+          $("#unique.invalid-feedback").addClass("d-block");
+        }
+      });
+  });
 }
 
 interface inventoryItem {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
-function populateTable (req: any) {
-  let table = $('#inventoryTable tbody')[0]
-  let rows = req.data.sort((i1: inventoryItem, i2: inventoryItem) => {
-    return i1.id > i2.id
-  })
+function populateTable(items: inventoryItem[]) {
+  let table = $("#inventoryTable tbody")[0];
+  let rows = items.sort((i1: inventoryItem, i2: inventoryItem) => {
+    return i1.id - i2.id;
+  });
   rows.forEach((element: inventoryItem) => {
-    let row = table.insertRow(0)
-    row.insertCell(0).innerHTML = element.id
-    row.insertCell(1).innerHTML = element.name
-  })
+    let row = table.insertRow(0);
+    row.insertCell(0).innerHTML = element.id;
+    row.insertCell(1).innerHTML = element.name;
+  });
 }

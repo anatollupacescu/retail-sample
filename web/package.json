@@ -21,7 +21,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "format": "prettier --write --parser typescript \"src/*.ts\"",
+    "format": "prettier --write --parser typescript \"src/**/*.ts\"",
     "test": "mocha -r ts-node/register src/**/*.spec.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.spec.ts\" npm run test",
     "start": "parcel serve src/index.html",
@@ -33,6 +33,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.19.2",
-    "jquery": "^3.4.1"
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.0"
   }
 }

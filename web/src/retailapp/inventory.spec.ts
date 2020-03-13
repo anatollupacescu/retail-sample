@@ -1,93 +1,93 @@
-import "mocha";
-import RetailInventory from "./inventory";
-import chai = require("chai");
-import spies = require("chai-spies");
+import 'mocha'
+import RetailInventory from './inventory'
+import chai = require('chai')
+import spies = require('chai-spies')
 
-chai.use(spies);
-let expect = chai.expect;
+chai.use(spies)
+let expect = chai.expect
 
-describe("saving a new item", () => {
-  describe("when item name is empty", () => {
-    let app = new RetailInventory("");
+describe('saving a new item', () => {
+  describe('when item name is empty', () => {
+    let app = new RetailInventory('')
 
-    it("Should err", async () => {
+    it('Should err', async () => {
       // no done
-      let result = await app.addInventoryItem("");
-      expect(result).to.equal("name empty");
-      expect(app.getInventory()).to.have.length(0);
-    });
-  });
+      let result = await app.addInventoryItem('')
+      expect(result).to.equal('name empty')
+      expect(app.getInventory()).to.have.length(0)
+    })
+  })
 
-  describe("when item name is already present", () => {
-    let app = new RetailInventory("");
+  describe('when item name is already present', () => {
+    let app = new RetailInventory('')
 
-    let mockApi = chai.spy.on(app, "apiAddInventoryItem", () => ({
+    let mockApi = chai.spy.on(app, 'apiAddInventoryItem', () => ({
       data: {
         data: {
           test: 1
         }
       }
-    }));
+    }))
 
-    it("Should err", async () => {
-      await app.addInventoryItem("test");
-      let result = await app.addInventoryItem("test");
-      expect(mockApi).to.have.been.called.exactly(1);
-      expect(result).to.equal("name present");
-      expect(app.getInventory()).to.have.length(1);
-    });
-  });
+    it('Should err', async () => {
+      await app.addInventoryItem('test')
+      let result = await app.addInventoryItem('test')
+      expect(mockApi).to.have.been.called.exactly(1)
+      expect(result).to.equal('name present')
+      expect(app.getInventory()).to.have.length(1)
+    })
+  })
 
-  describe("when item name is unique", () => {
-    let app = new RetailInventory("");
+  describe('when item name is unique', () => {
+    let app = new RetailInventory('')
 
     let mockApiResponses = [
       {
-        name: "test1",
+        name: 'test1',
         id: 2
       },
       {
-        name: "test",
+        name: 'test',
         id: 1
       }
-    ];
+    ]
 
-    let mockApi = chai.spy.on(app, "apiAddInventoryItem", () => ({
+    let mockApi = chai.spy.on(app, 'apiAddInventoryItem', () => ({
       data: {
         data: {
           data: mockApiResponses.pop()
         }
       }
-    }));
+    }))
 
-    app.addInventoryItem("test");
-    app.addInventoryItem("test1");
+    app.addInventoryItem('test')
+    app.addInventoryItem('test1')
 
-    it("should make the api call", () => {
-      expect(mockApi).to.have.been.called.exactly(2);
-      expect(app.getInventory()).to.have.length(2);
-    });
-  });
-});
+    it('should make the api call', () => {
+      expect(mockApi).to.have.been.called.exactly(2)
+      expect(app.getInventory()).to.have.length(2)
+    })
+  })
+})
 
-describe("fetching inventory state", () => {
-  let app = new RetailInventory("");
+describe('fetching inventory state', () => {
+  let app = new RetailInventory('')
 
-  var mockApi = chai.spy.on(app, "apiFetchInventoryState", () => ({
+  var mockApi = chai.spy.on(app, 'apiFetchInventoryState', () => ({
     data: {
       data: [
         {
-          name: "item1",
+          name: 'item1',
           id: 2
         }
       ]
     }
-  }));
+  }))
 
-  app.fetchInventoryState();
+  app.fetchInventoryState()
 
-  it("should make the api call", () => {
-    expect(mockApi).to.have.been.called.exactly(1);
-    expect(app.getInventory()).to.have.length(1);
-  });
-});
+  it('should make the api call', () => {
+    expect(mockApi).to.have.been.called.exactly(1)
+    expect(app.getInventory()).to.have.length(1)
+  })
+})

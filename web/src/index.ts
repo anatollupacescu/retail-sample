@@ -4,7 +4,7 @@ import { apiIsHealthy } from './health'
 import RetailInventory from './retailapp/inventory'
 
 $(document).ready(async () => {
-  $('a[data-toggle="tab"]').on('click', function (e) {
+  $('a[data-toggle="tab"]').on('click', function(e) {
     console.log('current tab', e.target.id) // newly activated tab
   })
   let apiUrl = process.env.API_URL

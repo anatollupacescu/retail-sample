@@ -1,109 +1,109 @@
 $(document).ready(function() {
-  let apiUrl = process.env.API_URL;
+  let apiUrl = process.env.API_URL
 
-  var fpTable = $("#finishedProducts").DataTable({
+  var fpTable = $('#finishedProducts').DataTable({
     ajax: `${apiUrl}/outbound/config`,
-    columns: [{ data: "name" }, { data: "count", searchable: false }]
-  });
+    columns: [{ data: 'name' }, { data: 'count', searchable: false }]
+  })
 
-  var items = $("#items").DataTable({
-    columns: [{ data: "name" }, { data: "count" }]
-  });
+  var items = $('#items').DataTable({
+    columns: [{ data: 'name' }, { data: 'count' }]
+  })
 
   var reloadItemNameList = function() {
     $.ajax({
-      type: "GET",
+      type: 'GET',
       url: `${apiUrl}/inbound/config`,
-      accept: "application/json",
+      accept: 'application/json',
       success: function(data) {
-        let items = data.data;
+        let items = data.data
         if (items) {
-          $("#itemType").empty();
+          $('#itemType').empty()
           items.map(function(item) {
-            $("#itemType").append(new Option(item.type));
-          });
+            $('#itemType').append(new Option(item.type))
+          })
         }
       },
       error: function(resp) {
-        console.log(resp.statusText);
+        console.log(resp.statusText)
       }
-    });
-  };
+    })
+  }
 
-  reloadItemNameList();
+  reloadItemNameList()
 
-  $("#createNew").on("click", function() {
-    var tableData = items.rows().data();
-    var fpName = $("#finishedProductName").val();
-    console.log("data gt", JSON.stringify(tableData));
+  $('#createNew').on('click', function() {
+    var tableData = items.rows().data()
+    var fpName = $('#finishedProductName').val()
+    console.log('data gt', JSON.stringify(tableData))
     if (!items.rows().count()) {
-      $("#noRowsErr.invalid-feedback").addClass("d-block");
+      $('#noRowsErr.invalid-feedback').addClass('d-block')
     }
     if (!fpName) {
-      $("#noNameErr.invalid-feedback").addClass("d-block");
+      $('#noNameErr.invalid-feedback').addClass('d-block')
     }
     if (tableData && fpName) {
-      var cs = {};
+      var cs = {}
       tableData.each(function(i) {
-        cs[i.name] = Number.parseInt(i.count);
-      });
+        cs[i.name] = Number.parseInt(i.count)
+      })
       var payload = {
         name: fpName,
         items: cs
-      };
+      }
       $.ajax({
-        type: "POST",
+        type: 'POST',
         url: `${apiUrl}/outbound/config`,
         data: JSON.stringify(payload),
-        contentType: "application/json",
+        contentType: 'application/json',
         success: function() {
-          items.clear().draw();
-          fpTable.ajax.reload();
-          $("#finishedProductName").val("");
-          reloadItemNameList();
+          items.clear().draw()
+          fpTable.ajax.reload()
+          $('#finishedProductName').val('')
+          reloadItemNameList()
         },
         error: function(resp) {
-          if (resp.responseText === "ERR_UNIQUE") {
-            $("#unique.invalid-feedback").addClass("d-block");
+          if (resp.responseText === 'ERR_UNIQUE') {
+            $('#unique.invalid-feedback').addClass('d-block')
           }
         }
-      });
+      })
     }
-  });
+  })
 
-  $("#count").on("change", function() {
-    $("#countErr.invalid-feedback").removeClass("d-block");
-  });
+  $('#count').on('change', function() {
+    $('#countErr.invalid-feedback').removeClass('d-block')
+  })
 
-  $("#finishedProductName").on("keyup", function() {
-    $("#noNameErr.invalid-feedback").removeClass("d-block");
-  });
+  $('#finishedProductName').on('keyup', function() {
+    $('#noNameErr.invalid-feedback').removeClass('d-block')
+  })
 
-  $("#add").on("click", function() {
-    let selectedItemName = $("#itemType option:selected");
-    var name = selectedItemName.text();
-    let itemCount = $("#count");
-    var count = itemCount.val();
+  $('#add').on('click', function() {
+    let selectedItemName = $('#itemType option:selected')
+    var name = selectedItemName.text()
+    let itemCount = $('#count')
+    var count = itemCount.val()
     if (!count) {
-      $("#countErr.invalid-feedback").addClass("d-block");
-      return;
+      $('#countErr.invalid-feedback').addClass('d-block')
+      return
     }
     if (!name) {
-      $("#nameErr.invalid-feedback").addClass("d-block");
-      return;
+      $('#nameErr.invalid-feedback').addClass('d-block')
+      return
     }
     items.row
       .add({
         name: name,
         count: count
       })
-      .draw();
-    selectedItemName.remove();
-    let remaining = $("#itemType").find("option").length;
+      .draw()
+    selectedItemName.remove()
+    let remaining = $('#itemType').find('option').length
     if (remaining === 0) {
-      $("#add").prop("disabled", true);
+      $('#add').prop('disabled', true)
     }
-    $("#noRowsErr.invalid-feedback").removeClass("d-block");
-    itemCount.val("");
-  });
-});
+    $('#noRowsErr.invalid-feedback').removeClass('d-block')
+    itemCount.val('')
+  })
+})

@@ -2,14 +2,14 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
-import ReceiptClient from './receipt'
+import RecipeClient from './recipe'
 
 chai.use(spies)
 let expect = chai.expect
 
 describe('add ingredients', () => {
   describe('when qty is 0', () => {
-    let app = new ReceiptClient('')
+    let app = new RecipeClient('')
     let result = app.addIngredient(1, 0)
 
     it('should err', async () => {
@@ -20,7 +20,7 @@ describe('add ingredients', () => {
 
   describe('when ok', () => {
     //wip
-    let app = new ReceiptClient('')
+    let app = new RecipeClient('')
     app.addIngredient(1, 1)
 
     it('should save the ingredient', () => {
@@ -31,12 +31,12 @@ describe('add ingredients', () => {
 
 describe('saving a receipt', () => {
   describe('when name is empty', () => {
-    let app = new ReceiptClient('')
+    let app = new RecipeClient('')
 
     it('Should err', async () => {
-      let result = await app.saveReceipt()
+      let result = await app.saveRecipe()
       expect(result).to.equal('name empty')
-      expect(app.getReceipts()).to.have.length(0)
+      expect(app.getRecipes()).to.have.length(0)
     })
   })
 
@@ -48,35 +48,35 @@ describe('saving a receipt', () => {
       }
     ]
 
-    let app = new ReceiptClient('', state)
+    let app = new RecipeClient('', state)
     app.setName('test')
 
     let mockApi = chai.spy.on(app, 'apiSaveReceipt')
 
     it('Should err', async () => {
-      let result = await app.saveReceipt()
+      let result = await app.saveRecipe()
       expect(mockApi).to.not.have.been.called
       expect(result).to.equal('name present')
-      expect(app.getReceipts()).to.have.length(1)
+      expect(app.getRecipes()).to.have.length(1)
     })
   })
 
   describe('when receipt does not have ingredients', () => {
-    let app = new ReceiptClient('')
+    let app = new RecipeClient('')
     app.setName('test')
 
     let mockApi = chai.spy.on(app, 'apiSaveReceipt')
 
     it('should err', async () => {
-      let result = await app.saveReceipt()
+      let result = await app.saveRecipe()
       expect(mockApi).to.not.have.been.called
       expect(result).to.equal('no ingredients')
-      expect(app.getReceipts()).to.have.length(0)
+      expect(app.getRecipes()).to.have.length(0)
     })
   })
 
   describe('when receipt is correct', () => {
-    let app = new ReceiptClient('')
+    let app = new RecipeClient('')
     app.setName('test')
     app.addIngredient(1, 1)
 
@@ -89,15 +89,15 @@ describe('saving a receipt', () => {
     }))
 
     it('makes the api call', async () => {
-      await app.saveReceipt()
+      await app.saveRecipe()
       expect(mockApi).to.have.been.called
-      expect(app.getReceipts()).to.have.length(1)
+      expect(app.getRecipes()).to.have.length(1)
     })
   })
 })
 
 describe('fetching receipts', () => {
-  let app = new ReceiptClient('')
+  let app = new RecipeClient('')
 
   var mockApi = chai.spy.on(app, 'apiFetchReceipts', () => ({
     data: {
@@ -111,8 +111,8 @@ describe('fetching receipts', () => {
   }))
 
   it('should make the api call', async () => {
-    await app.fetchReceipts()
+    await app.fetchRecipes()
     expect(mockApi).to.have.been.called.exactly(1)
-    expect(app.getReceipts()).to.have.length(1)
+    expect(app.getRecipes()).to.have.length(1)
   })
 })

@@ -25,7 +25,7 @@ export default class InventoryClient {
     return axios.post(this.endpoint, [name])
   }
 
-  async fetchInventoryState(): Promise<any> {
+  async fetchInventoryState() {
     const data = await this.apiFetchInventoryState()
     this.inventory = data.data.data
   }

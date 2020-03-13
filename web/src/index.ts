@@ -1,7 +1,11 @@
 import $ = require('jquery')
-import { initializeInventory } from './listener/inventory'
 import { apiIsHealthy } from './health'
+
 import InventoryClient from './retailapp/inventory'
+import { initializeInventory } from './listener/inventory'
+
+import RecipeClient from './retailapp/recipe'
+import { initializeRecipe } from './listener/recipe'
 
 $(document).ready(async () => {
   $('a[data-toggle="tab"]').on('click', function(e) {
@@ -24,8 +28,11 @@ $(document).ready(async () => {
   }
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let retailInventory = new InventoryClient(apiEndpoint)
+  let inventory = new InventoryClient(apiEndpoint)
 
   //register page listeners and load initial data
-  initializeInventory(retailInventory)
+  initializeInventory(inventory)
+
+  let recipe = new RecipeClient(apiEndpoint)
+  initializeRecipe(inventory, recipe)
 })

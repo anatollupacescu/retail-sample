@@ -35,7 +35,7 @@ export default class RecipeClient {
   }
 
   addIngredient(id: number, qty: number): string {
-    if (qty === 0) {
+    if (!qty || qty === 0) {
       return 'zero quantity'
     }
 

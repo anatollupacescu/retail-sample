@@ -4,10 +4,10 @@ import RecipeClient from '../retailapp/recipe'
 import $ = require('jquery')
 
 export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient) {
-  let itemNameComponent = $('#recipeItemName')
+  let itemNameDropdown = $('#recipeItemName')
 
   $('#recipe-tab').on('click', () => {
-    populateDropdown(itemNameComponent, inv.getInventory())
+    populateDropdown(itemNameDropdown, inv.getInventory())
   })
 
   recipe.fetchRecipes().then(() => {
@@ -15,13 +15,18 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient) {
   })
 
   $('#addRecipeItem').on('click', () => {
-    let id = <number>itemNameComponent.val()
+    let id = <number>itemNameDropdown.val()
     let qty = <number>$('#recipeItemQty').val()
-    let res = recipe.addIngredient(id, qty)
-    console.log(res)
+    let res = recipe.addIngredient(Number(id), Number(qty))
+    if (res) {
+      showAddIngredientError(res)
+    }
   })
+
   //link buttons etc...
 }
+
+function showAddIngredientError(_s: string): void {}
 
 function populateDropdown(component: any, items: any[]) {
   component.empty()

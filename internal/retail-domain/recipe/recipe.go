@@ -15,6 +15,7 @@ type (
 	ID   int
 
 	Recipe struct {
+		ID          ID
 		Name        Name
 		Ingredients []Ingredient
 	}
@@ -80,10 +81,8 @@ func (b Book) Get(id ID) Recipe {
 	return b.Store.get(id)
 }
 
-func (b Book) Names() (r []Name) {
-	for _, rp := range b.Store.all() {
-		r = append(r, rp.Name)
-	}
+func (b Book) All() (r []Recipe) {
+	r = append(r, b.Store.all()...)
 
 	return
 }

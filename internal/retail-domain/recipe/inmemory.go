@@ -21,7 +21,8 @@ func (m *InMemoryStore) add(r Recipe) (ID, error) {
 }
 
 func (m *InMemoryStore) all() (r []Recipe) {
-	for _, rp := range m.data {
+	for id, rp := range m.data {
+		rp.ID = ID(id)
 		r = append(r, rp)
 	}
 

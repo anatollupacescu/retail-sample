@@ -68,14 +68,22 @@ func (a *WebAdapter) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var response struct {
-		Data []string `json:"data"`
+	type recipe struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
 	}
 
-	response.Data = make([]string, 0) //to have  '[]' instead of null
+	var response struct {
+		Data []recipe `json:"data"`
+	}
 
-	for _, name := range a.RecipeBook.Names() {
-		response.Data = append(response.Data, string(name))
+	response.Data = make([]recipe, 0) //to have  '[]' instead of null
+
+	for _, r := range a.RecipeBook.All() {
+		response.Data = append(response.Data, recipe{
+			ID:   int(r.ID),
+			Name: string(r.Name),
+		})
 	}
 
 	err := json.NewEncoder(w).Encode(response)

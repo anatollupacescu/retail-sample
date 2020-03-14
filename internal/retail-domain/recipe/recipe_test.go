@@ -130,12 +130,13 @@ func TestGetRecipeNames(t *testing.T) {
 	s := &recipe.MockRecipeStore{}
 	b := recipe.Book{Store: s}
 
-	s.On("all").Return([]recipe.Recipe{{
+	expectedRecipe := recipe.Recipe{
+		ID:   recipe.ID(1),
 		Name: recipe.Name("glintwine"),
-	}})
+	}
+	s.On("all").Return([]recipe.Recipe{expectedRecipe})
 
-	r := b.Names()
-	assert.Equal(t, r, []recipe.Name{recipe.Name("glintwine")})
-
+	r := b.All()
+	assert.Equal(t, r, []recipe.Recipe{expectedRecipe})
 	s.AssertExpectations(t)
 }

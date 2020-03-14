@@ -23,8 +23,8 @@ func (b *MockRecipeBook) Get(id recipe.ID) recipe.Recipe {
 	return b.Called(id).Get(0).(recipe.Recipe)
 }
 
-func (b *MockRecipeBook) Names() []recipe.Name {
-	return b.Called().Get(0).([]recipe.Name)
+func (b *MockRecipeBook) All() []recipe.Recipe {
+	return b.Called().Get(0).([]recipe.Recipe)
 }
 
 // inventory

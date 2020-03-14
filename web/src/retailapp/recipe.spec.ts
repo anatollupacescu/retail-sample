@@ -18,6 +18,17 @@ describe('add ingredients', () => {
     })
   })
 
+  describe('when ingredient is duplicate', () => {
+    let app = new RecipeClient('')
+    app.addIngredient(1, 1)
+    let result = app.addIngredient(1, 2)
+
+    it('should err', async () => {
+      expect(result).to.equal('duplicate id')
+      expect(app.listItems()).to.have.length(1)
+    })
+  })
+
   describe('when ok', () => {
     //wip
     let app = new RecipeClient('')
@@ -29,7 +40,7 @@ describe('add ingredients', () => {
   })
 })
 
-describe('saving a receipt', () => {
+describe('saving a recipe', () => {
   describe('when name is empty', () => {
     let app = new RecipeClient('')
 
@@ -40,7 +51,7 @@ describe('saving a receipt', () => {
     })
   })
 
-  describe('when receipt name is already taken', () => {
+  describe('when recipe name is already taken', () => {
     let state = [
       {
         id: 1,
@@ -51,9 +62,9 @@ describe('saving a receipt', () => {
     let app = new RecipeClient('', state)
     app.setName('test')
 
-    let mockApi = chai.spy.on(app, 'apiSaveReceipt')
+    let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
-    it('Should err', async () => {
+    it('should err', async () => {
       let result = await app.saveRecipe()
       expect(mockApi).to.not.have.been.called
       expect(result).to.equal('name present')
@@ -61,11 +72,11 @@ describe('saving a receipt', () => {
     })
   })
 
-  describe('when receipt does not have ingredients', () => {
+  describe('when recipe does not have ingredients', () => {
     let app = new RecipeClient('')
     app.setName('test')
 
-    let mockApi = chai.spy.on(app, 'apiSaveReceipt')
+    let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
     it('should err', async () => {
       let result = await app.saveRecipe()
@@ -75,12 +86,12 @@ describe('saving a receipt', () => {
     })
   })
 
-  describe('when receipt is correct', () => {
+  describe('when recipe is correct', () => {
     let app = new RecipeClient('')
     app.setName('test')
     app.addIngredient(1, 1)
 
-    let mockApi = chai.spy.on(app, 'apiSaveReceipt', () => ({
+    let mockApi = chai.spy.on(app, 'apiSaveRecipe', () => ({
       data: {
         data: {
           test: 1
@@ -96,10 +107,10 @@ describe('saving a receipt', () => {
   })
 })
 
-describe('fetching receipts', () => {
+describe('fetching recipes', () => {
   let app = new RecipeClient('')
 
-  var mockApi = chai.spy.on(app, 'apiFetchReceipts', () => ({
+  var mockApi = chai.spy.on(app, 'apiFetchRecipes', () => ({
     data: {
       data: [
         {

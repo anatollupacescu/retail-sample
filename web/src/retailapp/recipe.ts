@@ -18,9 +18,9 @@ export default class RecipeClient {
   private endpoint: string
   private recipes: Recipe[]
 
-  constructor(url: string, receipts: Recipe[] = []) {
-    this.endpoint = `${url}/receipt`
-    this.recipes = receipts
+  constructor(url: string, recipe: Recipe[] = []) {
+    this.endpoint = `${url}/recipe`
+    this.recipes = recipe
   }
 
   private emptyRecipe(): RecipeCandidate {
@@ -30,13 +30,19 @@ export default class RecipeClient {
     }
   }
 
-  setName(newReceiptName: string) {
-    this.pendingRecipe.name = newReceiptName
+  setName(newRecipeName: string) {
+    this.pendingRecipe.name = newRecipeName
   }
 
   addIngredient(id: number, qty: number): string {
     if (qty === 0) {
       return 'zero quantity'
+    }
+
+    let found = this.pendingRecipe.items.find(i => i.id === id)
+
+    if (found) {
+      return 'duplicate id'
     }
 
     let item: RecipeItem = {
@@ -75,13 +81,13 @@ export default class RecipeClient {
     this.pendingRecipe = this.emptyRecipe()
   }
 
-  apiFetchReceipts(): Promise<any> {
+  apiFetchRecipes(): Promise<any> {
     return Promise.resolve([])
   }
 
   async fetchRecipes(): Promise<any> {
-    await this.apiFetchReceipts()
-    this.recipes = []
+    let data = await this.apiFetchRecipes()
+    this.recipes = data.data.data
   }
 
   getRecipes(): Recipe[] {

@@ -34,7 +34,7 @@ export function initializeInventory(app: InventoryClient) {
           $('#unique.invalid-feedback').addClass('d-block')
           return
         }
-        $('#inventoryTable tbody tr').remove()
+
         populateTable(app.getInventory())
         nameInput.val('')
       })
@@ -55,6 +55,7 @@ interface inventoryItem {
 }
 
 function populateTable(items: inventoryItem[]) {
+  $('#inventoryTable tbody tr').remove()
   let table = <HTMLTableElement>$('#inventoryTable tbody')[0]
   let rows = items.sort((i1: inventoryItem, i2: inventoryItem) => {
     return i1.id - i2.id

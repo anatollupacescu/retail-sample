@@ -17,6 +17,14 @@ export default class InventoryClient {
     return this.inventory
   }
 
+  getName(id: number): string {
+    let item = this.inventory.find(i => i.id === id)
+    if (item) {
+      return item.name
+    }
+    return ''
+  }
+
   apiFetchInventoryState(): Promise<any> {
     return axios.get(this.endpoint)
   }

@@ -1,4 +1,6 @@
-interface RecipeItem {
+import axios from 'axios'
+
+export interface RecipeItem {
   id: number
   qty: number
 }
@@ -14,13 +16,14 @@ interface Recipe {
 }
 
 export default class RecipeClient {
-  private pendingRecipe: RecipeCandidate = this.emptyRecipe()
+  private pendingRecipe: RecipeCandidate
   private endpoint: string
   private recipes: Recipe[]
 
   constructor(url: string, recipe: Recipe[] = []) {
     this.endpoint = `${url}/recipe`
     this.recipes = recipe
+    this.pendingRecipe = this.emptyRecipe()
   }
 
   private emptyRecipe(): RecipeCandidate {
@@ -82,7 +85,7 @@ export default class RecipeClient {
   }
 
   apiFetchRecipes(): Promise<any> {
-    return Promise.resolve([])
+    return axios.get(this.endpoint)
   }
 
   async fetchRecipes(): Promise<any> {

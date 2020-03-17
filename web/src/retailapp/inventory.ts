@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-interface inventoryItem {
+export interface inventoryItem {
   name: string
   id: number
 }

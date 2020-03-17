@@ -10,7 +10,7 @@ interface RecipeCandidate {
   items: RecipeItem[]
 }
 
-interface Recipe {
+export interface Recipe {
   id: number
   name: string
 }
@@ -58,8 +58,15 @@ export default class RecipeClient {
   }
 
   apiSaveRecipe(): Promise<any> {
-    console.log(this.endpoint)
-    return Promise.resolve()
+    let items: any = {}
+    this.pendingRecipe.items.forEach(i => {
+      items[i.id] = i.qty
+    })
+    let payload = {
+      name: this.pendingRecipe.name,
+      items: items
+    }
+    return axios.post(this.endpoint, payload)
   }
 
   async saveRecipe(): Promise<any> {
@@ -79,7 +86,13 @@ export default class RecipeClient {
     }
 
     let data = await this.apiSaveRecipe()
-    this.recipes.push(data.data.data)
+
+    Object.keys(data.data.data).forEach((i: any) => {
+      this.recipes.push({
+        id: Number(data.data.data[i]),
+        name: String(i)
+      })
+    })
 
     this.pendingRecipe = this.emptyRecipe()
   }

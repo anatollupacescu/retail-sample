@@ -3,18 +3,24 @@ import RecipeClient, { RecipeItem, Recipe } from '../retailapp/recipe'
 
 import $ = require('jquery')
 
-export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): void {
-  let itemNameDropdown = $('#recipeItemName'),
-    itemQtyPicker = $('#recipeItemQty'),
-    addItemBtn = $('#addRecipeItem'),
-    saveRecipeBtn = $('#saveRecipe'),
-    recipeNameInput = $('#recipeName')
+let itemNameDropdown: JQuery<HTMLElement>,
+  itemQtyPicker: JQuery<HTMLElement>,
+  addItemBtn: JQuery<HTMLElement>,
+  saveRecipeBtn: JQuery<HTMLElement>,
+  recipeNameInput: JQuery<HTMLElement>
 
-  onClickRecipeTab_updateIngredientsNameDropdown(itemNameDropdown, recipe, inv)
-  onChangeQty_resetErrorMessage(itemQtyPicker)
-  onClickAddRecipeItem_addIngredientToPendingRecipe(addItemBtn, itemNameDropdown, itemQtyPicker, recipe, inv)
-  onClickSaveRecipe_saveAndResetStage(saveRecipeBtn, recipeNameInput, recipe)
-  onChangeRecipeName_resetNoNameError(recipeNameInput)
+export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): void {
+  itemNameDropdown = $('#recipeItemName')
+  itemQtyPicker = $('#recipeItemQty')
+  addItemBtn = $('#addRecipeItem')
+  saveRecipeBtn = $('#saveRecipe')
+  recipeNameInput = $('#recipeName')
+
+  onClickRecipeTab_updateIngredientsNameDropdown(recipe, inv)
+  onChangeQty_resetErrorMessage()
+  onClickAddRecipeItem_addIngredientToPendingRecipe(recipe, inv)
+  onClickSaveRecipe_saveAndResetStage(recipe)
+  onChangeRecipeName_resetNoNameError()
 
   //fetch main table data
   recipe.fetchRecipes().then(() => {
@@ -22,24 +28,26 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
   })
 }
 
-function onChangeRecipeName_resetNoNameError(recipeNameInput: any): void {
+function onChangeRecipeName_resetNoNameError(): void {
   recipeNameInput.keyup(() => {
     $('#noNameErr.invalid-feedback').removeClass('d-block')
   })
 }
 
-function onClickSaveRecipe_saveAndResetStage(btn: any, recipeNameInput: any, recipe: RecipeClient): void {
-  btn.on('click', () => {
+function onClickSaveRecipe_saveAndResetStage(recipe: RecipeClient): void {
+  saveRecipeBtn.on('click', () => {
     let recipeName = <string>recipeNameInput.val()
     recipe.setName(recipeName)
     recipe
       .saveRecipe()
       .then(msg => {
-        switch (msg) {
+        switch(msg) {
+          case 'ERR_EMPTY':
           case 'name empty': {
             showNoNameError()
             return
           }
+          case 'ERR_PRESENT':
           case 'name present': {
             alert('duplicate name')
             return
@@ -51,7 +59,7 @@ function onClickSaveRecipe_saveAndResetStage(btn: any, recipeNameInput: any, rec
           default: {
             populateRecipeTable(recipe.getRecipes())
             clearIngredientsTable()
-            clearRecipeName(recipeNameInput)
+            clearRecipeName()
           }
         }
       })
@@ -61,8 +69,8 @@ function onClickSaveRecipe_saveAndResetStage(btn: any, recipeNameInput: any, rec
   })
 }
 
-function clearRecipeName(input: any): void {
-  input.val('')
+function clearRecipeName(): void {
+  recipeNameInput.val('')
 }
 
 function clearIngredientsTable(): void {
@@ -70,7 +78,7 @@ function clearIngredientsTable(): void {
 }
 
 function resetItemCount(): void {
-  $('#recipeItemQty').val(0)
+  itemQtyPicker.val(0)
 }
 
 function removeIngredientNameFromTheList(op: string): void {
@@ -101,23 +109,20 @@ function showNoNameError(): void {
 }
 
 function onClickAddRecipeItem_addIngredientToPendingRecipe(
-  btn: any,
-  itemNameDropdown: any,
-  itemQtyPicker: any,
   recipe: RecipeClient,
   inv: InventoryClient
 ): void {
-  btn.on('click', () => {
+  addItemBtn.on('click', () => {
     let id = itemNameDropdown.val()
     let qty = <number>itemQtyPicker.val()
     let err = recipe.addIngredient(Number(id), Number(qty))
-    if (err) {
+    if(err) {
       showAddIngredientError(err)
       return
     }
     populateIngredientsTable(recipe, inv)
     resetNoIngredientsError()
-    removeIngredientNameFromTheList(id)
+    removeIngredientNameFromTheList(String(id))
     resetItemCount()
   })
 }
@@ -137,34 +142,33 @@ function populateIngredientsTable(recipe: RecipeClient, inv: InventoryClient): v
 }
 
 function showAddIngredientError(s: string): void {
-  if (s === 'zero quantity') {
+  if(s === 'zero quantity') {
     $('#recipeItemQtyErr.invalid-feedback').addClass('d-block')
     return
   }
   console.log('got error', s)
 }
 
-function onChangeQty_resetErrorMessage(component: any): void {
-  component.on('change', () => {
+function onChangeQty_resetErrorMessage(): void {
+  itemQtyPicker.on('change', () => {
     $('#recipeItemQtyErr.invalid-feedback').removeClass('d-block')
   })
 }
 
 function onClickRecipeTab_updateIngredientsNameDropdown(
-  component: any,
   recipe: RecipeClient,
   inv: InventoryClient
 ): void {
   $('#recipe-tab').on('click', () => {
-    populateDropdown(component, recipe, inv.getInventory())
+    populateDropdown(recipe, inv)
   })
 }
 
-function populateDropdown(component: any, recipe: RecipeClient, items: any[]) {
-  component.empty()
-  items.map(item => {
-    if (!isInRecipe(recipe, item)) {
-      component.append(new Option(item.name, item.id))
+function populateDropdown(recipe: RecipeClient, inv: InventoryClient) {
+  itemNameDropdown.empty()
+  inv.getInventory().map(item => {
+    if(!isInRecipe(recipe, item)) {
+      itemNameDropdown.append(new Option(item.name, String(item.id)))
     }
   })
 }

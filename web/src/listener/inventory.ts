@@ -2,22 +2,21 @@ import $ = require('jquery')
 
 import InventoryClient from '../retailapp/inventory'
 
+let nameInput: JQuery<HTMLElement>
+
 export function initializeInventory(app: InventoryClient) {
+  nameInput = $('#name')
+
+  onTableRowClick_highlight_row();
+  onChangeNameInput_resetErrorMessage()
+  onSaveNewItem_submit(app);
+
   app.fetchInventoryState().then(() => {
     populateTable(app.getInventory())
   })
+}
 
-  $('#inventoryTable tbody').on('click', 'tr', function() {
-    $(this).toggleClass('list-group-item-dark')
-  })
-
-  let nameInput = $('#name')
-
-  nameInput.keyup(function() {
-    $('#nonempty.invalid-feedback').removeClass('d-block')
-    $('#unique.invalid-feedback').removeClass('d-block')
-  })
-
+function onSaveNewItem_submit(app: InventoryClient): void {
   $('#mainForm').on('submit', function(e) {
     e.preventDefault()
 
@@ -26,26 +25,35 @@ export function initializeInventory(app: InventoryClient) {
     app
       .addInventoryItem(data)
       .then(rsp => {
-        if (rsp === 'name empty') {
-          $('#nonempty.invalid-feedback').addClass('d-block')
-          return
+        switch(rsp) {
+          case 'ERR_EMPTY':
+          case 'name empty':
+            $('#nonempty.invalid-feedback').addClass('d-block')
+            return;
+          case 'ERR_UNIQUE':
+          case 'name present':
+            $('#unique.invalid-feedback').addClass('d-block')
+            return;
+          default:
+            populateTable(app.getInventory())
+            nameInput.val('')
         }
-        if (rsp === 'name present') {
-          $('#unique.invalid-feedback').addClass('d-block')
-          return
-        }
-
-        populateTable(app.getInventory())
-        nameInput.val('')
       })
       .catch(err => {
-        if (err === 'ERR_EMPTY') {
-          $('#nonempty.invalid-feedback').addClass('d-block')
-        }
-        if (err === 'ERR_UNIQUE') {
-          $('#unique.invalid-feedback').addClass('d-block')
-        }
+        console.error(err)
       })
+  })
+}
+
+function onChangeNameInput_resetErrorMessage(): void {
+  nameInput.keyup(function() {
+    $('#nonempty.invalid-feedback').removeClass('d-block')
+    $('#unique.invalid-feedback').removeClass('d-block')
+  })
+}
+function onTableRowClick_highlight_row(): void {
+  $('#inventoryTable tbody').on('click', 'tr', function() {
+    $(this).toggleClass('list-group-item-dark')
   })
 }
 

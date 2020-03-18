@@ -33,9 +33,10 @@ export default class InventoryClient {
     return axios.post(this.endpoint, [name])
   }
 
-  async fetchInventoryState() {
+  async fetchInventoryState(): Promise<any> {
     const data = await this.apiFetchInventoryState()
     this.inventory = data.data.data
+    return data
   }
 
   async addInventoryItem(itemName: string): Promise<any> {
@@ -53,6 +54,8 @@ export default class InventoryClient {
         id: data.data.data[key]
       })
     })
+
+    return data
   }
 
   private nameIsUnique(name: string) {

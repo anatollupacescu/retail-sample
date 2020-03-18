@@ -7,9 +7,9 @@ let nameInput: JQuery<HTMLElement>
 export function initializeInventory(app: InventoryClient) {
   nameInput = $('#name')
 
-  onTableRowClick_highlight_row();
+  onTableRowClick_highlight_row()
   onChangeNameInput_resetErrorMessage()
-  onSaveNewItem_submit(app);
+  onSaveNewItem_submit(app)
 
   app.fetchInventoryState().then(() => {
     populateTable(app.getInventory())
@@ -25,15 +25,15 @@ function onSaveNewItem_submit(app: InventoryClient): void {
     app
       .addInventoryItem(data)
       .then(rsp => {
-        switch(rsp) {
+        switch (rsp) {
           case 'ERR_EMPTY':
           case 'name empty':
             $('#nonempty.invalid-feedback').addClass('d-block')
-            return;
+            return
           case 'ERR_UNIQUE':
           case 'name present':
             $('#unique.invalid-feedback').addClass('d-block')
-            return;
+            return
           default:
             populateTable(app.getInventory())
             nameInput.val('')

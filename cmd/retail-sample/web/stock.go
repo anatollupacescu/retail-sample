@@ -74,8 +74,6 @@ func (a *WebAdapter) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *WebAdapter) ProvisionStock(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -118,6 +116,8 @@ func (a *WebAdapter) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 }
 
 func (a *WebAdapter) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {

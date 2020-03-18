@@ -95,6 +95,7 @@ export default class RecipeClient {
     })
 
     this.pendingRecipe = this.emptyRecipe()
+    return data
   }
 
   apiFetchRecipes(): Promise<any> {

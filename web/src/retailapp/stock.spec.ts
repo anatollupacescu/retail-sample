@@ -2,12 +2,44 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
+import StockClient from './stock'
+
 chai.use(spies)
 let expect = chai.expect
 
 describe('provision stock', () => {
-  it('should succeed', function() {
-    //here we should spy on api methods and all the rest...
-    expect(true).to.be.true
+  let app = new StockClient('')
+  let mockApi = chai.spy.on(app, 'apiProvision', () => ({
+    data: {
+      data: {
+        '1': 2
+      }
+    }
+  }))
+
+  it('calls the api and stores the state locally', async () => {
+    await app.provision('1', 2)
+    expect(mockApi).to.have.been.called
+    expect(app.getData()).to.have.length(1)
+  })
+})
+
+describe('fetching state', () => {
+  let app = new StockClient('')
+  let mockApi = chai.spy.on(app, 'apiFetchState', () => ({
+    data: {
+      data: [
+        {
+          id: 1,
+          qty: 2
+        }
+      ]
+    }
+  }))
+
+  it('calls the api and stores the state locally', async () => {
+    await app.fetchState()
+    expect(mockApi).to.have.been.called
+    expect(app.getData()).to.have.length(1)
   })
 })

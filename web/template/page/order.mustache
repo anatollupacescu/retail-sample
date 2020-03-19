@@ -15,22 +15,28 @@
           <div class="row">
             <div class="col-md-3">
               <div class="form-group">
-                <label for="outboundItemType" class="">Outbound product<br /></label>
-                <select class="form-control custom-select" id="outboundItemType">
+                <label for="orderRecipe" class="">Outbound product<br /></label>
+                <select class="form-control custom-select" id="orderRecipe">
                   <option selected="">Choose one</option>
                 </select>
               </div>
             </div>
-            <div class="col-md-1">
+            <div class="col-md-2">
               <div class="form-group">
-                <label for="count" class="">Count<br /></label>
-                <input type="number" class="form-control" id="count" />
+                <label for="orderQty" class="">Count<br /></label>
+                <input type="number" class="form-control" id="orderQty" />
+                <div id="errQty" class="invalid-feedback">
+                    Please choose a valid quantity
+                  </div>
               </div>
             </div>
           </div>
           <div class="row pb-4">
             <div class="col-md-12">
-              <button id="sell" class="btn btn-secondary">Sell</button>
+              <button id="placeOrder" class="btn btn-secondary">Sell</button>
+              <div id="errStock" class="invalid-feedback">
+                Not enough stock
+              </div>
             </div>
           </div>
         </div>
@@ -42,13 +48,13 @@
 <div class="container">
   <div class="row pt-3">
     <div class="col-md-12">
-      <table id="outboundList" class="table table-striped table-bordered">
+      <table id="orderTable" class="table table-striped table-bordered">
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Name</th>
+            <th>ID</th>
             <th>Count</th>
           </tr>
+          <tbody></tbody>
         </thead>
       </table>
     </div>

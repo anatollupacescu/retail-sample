@@ -10,6 +10,9 @@ import { initializeRecipe } from './listener/recipe'
 import { initializeStock } from './listener/stock'
 import StockClient from './retailapp/stock'
 
+import { initializeOrder } from './listener/order'
+import OrderClient from './retailapp/order'
+
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
   let apiPort = process.env.API_PORT
@@ -39,4 +42,7 @@ $(document).ready(async () => {
 
   let stock = new StockClient(apiEndpoint)
   initializeStock(inventory, stock)
+
+  let order = new OrderClient(apiEndpoint)
+  initializeOrder(recipe, order)
 })

@@ -97,14 +97,14 @@ func (a App) GetProvisionLog() (r []ProvisionEntry) {
 
 var ErrRecipeNotFound = errors.New("outbound type not found")
 
-func (a App) PlaceOrder(id int, qty int) error {
+func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 	recipeID := recipe.ID(id)
 	r := a.RecipeBook.Get(recipeID)
 
 	ingredients := r.Ingredients
 
 	if ingredients == nil {
-		return ErrRecipeNotFound
+		return 0, ErrRecipeNotFound
 	}
 
 	//TODO zero qty?
@@ -112,16 +112,16 @@ func (a App) PlaceOrder(id int, qty int) error {
 	if err := a.Stock.Sell(ingredients, qty); err != nil {
 		switch err {
 		case ErrNotEnoughStock:
-			return ErrNotEnoughStock
+			return 0, ErrNotEnoughStock
 		default:
 			panic("unexpected error")
 		}
 	}
 
-	a.Orders.Add(order.OrderEntry{
+	entryID := a.Orders.Add(order.OrderEntry{
 		RecipeID: id,
 		Qty:      qty,
 	})
 
-	return nil
+	return entryID, nil
 }

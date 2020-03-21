@@ -1,5 +1,5 @@
-import InventoryClient, { inventoryItem } from '../retailapp/inventory'
-import RecipeClient, { RecipeItem, Recipe } from '../retailapp/recipe'
+import InventoryClient, { inventoryItem } from '../client/inventory'
+import RecipeClient, { RecipeItem, Recipe } from '../client/recipe'
 
 import $ = require('jquery')
 
@@ -41,7 +41,7 @@ function onClickSaveRecipe_saveAndResetStage(recipe: RecipeClient): void {
     recipe
       .saveRecipe()
       .then(msg => {
-        switch (msg) {
+        switch(msg) {
           case 'ERR_EMPTY':
           case 'name empty': {
             showNoNameError()
@@ -113,7 +113,7 @@ function onClickAddRecipeItem_addIngredientToPendingRecipe(recipe: RecipeClient,
     let id = itemNameDropdown.val()
     let qty = <number>itemQtyPicker.val()
     let err = recipe.addIngredient(Number(id), Number(qty))
-    if (err) {
+    if(err) {
       showAddIngredientError(err)
       return
     }
@@ -139,7 +139,7 @@ function populateIngredientsTable(recipe: RecipeClient, inv: InventoryClient): v
 }
 
 function showAddIngredientError(s: string): void {
-  if (s === 'zero quantity') {
+  if(s === 'zero quantity') {
     $('#recipeItemQtyErr.invalid-feedback').addClass('d-block')
     return
   }
@@ -161,7 +161,7 @@ function onClickRecipeTab_updateIngredientsNameDropdown(recipe: RecipeClient, in
 function populateDropdown(recipe: RecipeClient, inv: InventoryClient) {
   itemNameDropdown.empty()
   inv.getInventory().map(item => {
-    if (!isInRecipe(recipe, item)) {
+    if(!isInRecipe(recipe, item)) {
       itemNameDropdown.append(new Option(item.name, String(item.id)))
     }
   })

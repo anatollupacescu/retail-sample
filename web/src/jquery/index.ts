@@ -1,24 +1,24 @@
 import $ = require('jquery')
-import { apiIsHealthy } from './health'
+import { apiIsHealthy } from '../health'
 
-import InventoryClient from './retailapp/inventory'
-import { initializeInventory } from './listener/inventory'
+import InventoryClient from '../client/inventory'
+import { initializeInventory } from './inventory'
 
-import RecipeClient from './retailapp/recipe'
-import { initializeRecipe } from './listener/recipe'
+import RecipeClient from '../client/recipe'
+import { initializeRecipe } from './recipe'
 
-import { initializeStock } from './listener/stock'
-import StockClient from './retailapp/stock'
+import { initializeStock } from './stock'
+import StockClient from '../client/stock'
 
-import { initializeOrder } from './listener/order'
-import OrderClient from './retailapp/order'
+import { initializeOrder } from './order'
+import OrderClient from '../client/order'
 
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
   let apiPort = process.env.API_PORT
   let diagPort = process.env.DIAG_PORT
 
-  if (!apiUrl || !apiPort || !diagPort) {
+  if(!apiUrl || !apiPort || !diagPort) {
     console.error('missing configuration')
     return
   }
@@ -26,7 +26,7 @@ $(document).ready(async () => {
   let diagEndpoint = `${apiUrl}:${diagPort}`
   let apiStatus = await apiIsHealthy(diagEndpoint)
 
-  if (!apiStatus) {
+  if(!apiStatus) {
     console.error('diagnostic check failed', diagEndpoint)
     return
   }

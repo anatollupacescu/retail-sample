@@ -1,4 +1,4 @@
-import { lol } from './health'
+import { apiIsHealthy } from '../health'
 
 class Student {
   fullName: string
@@ -8,7 +8,7 @@ class Student {
   }
 
   doGreet() {
-    return this.fullName + ' says ' + lol()
+    return this.fullName + ' says ' + apiIsHealthy('localhost:8080/health')
   }
 }
 

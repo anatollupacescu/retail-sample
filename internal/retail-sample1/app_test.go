@@ -15,7 +15,7 @@ import (
 )
 
 func TestPlaceOrder(t *testing.T) {
-	t.Run("should reject order with non existent id", func(t *testing.T) {
+	t.Run("should reject order with non existent recipe id", func(t *testing.T) {
 		b := warehouse.MockRecipeBook{}
 
 		var zeroRecipe recipe.Recipe
@@ -25,8 +25,9 @@ func TestPlaceOrder(t *testing.T) {
 			RecipeBook: &b,
 		}
 
-		err := app.PlaceOrder(1, 10)
+		entryID, err := app.PlaceOrder(1, 10)
 
+		assert.Zero(t, entryID)
 		assert.Equal(t, warehouse.ErrRecipeNotFound, err)
 		b.AssertExpectations(t)
 	})
@@ -48,8 +49,9 @@ func TestPlaceOrder(t *testing.T) {
 			Stock:      warehouse.NewStockWithData(data),
 		}
 
-		err := app.PlaceOrder(1, 5)
+		entryID, err := app.PlaceOrder(1, 5)
 
+		assert.Zero(t, entryID)
 		assert.Equal(t, warehouse.ErrNotEnoughStock, err)
 		b.AssertExpectations(t)
 	})
@@ -75,10 +77,10 @@ func TestPlaceOrder(t *testing.T) {
 			Stock:      warehouse.NewStockWithData(data),
 		}
 
-		err := app.PlaceOrder(1, 5)
+		entryID, err := app.PlaceOrder(1, 5)
 
 		assert.NoError(t, err)
-
+		assert.Equal(t, order.ID(1), entryID)
 		assert.Equal(t, 1, data[51])
 		b.AssertExpectations(t)
 	})

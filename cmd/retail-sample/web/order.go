@@ -25,12 +25,39 @@ func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.App.PlaceOrder(*requestBody.ID, *requestBody.Qty); err != nil {
+	recipeID := *requestBody.ID
+	orderQty := *requestBody.Qty
+
+	entryID, err := a.App.PlaceOrder(recipeID, orderQty)
+
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	type DescriptorEntity struct {
+		ID       int `json:"id"`
+		RecipeID int `json:"recipeID"`
+		Qty      int `json:"qty"`
+	}
+
+	var response = struct {
+		Data DescriptorEntity `json:"data"`
+	}{
+		Data: DescriptorEntity{
+			ID:       int(entryID),
+			RecipeID: recipeID,
+			Qty:      orderQty,
+		},
+	}
+
 	w.WriteHeader(http.StatusCreated)
+
+	err = json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 }
 
 func (a *WebAdapter) GetOrder(w http.ResponseWriter, r *http.Request) {

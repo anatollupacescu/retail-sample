@@ -1,7 +1,7 @@
 import $ = require('jquery')
 
-import OrderClient, { Order } from '../retailapp/order'
-import RecipeClient from '../retailapp/recipe'
+import OrderClient, { Order } from '../client/order'
+import RecipeClient from '../client/recipe'
 
 let recipeInput: JQuery<HTMLElement>, qtyInput: JQuery<HTMLElement>, placeOrderBtn: JQuery<HTMLElement>
 
@@ -65,7 +65,7 @@ function onPlaceBtnClick_placeOrder(order: OrderClient): void {
 
 function placeOrder(order: OrderClient): void {
   let qty = qtyInput.val()
-  if (!qty || Number(qty) === 0) {
+  if(!qty || Number(qty) === 0) {
     showQtyError()
     return
   }
@@ -83,7 +83,7 @@ function placeOrder(order: OrderClient): void {
     })
     .catch(res => {
       let errMsg = res.response.data
-      if (errMsg && errMsg.startsWith('not enough stock')) {
+      if(errMsg && errMsg.startsWith('not enough stock')) {
         showNotEnoughStockErr()
       }
     })

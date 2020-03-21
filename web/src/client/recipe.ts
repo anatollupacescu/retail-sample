@@ -13,6 +13,7 @@ interface RecipeCandidate {
 export interface Recipe {
   id: number
   name: string
+  items: RecipeItem[]
 }
 
 export default class RecipeClient {
@@ -90,7 +91,8 @@ export default class RecipeClient {
     Object.keys(data.data.data).forEach((i: any) => {
       this.recipes.push({
         id: Number(data.data.data[i]),
-        name: String(i)
+        name: String(i),
+        items: this.pendingRecipe.items
       })
     })
 
@@ -109,6 +111,14 @@ export default class RecipeClient {
 
   getRecipes(): Recipe[] {
     return this.recipes
+  }
+
+  getByID(id: number): Recipe {
+    let r = this.recipes.filter(r => r.id === id)
+    if (!r || r.length === 0) {
+      throw `recipe with id ${id} not found`
+    }
+    return r[0]
   }
 
   listItems(): RecipeItem[] {

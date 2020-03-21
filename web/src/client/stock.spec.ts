@@ -8,8 +8,17 @@ chai.use(spies)
 let expect = chai.expect
 
 describe('provision stock', () => {
-  let app = new StockClient('')
+  let data = [
+    {
+      id: 1,
+      qty: 1,
+      items: []
+    }
+  ]
+
+  let app = new StockClient('', data)
   let mockApi = chai.spy.on(app, 'apiProvision', () => ({
+    status: 201,
     data: {
       data: {
         '1': 2

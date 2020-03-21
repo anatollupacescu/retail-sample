@@ -1,16 +1,23 @@
 import axios from 'axios'
 
-export interface Position {
+interface item {
   id: number
   qty: number
 }
 
+export interface Position {
+  id: number
+  qty: number
+  items: item[]
+}
+
 export default class StockClient {
   private endpoint: string
-  private data: Position[] = []
+  private data: Position[]
 
-  constructor(url: string) {
+  constructor(url: string, initialData: Position[] = []) {
     this.endpoint = `${url}/stock`
+    this.data = initialData
   }
 
   async provision(id: string, qty: number): Promise<any> {
@@ -19,13 +26,20 @@ export default class StockClient {
     Object.keys(resp.data.data).forEach(k => {
       let updated = this.updatePosition(Number(k), Number(resp.data.data[k]))
       if (!updated) {
-        this.data.push({ id: Number(id), qty: qty })
+        throw 'Not updated'
       }
     })
     return resp
   }
 
-  private updatePosition(k: number, v: number): boolean {
+  substractFromPosition(ingredientID: number, toSubstract: number): void {
+    let ingredient = this.data.filter(p => p.id === ingredientID)
+    if (ingredient && ingredient.length > 0) {
+      ingredient[0].qty = ingredient[0].qty - toSubstract
+    }
+  }
+
+  updatePosition(k: number, v: number): boolean {
     let updated = false
     this.data.map(p => {
       if (updated) return

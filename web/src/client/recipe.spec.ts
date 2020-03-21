@@ -55,7 +55,8 @@ describe('saving a recipe', () => {
     let state = [
       {
         id: 1,
-        name: 'test'
+        name: 'test',
+        items: []
       }
     ]
 

@@ -2,17 +2,18 @@ import $ = require('jquery')
 
 import OrderClient, { Order } from '../client/order'
 import RecipeClient from '../client/recipe'
+import RetailApp from '../retailapp/app'
 
 let recipeInput: JQuery<HTMLElement>, qtyInput: JQuery<HTMLElement>, placeOrderBtn: JQuery<HTMLElement>
 
-export function initializeOrder(recipe: RecipeClient, order: OrderClient) {
+export function initializeOrder(app: RetailApp, recipe: RecipeClient, order: OrderClient) {
   recipeInput = $('#orderRecipe')
   qtyInput = $('#orderQty')
   placeOrderBtn = $('#placeOrder')
 
   onQtyChange_resetErr()
   onRecipeInputChange_resetErr()
-  onPlaceBtnClick_placeOrder(order)
+  onPlaceBtnClick_placeOrder(app, order)
   onTabClick_populateRecipeList(recipe)
 
   order.fetchOrders().then(() => {
@@ -57,15 +58,15 @@ function populateTable(order: OrderClient): void {
   })
 }
 
-function onPlaceBtnClick_placeOrder(order: OrderClient): void {
+function onPlaceBtnClick_placeOrder(app: RetailApp, order: OrderClient): void {
   placeOrderBtn.on('click', () => {
-    placeOrder(order)
+    placeOrder(app, order)
   })
 }
 
-function placeOrder(order: OrderClient): void {
+function placeOrder(app: RetailApp, order: OrderClient): void {
   let qty = qtyInput.val()
-  if(!qty || Number(qty) === 0) {
+  if (!qty || Number(qty) === 0) {
     showQtyError()
     return
   }
@@ -74,8 +75,8 @@ function placeOrder(order: OrderClient): void {
 
   let recipeID = recipeInput.val()
 
-  order
-    .addOrder(Number(recipeID), Number(qty))
+  app
+    .placeOrder(Number(recipeID), Number(qty))
     .then(() => {
       populateTable(order)
       resetNotEnoughStockErr()
@@ -83,7 +84,7 @@ function placeOrder(order: OrderClient): void {
     })
     .catch(res => {
       let errMsg = res.response.data
-      if(errMsg && errMsg.startsWith('not enough stock')) {
+      if (errMsg && errMsg.startsWith('not enough stock')) {
         showNotEnoughStockErr()
       }
     })

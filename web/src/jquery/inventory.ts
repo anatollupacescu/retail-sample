@@ -25,7 +25,7 @@ function onSaveNewItem_submit(app: InventoryClient): void {
     app
       .addInventoryItem(data)
       .then(rsp => {
-        switch(rsp) {
+        switch (rsp) {
           case 'ERR_EMPTY':
           case 'name empty':
             $('#nonempty.invalid-feedback').addClass('d-block')

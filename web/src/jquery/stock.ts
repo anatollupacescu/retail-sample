@@ -25,7 +25,7 @@ export function initializeStock(inv: InventoryClient, stock: StockClient) {
 function onProvisionBtnClick_doProvision(inv: InventoryClient, stock: StockClient): void {
   addBtn.on('click', () => {
     let qty = <number>qtyInput.val()
-    if(!qty || Number(qty) <= 0) {
+    if (!qty || Number(qty) <= 0) {
       setErrorMessage()
       return
     }
@@ -33,7 +33,7 @@ function onProvisionBtnClick_doProvision(inv: InventoryClient, stock: StockClien
     stock
       .provision(id, qty)
       .then(res => {
-        if(res.status !== 201) {
+        if (res.status !== 201) {
           console.error('got error provisioning')
           return
         }
@@ -90,7 +90,7 @@ function populateTable(inventory: InventoryClient, stock: StockClient): void {
 
     let value: string = stockDict[element.id]
 
-    if(!value) {
+    if (!value) {
       value = '0'
     }
 

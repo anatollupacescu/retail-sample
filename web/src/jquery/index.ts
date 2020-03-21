@@ -13,12 +13,14 @@ import StockClient from '../client/stock'
 import { initializeOrder } from './order'
 import OrderClient from '../client/order'
 
+import RetailApp from '../retailapp/app'
+
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
   let apiPort = process.env.API_PORT
   let diagPort = process.env.DIAG_PORT
 
-  if(!apiUrl || !apiPort || !diagPort) {
+  if (!apiUrl || !apiPort || !diagPort) {
     console.error('missing configuration')
     return
   }
@@ -26,7 +28,7 @@ $(document).ready(async () => {
   let diagEndpoint = `${apiUrl}:${diagPort}`
   let apiStatus = await apiIsHealthy(diagEndpoint)
 
-  if(!apiStatus) {
+  if (!apiStatus) {
     console.error('diagnostic check failed', diagEndpoint)
     return
   }
@@ -44,5 +46,7 @@ $(document).ready(async () => {
   initializeStock(inventory, stock)
 
   let order = new OrderClient(apiEndpoint)
-  initializeOrder(recipe, order)
+
+  let app = new RetailApp(stock, order, recipe)
+  initializeOrder(app, recipe, order)
 })

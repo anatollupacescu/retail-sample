@@ -69,8 +69,9 @@ func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type recipe struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
+		ID    int    `json:"id"`
+		Name  string `json:"name"`
+		Items []item `json:"items"`
 	}
 
 	var response struct {
@@ -81,8 +82,9 @@ func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 
 	for _, r := range a.RecipeBook.All() {
 		response.Data = append(response.Data, recipe{
-			ID:   int(r.ID),
-			Name: string(r.Name),
+			ID:    int(r.ID),
+			Name:  string(r.Name),
+			Items: toItems(r.Ingredients),
 		})
 	}
 
@@ -91,6 +93,22 @@ func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+}
+
+type item struct {
+	Id  int `json:"id"`
+	Qty int `json:"qty"`
+}
+
+func toItems(i []recipe.Ingredient) (items []item) {
+	for _, ri := range i {
+		items = append(items, item{
+			Id:  int(ri.ID),
+			Qty: int(ri.Qty),
+		})
+	}
+
+	return
 }
 
 func (a *WebAdapter) GetRecipe(w http.ResponseWriter, _ *http.Request) {

@@ -13,6 +13,48 @@ export default class InventoryClient {
     this.endpoint = `${url}/inventory`
   }
 
+  apiFetchState(): Promise<any> {
+    return axios.get(this.endpoint)
+  }
+
+  apiAddItem(name: string): Promise<any> {
+    return axios.post(this.endpoint, [name])
+  }
+
+  async fetchState(): Promise<any> {
+    const data = await this.apiFetchState()
+    this.inventory = data.data.data
+    return data
+  }
+
+  async addItem(itemName: string /*TODO shoud accept an array*/): Promise<any> {
+    if (!itemName || itemName.length === 0) {
+      return Promise.resolve('name empty')
+    }
+    if (!this.nameIsUnique(itemName)) {
+      return Promise.resolve('name present')
+    }
+    const data = await this.apiAddItem(itemName)
+
+    let newItems: inventoryItem[] = []
+
+    Object.keys(data.data.data).forEach((key: string) => {
+      newItems.push({
+        name: key,
+        id: data.data.data[key]
+      })
+    })
+
+    this.inventory.push(...newItems)
+
+    return newItems
+  }
+
+  private nameIsUnique(name: string) {
+    let found = this.inventory.find(item => item.name === name)
+    return found === undefined
+  }
+
   getInventory(): inventoryItem[] {
     return this.inventory
   }
@@ -23,43 +65,5 @@ export default class InventoryClient {
       return item.name
     }
     return ''
-  }
-
-  apiFetchInventoryState(): Promise<any> {
-    return axios.get(this.endpoint)
-  }
-
-  apiAddInventoryItem(name: string): Promise<any> {
-    return axios.post(this.endpoint, [name])
-  }
-
-  async fetchInventoryState(): Promise<any> {
-    const data = await this.apiFetchInventoryState()
-    this.inventory = data.data.data
-    return data
-  }
-
-  async addInventoryItem(itemName: string): Promise<any> {
-    if (!itemName || itemName.length === 0) {
-      return Promise.resolve('name empty')
-    }
-    if (!this.nameIsUnique(itemName)) {
-      return Promise.resolve('name present')
-    }
-    const data = await this.apiAddInventoryItem(itemName)
-
-    Object.keys(data.data.data).forEach((key: string) => {
-      this.inventory.push({
-        name: key,
-        id: data.data.data[key]
-      })
-    })
-
-    return data
-  }
-
-  private nameIsUnique(name: string) {
-    let found = this.inventory.find(item => item.name === name)
-    return found === undefined
   }
 }

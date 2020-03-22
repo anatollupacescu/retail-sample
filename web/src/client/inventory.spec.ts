@@ -13,7 +13,7 @@ describe('saving a new item', () => {
 
     it('Should err', async () => {
       // no done
-      let result = await app.addInventoryItem('')
+      let result = await app.addItem('')
       expect(result).to.equal('name empty')
       expect(app.getInventory()).to.have.length(0)
     })
@@ -22,7 +22,7 @@ describe('saving a new item', () => {
   describe('when item name is already present', () => {
     let app = new InventoryClient('')
 
-    let mockApi = chai.spy.on(app, 'apiAddInventoryItem', () => ({
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => ({
       data: {
         data: {
           test: 1
@@ -31,8 +31,8 @@ describe('saving a new item', () => {
     }))
 
     it('Should err', async () => {
-      await app.addInventoryItem('test')
-      let result = await app.addInventoryItem('test')
+      await app.addItem('test')
+      let result = await app.addItem('test')
       expect(mockApi).to.have.been.called.exactly(1)
       expect(result).to.equal('name present')
       expect(app.getInventory()).to.have.length(1)
@@ -53,7 +53,7 @@ describe('saving a new item', () => {
       }
     ]
 
-    let mockApi = chai.spy.on(app, 'apiAddInventoryItem', () => ({
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => ({
       data: {
         data: {
           data: mockApiResponses.pop()
@@ -61,8 +61,8 @@ describe('saving a new item', () => {
       }
     }))
 
-    app.addInventoryItem('test')
-    app.addInventoryItem('test1')
+    app.addItem('test')
+    app.addItem('test1')
 
     it('should make the api call', () => {
       expect(mockApi).to.have.been.called.exactly(2)
@@ -74,7 +74,7 @@ describe('saving a new item', () => {
 describe('fetching inventory state', () => {
   let app = new InventoryClient('')
 
-  var mockApi = chai.spy.on(app, 'apiFetchInventoryState', () => ({
+  var mockApi = chai.spy.on(app, 'apiFetchState', () => ({
     data: {
       data: [
         {
@@ -85,7 +85,7 @@ describe('fetching inventory state', () => {
     }
   }))
 
-  app.fetchInventoryState()
+  app.fetchState()
 
   it('should make the api call', () => {
     expect(mockApi).to.have.been.called.exactly(1)

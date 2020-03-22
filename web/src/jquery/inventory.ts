@@ -1,22 +1,23 @@
 import $ = require('jquery')
 
 import InventoryClient from '../client/inventory'
+import RetailApp from '../retailapp/app'
 
 let nameInput: JQuery<HTMLElement>
 
-export function initializeInventory(app: InventoryClient) {
+export function initializeInventory(app: RetailApp, inv: InventoryClient) {
   nameInput = $('#name')
 
   onTableRowClick_highlight_row()
   onChangeNameInput_resetErrorMessage()
-  onSaveNewItem_submit(app)
+  onSaveNewItem_submit(app, inv)
 
-  app.fetchInventoryState().then(() => {
-    populateTable(app.getInventory())
+  inv.fetchState().then(() => {
+    populateTable(inv.getInventory())
   })
 }
 
-function onSaveNewItem_submit(app: InventoryClient): void {
+function onSaveNewItem_submit(app: RetailApp, inv: InventoryClient): void {
   $('#mainForm').on('submit', function(e) {
     e.preventDefault()
 
@@ -35,7 +36,7 @@ function onSaveNewItem_submit(app: InventoryClient): void {
             $('#unique.invalid-feedback').addClass('d-block')
             return
           default:
-            populateTable(app.getInventory())
+            populateTable(inv.getInventory())
             nameInput.val('')
         }
       })

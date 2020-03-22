@@ -35,18 +35,18 @@ $(document).ready(async () => {
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
   let inventory = new InventoryClient(apiEndpoint)
-
-  //register page listeners and load initial data
-  initializeInventory(inventory)
-
   let recipe = new RecipeClient(apiEndpoint)
-  initializeRecipe(inventory, recipe)
-
-  let stock = new StockClient(apiEndpoint)
-  initializeStock(inventory, stock)
 
   let order = new OrderClient(apiEndpoint)
+  let stock = new StockClient(apiEndpoint)
+  let app = new RetailApp(stock, order, recipe, inventory)
 
-  let app = new RetailApp(stock, order, recipe)
+  //register page listeners and load initial data
+  initializeInventory(app, inventory)
+
+  initializeRecipe(inventory, recipe)
+
+  initializeStock(inventory, stock)
+
   initializeOrder(app, recipe, order)
 })

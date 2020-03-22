@@ -1,14 +1,8 @@
 import axios from 'axios'
 
-interface item {
-  id: number
-  qty: number
-}
-
 export interface Position {
   id: number
   qty: number
-  items: item[]
 }
 
 export default class StockClient {
@@ -18,6 +12,13 @@ export default class StockClient {
   constructor(url: string, initialData: Position[] = []) {
     this.endpoint = `${url}/stock`
     this.data = initialData
+  }
+
+  addPosition(id: number): void {
+    this.data.push({
+      id: id,
+      qty: 0
+    })
   }
 
   async provision(id: string, qty: number): Promise<any> {

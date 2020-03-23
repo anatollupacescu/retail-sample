@@ -70,20 +70,20 @@ export default class RecipeClient {
     return axios.post(this.endpoint, payload)
   }
 
-  async saveRecipe(): Promise<any> {
+  async saveRecipe(): Promise<string> {
     let rName = this.pendingRecipe.name
     if (!rName || rName.length === 0) {
-      return Promise.resolve('name empty')
+      return 'name empty'
     }
 
     let found = this.recipes.find(r => r.name === rName)
 
     if (found) {
-      return Promise.resolve('name present')
+      return 'name present'
     }
 
     if (this.pendingRecipe.items.length === 0) {
-      return Promise.resolve('no ingredients')
+      return 'no ingredients'
     }
 
     let data = await this.apiSaveRecipe()
@@ -97,7 +97,8 @@ export default class RecipeClient {
     })
 
     this.pendingRecipe = this.emptyRecipe()
-    return data
+
+    return ''
   }
 
   apiFetchRecipes(): Promise<any> {

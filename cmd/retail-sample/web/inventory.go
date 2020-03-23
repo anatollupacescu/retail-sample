@@ -23,59 +23,58 @@ func (a *WebAdapter) CreateInventoryItem(w http.ResponseWriter, r *http.Request)
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
-	var names []string
+	type payload struct {
+		Name string `json:"name"`
+	}
 
-	if err := d.Decode(&names); err != nil {
+	var requestPayload payload
+
+	if err := d.Decode(&requestPayload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	type DescriptorEntity map[inventory.Name]inventory.ID
+	itemName := inventory.Name(requestPayload.Name)
+	createdID, err := a.Inventory.Add(itemName)
 
-	descriptors := make(DescriptorEntity, len(names))
-
-	for _, name := range names {
-		itemName := inventory.Name(name)
-		createdID, err := a.Inventory.Add(itemName)
-
-		if err != nil {
-			var msg string
-			switch err {
-			case inventory.ErrEmptyName:
-				msg = ErrNoName
-			case inventory.ErrDuplicateName:
-				msg = ErrUnique
-			default:
-				http.Error(w, "Server error", http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusBadRequest)
-
-			if _, err = fmt.Fprint(w, msg); err != nil {
-				log.Fatal(err)
-			}
-
+	if err != nil {
+		var msg string
+		switch err {
+		case inventory.ErrEmptyName:
+			msg = ErrNoName
+		case inventory.ErrDuplicateName:
+			msg = ErrUnique
+		default:
+			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
 
-		descriptors[itemName] = createdID
+		w.WriteHeader(http.StatusBadRequest)
+
+		if _, err = fmt.Fprint(w, msg); err != nil {
+			log.Fatal(err)
+		}
+
+		return
 	}
 
-	if len(descriptors) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-		return
+	type DescriptorEntity struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
 	}
 
 	var response = struct {
 		Data DescriptorEntity `json:"data"`
 	}{
-		Data: descriptors,
+		Data: DescriptorEntity{
+			ID:   int(createdID),
+			Name: requestPayload.Name,
+		},
 	}
 
 	w.WriteHeader(http.StatusCreated)
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

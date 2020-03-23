@@ -10,62 +10,79 @@ let expect = chai.expect
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
     let app = new InventoryClient('')
+    let mockApi = chai.spy.on(app, 'apiAddItem')
 
-    it('Should err', async () => {
+    it('should err', async () => {
       // no done
       let result = await app.addItem('')
-      expect(result).to.equal('name empty')
+      expect(mockApi).to.not.have.been.called
+      expect(result[1]).to.equal('name empty')
+      expect(app.getInventory()).to.have.length(0)
+    })
+  })
+
+  describe('when server says item name is empty', () => {
+    let app = new InventoryClient('')
+    let mockApi = chai.spy.on(app, 'apiAddItem')
+
+    it('should err', async () => {
+      // no done
+      let result = await app.addItem('')
+      expect(mockApi).to.not.have.been.called
+      expect(result[1]).to.equal('name empty')
       expect(app.getInventory()).to.have.length(0)
     })
   })
 
   describe('when item name is already present', () => {
-    let app = new InventoryClient('')
+    let presentItem = {
+      id: 1,
+      name: 'test'
+    }
 
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => ({
-      data: {
-        data: {
-          test: 1
-        }
-      }
-    }))
+    let app = new InventoryClient('', [presentItem])
 
-    it('Should err', async () => {
-      await app.addItem('test')
+    let mockApi = chai.spy.on(app, 'apiAddItem')
+
+    it('should err without calling api', async () => {
       let result = await app.addItem('test')
-      expect(mockApi).to.have.been.called.exactly(1)
-      expect(result).to.equal('name present')
+      expect(mockApi).to.have.not.been.called
+      expect(result[1]).to.equal('name present')
       expect(app.getInventory()).to.have.length(1)
     })
   })
 
-  describe('when item name is unique', () => {
+  describe('when server says item name is already present', () => {
     let app = new InventoryClient('')
 
-    let mockApiResponses = [
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[], 'ERR_UNIQUE'])
+
+    it('Should err', async () => {
+      let result = await app.addItem('test')
+      expect(mockApi).to.have.been.called.exactly(1)
+      expect(result[1]).to.equal('name present')
+      expect(app.getInventory()).to.be.empty
+    })
+  })
+
+  describe('when item name is unique', () => {
+    let initialData = [
       {
-        name: 'test1',
-        id: 2
-      },
-      {
-        name: 'test',
-        id: 1
+        id: 1,
+        name: 'test1'
       }
     ]
+    let app = new InventoryClient('', initialData)
 
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => ({
-      data: {
-        data: {
-          data: mockApiResponses.pop()
-        }
-      }
-    }))
+    let serverResponse = {
+      id: 2,
+      name: 'test2'
+    }
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[serverResponse], ''])
 
-    app.addItem('test')
-    app.addItem('test1')
-
-    it('should make the api call', () => {
-      expect(mockApi).to.have.been.called.exactly(2)
+    it('should make the api call', async () => {
+      let result = await app.addItem('test2')
+      expect(mockApi).to.have.been.called
       expect(app.getInventory()).to.have.length(2)
     })
   })
@@ -85,9 +102,8 @@ describe('fetching inventory state', () => {
     }
   }))
 
-  app.fetchState()
-
-  it('should make the api call', () => {
+  it('should make the api call', async () => {
+    await app.fetchState()
     expect(mockApi).to.have.been.called.exactly(1)
     expect(app.getInventory()).to.have.length(1)
   })

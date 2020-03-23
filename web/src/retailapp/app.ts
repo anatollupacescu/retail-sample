@@ -16,12 +16,22 @@ export default class RetailApp {
     this.inventory = inv
   }
 
-  async addInventoryItem(name: string): Promise<any> {
-    let newItems = await this.inventory.addItem(name)
+  async addInventoryItem(name: string): Promise<string> {
+    let result = await this.inventory.addItem(name)
+
+    let err = result[1]
+
+    if (err !== '') {
+      return err
+    }
+
+    let newItems = result[0]
 
     newItems.forEach((i: inventoryItem) => {
       this.stock.addPosition(i.id)
     })
+
+    return ''
   }
 
   async placeOrder(recipeID: number, qty: number): Promise<any> {

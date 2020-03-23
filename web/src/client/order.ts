@@ -23,9 +23,9 @@ export default class OrderClient {
     return axios.get(this.endpoint)
   }
 
-  async addOrder(recipeID: number, qty: number): Promise<any> {
+  async addOrder(recipeID: number, qty: number): Promise<string> {
     if (!qty || qty === 0) {
-      return Promise.resolve('quantity mandatory')
+      return 'quantity mandatory'
     }
     let result = await this.apiAddOrder(recipeID, qty)
     if (result.status !== 201) {
@@ -36,6 +36,7 @@ export default class OrderClient {
       recipeID: recipeID,
       qty: qty
     })
+    return ''
   }
 
   private apiAddOrder(recipeID: number, qty: number): Promise<any> {

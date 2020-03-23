@@ -19,7 +19,7 @@ describe('add inventory item', () => {
 
   let app = new RetailApp(stock, order, recipe, inv)
 
-  let addItem = chai.spy.on(inv, 'addItem', () => [{ id: 1 }, { id: 2 }])
+  let addItem = chai.spy.on(inv, 'addItem', () => [[{ id: 1 }, { id: 2 }], ''])
   let addPosition = chai.spy.on(stock, 'addPosition', () => {})
 
   it('sets stock position to zero', async () => {

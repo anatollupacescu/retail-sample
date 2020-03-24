@@ -9,9 +9,9 @@ export default class InventoryClient {
   private endpoint: string
   private inventory: inventoryItem[]
 
-  constructor(url: string, initial: inventoryItem[] = []) {
+  constructor(url: string = '', initial: inventoryItem[] = []) {
     this.endpoint = `${url}/inventory`
-    this.inventory = initial
+    this.inventory = initial.slice(0)
   }
 
   apiFetchState(): Promise<any> {

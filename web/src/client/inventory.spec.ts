@@ -9,7 +9,7 @@ let expect = chai.expect
 
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
-    let app = new InventoryClient('')
+    let app = new InventoryClient()
     let mockApi = chai.spy.on(app, 'apiAddItem')
 
     it('should err', async () => {
@@ -22,7 +22,7 @@ describe('saving a new item', () => {
   })
 
   describe('when server says item name is empty', () => {
-    let app = new InventoryClient('')
+    let app = new InventoryClient()
     let mockApi = chai.spy.on(app, 'apiAddItem')
 
     it('should err', async () => {
@@ -35,12 +35,14 @@ describe('saving a new item', () => {
   })
 
   describe('when item name is already present', () => {
-    let presentItem = {
-      id: 1,
-      name: 'test'
-    }
+    let initialData = [
+      {
+        id: 1,
+        name: 'test'
+      }
+    ]
 
-    let app = new InventoryClient('', [presentItem])
+    let app = new InventoryClient('', initialData)
 
     let mockApi = chai.spy.on(app, 'apiAddItem')
 
@@ -53,7 +55,7 @@ describe('saving a new item', () => {
   })
 
   describe('when server says item name is already present', () => {
-    let app = new InventoryClient('')
+    let app = new InventoryClient()
 
     let mockApi = chai.spy.on(app, 'apiAddItem', () => [[], 'ERR_UNIQUE'])
 
@@ -74,31 +76,33 @@ describe('saving a new item', () => {
     ]
     let app = new InventoryClient('', initialData)
 
-    let serverResponse = {
+    let apiResponse = {
       id: 2,
       name: 'test2'
     }
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[serverResponse], ''])
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[apiResponse], ''])
 
     it('should make the api call', async () => {
       let result = await app.addItem('test2')
       expect(mockApi).to.have.been.called
+      expect(result[1]).to.be.empty
       expect(app.getInventory()).to.have.length(2)
+      expect(app.getInventory()).to.have.members([...initialData, apiResponse])
     })
   })
 })
 
 describe('fetching inventory state', () => {
-  let app = new InventoryClient('')
+  let app = new InventoryClient()
+
+  let apiItem = {
+    id: 1,
+    name: 'item1'
+  }
 
   var mockApi = chai.spy.on(app, 'apiFetchState', () => ({
     data: {
-      data: [
-        {
-          name: 'item1',
-          id: 2
-        }
-      ]
+      data: [apiItem]
     }
   }))
 
@@ -106,5 +110,6 @@ describe('fetching inventory state', () => {
     await app.fetchState()
     expect(mockApi).to.have.been.called.exactly(1)
     expect(app.getInventory()).to.have.length(1)
+    expect(app.getInventory()[0]).to.equal(apiItem)
   })
 })

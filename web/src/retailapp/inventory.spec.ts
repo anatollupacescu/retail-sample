@@ -9,6 +9,11 @@ chai.use(spies)
 let expect = chai.expect
 
 describe('init', () => {
+  // let client = new InventoryClient()
+  // let stock = new StockClient()
+
+  // let page = new Inventory(client, stock)
+
   it('should fetch state and render table', () => {})
 })
 
@@ -24,7 +29,7 @@ describe('on submit', () => {
     let stock = new StockClient()
     let page = new Inventory(client, stock)
     //  let addItem = chai.spy.on(client, 'addItem', () => [{ id: 1, name: 'test' }])
-    let name = chai.spy.on(page, 'name', () => '')
+    let getNameValue = chai.spy.on(page, 'getNameValue', () => '')
     let nameError = chai.spy.on(page, 'nameError')
     let addBtnEnabled = chai.spy.on(page, 'addBtnEnabled')
 
@@ -32,7 +37,7 @@ describe('on submit', () => {
 
     it('should show error ', () => {
       page.onSubmit()
-      expect(name).to.have.been.called
+      expect(getNameValue).to.have.been.called
       expect(nameError).to.have.been.called.with(true)
       expect(addBtnEnabled).to.have.been.called.with(false)
       // expect(addStockPos).to.have.been.called

@@ -15,10 +15,12 @@ export function initializeInventory(client: InventoryClient, stock: StockClient)
 
   let page = new Inventory(client, stock)
 
-  page.name = (newVal: string) => manageName(nameInput, newVal)
-  page.nameError = (v: boolean) => showEmptyNameError(v)
-  page.uniqueError = (v: boolean) => showUniqueNameError(v)
+  page.getNameValue = () => getNameValue(nameInput)
+  page.setNameEmpty = () => setNameEmpty(nameInput)
+  page.nameError = (v: boolean) => toggleEmptyNameError(v)
+  page.uniqueError = (v: boolean) => toggleUniqueNameError(v)
   page.addBtnEnabled = (v: boolean) => setAddBtnState(v)
+  page.isAddBtnEnabled = (): boolean => getAddBtnState()
   page.renderTable = (data: inventoryItem[]) => populateTable(data)
 
   form.on('submit', (e: Event) => {
@@ -33,29 +35,25 @@ export function initializeInventory(client: InventoryClient, stock: StockClient)
   page.init()
 }
 
-function manageName(nameInput: JQuery<HTMLElement>, newVal: string): string {
-  if (newVal !== undefined) {
-    nameInput.val(newVal)
-  }
-
+function getNameValue(nameInput: JQuery<HTMLElement>): string {
   return <string>nameInput.val()
 }
 
-function setAddBtnState(v: boolean): boolean {
-  let btn = $('button#inventoryPageSubmitButton.btn.btn-secondary')
-  if (v === false) {
-    btn.prop('disabled', true)
-    return v
-  }
-  if (v === true) {
-    btn.prop('disabled', false)
-    return v
-  }
+function setNameEmpty(nameInput: JQuery<HTMLElement>): void {
+  nameInput.val('')
+}
 
+function getAddBtnState(): boolean {
+  let btn = $('button#inventoryPageSubmitButton.btn.btn-secondary')
   return !btn.is(':disabled')
 }
 
-function showUniqueNameError(v: boolean): void {
+function setAddBtnState(v: boolean): void {
+  let btn = $('button#inventoryPageSubmitButton.btn.btn-secondary')
+  btn.prop('disabled', !v)
+}
+
+function toggleUniqueNameError(v: boolean): void {
   if (v) {
     $('#unique.invalid-feedback').addClass('d-block')
     return
@@ -63,7 +61,7 @@ function showUniqueNameError(v: boolean): void {
   $('#unique.invalid-feedback').removeClass('d-block')
 }
 
-function showEmptyNameError(v: boolean): void {
+function toggleEmptyNameError(v: boolean): void {
   if (v) {
     $('#nonempty.invalid-feedback').addClass('d-block')
     return

@@ -1,20 +1,26 @@
-import InventoryClient from '../client/inventory'
+import InventoryClient, { inventoryItem } from '../client/inventory'
 import StockClient from '../client/stock'
 
 export default class Inventory {
   private client: InventoryClient
   private stock: StockClient
 
-  name!: Function
-  nameError!: Function
-  uniqueError!: Function
-  addBtnEnabled!: Function
-  renderTable!: Function
-
   constructor(inv: InventoryClient, stock: StockClient) {
     this.client = inv
     this.stock = stock
   }
+
+  nameError(_v: boolean | undefined) {}
+  getNameValue(): string {
+    return ''
+  }
+  setNameEmpty(): void {}
+  uniqueError(_v: boolean) {}
+  addBtnEnabled(_v: boolean) {}
+  isAddBtnEnabled(): boolean {
+    return false
+  }
+  renderTable(_data: inventoryItem[]) {}
 
   async init() {
     let data = await this.client.fetchState()
@@ -22,7 +28,7 @@ export default class Inventory {
   }
 
   onNameChange() {
-    let n: string = this.name()
+    let n: string = this.getNameValue()
 
     if (n && n.trim().length > 0) {
       this.addBtnEnabled(true)
@@ -35,7 +41,7 @@ export default class Inventory {
   }
 
   onSubmit() {
-    let n: string = this.name()
+    let n: string = this.getNameValue()
 
     if (!n || n.trim().length === 0) {
       this.nameError(true)
@@ -63,7 +69,7 @@ export default class Inventory {
 
       let data = this.client.getInventory()
       this.renderTable(data)
-      this.name('')
+      this.setNameEmpty()
       this.addBtnEnabled(false)
     })
   }

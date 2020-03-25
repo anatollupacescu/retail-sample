@@ -9,7 +9,7 @@ export default class StockClient {
   private endpoint: string
   private data: Position[]
 
-  constructor(url: string, initialData: Position[] = []) {
+  constructor(url: string = '', initialData: Position[] = []) {
     this.endpoint = `${url}/stock`
     this.data = initialData
   }

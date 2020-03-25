@@ -5,6 +5,13 @@ export interface inventoryItem {
   name: string
 }
 
+type AddItemResult = [inventoryItem, string]
+
+const zeroValueItem: inventoryItem = {
+  id: 0,
+  name: ''
+}
+
 export default class InventoryClient {
   private endpoint: string
   private inventory: inventoryItem[]
@@ -21,45 +28,44 @@ export default class InventoryClient {
   async fetchState(): Promise<inventoryItem[]> {
     const data = await this.apiFetchState()
     this.inventory = data.data.data
-    return data
+    return this.inventory
   }
 
-  async apiAddItem(name: string): Promise<any> {
+  async apiAddItem(name: string): Promise<AddItemResult> {
     try {
       let res = await axios.post(this.endpoint, {
         name: name
       })
-      return [res.data.data, '']
+      let createdItem: inventoryItem = res.data.data
+      return [createdItem, '']
     } catch (error) {
-      return [[], error.response.data]
+      return [zeroValueItem, error.response.data]
     }
   }
 
-  async addItem(itemName: string /*TODO shoud accept an array*/): Promise<[inventoryItem[], string]> {
+  async addItem(itemName: string): Promise<AddItemResult> {
     const errMsgEmptyName = 'name empty',
       errMsgNamePresent = 'name present'
 
     if (!itemName || itemName.length === 0) {
-      return [[], errMsgEmptyName]
+      return [zeroValueItem, errMsgEmptyName]
     }
 
     if (!this.isUnique(itemName)) {
-      return [[], errMsgNamePresent]
+      return [zeroValueItem, errMsgNamePresent]
     }
 
-    let apiResponse: [inventoryItem[], string] = await this.apiAddItem(itemName)
-
-    let newItems = apiResponse[0]
-
-    this.inventory.push(...newItems)
+    let apiResponse = await this.apiAddItem(itemName)
 
     switch (apiResponse[1]) {
       case 'ERR_EMPTY':
-        return [newItems, errMsgEmptyName]
+        return [zeroValueItem, errMsgEmptyName]
       case 'ERR_UNIQUE':
-        return [newItems, errMsgNamePresent]
+        return [zeroValueItem, errMsgNamePresent]
       case '':
-        return apiResponse
+        let newItem = apiResponse[0]
+        this.inventory.push(newItem)
+        return [zeroValueItem, '']
       default:
         throw new Error('unexpected response from the server')
     }

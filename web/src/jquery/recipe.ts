@@ -19,7 +19,7 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
   onClickRecipeTab_updateIngredientsNameDropdown(recipe, inv)
   onChangeQty_resetErrorMessage()
   onClickAddRecipeItem_addIngredientToPendingRecipe(recipe, inv)
-  onClickSaveRecipe_saveAndResetStage(recipe)
+  onClickSaveRecipe_saveAndResetStage(recipe, inv)
   onChangeRecipeName_resetNoNameError()
 
   //fetch main table data
@@ -34,7 +34,7 @@ function onChangeRecipeName_resetNoNameError(): void {
   })
 }
 
-function onClickSaveRecipe_saveAndResetStage(recipe: RecipeClient): void {
+function onClickSaveRecipe_saveAndResetStage(recipe: RecipeClient, inv: InventoryClient): void {
   saveRecipeBtn.on('click', () => {
     let recipeName = <string>recipeNameInput.val()
     recipe.setName(recipeName)
@@ -60,6 +60,7 @@ function onClickSaveRecipe_saveAndResetStage(recipe: RecipeClient): void {
             populateRecipeTable(recipe.getRecipes())
             clearIngredientsTable()
             clearRecipeName()
+            populateDropdown(recipe, inv)
           }
         }
       })

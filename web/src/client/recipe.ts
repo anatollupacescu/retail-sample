@@ -21,7 +21,7 @@ export default class RecipeClient {
   private endpoint: string
   private recipes: Recipe[]
 
-  constructor(url: string, recipe: Recipe[] = []) {
+  constructor(url: string = '', recipe: Recipe[] = []) {
     this.endpoint = `${url}/recipe`
     this.recipes = recipe
     this.pendingRecipe = this.emptyRecipe()
@@ -55,6 +55,7 @@ export default class RecipeClient {
     }
 
     this.pendingRecipe.items.push(item)
+
     return ''
   }
 

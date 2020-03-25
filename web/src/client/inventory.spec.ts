@@ -57,9 +57,9 @@ describe('saving a new item', () => {
   describe('when server says item name is already present', () => {
     let app = new InventoryClient()
 
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[], 'ERR_UNIQUE'])
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => [null, 'ERR_UNIQUE'])
 
-    it('Should err', async () => {
+    it('should err', async () => {
       let result = await app.addItem('test')
       expect(mockApi).to.have.been.called.exactly(1)
       expect(result[1]).to.equal('name present')
@@ -80,7 +80,7 @@ describe('saving a new item', () => {
       id: 2,
       name: 'test2'
     }
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => [[apiResponse], ''])
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => [apiResponse, ''])
 
     it('should make the api call', async () => {
       let result = await app.addItem('test2')

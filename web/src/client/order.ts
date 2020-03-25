@@ -8,10 +8,11 @@ export interface Order {
 
 export default class OrderClient {
   private endpoint: string
-  private orders: Order[] = []
+  private orders: Order[]
 
-  constructor(url: string) {
+  constructor(url: string = '', initial: Order[] = []) {
     this.endpoint = `${url}/order`
+    this.orders = initial
   }
 
   async fetchOrders(): Promise<any> {
@@ -21,6 +22,10 @@ export default class OrderClient {
 
   private apiFetchOrders(): Promise<any> {
     return axios.get(this.endpoint)
+  }
+
+  private apiAddOrder(recipeID: number, qty: number): Promise<any> {
+    return axios.post(this.endpoint, { id: recipeID, qty: qty })
   }
 
   async addOrder(recipeID: number, qty: number): Promise<string> {
@@ -37,10 +42,6 @@ export default class OrderClient {
       qty: qty
     })
     return ''
-  }
-
-  private apiAddOrder(recipeID: number, qty: number): Promise<any> {
-    return axios.post(this.endpoint, { id: recipeID, qty: qty })
   }
 
   getOrders(): Order[] {

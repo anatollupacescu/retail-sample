@@ -42,7 +42,7 @@ $(document).ready(async () => {
   let app = new RetailApp(stock, order, recipe, inventory)
 
   //register page listeners and load initial data
-  initializeInventory(app, inventory)
+  initializeInventory(inventory, stock)
 
   initializeRecipe(inventory, recipe)
 

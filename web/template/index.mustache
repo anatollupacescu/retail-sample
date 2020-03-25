@@ -26,20 +26,20 @@
                     aria-selected="true">Inventory</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="recipe-tab" 
-                    data-toggle="tab" 
-                    href="#recipe" 
-                    role="tab" 
-                    aria-controls="recipe" 
-                    aria-selected="false">Recipe</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" id="stock-tab" 
                     data-toggle="tab" 
                     href="#stock" 
                     role="tab" 
                     aria-controls="stock" 
                     aria-selected="false">Stock</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="recipe-tab" 
+                    data-toggle="tab" 
+                    href="#recipe" 
+                    role="tab" 
+                    aria-controls="recipe" 
+                    aria-selected="false">Recipe</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="order-tab" 
@@ -58,11 +58,11 @@
     <div class="tab-pane active" id="inventory" role="tabpanel" aria-labelledby="inventory-tab">
         {{> page/inventory}}
     </div>
-    <div class="tab-pane" id="recipe" role="tabpanel" aria-labelledby="recipe-tab">
-        {{> page/recipe}}
-    </div>
     <div class="tab-pane" id="stock" role="tabpanel" aria-labelledby="stock-tab">
         {{> page/stock}}
+    </div>
+    <div class="tab-pane" id="recipe" role="tabpanel" aria-labelledby="recipe-tab">
+        {{> page/recipe}}
     </div>
     <div class="tab-pane" id="order" role="tabpanel" aria-labelledby="order-tab">
         {{> page/order}}

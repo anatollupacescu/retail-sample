@@ -1,7 +1,7 @@
 import OrderClient from '../client/order'
 import StockClient from '../client/stock'
 import RecipeClient from '../client/recipe'
-import InventoryClient, { inventoryItem } from '../client/inventory'
+import InventoryClient from '../client/inventory'
 
 export default class RetailApp {
   private stock: StockClient
@@ -25,11 +25,11 @@ export default class RetailApp {
       return err
     }
 
-    let newItems = result[0]
+    // let newItems = result[0]
 
-    newItems.forEach((i: inventoryItem) => {
-      this.stock.addPosition(i.id)
-    })
+    // newItems.forEach((i: inventoryItem) => {
+    //   this.stock.addPosition(i.id)
+    // })
 
     return ''
   }

@@ -1,12 +1,12 @@
 import $ = require('jquery')
 
-import OrderClient, { Order } from '../client/order'
-import RecipeClient from '../client/recipe'
-import RetailApp from '../retailapp/app'
+import OrderClient, { OrderDTO } from '../app/order/client'
+import Order from '../app/order/order'
+import RecipeClient from '../app/recipe/client'
 
 let recipeInput: JQuery<HTMLElement>, qtyInput: JQuery<HTMLElement>, placeOrderBtn: JQuery<HTMLElement>
 
-export function initializeOrder(app: RetailApp, recipe: RecipeClient, order: OrderClient) {
+export function initializeOrder(app: Order, recipe: RecipeClient, order: OrderClient) {
   recipeInput = $('#orderRecipe')
   qtyInput = $('#orderQty')
   placeOrderBtn = $('#placeOrder')
@@ -50,21 +50,21 @@ function populateDropdown(recipe: RecipeClient): void {
 function populateTable(order: OrderClient): void {
   $('#orderTable tbody tr').remove()
   let table = <HTMLTableElement>$('#orderTable tbody')[0]
-  let rows = order.getOrders().sort((i1: Order, i2: Order) => i1.recipeID - i2.recipeID)
-  rows.forEach((element: Order) => {
+  let rows = order.getOrders().sort((i1: OrderDTO, i2: OrderDTO) => i1.recipeID - i2.recipeID)
+  rows.forEach((element: OrderDTO) => {
     let row = <HTMLTableRowElement>table.insertRow(0)
     row.insertCell(0).innerHTML = String(element.recipeID)
     row.insertCell(1).innerHTML = String(element.qty)
   })
 }
 
-function onPlaceBtnClick_placeOrder(app: RetailApp, order: OrderClient): void {
+function onPlaceBtnClick_placeOrder(app: Order, order: OrderClient): void {
   placeOrderBtn.on('click', () => {
     placeOrder(app, order)
   })
 }
 
-function placeOrder(app: RetailApp, order: OrderClient): void {
+function placeOrder(app: Order, order: OrderClient): void {
   let qty = qtyInput.val()
   if (!qty || Number(qty) === 0) {
     showQtyError()

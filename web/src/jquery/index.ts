@@ -1,19 +1,19 @@
 import $ = require('jquery')
 import { apiIsHealthy } from '../health'
 
-import InventoryClient from '../client/inventory'
+import InventoryClient from '../app/inventory/client'
 import { initializeInventory } from './inventory'
 
-import RecipeClient from '../client/recipe'
+import RecipeClient from '../app/recipe/client'
 import { initializeRecipe } from './recipe'
 
 import { initializeStock } from './stock'
-import StockClient from '../client/stock'
+import StockClient from '../app/stock/client'
 
 import { initializeOrder } from './order'
-import OrderClient from '../client/order'
+import OrderClient from '../app/order/client'
 
-import RetailApp from '../retailapp/app'
+import Order from '../app/order/order'
 
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
@@ -39,7 +39,7 @@ $(document).ready(async () => {
 
   let order = new OrderClient(apiEndpoint)
   let stock = new StockClient(apiEndpoint)
-  let app = new RetailApp(stock, order, recipe, inventory)
+  let app = new Order(stock, order, recipe)
 
   //register page listeners and load initial data
   initializeInventory(inventory, stock)

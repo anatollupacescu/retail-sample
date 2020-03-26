@@ -2,7 +2,7 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
-import RecipeClient from './recipe'
+import RecipeClient from './client'
 
 chai.use(spies)
 let expect = chai.expect

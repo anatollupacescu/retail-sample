@@ -1,5 +1,5 @@
-import InventoryClient, { inventoryItem } from '../client/inventory'
-import RecipeClient, { RecipeItem, Recipe } from '../client/recipe'
+import InventoryClient, { inventoryItem } from '../app/inventory/client'
+import RecipeClient, { RecipeItem, Recipe } from '../app/recipe/client'
 
 import $ = require('jquery')
 

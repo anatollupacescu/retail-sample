@@ -1,7 +1,7 @@
 import $ = require('jquery')
 
-import InventoryClient, { inventoryItem } from '../client/inventory'
-import StockClient, { Position } from '../client/stock'
+import InventoryClient, { inventoryItem } from '../app/inventory/client'
+import StockClient, { Position } from '../app/stock/client'
 
 let qtyInput: JQuery<HTMLElement>, addBtn: JQuery<HTMLElement>, nameInput: JQuery<HTMLElement>
 

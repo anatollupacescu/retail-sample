@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export interface Order {
+export interface OrderDTO {
   date: string
   recipeID: number
   qty: number
@@ -8,9 +8,9 @@ export interface Order {
 
 export default class OrderClient {
   private endpoint: string
-  private orders: Order[]
+  private orders: OrderDTO[]
 
-  constructor(url: string = '', initial: Order[] = []) {
+  constructor(url: string = '', initial: OrderDTO[] = []) {
     this.endpoint = `${url}/order`
     this.orders = initial
   }
@@ -44,7 +44,7 @@ export default class OrderClient {
     return ''
   }
 
-  getOrders(): Order[] {
+  getOrders(): OrderDTO[] {
     return this.orders
   }
 }

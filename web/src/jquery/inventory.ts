@@ -1,8 +1,8 @@
 import $ = require('jquery')
 
-import InventoryClient from '../client/inventory'
-import Inventory from '../retailapp/inventory'
-import StockClient from '../client/stock'
+import InventoryClient from '../app/inventory/client'
+import Inventory from '../app/inventory/inventory'
+import StockClient from '../app/stock/client'
 
 interface inventoryItem {
   id: number
@@ -13,26 +13,28 @@ export function initializeInventory(client: InventoryClient, stock: StockClient)
   let nameInput: JQuery<HTMLElement> = $('#name')
   let form: JQuery<HTMLElement> = $('#mainForm')
 
-  let page = new Inventory(client, stock)
+  let page = {
+    getNameValue: () => getNameValue(nameInput),
+    setNameEmpty: () => setNameEmpty(nameInput),
+    nameError: (v: boolean) => toggleEmptyNameError(v),
+    uniqueError: (v: boolean) => toggleUniqueNameError(v),
+    addBtnEnabled: (v: boolean) => setAddBtnState(v),
+    isAddBtnEnabled: (): boolean => getAddBtnState(),
+    renderTable: (data: inventoryItem[]) => populateTable(data)
+  }
 
-  page.getNameValue = () => getNameValue(nameInput)
-  page.setNameEmpty = () => setNameEmpty(nameInput)
-  page.nameError = (v: boolean) => toggleEmptyNameError(v)
-  page.uniqueError = (v: boolean) => toggleUniqueNameError(v)
-  page.addBtnEnabled = (v: boolean) => setAddBtnState(v)
-  page.isAddBtnEnabled = (): boolean => getAddBtnState()
-  page.renderTable = (data: inventoryItem[]) => populateTable(data)
+  let app = new Inventory(client, stock, page)
 
   form.on('submit', (e: Event) => {
     e.preventDefault()
-    page.onSubmit()
+    app.onSubmit()
   })
 
   nameInput.on('keyup', () => {
-    page.onNameChange()
+    app.onNameChange()
   })
 
-  page.init()
+  app.init()
 }
 
 function getNameValue(nameInput: JQuery<HTMLElement>): string {
@@ -69,11 +71,13 @@ function toggleEmptyNameError(v: boolean): void {
   $('#nonempty.invalid-feedback').removeClass('d-block')
 }
 
+/* for later
 function onTableRowClick_highlight_row(): void {
   $('#inventoryTable tbody').on('click', 'tr', function() {
     $(this).toggleClass('list-group-item-dark')
   })
 }
+*/
 
 const byID = (i1: inventoryItem, i2: inventoryItem) => i1.id - i2.id
 

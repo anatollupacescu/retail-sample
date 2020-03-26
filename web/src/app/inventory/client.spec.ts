@@ -2,7 +2,7 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
-import InventoryClient from './inventory'
+import InventoryClient from './client'
 
 chai.use(spies)
 let expect = chai.expect

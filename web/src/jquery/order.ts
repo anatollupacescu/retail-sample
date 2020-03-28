@@ -3,13 +3,16 @@ import $ = require('jquery')
 import OrderClient, { OrderDTO } from '../app/order/client'
 import Order from '../app/order/order'
 import RecipeClient from '../app/recipe/client'
+import StockClient from '../app/stock/client'
 
 let recipeInput: JQuery<HTMLElement>, qtyInput: JQuery<HTMLElement>, placeOrderBtn: JQuery<HTMLElement>
 
-export function initializeOrder(app: Order, recipe: RecipeClient, order: OrderClient) {
+export function initializeOrder(stock: StockClient, recipe: RecipeClient, order: OrderClient) {
   recipeInput = $('#orderRecipe')
   qtyInput = $('#orderQty')
   placeOrderBtn = $('#placeOrder')
+
+  let app = new Order(stock, order, recipe)
 
   onQtyChange_resetErr()
   onRecipeInputChange_resetErr()

@@ -1,9 +1,11 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 export interface Position {
   id: number
   qty: number
 }
+
+type ApiResponse = Record<number, number>
 
 export default class StockClient {
   private endpoint: string
@@ -21,16 +23,34 @@ export default class StockClient {
     })
   }
 
+  private async apiProvision(data: any): Promise<ApiResponse> {
+    try {
+      let res: AxiosResponse = await axios.post(this.endpoint, data)
+      let pos: ApiResponse = res.data.data
+      return Promise.resolve(pos)
+    } catch (error) {
+      return Promise.reject(`got error provisioning: ${error}`)
+    }
+  }
+
   async provision(id: string, qty: number): Promise<any> {
     let data = { [id]: Number(qty) }
-    let resp = await this.apiProvision(data)
-    Object.keys(resp.data.data).forEach(k => {
-      let updated = this.updatePosition(Number(k), Number(resp.data.data[k]))
-      if (!updated) {
-        throw 'Not updated'
+    let stock = await this.apiProvision(data)
+    for (let id in stock) {
+      this.updatePosition(Number(id), Number(stock[id]))
+    }
+    return Promise.resolve()
+  }
+
+  updatePosition(id: number, newValue: number): void {
+    let updated = false
+    this.data.map(p => {
+      if (updated) return
+      if (p.id === id) {
+        p.qty = newValue
+        updated = true
       }
     })
-    return resp
   }
 
   substractFromPosition(ingredientID: number, toSubstract: number): void {
@@ -40,32 +60,20 @@ export default class StockClient {
     }
   }
 
-  updatePosition(k: number, v: number): boolean {
-    let updated = false
-    this.data.map(p => {
-      if (updated) return
-      if (p.id === k) {
-        p.qty = v
-        updated = true
-      }
-    })
-    return updated
-  }
-
-  private apiProvision(data: any): Promise<any> {
-    return axios.post(this.endpoint, data)
+  private async apiFetchState(): Promise<Position[]> {
+    try {
+      let res = await axios.get(this.endpoint)
+      return Promise.resolve(res.data.data)
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
   async fetchState(): Promise<void> {
-    let data = await this.apiFetchState()
-    this.data = data.data.data
-  }
-
-  private async apiFetchState(): Promise<any> {
-    return axios.get(this.endpoint)
+    this.data = await this.apiFetchState()
   }
 
   getData(): Position[] {
-    return this.data
+    return [...this.data]
   }
 }

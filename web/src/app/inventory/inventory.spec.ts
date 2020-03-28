@@ -9,17 +9,12 @@ chai.use(spies)
 let expect = chai.expect
 
 describe('init', () => {
-  // let client = new InventoryClient()
-  // let stock = new StockClient()
-
-  // let page = new Inventory(client, stock)
-
-  it('should fetch state and render table', () => { })
+  it('should fetch state and render table', () => {})
 })
 
 describe('on name change', () => {
   describe('when new value is empty', () => {
-    it('should disable the ADD button', () => { })
+    it('should disable the ADD button', () => {})
   })
 })
 
@@ -47,21 +42,21 @@ describe('on submit', () => {
     })
   })
 
-  xdescribe('when ', () => { })
+  xdescribe('when ', () => {})
 })
 
 function noOpPage(): InventoryPage {
   return {
-    nameError: (_v: boolean | undefined): void => { },
+    nameError: (_v: boolean | undefined): void => {},
     getNameValue: (): string => {
       return ''
     },
-    setNameEmpty: (): void => { },
-    uniqueError: (_v: boolean): void => { },
-    addBtnEnabled: (_v: boolean): void => { },
+    setNameEmpty: (): void => {},
+    uniqueError: (_v: boolean): void => {},
+    addBtnEnabled: (_v: boolean): void => {},
     isAddBtnEnabled: (): boolean => {
       return false
     },
-    renderTable: (_data: inventoryItem[]): void => { }
+    renderTable: (_data: inventoryItem[]): void => {}
   }
 }

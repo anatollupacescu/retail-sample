@@ -1,49 +1,46 @@
 import $ = require('jquery')
+import Stock, { Page, stockTableRowDTO, inventoryItemDTO } from '../app/stock/stock'
+import InventoryClient from '../app/inventory/client'
+import StockClient from '../app/stock/client'
 
-import InventoryClient, { inventoryItem } from '../app/inventory/client'
-import StockClient, { Position } from '../app/stock/client'
+export function initializeStock(inventoryClient: InventoryClient, stockClient: StockClient) {
+  let qtyInput: JQuery<HTMLElement> = $('#provisionQty'),
+    nameInput: JQuery<HTMLElement> = $('#inventoryItemType'),
+    addBtn: JQuery<HTMLElement> = $('#provisionStock'),
+    tab: JQuery<HTMLElement> = $('#stock-tab')
 
-let qtyInput: JQuery<HTMLElement>, addBtn: JQuery<HTMLElement>, nameInput: JQuery<HTMLElement>
+  let page: Page = {
+    getID: (): string => <string>nameInput.val(),
+    getQty: (): number => <number>qtyInput.val(),
+    resetQty: (): void => resetValue(qtyInput),
+    toggleError: (v: boolean): void => toggleError(v),
+    populateDropdown: (data: inventoryItemDTO[]): void => populateDropdown(data, nameInput),
+    populateTable: (data: stockTableRowDTO[]): void => populateTable(data)
+  }
 
-export function initializeStock(inv: InventoryClient, stock: StockClient) {
-  qtyInput = $('#provisionQty')
-  nameInput = $('#inventoryItemType')
-  addBtn = $('#provisionStock')
+  let app = new Stock(inventoryClient, stockClient, page)
 
-  onTabClick_populateDropdown_populateTable(inv, stock)
-  onProvisionBtnClick_doProvision(inv, stock)
-
-  $('#provisionStock').on('click', () => {
-    resetCount()
+  tab.on('click', () => {
+    app.show()
   })
 
-  stock.fetchState().then(() => {
-    populateTable(inv, stock)
+  addBtn.on('click', () => {
+    app.onProvision()
   })
+
+  qtyInput.on('change', () => {
+    app.onQtyChange()
+  })
+
+  app.init()
 }
 
-function onProvisionBtnClick_doProvision(inv: InventoryClient, stock: StockClient): void {
-  addBtn.on('click', () => {
-    let qty = <number>qtyInput.val()
-    if (!qty || Number(qty) <= 0) {
-      setErrorMessage()
-      return
-    }
-    let id = <string>nameInput.val()
-    stock
-      .provision(id, qty)
-      .then(res => {
-        if (res.status !== 201) {
-          console.error('got error provisioning')
-          return
-        }
-        resetErrorMessage()
-        populateTable(inv, stock)
-      })
-      .catch(err => {
-        console.error(err)
-      })
-  })
+function toggleError(v: boolean): void {
+  if (v) {
+    setErrorMessage()
+    return
+  }
+  resetErrorMessage()
 }
 
 function setErrorMessage(): void {
@@ -54,59 +51,28 @@ function resetErrorMessage(): void {
   $('#provisionQtyErr.invalid-feedback').removeClass('d-block')
 }
 
-function onTabClick_populateDropdown_populateTable(inv: InventoryClient, stock: StockClient): void {
-  $('#stock-tab').on('click', () => {
-    populateDropdown(inv)
-    populateTable(inv, stock)
-  })
-}
-
-function populateDropdown(inv: InventoryClient): void {
+function populateDropdown(items: inventoryItemDTO[], nameInput: JQuery<HTMLElement>): void {
   nameInput.empty()
-  inv.getInventory().map(item => {
-    nameInput.append(new Option(item.name, String(item.id)))
+  items.forEach(item => {
+    nameInput.append(new Option(item.name, item.id))
   })
 }
 
-function resetCount(): void {
+function resetValue(qtyInput: JQuery<HTMLElement>): void {
   qtyInput.val('')
 }
 
-function populateTable(inventory: InventoryClient, stock: StockClient): void {
-  $('#stock tbody tr').remove()
+function populateTable(data: stockTableRowDTO[]): void {
   let table = <HTMLTableElement>$('#stock tbody')[0]
+  let rows = data.sort((i1: stockTableRowDTO, i2: stockTableRowDTO) => i1.id - i2.id)
 
-  let items: Position[] = stock.getData()
-  let stockDict: StockDict = toDict(items)
+  $('#stock tbody tr').remove()
 
-  let inventoryItems = inventory.getInventory()
-  let rows = inventoryItems.sort((i1: inventoryItem, i2: inventoryItem) => i1.id - i2.id)
-
-  rows.forEach((element: inventoryItem) => {
+  rows.forEach((element: stockTableRowDTO) => {
     let row = <HTMLTableRowElement>table.insertRow(0)
 
     row.insertCell(0).innerHTML = String(element.id)
-    row.insertCell(1).innerHTML = String(inventory.getName(element.id))
-
-    let value: string = stockDict[element.id]
-
-    if (!value) {
-      value = '0'
-    }
-
-    row.insertCell(2).innerHTML = value
+    row.insertCell(1).innerHTML = element.name
+    row.insertCell(2).innerHTML = element.qty
   })
-}
-
-type StockDict = Record<string, string>
-
-function toDict(i: Position[]): StockDict {
-  let r: StockDict = {}
-  i.forEach(e => {
-    r = {
-      [e.id]: String(e.qty),
-      ...r
-    }
-  })
-  return r
 }

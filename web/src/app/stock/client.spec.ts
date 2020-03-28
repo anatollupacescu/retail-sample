@@ -18,12 +18,7 @@ describe('provision stock', () => {
 
   let app = new StockClient('', data)
   let mockApi = chai.spy.on(app, 'apiProvision', () => ({
-    status: 201,
-    data: {
-      data: {
-        '1': 2
-      }
-    }
+    1: 2
   }))
 
   it('calls the api and stores the state locally', async () => {
@@ -35,16 +30,12 @@ describe('provision stock', () => {
 
 describe('fetching state', () => {
   let app = new StockClient('')
-  let mockApi = chai.spy.on(app, 'apiFetchState', () => ({
-    data: {
-      data: [
-        {
-          id: 1,
-          qty: 2
-        }
-      ]
+  let mockApi = chai.spy.on(app, 'apiFetchState', () => ([
+    {
+      id: 1,
+      qty: 2
     }
-  }))
+  ]))
 
   it('calls the api and stores the state locally', async () => {
     await app.fetchState()

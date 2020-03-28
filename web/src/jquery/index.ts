@@ -13,8 +13,6 @@ import StockClient from '../app/stock/client'
 import { initializeOrder } from './order'
 import OrderClient from '../app/order/client'
 
-import Order from '../app/order/order'
-
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
   let apiPort = process.env.API_PORT
@@ -36,17 +34,14 @@ $(document).ready(async () => {
   let apiEndpoint = `${apiUrl}:${apiPort}`
   let inventory = new InventoryClient(apiEndpoint)
   let recipe = new RecipeClient(apiEndpoint)
-
   let order = new OrderClient(apiEndpoint)
   let stock = new StockClient(apiEndpoint)
-  let app = new Order(stock, order, recipe)
 
-  //register page listeners and load initial data
   initializeInventory(inventory, stock)
 
   initializeRecipe(inventory, recipe)
 
   initializeStock(inventory, stock)
 
-  initializeOrder(app, recipe, order)
+  initializeOrder(stock, recipe, order)
 })

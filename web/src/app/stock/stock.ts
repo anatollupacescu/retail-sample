@@ -82,7 +82,7 @@ export default class Stock {
   onQtyChange() {
     let qty = this.page.getQty()
 
-    if (!qty || Number(qty) <= 0) {
+    if (this.badQuantity(qty)) {
       this.page.toggleError(true)
       return
     }
@@ -92,11 +92,26 @@ export default class Stock {
 
   onProvision() {
     let qty = this.page.getQty()
+
+    if (this.badQuantity(qty)) {
+      this.page.toggleError(true)
+      return
+    }
+
+    this.page.toggleError(false)
+
     let id = this.page.getID()
     this.client.provision(id, qty).then(() => {
       this.page.resetQty()
       let data = this.computeTableRows()
       this.page.populateTable(data)
     })
+  }
+
+  badQuantity(qty: any): boolean {
+    if (!qty || Number(qty) <= 0) {
+      return true
+    }
+    return false
   }
 }

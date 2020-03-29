@@ -6,6 +6,15 @@
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
 
+POST localhost:8080/order
+Content-Type: application/json
+
+{
+  "id":"1",
+  "qty":"2"
+}
+
+###
 GET http://localhost:8080/inbound/config
 Accept: application/json
 

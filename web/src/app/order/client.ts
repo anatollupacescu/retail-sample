@@ -24,23 +24,37 @@ export default class OrderClient {
     return axios.get(this.endpoint)
   }
 
-  private apiAddOrder(recipeID: number, qty: number): Promise<any> {
-    return axios.post(this.endpoint, { id: recipeID, qty: qty })
+  private async apiAddOrder(recipeID: number, qty: number): Promise<string> {
+    try {
+      await axios.post(this.endpoint, { id: Number(recipeID), qty: Number(qty) })
+    } catch (error) {
+      return error.response.data.trim()
+    }
+
+    return ''
   }
 
   async addOrder(recipeID: number, qty: number): Promise<string> {
     if (!qty || qty === 0) {
       return 'quantity mandatory'
     }
-    let result = await this.apiAddOrder(recipeID, qty)
-    if (result.status !== 201) {
-      throw new Error('bad status')
+
+    let msg = await this.apiAddOrder(recipeID, qty)
+
+    switch (msg) {
+      case 'not enough stock':
+        return 'not enough stock'
+      case '':
+        this.orders.push({
+          date: '',
+          recipeID: recipeID,
+          qty: qty
+        })
+        break
+      default:
+        throw `unknown error: ${msg}`
     }
-    this.orders.push({
-      date: '',
-      recipeID: recipeID,
-      qty: qty
-    })
+
     return ''
   }
 

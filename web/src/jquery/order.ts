@@ -1,7 +1,7 @@
 import $ = require('jquery')
 
 import OrderClient, { OrderDTO } from '../app/order/client'
-import Order, { OrderPage } from '../app/order/order'
+import Order, { Page } from '../app/order/order'
 import RecipeClient, { Recipe } from '../app/recipe/client'
 import StockClient from '../app/stock/client'
 
@@ -10,10 +10,11 @@ export function initializeOrder(stock: StockClient, recipe: RecipeClient, order:
     qtyInput: JQuery<HTMLElement> = $('#orderQty'),
     placeOrderBtn: JQuery<HTMLElement> = $('#placeOrder')
 
-  let page: OrderPage = {
+  let page: Page = {
     toggleSubmitButtonState: (v: boolean): void => toggleSubmitButtonState(v),
     getRecipeID: (): number => getNumberValue(recipeInput),
     getQty: (): number => getNumberValue(qtyInput),
+    resetQty: (): void => resetInput(qtyInput),
     toggleQtyError: (v: boolean) => toggleQtyErr(v),
     toggleNotEnoughStockError: (v: boolean) => toggleNotEnoughStockErr(v),
     populateDropdown: (rows: Recipe[]): void => populateDropdown(rows, recipeInput),
@@ -63,7 +64,7 @@ function toggleQtyErr(v: boolean): void {
 }
 
 function getNumberValue(input: JQuery<HTMLElement>): number {
-  return <number>input.val()
+  return Number(input.val())
 }
 
 function populateDropdown(recipes: Recipe[], input: JQuery<HTMLElement>): void {
@@ -114,7 +115,7 @@ function placeOrder(app: Order, order: OrderClient): void {
     */
 }
 
-function resetQty(input: JQuery<HTMLElement>): void {
+function resetInput(input: JQuery<HTMLElement>): void {
   input.val('')
 }
 

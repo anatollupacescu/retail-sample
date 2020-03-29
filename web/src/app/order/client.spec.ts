@@ -19,14 +19,7 @@ describe('provision stock', () => {
 
   describe('when all good', () => {
     let app = new OrderClient('')
-    let mockApi = chai.spy.on(app, 'apiAddOrder', () => ({
-      status: 201,
-      data: {
-        data: {
-          '1': 2
-        }
-      }
-    }))
+    let mockApi = chai.spy.on(app, 'apiAddOrder', () => '')
 
     it('calls the api and stores the state locally', async () => {
       await app.addOrder(1, 2)

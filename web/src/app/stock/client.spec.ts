@@ -17,14 +17,18 @@ describe('provision stock', () => {
   ]
 
   let app = new StockClient('', data)
-  let mockApi = chai.spy.on(app, 'apiProvision', () => ({
-    1: 2
-  }))
+
+  let apiProvision = chai.spy.on(app, 'apiProvision', () =>
+    Promise.resolve({
+      1: 2
+    })
+  )
 
   it('calls the api and stores the state locally', async () => {
     await app.provision('1', 2)
-    expect(mockApi).to.have.been.called
+    expect(apiProvision).to.have.been.called
     expect(app.getData()).to.have.length(1)
+    expect(app.getData()[0].qty).to.equal(2)
   })
 })
 

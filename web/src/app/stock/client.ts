@@ -13,7 +13,7 @@ export default class StockClient {
 
   constructor(url: string = '', initialData: Position[] = []) {
     this.endpoint = `${url}/stock`
-    this.data = initialData
+    this.data = [...initialData]
   }
 
   addPosition(id: number): void {
@@ -26,8 +26,7 @@ export default class StockClient {
   private async apiProvision(data: any): Promise<ApiResponse> {
     try {
       let res: AxiosResponse = await axios.post(this.endpoint, data)
-      let pos: ApiResponse = res.data.data
-      return Promise.resolve(pos)
+      return res.data.data
     } catch (error) {
       return Promise.reject(`got error provisioning: ${error}`)
     }
@@ -39,7 +38,6 @@ export default class StockClient {
     for (let id in stock) {
       this.updatePosition(Number(id), Number(stock[id]))
     }
-    return Promise.resolve()
   }
 
   updatePosition(id: number, newValue: number): void {
@@ -63,7 +61,7 @@ export default class StockClient {
   private async apiFetchState(): Promise<Position[]> {
     try {
       let res = await axios.get(this.endpoint)
-      return Promise.resolve(res.data.data)
+      return res.data.data
     } catch (error) {
       return Promise.reject(error)
     }

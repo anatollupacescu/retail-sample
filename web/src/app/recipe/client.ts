@@ -116,7 +116,7 @@ export default class RecipeClient {
   }
 
   getByID(id: number): Recipe {
-    let r = this.recipes.filter(r => r.id === id)
+    let r = this.recipes.filter(r => r.id === Number(id))
     if (!r || r.length === 0) {
       throw `recipe with id ${id} not found`
     }

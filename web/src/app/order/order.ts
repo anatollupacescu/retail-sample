@@ -1,20 +1,62 @@
-import OrderClient from './client'
+import OrderClient, { OrderDTO } from './client'
 import StockClient from '../stock/client'
-import RecipeClient from '../recipe/client'
+import RecipeClient, { Recipe } from '../recipe/client'
+
+export interface OrderPage {
+  toggleSubmitButtonState(v: boolean): void
+  getRecipeID(): number
+  getQty(): number
+  toggleQtyError(v: boolean): void
+  toggleNotEnoughStockError(v: boolean): void
+  populateDropdown(rows: Recipe[]): void
+  populateTable(rows: OrderDTO[]): void
+}
 
 export default class Order {
-  private stock: StockClient
-  private order: OrderClient
-  private recipe: RecipeClient
+  private page: OrderPage
 
-  constructor(stockClient: StockClient, orderClient: OrderClient, recipeClient: RecipeClient) {
+  private stock: StockClient
+  private recipe: RecipeClient
+  private client: OrderClient
+
+  constructor(stockClient: StockClient, orderClient: OrderClient, recipeClient: RecipeClient, page: OrderPage) {
     this.stock = stockClient
-    this.order = orderClient
+    this.client = orderClient
     this.recipe = recipeClient
+    this.page = page
   }
 
-  async placeOrder(recipeID: number, qty: number): Promise<any> {
-    await this.order.addOrder(recipeID, qty)
+  qtyInputChanged() {
+    let qty = this.page.getQty()
+
+    if (!qty || Number(qty) <= 0) {
+      this.page.toggleQtyError(true)
+      this.page.toggleSubmitButtonState(false)
+      return
+    }
+
+    this.page.toggleQtyError(false)
+    this.page.toggleSubmitButtonState(true)
+  }
+
+  recipeInputChanged() {
+    this.page.toggleNotEnoughStockError(false)
+  }
+
+  show() {
+    let items = this.recipe.getRecipes()
+    this.page.populateDropdown(items)
+  }
+
+  init() {
+    console.log('will call api to fetch the state')
+  }
+
+  async placeOrder(): Promise<any> {
+    let recipeID: number = this.page.getRecipeID(),
+      qty: number = this.page.getQty()
+
+    await this.client.addOrder(recipeID, qty)
     this.updateStock(recipeID, qty)
   }
 

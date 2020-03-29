@@ -69,14 +69,17 @@
 									"",
 									"pm.test(\"descriptor entity has an id\", function() {",
 									"    let itemName = pm.environment.get(\"inventory_item_name\");",
-									"",
 									"    let responseJson = pm.response.json();",
-									"    let itemID = responseJson.data[itemName];",
-									"    pm.expect(itemID).to.be.above(0)",
-									"",
-									"    pm.environment.set(\"inventory_item_id\", itemID)",
+									"    let itemID = responseJson.data.id;",
+									"    pm.expect(itemID).to.be.above(0);",
 									"})",
-									""
+									"",
+									"pm.test(\"save inventory id\", function() {",
+									"    let itemName = pm.environment.get(\"inventory_item_name\");",
+									"    let responseJson = pm.response.json();",
+									"    let itemID = responseJson.data.id;",
+									"    pm.environment.set(\"inventory_item_id\", itemID);",
+									"})"
 								],
 								"type": "text/javascript"
 							}
@@ -105,7 +108,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"{{inventory_item_name}}\" ]"
+							"raw": "{\n\t\"name\": \"{{inventory_item_name}}\"\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/inventory",
@@ -231,7 +234,7 @@
 			"name": "provision stock",
 			"item": [
 				{
-					"name": "create two inventory items",
+					"name": "create one inventory item",
 					"event": [
 						{
 							"listen": "test",
@@ -254,14 +257,11 @@
 									"    pm.response.to.be.json;",
 									"    ",
 									"    let name1 = pm.environment.get(\"inventory_item_name_1\");",
-									"    let name2 = pm.environment.get(\"inventory_item_name_2\");",
 									"    ",
 									"    let responseJson = pm.response.json();",
-									"    let id1 = responseJson.data[name1]",
-									"    let id2 = responseJson.data[name2]",
+									"    let id1 = responseJson.data.id",
 									"",
 									"    pm.environment.set(\"inventory_item_id_1\", id1)",
-									"    pm.environment.set(\"inventory_item_id_2\", id2)",
 									"})",
 									""
 								],
@@ -275,6 +275,79 @@
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_1\", uuid())",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\":\"{{inventory_item_name_1}}\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/inventory",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create second inventory item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"save response ids to env\", function() {",
+									"    pm.response.to.be.json;",
+									"    ",
+									"    let name2 = pm.environment.get(\"inventory_item_name_2\");",
+									"    let responseJson = pm.response.json();",
+									"    let id2 = responseJson.data.id",
+									"",
+									"    pm.environment.set(\"inventory_item_id_2\", id2)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
+								"exec": [
+									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_2\", uuid())",
 									""
 								],
@@ -293,7 +366,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"{{inventory_item_name_1}}\", \"{{inventory_item_name_2}}\"]"
+							"raw": "{\n\t\"name\":\"{{inventory_item_name_2}}\"\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/inventory",
@@ -608,10 +681,10 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "outbound",
+			"name": "recipe",
 			"item": [
 				{
-					"name": "create two inventory items",
+					"name": "create one inventory item",
 					"event": [
 						{
 							"listen": "test",
@@ -622,18 +695,95 @@
 									"    pm.response.to.have.status(201);",
 									"})",
 									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
 									"",
 									"pm.test(\"save response ids to env\", function() {",
 									"    pm.response.to.be.json;",
 									"    ",
 									"    let name1 = pm.environment.get(\"test_outbound_inventory_item_name_1\");",
-									"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
 									"    ",
 									"    let responseJson = pm.response.json();",
-									"    let id1 = responseJson.data[name1]",
-									"    let id2 = responseJson.data[name2]",
+									"    let id1 = responseJson.data.id",
 									"",
 									"    pm.environment.set(\"test_outbound_inventory_item_id_1\", id1)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
+								"exec": [
+									"let uuid = require('uuid')",
+									"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_1}}\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/inventory",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"inventory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create second inventory item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"exec": [
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"save response ids to env\", function() {",
+									"    pm.response.to.be.json;",
+									"    ",
+									"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
+									"    let responseJson = pm.response.json();",
+									"    let id2 = responseJson.data.id",
+									"",
 									"    pm.environment.set(\"test_outbound_inventory_item_id_2\", id2)",
 									"})",
 									""
@@ -644,10 +794,9 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "b148d126-c063-4799-ad11-1c952ac52d8f",
+								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
 								"exec": [
 									"let uuid = require('uuid')",
-									"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
 									"pm.environment.set(\"test_outbound_inventory_item_name_2\", uuid())",
 									""
 								],
@@ -660,13 +809,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[ \"{{test_outbound_inventory_item_name_1}}\", \"{{test_outbound_inventory_item_name_2}}\"]"
+							"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_2}}\"\n}"
 						},
 						"url": {
 							"raw": "localhost:8080/inventory",
@@ -689,7 +838,7 @@
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"status is 202 ACCEPTED\", function() {",
+									"pm.test(\"status is 201\", function() {",
 									"    pm.response.to.have.status(201);",
 									"})",
 									""
@@ -1085,6 +1234,28 @@
 						}
 					},
 					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "0f4044ca-3364-4a68-89c5-e1c154217936",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "ac1236eb-af8c-429d-a7ff-818cdda25812",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			],
 			"protocolProfileBehavior": {}

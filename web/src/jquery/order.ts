@@ -1,7 +1,7 @@
 import $ = require('jquery')
 
-import OrderClient, { OrderDTO } from '../app/order/client'
-import Order, { Page } from '../app/order/order'
+import OrderClient, { Record } from '../app/order/client'
+import Order, { Page, tableRowDTO } from '../app/order/order'
 import RecipeClient, { Recipe } from '../app/recipe/client'
 import StockClient from '../app/stock/client'
 
@@ -18,7 +18,7 @@ export function initializeOrder(stock: StockClient, recipe: RecipeClient, order:
     toggleQtyError: (v: boolean) => toggleQtyErr(v),
     toggleNotEnoughStockError: (v: boolean) => toggleNotEnoughStockErr(v),
     populateDropdown: (rows: Recipe[]): void => populateDropdown(rows, recipeInput),
-    populateTable: (rows: OrderDTO[]): void => populateTable(rows)
+    populateTable: (rows: tableRowDTO[]): void => populateTable(rows)
   }
 
   let app = new Order(stock, order, recipe, page)
@@ -74,16 +74,17 @@ function populateDropdown(recipes: Recipe[], input: JQuery<HTMLElement>): void {
   })
 }
 
-const byRecipeID = (i1: OrderDTO, i2: OrderDTO) => i1.recipeID - i2.recipeID
+const byRecipeID = (i1: tableRowDTO, i2: tableRowDTO) => Number(i1.id) - Number(i2.id)
 
-function populateTable(data: OrderDTO[]): void {
+function populateTable(data: tableRowDTO[]): void {
   let rows = data.sort(byRecipeID)
   let table = <HTMLTableElement>$('#orderTable tbody')[0]
   $('#orderTable tbody tr').remove()
-  rows.forEach((element: OrderDTO) => {
+  rows.forEach((element: tableRowDTO) => {
     let row = <HTMLTableRowElement>table.insertRow(0)
-    row.insertCell(0).innerHTML = String(element.recipeID)
-    row.insertCell(1).innerHTML = String(element.qty)
+    row.insertCell(0).innerHTML = element.id
+    row.insertCell(1).innerHTML = element.recipe
+    row.insertCell(2).innerHTML = element.qty
   })
 }
 

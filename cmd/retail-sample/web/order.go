@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 )
 
 func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +20,7 @@ func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if requestBody.ID == nil || requestBody.Qty == nil {
-		http.Error(w, "name and quantity not provided", http.StatusBadRequest)
+		http.Error(w, "name or quantity not provided", http.StatusBadRequest)
 		return
 	}
 
@@ -51,6 +50,7 @@ func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
 	err = json.NewEncoder(w).Encode(response)
@@ -65,12 +65,13 @@ func (a *WebAdapter) GetOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *WebAdapter) ListOrders(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	type entry struct {
-		Date     time.Time `json:"date"`
-		RecipeID int       `json:"recipeID"`
-		Qty      int       `json:"qty"`
+		ID       int `json:"id"`
+		RecipeID int `json:"recipeID"`
+		Qty      int `json:"qty"`
 	}
 
 	var response struct {
@@ -81,7 +82,7 @@ func (a *WebAdapter) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	for _, o := range a.Orders.All() {
 		e := entry{
-			Date:     o.Date,
+			ID:       int(o.ID),
 			RecipeID: o.RecipeID,
 			Qty:      o.Qty,
 		}

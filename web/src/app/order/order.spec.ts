@@ -5,8 +5,8 @@ import spies = require('chai-spies')
 chai.use(spies)
 let expect = chai.expect
 
-import Order, { Page } from './order'
-import OrderClient, { OrderDTO } from './client'
+import Order, { Page, tableRowDTO } from './order'
+import OrderClient from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
 
@@ -22,7 +22,7 @@ const defaultPage = (): Page => ({
   toggleQtyError: (_v: boolean): void => {},
   toggleNotEnoughStockError: (_v: boolean): void => {},
   populateDropdown: (_rows: Recipe[]): void => {},
-  populateTable: (_rows: OrderDTO[]): void => {}
+  populateTable: (_rows: tableRowDTO[]): void => {}
 })
 
 describe('place order', () => {

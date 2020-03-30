@@ -1,28 +1,30 @@
 package order
 
 type InMemoryStore struct {
-	data    map[int]Order
+	data    map[ID]Order
 	counter *int
 }
 
 func NewInMemoryStore() store {
 	zero := 0
 	return InMemoryStore{
-		data:    make(map[int]Order),
+		data:    make(map[ID]Order),
 		counter: &zero,
 	}
 }
 
 func (m InMemoryStore) add(i Order) ID {
-	currentID := *m.counter
-	m.data[currentID] = i
 	*m.counter += 1
 
-	return ID(currentID)
+	newID := ID(*m.counter)
+	m.data[newID] = i
+
+	return newID
 }
 
 func (m InMemoryStore) all() (r []Order) {
-	for _, v := range m.data {
+	for id, v := range m.data {
+		v.ID = id
 		r = append(r, v)
 	}
 

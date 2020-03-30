@@ -704,8 +704,6 @@
 									"})",
 									"",
 									"pm.test(\"save response ids to env\", function() {",
-									"    pm.response.to.be.json;",
-									"    ",
 									"    let name1 = pm.environment.get(\"test_outbound_inventory_item_name_1\");",
 									"    ",
 									"    let responseJson = pm.response.json();",
@@ -778,8 +776,6 @@
 									"})",
 									"",
 									"pm.test(\"save response ids to env\", function() {",
-									"    pm.response.to.be.json;",
-									"    ",
 									"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
 									"    let responseJson = pm.response.json();",
 									"    let id2 = responseJson.data.id",
@@ -1086,10 +1082,37 @@
 							"script": {
 								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
 								"exec": [
-									"pm.test(\"Should return 200\", function() {",
-									"    pm.response.to.have.status(200)",
+									"pm.test(\"status is OK\", function() {",
+									"    pm.response.to.have.status(200);",
 									"})",
-									""
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"body contains the order\", function() {",
+									"    let body = JSON.parse(responseBody);",
+									"    let recipeID = pm.environment.get(\"test_outbound_recipe_id\");",
+									"    ",
+									"    let expected = {",
+									"        recipeID: recipeID,",
+									"        qty: 1",
+									"    }",
+									"    ",
+									"    pm.expect(body.data.map(dropID)).to.be.an('array')",
+									"       .that.deep.includes(expected)",
+									"})",
+									"",
+									"function dropID(e) {",
+									"    return {",
+									"        recipeID: e.recipeID,",
+									"        qty: e.qty",
+									"    }",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -1112,13 +1135,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "localhost:8080/recipe",
+							"raw": "localhost:8080/order",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"recipe"
+								"order"
 							]
 						}
 					},

@@ -1,6 +1,12 @@
-import OrderClient, { OrderDTO } from './client'
+import OrderClient, { Record } from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
+
+export interface tableRowDTO {
+  id: string
+  recipe: string
+  qty: string
+}
 
 export interface Page {
   toggleSubmitButtonState(v: boolean): void
@@ -10,7 +16,7 @@ export interface Page {
   toggleQtyError(v: boolean): void
   toggleNotEnoughStockError(v: boolean): void
   populateDropdown(rows: Recipe[]): void
-  populateTable(rows: OrderDTO[]): void
+  populateTable(rows: tableRowDTO[]): void
 }
 
 export default class Order {
@@ -30,7 +36,7 @@ export default class Order {
   qtyInputChanged() {
     let qty = this.page.getQty()
 
-    if (!qty || Number(qty) <= 0) {
+    if (this.badQuantity(qty)) {
       this.page.toggleQtyError(true)
       this.page.toggleSubmitButtonState(false)
       return
@@ -53,16 +59,24 @@ export default class Order {
 
   init() {
     this.client.fetchOrders().then(() => {
-      let data: OrderDTO[] = this.client.getOrders()
-      this.page.populateTable(data)
+      let data: Record[] = this.client.getOrders()
+      let rows = this.toRows(data)
+      this.page.populateTable(rows)
     })
+  }
+
+  badQuantity(qty: any): boolean {
+    if (!qty || Number(qty) <= 0) {
+      return true
+    }
+    return false
   }
 
   async placeOrder(): Promise<any> {
     let recipeID: number = this.page.getRecipeID(),
       qty: number = this.page.getQty()
 
-    if (!qty || Number(qty) <= 0) {
+    if (this.badQuantity(qty)) {
       this.page.toggleQtyError(true)
       this.page.toggleSubmitButtonState(false)
       return
@@ -75,19 +89,25 @@ export default class Order {
         this.page.toggleNotEnoughStockError(true)
         this.page.toggleSubmitButtonState(false)
         return
-
-      default:
-        break
     }
 
-    let data: OrderDTO[] = this.client.getOrders()
+    let data: Record[] = this.client.getOrders()
 
-    this.page.populateTable(data)
+    let rows = this.toRows(data)
+    this.page.populateTable(rows)
     this.page.resetQty()
-    this.page.toggleSubmitButtonState(true)
+    this.page.toggleSubmitButtonState(false)
     this.page.toggleNotEnoughStockError(false)
 
     this.updateStock(recipeID, qty)
+  }
+
+  toRows(data: Record[]): tableRowDTO[] {
+    return data.map(record => ({
+      id: String(record.id),
+      recipe: this.recipe.getByID(record.recipeID).name,
+      qty: String(record.qty)
+    }))
   }
 
   private updateStock(recipeID: number, orderSize: number): void {

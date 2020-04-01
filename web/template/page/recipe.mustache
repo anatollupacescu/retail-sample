@@ -33,7 +33,7 @@
           </div>
           <div class="row pb-4">
             <div class="col-md-12">
-              <button id="addRecipeItem" class="btn btn-secondary">
+              <button id="addRecipeItem" class="btn btn-secondary" disabled="">
                 Add to list
               </button>
             </div>
@@ -58,18 +58,21 @@
           <div class="row">
             <div class="col-md-3">
               <div class="form-group">
-                <label for="recipeName">Finished product name<br />
+                <label for="recipeName">New recipe name<br />
                 </label>
                 <input type="text" class="form-control" id="recipeName" />
                 <div id="noNameErr" class="invalid-feedback">
                   Please choose a name
+                </div>
+                <div id="noUniqueNameErr" class="invalid-feedback">
+                  The name has to be unique
                 </div>
               </div>
             </div>
           </div>
           <div class="row pb-4">
             <div class="col-md-12">
-              <button id="saveRecipe" class="btn btn-secondary">
+              <button id="saveRecipe" class="btn btn-secondary"  disabled="">
                 Save new finished product
               </button>
             </div>
@@ -86,8 +89,8 @@
       <table id="recipes" class="table table-striped table-bordered">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
-            <th>Count</th>
           </tr>
         </thead>
         <tbody></tbody>

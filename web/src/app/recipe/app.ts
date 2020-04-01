@@ -1,11 +1,5 @@
 import InventoryClient, { inventoryItem } from '../inventory/client'
-import RecipeClient, { Recipe } from './client'
-
-export interface ingredientDTO {
-  id: number
-  name: string
-  qty: number
-}
+import RecipeClient, { Recipe, RecipeItem } from './client'
 
 export interface optionDTO {
   id: number
@@ -20,13 +14,15 @@ export interface recipeDTO {
 export interface Page {
   ingredientID(): number
   removeIngredientFromDropdown(s: string): void
-  toggleIngredientNameError(v: boolean): void
-  toggleAddIngredientButtonState(v: boolean): void
+  toggleAddToListBtnDisabledState(v: boolean): void
   toggleNoIngredientsError(v: boolean): void
-  recipeID(): number
+
+  recipeName(): string
   resetRecipeName(): void
   toggleAddRecipeButtonState(v: boolean): void
   toggleRecipeNameError(v: boolean): void
+  toggleNoUniqueNameErr(v: boolean): void
+
   populateIngredientsDropdown(dtos: optionDTO[]): void
   populateIngredientsTable(dtos: ingredientDTO[]): void
   populateTable(rows: recipeDTO[]): void
@@ -35,10 +31,22 @@ export interface Page {
   toggleQtyError(v: boolean): void
 }
 
+interface ingredient {
+  id: number
+  qty: number
+}
+
+export interface ingredientDTO {
+  name: string
+  qty: string
+}
+
 export default class App {
   private inventory: InventoryClient
   private client: RecipeClient
   private page: Page
+
+  private ingredients: ingredient[] = []
 
   constructor(inv: InventoryClient, recipe: RecipeClient, page: Page) {
     this.inventory = inv
@@ -55,63 +63,174 @@ export default class App {
   }
 
   toRows(recipes: Recipe[]): recipeDTO[] {
-    return []
+    return recipes.map(r => ({
+      id: r.id,
+      name: r.name
+    }))
   }
 
-  show() {
+  renderIngredientsDropdown() {
     let dropdownOptions = this.inventory.getInventory()
     let filteredOptions = this.removeExisting(dropdownOptions)
     let dtos = this.toOptionDTO(filteredOptions)
     this.page.populateIngredientsDropdown(dtos)
   }
 
+  show() {
+    this.renderIngredientsDropdown()
+  }
+
   toOptionDTO(filteredOptions: inventoryItem[]): optionDTO[] {
-    return []
+    return filteredOptions.map(i => ({
+      id: i.id,
+      name: i.name
+    }))
   }
 
   removeExisting(dropdownOptions: inventoryItem[]): inventoryItem[] {
-    return []
+    return dropdownOptions.filter(dop => {
+      let found = this.ingredients.find(i => i.id === dop.id)
+      return !found
+    })
+  }
+
+  nameIsValid(name: string): boolean {
+    if (!name || name.trim().length === 0) {
+      return false
+    }
+    return true
+  }
+
+  refreshRecipeNameRelevantUI(name: string): void {
+    if (!this.nameIsValid(name)) {
+      this.page.toggleRecipeNameError(true)
+      this.page.toggleAddRecipeButtonState(true)
+      return
+    }
+    this.page.toggleRecipeNameError(false)
+    this.page.toggleAddRecipeButtonState(false)
   }
 
   onRecipeNameChange() {
-    throw new Error('Method not implemented.')
+    let name = this.page.recipeName()
+    this.refreshRecipeNameRelevantUI(name)
   }
 
   onSaveRecipe() {
-    let recipeID = this.page.recipeID()
-    this.client.setName('WIP')
-    this.client.saveRecipe().then(msg => {
+    let name = this.page.recipeName()
+    this.refreshRecipeNameRelevantUI(name)
+
+    if (this.ingredients.length === 0) {
+      this.page.toggleNoIngredientsError(true)
+      return
+    }
+
+    this.page.toggleNoIngredientsError(false)
+
+    let recipeItems = this.toRecipeItems(this.ingredients)
+
+    this.client.saveRecipe(name, recipeItems).then(msg => {
       switch (msg) {
-        case 'ERR_EMPTY':
         case 'name empty': {
           this.page.toggleRecipeNameError(true)
-          return
+          break
         }
-        case 'ERR_PRESENT':
         case 'name present': {
-          alert('duplicate name')
-          return
+          this.page.toggleNoUniqueNameErr(true)
+          break
         }
         case 'no ingredients': {
           this.page.toggleNoIngredientsError(true)
-          return
+          break
         }
         case '':
+          this.ingredients = []
+          this.renderIngredientsDropdown()
+          this.populateIngredientsTable()
+          this.page.toggleNoUniqueNameErr(false)
+          this.page.resetRecipeName()
+          this.page.toggleAddRecipeButtonState(true)
+          let recipes: Recipe[] = this.client.getRecipes()
+          let rows: recipeDTO[] = this.toRows(recipes)
+          this.page.populateTable(rows)
           break
         default: {
           throw 'unknown error'
         }
       }
-
-      //  success
     })
   }
 
+  populateIngredientsTable() {
+    let dtos = this.ingredientDTOs()
+    this.page.populateIngredientsTable(dtos)
+  }
+
+  toRecipeItems(ingredients: ingredient[]): RecipeItem[] {
+    return ingredients.map(i => ({
+      id: i.id,
+      qty: i.qty
+    }))
+  }
+
   onAddIngredient() {
-    throw new Error('Method not implemented.')
+    let qty = this.page.ingredientQty()
+
+    if (this.badQuantity(qty)) {
+      this.page.toggleQtyError(true)
+      return
+    }
+
+    let id = this.page.ingredientID()
+
+    this.ingredients.push({
+      id: id,
+      qty: qty
+    })
+
+    this.populateIngredientsTable()
+    this.page.toggleNoIngredientsError(false)
+
+    this.renderIngredientsDropdown()
+
+    this.page.resetQty()
+    this.page.toggleAddToListBtnDisabledState(true)
+  }
+
+  ingredientDTOs(): ingredientDTO[] {
+    return this.ingredients.map(i => {
+      let name = this.inventory.getName(i.id)
+      return {
+        qty: String(i.qty),
+        name: name
+      }
+    })
+  }
+
+  badQuantity(qty: number): boolean {
+    if (!qty || Number(qty) <= 0) {
+      return true
+    }
+    return false
   }
 
   onIngredientQtyChange() {
-    throw new Error('Method not implemented.')
+    let qty = this.page.ingredientQty()
+
+    if (this.badQuantity(qty)) {
+      this.page.toggleQtyError(true)
+      this.page.toggleAddToListBtnDisabledState(true)
+      return
+    }
+
+    let id = this.page.ingredientID()
+
+    if (!id || id === 0) {
+      this.page.toggleAddToListBtnDisabledState(true)
+      return
+    }
+
+    this.page.toggleQtyError(false)
+    this.page.toggleAddToListBtnDisabledState(false)
   }
 }

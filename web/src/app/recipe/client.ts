@@ -5,11 +5,6 @@ export interface RecipeItem {
   qty: number
 }
 
-interface RecipeCandidate {
-  name: string
-  items: RecipeItem[]
-}
-
 export interface Recipe {
   id: number
   name: string
@@ -17,87 +12,42 @@ export interface Recipe {
 }
 
 export default class RecipeClient {
-  private pendingRecipe: RecipeCandidate
   private endpoint: string
   private recipes: Recipe[]
 
   constructor(url: string = '', recipe: Recipe[] = []) {
     this.endpoint = `${url}/recipe`
     this.recipes = recipe
-    this.pendingRecipe = this.emptyRecipe()
   }
 
-  private emptyRecipe(): RecipeCandidate {
-    return {
-      name: '',
-      items: []
-    }
-  }
-
-  setName(newRecipeName: string) {
-    this.pendingRecipe.name = newRecipeName
-  }
-
-  addIngredient(id: number, qty: number): string {
-    if (!qty || qty === 0) {
-      return 'zero quantity'
-    }
-
-    let found = this.pendingRecipe.items.find(i => i.id === id)
-
-    if (found) {
-      return 'duplicate id'
-    }
-
-    let item: RecipeItem = {
-      id: id,
-      qty: qty
-    }
-
-    this.pendingRecipe.items.push(item)
-
-    return ''
-  }
-
-  apiSaveRecipe(): Promise<any> {
+  apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
     let items: any = {}
-    this.pendingRecipe.items.forEach(i => {
+    ingredients.forEach(i => {
       items[i.id] = i.qty
     })
     let payload = {
-      name: this.pendingRecipe.name,
+      name: name,
       items: items
     }
     return axios.post(this.endpoint, payload)
   }
 
-  async saveRecipe(): Promise<string> {
-    let rName = this.pendingRecipe.name
-    if (!rName || rName.length === 0) {
-      return 'name empty'
-    }
-
-    let found = this.recipes.find(r => r.name === rName)
+  async saveRecipe(name: string, ingredients: RecipeItem[]): Promise<string> {
+    let found = this.recipes.find(r => r.name === name)
 
     if (found) {
       return 'name present'
     }
 
-    if (this.pendingRecipe.items.length === 0) {
-      return 'no ingredients'
-    }
-
-    let data = await this.apiSaveRecipe()
+    let data = await this.apiSaveRecipe(name, ingredients)
 
     Object.keys(data.data.data).forEach((i: any) => {
       this.recipes.push({
         id: Number(data.data.data[i]),
         name: String(i),
-        items: this.pendingRecipe.items
+        items: ingredients
       })
     })
-
-    this.pendingRecipe = this.emptyRecipe()
 
     return ''
   }
@@ -121,9 +71,5 @@ export default class RecipeClient {
       throw `recipe with id ${id} not found`
     }
     return r[0]
-  }
-
-  listItems(): RecipeItem[] {
-    return this.pendingRecipe.items
   }
 }

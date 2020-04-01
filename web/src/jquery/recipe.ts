@@ -16,15 +16,18 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
     ingredientID: (): number => getNumberValue(itemNameDropdown),
     removeIngredientFromDropdown: (s: string): void => removeIngredientNameFromTheList(s),
     ingredientQty: (): number => getNumberValue(itemQtyPicker),
-    toggleIngredientNameError: (v: boolean): void => toggleIngredientNameError(v),
-    toggleNoIngredientsError: (v: boolean): void => toggleNoIngredientsError(v),
-    toggleRecipeNameError: (v: boolean): void => toggleRecipeNameError(v),
+
     resetQty: () => resetValue(itemQtyPicker),
     toggleQtyError: (v: boolean) => toggleQtyError(v),
-    toggleAddIngredientButtonState: (v: boolean) => toggleAddIngredientButtonState(v),
-    recipeID: (): number => getNumberValue(recipeNameInput),
+
+    toggleAddToListBtnDisabledState: (v: boolean): void => toggleDisabledState(v, addItemBtn),
+
+    recipeName: (): string => getStringValue(recipeNameInput),
     resetRecipeName: () => resetValue(recipeNameInput),
-    toggleAddRecipeButtonState: (v: boolean) => toggleAddRecipeButtonState(v),
+    toggleRecipeNameError: (v: boolean): void => toggleRecipeNameError(v),
+    toggleAddRecipeButtonState: (v: boolean) => toggleDisabledState(v, saveRecipeBtn),
+    toggleNoIngredientsError: (v: boolean): void => toggleNoIngredientsError(v),
+    toggleNoUniqueNameErr: (v: boolean): void => toggleNoUniqueNameErr(v),
     populateIngredientsDropdown: (dtos: optionDTO[]): void => populateDropdown(itemNameDropdown, dtos),
     populateIngredientsTable: (dtos: ingredientDTO[]): void => populateIngredientsTable(dtos),
     populateTable: (rows: recipeDTO[]): void => populateRecipeTable(rows)
@@ -44,7 +47,7 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
     app.onAddIngredient()
   })
 
-  recipeNameInput.on('change', () => {
+  recipeNameInput.on('keyup', () => {
     app.onRecipeNameChange()
   })
 
@@ -53,8 +56,10 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
   })
 
   app.init()
+}
 
-  //fetch main table data
+function toggleDisabledState(v: boolean, input: JQuery): void {
+  input.prop('disabled', v)
 }
 
 function resetValue(input: JQuery): void {
@@ -65,12 +70,8 @@ function getNumberValue(input: JQuery): number {
   return Number(input.val())
 }
 
-function toggleIngredientNameError(v: boolean): void {
-  if (v) {
-    $('#noNameErr.invalid-feedback').addClass('d-block')
-    return
-  }
-  $('#noNameErr.invalid-feedback').removeClass('d-block')
+function getStringValue(input: JQuery): string {
+  return String(input.val())
 }
 
 function toggleQtyError(v: boolean): void {
@@ -89,28 +90,20 @@ function toggleNoIngredientsError(v: boolean): void {
   $('#noRowsErr.invalid-feedback').removeClass('d-block')
 }
 
+function toggleNoUniqueNameErr(v: boolean): void {
+  if (v) {
+    $('#noUniqueNameErr.invalid-feedback').addClass('d-block')
+    return
+  }
+  $('#noUniqueNameErr.invalid-feedback').removeClass('d-block')
+}
+
 function toggleRecipeNameError(v: boolean): void {
   if (v) {
     $('#noNameErr.invalid-feedback').addClass('d-block')
     return
   }
   $('#noNameErr.invalid-feedback').removeClass('d-block')
-}
-
-function toggleAddIngredientButtonState(v: boolean): void {
-  if (v) {
-    //enable
-    return
-  }
-  //disable
-}
-
-function toggleAddRecipeButtonState(v: boolean): void {
-  if (v) {
-    //enable
-    return
-  }
-  //disable
 }
 
 function removeIngredientNameFromTheList(op: string): void {
@@ -130,8 +123,10 @@ function populateRecipeTable(recipes: recipeDTO[]): void {
   })
 }
 
+const byName = (i1: { name: string }, i2: { name: string }) => i1.name.localeCompare(i2.name)
+
 function populateIngredientsTable(dtos: ingredientDTO[]): void {
-  let rows = dtos.sort(byID)
+  let rows = dtos.sort(byName)
   let recipeItemsTable = <HTMLTableElement>$('#recipeItems tbody')[0]
   $('#recipeItems tbody tr').remove()
   rows.forEach((item: ingredientDTO) => {

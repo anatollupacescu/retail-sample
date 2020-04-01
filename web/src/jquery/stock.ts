@@ -1,9 +1,9 @@
 import $ = require('jquery')
 import Stock, { Page, stockTableRowDTO, inventoryItemDTO } from '../app/stock/stock'
-import InventoryClient from '../app/inventory/client'
+import Client from '../app/inventory/client'
 import StockClient from '../app/stock/client'
 
-export function initializeStock(inventoryClient: InventoryClient, stockClient: StockClient) {
+export function initializeStock(inventoryClient: Client, stockClient: StockClient) {
   let qtyInput: JQuery<HTMLElement> = $('#provisionQty'),
     nameInput: JQuery<HTMLElement> = $('#inventoryItemType'),
     addBtn: JQuery<HTMLElement> = $('#provisionStock'),

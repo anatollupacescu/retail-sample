@@ -1,4 +1,4 @@
-import InventoryClient, { inventoryItem } from '../inventory/client'
+import Client, { inventoryItem } from '../inventory/client'
 import RecipeClient, { Recipe, RecipeItem } from './client'
 
 export interface optionDTO {
@@ -42,13 +42,13 @@ export interface ingredientDTO {
 }
 
 export default class App {
-  private inventory: InventoryClient
+  private inventory: Client
   private client: RecipeClient
   private page: Page
 
   private ingredients: ingredient[] = []
 
-  constructor(inv: InventoryClient, recipe: RecipeClient, page: Page) {
+  constructor(inv: Client, recipe: RecipeClient, page: Page) {
     this.inventory = inv
     this.client = recipe
     this.page = page
@@ -70,7 +70,7 @@ export default class App {
   }
 
   renderIngredientsDropdown() {
-    let dropdownOptions = this.inventory.getInventory()
+    let dropdownOptions = this.inventory.getState()
     let filteredOptions = this.removeExisting(dropdownOptions)
     let dtos = this.toOptionDTO(filteredOptions)
     this.page.populateIngredientsDropdown(dtos)

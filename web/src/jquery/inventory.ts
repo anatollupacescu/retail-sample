@@ -1,7 +1,7 @@
 import $ = require('jquery')
 
-import InventoryClient from '../app/inventory/client'
-import Inventory from '../app/inventory/inventory'
+import Client from '../app/inventory/client'
+import App, { Page } from '../app/inventory/app'
 import StockClient from '../app/stock/client'
 
 interface inventoryItem {
@@ -9,21 +9,20 @@ interface inventoryItem {
   name: string
 }
 
-export function initializeInventory(client: InventoryClient, stock: StockClient) {
+export function initializeInventory(client: Client, stock: StockClient) {
   let nameInput: JQuery<HTMLElement> = $('#name')
   let form: JQuery<HTMLElement> = $('#mainForm')
 
-  let page = {
-    getNameValue: () => getNameValue(nameInput),
-    setNameEmpty: () => setNameEmpty(nameInput),
-    nameError: (v: boolean) => toggleEmptyNameError(v),
-    uniqueError: (v: boolean) => toggleUniqueNameError(v),
+  let page: Page = {
+    name: () => getNameValue(nameInput),
+    resetName: () => setNameEmpty(nameInput),
+    toggleNameError: (v: boolean) => toggleEmptyNameError(v),
+    toggleUniqueError: (v: boolean) => toggleUniqueNameError(v),
     addBtnEnabled: (v: boolean) => setAddBtnState(v),
-    isAddBtnEnabled: (): boolean => getAddBtnState(),
     renderTable: (data: inventoryItem[]) => populateTable(data)
   }
 
-  let app = new Inventory(client, stock, page)
+  let app = new App(client, stock, page)
 
   form.on('submit', (e: Event) => {
     e.preventDefault()
@@ -43,11 +42,6 @@ function getNameValue(nameInput: JQuery<HTMLElement>): string {
 
 function setNameEmpty(nameInput: JQuery<HTMLElement>): void {
   nameInput.val('')
-}
-
-function getAddBtnState(): boolean {
-  let btn = $('button#inventoryPageSubmitButton.btn.btn-secondary')
-  return !btn.is(':disabled')
 }
 
 function setAddBtnState(v: boolean): void {

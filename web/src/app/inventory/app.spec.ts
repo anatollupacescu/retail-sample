@@ -1,8 +1,8 @@
 import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
-import InventoryClient, { inventoryItem } from './client'
-import Inventory, { InventoryPage } from './inventory'
+import Client, { inventoryItem } from './client'
+import Inventory, { Page } from './app'
 import StockClient from '../stock/client'
 
 chai.use(spies)
@@ -20,20 +20,20 @@ describe('on name change', () => {
 
 describe('on submit', () => {
   describe('when new name is empty', () => {
-    let client = new InventoryClient()
+    let client = new Client()
     let stock = new StockClient()
 
-    let page: InventoryPage = noOpPage()
+    let page: Page = noOpPage()
 
-    let getNameValue = chai.spy.on(page, 'getNameValue', () => '')
-    let nameError = chai.spy.on(page, 'nameError')
+    let getNameValue = chai.spy.on(page, 'name', () => '')
+    let nameError = chai.spy.on(page, 'toggleNameError')
     let addBtnEnabled = chai.spy.on(page, 'addBtnEnabled')
 
     let app = new Inventory(client, stock, page)
+    app.onSubmit()
 
-    it('should show error ', () => {
-      app.onSubmit()
-      expect(getNameValue).to.have.been.called
+    it('should show error', () => {
+      expect(getNameValue).to.have.been.called.once
       expect(nameError).to.have.been.called.with(true)
     })
 
@@ -45,18 +45,15 @@ describe('on submit', () => {
   xdescribe('when ', () => {})
 })
 
-function noOpPage(): InventoryPage {
+function noOpPage(): Page {
   return {
-    nameError: (_v: boolean | undefined): void => {},
-    getNameValue: (): string => {
+    toggleNameError: (_v: boolean): void => {},
+    name: (): string => {
       return ''
     },
-    setNameEmpty: (): void => {},
-    uniqueError: (_v: boolean): void => {},
+    resetName: (): void => {},
+    toggleUniqueError: (_v: boolean): void => {},
     addBtnEnabled: (_v: boolean): void => {},
-    isAddBtnEnabled: (): boolean => {
-      return false
-    },
     renderTable: (_data: inventoryItem[]): void => {}
   }
 }

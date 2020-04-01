@@ -12,7 +12,7 @@ const zeroValueItem: inventoryItem = {
   name: ''
 }
 
-export default class InventoryClient {
+export default class Client {
   private endpoint: string
   private inventory: inventoryItem[]
 
@@ -76,7 +76,7 @@ export default class InventoryClient {
     return found === undefined
   }
 
-  getInventory(): inventoryItem[] {
+  getState(): inventoryItem[] {
     return this.inventory
   }
 

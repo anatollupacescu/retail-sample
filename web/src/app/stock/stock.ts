@@ -1,4 +1,4 @@
-import InventoryClient, { inventoryItem } from '../inventory/client'
+import Client, { inventoryItem } from '../inventory/client'
 import StockClient from './client'
 
 import { Position } from '../stock/client'
@@ -26,18 +26,18 @@ export interface Page {
 type StockDict = Record<string, string>
 
 export default class Stock {
-  inventory: InventoryClient
+  inventory: Client
   client: StockClient
   page: Page
 
-  constructor(inv: InventoryClient, client: StockClient, page: Page) {
+  constructor(inv: Client, client: StockClient, page: Page) {
     this.inventory = inv
     this.client = client
     this.page = page
   }
 
   show() {
-    let options = this.inventory.getInventory()
+    let options = this.inventory.getState()
     let dtos: inventoryItemDTO[] = options.map(o => ({
       id: String(o.id),
       name: o.name
@@ -65,7 +65,7 @@ export default class Stock {
       qty: String(dict[i.id] === undefined ? 0 : dict[i.id])
     })
 
-    return this.inventory.getInventory().map(toDTO)
+    return this.inventory.getState().map(toDTO)
   }
 
   toDict(i: Position[]): StockDict {
@@ -108,7 +108,7 @@ export default class Stock {
     })
   }
 
-  badQuantity(qty: any): boolean {
+  private badQuantity(qty: any): boolean {
     if (!qty || Number(qty) <= 0) {
       return true
     }

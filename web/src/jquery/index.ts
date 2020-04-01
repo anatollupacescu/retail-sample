@@ -1,7 +1,7 @@
 import $ = require('jquery')
 import { apiIsHealthy } from '../health'
 
-import InventoryClient from '../app/inventory/client'
+import Client from '../app/inventory/client'
 import { initializeInventory } from './inventory'
 
 import RecipeClient from '../app/recipe/client'
@@ -32,7 +32,7 @@ $(document).ready(async () => {
   }
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let inventory = new InventoryClient(apiEndpoint)
+  let inventory = new Client(apiEndpoint)
   let recipe = new RecipeClient(apiEndpoint)
   let order = new OrderClient(apiEndpoint)
   let stock = new StockClient(apiEndpoint)

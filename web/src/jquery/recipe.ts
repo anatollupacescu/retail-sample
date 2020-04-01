@@ -27,7 +27,7 @@ export function initializeRecipe(inv: InventoryClient, recipe: RecipeClient): vo
     toggleRecipeNameError: (v: boolean): void => toggleRecipeNameError(v),
     toggleAddRecipeButtonState: (v: boolean) => toggleDisabledState(v, saveRecipeBtn),
     toggleNoIngredientsError: (v: boolean): void => toggleNoIngredientsError(v),
-    toggleNoUniqueNameErr: (v: boolean): void => toggleNoUniqueNameErr(v),
+    toggleNoUniqueNameError: (v: boolean): void => toggleNoUniqueNameErr(v),
     populateIngredientsDropdown: (dtos: optionDTO[]): void => populateDropdown(itemNameDropdown, dtos),
     populateIngredientsTable: (dtos: ingredientDTO[]): void => populateIngredientsTable(dtos),
     populateTable: (rows: recipeDTO[]): void => populateRecipeTable(rows)

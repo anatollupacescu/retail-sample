@@ -21,7 +21,7 @@ export interface Page {
   resetRecipeName(): void
   toggleAddRecipeButtonState(v: boolean): void
   toggleRecipeNameError(v: boolean): void
-  toggleNoUniqueNameErr(v: boolean): void
+  toggleNoUniqueNameError(v: boolean): void
 
   populateIngredientsDropdown(dtos: optionDTO[]): void
   populateIngredientsTable(dtos: ingredientDTO[]): void
@@ -136,7 +136,7 @@ export default class App {
           break
         }
         case 'name present': {
-          this.page.toggleNoUniqueNameErr(true)
+          this.page.toggleNoUniqueNameError(true)
           break
         }
         case 'no ingredients': {
@@ -147,7 +147,7 @@ export default class App {
           this.ingredients = []
           this.renderIngredientsDropdown()
           this.populateIngredientsTable()
-          this.page.toggleNoUniqueNameErr(false)
+          this.page.toggleNoUniqueNameError(false)
           this.page.resetRecipeName()
           this.page.toggleAddRecipeButtonState(true)
           let recipes: Recipe[] = this.client.getRecipes()

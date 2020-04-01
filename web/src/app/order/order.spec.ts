@@ -21,7 +21,7 @@ describe('place order', () => {
   let getRecipeID = chai.spy.on(page, 'getRecipeID', () => 1)
   let getQty = chai.spy.on(page, 'getQty', () => 1)
 
-  let addOrder = chai.spy.on(order, 'addOrder', () => { })
+  let addOrder = chai.spy.on(order, 'addOrder', () => {})
 
   let getRecipe = chai.spy.on(
     recipe,
@@ -50,17 +50,17 @@ describe('place order', () => {
 
 function noOpPage(): Page {
   return {
-    toggleSubmitButtonState: (_v: boolean): void => { },
+    toggleSubmitButtonState: (_v: boolean): void => {},
     getRecipeID: (): number => {
       return 0
     },
     getQty: (): number => {
       return 0
     },
-    resetQty: (): void => { },
-    toggleQtyError: (_v: boolean): void => { },
-    toggleNotEnoughStockError: (_v: boolean): void => { },
-    populateDropdown: (_rows: Recipe[]): void => { },
-    populateTable: (_rows: tableRowDTO[]): void => { }
+    resetQty: (): void => {},
+    toggleQtyError: (_v: boolean): void => {},
+    toggleNotEnoughStockError: (_v: boolean): void => {},
+    populateDropdown: (_rows: Recipe[]): void => {},
+    populateTable: (_rows: tableRowDTO[]): void => {}
   }
 }

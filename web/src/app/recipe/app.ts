@@ -54,6 +54,10 @@ export default class App {
     this.page = page
   }
 
+  show() {
+    this.renderIngredientsDropdown()
+  }
+
   init() {
     this.client.fetchRecipes().then(() => {
       let recipes: Recipe[] = this.client.getRecipes()
@@ -62,46 +66,42 @@ export default class App {
     })
   }
 
-  toRows(recipes: Recipe[]): recipeDTO[] {
+  private toRows(recipes: Recipe[]): recipeDTO[] {
     return recipes.map(r => ({
       id: r.id,
       name: r.name
     }))
   }
 
-  renderIngredientsDropdown() {
+  private renderIngredientsDropdown() {
     let dropdownOptions = this.inventory.getState()
     let filteredOptions = this.removeExisting(dropdownOptions)
     let dtos = this.toOptionDTO(filteredOptions)
     this.page.populateIngredientsDropdown(dtos)
   }
 
-  show() {
-    this.renderIngredientsDropdown()
-  }
-
-  toOptionDTO(filteredOptions: inventoryItem[]): optionDTO[] {
+  private toOptionDTO(filteredOptions: inventoryItem[]): optionDTO[] {
     return filteredOptions.map(i => ({
       id: i.id,
       name: i.name
     }))
   }
 
-  removeExisting(dropdownOptions: inventoryItem[]): inventoryItem[] {
+  private removeExisting(dropdownOptions: inventoryItem[]): inventoryItem[] {
     return dropdownOptions.filter(dop => {
       let found = this.ingredients.find(i => i.id === dop.id)
       return !found
     })
   }
 
-  nameIsValid(name: string): boolean {
+  private nameIsValid(name: string): boolean {
     if (!name || name.trim().length === 0) {
       return false
     }
     return true
   }
 
-  refreshRecipeNameRelevantUI(name: string): void {
+  private refreshRecipeNameRelevantUI(name: string): void {
     if (!this.nameIsValid(name)) {
       this.page.toggleRecipeNameError(true)
       this.page.toggleAddRecipeButtonState(true)
@@ -161,12 +161,12 @@ export default class App {
     })
   }
 
-  populateIngredientsTable() {
+  private populateIngredientsTable() {
     let dtos = this.ingredientDTOs()
     this.page.populateIngredientsTable(dtos)
   }
 
-  toRecipeItems(ingredients: ingredient[]): RecipeItem[] {
+  private toRecipeItems(ingredients: ingredient[]): RecipeItem[] {
     return ingredients.map(i => ({
       id: i.id,
       qty: i.qty
@@ -197,7 +197,7 @@ export default class App {
     this.page.toggleAddToListBtnDisabledState(true)
   }
 
-  ingredientDTOs(): ingredientDTO[] {
+  private ingredientDTOs(): ingredientDTO[] {
     return this.ingredients.map(i => {
       let name = this.inventory.getName(i.id)
       return {
@@ -207,7 +207,7 @@ export default class App {
     })
   }
 
-  badQuantity(qty: number): boolean {
+  private badQuantity(qty: number): boolean {
     if (!qty || Number(qty) <= 0) {
       return true
     }

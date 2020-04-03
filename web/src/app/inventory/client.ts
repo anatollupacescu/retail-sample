@@ -18,11 +18,16 @@ export default class Client {
 
   constructor(url: string = '', initial: inventoryItem[] = []) {
     this.endpoint = `${url}/inventory`
-    this.inventory = initial.slice(0)
+    this.inventory = [...initial]
   }
 
-  apiFetchState(): Promise<any> {
-    return axios.get(this.endpoint)
+  private async apiFetchState(): Promise<any> {
+    try {
+      let response = await axios.get(this.endpoint)
+      return response.data.data
+    } catch (error) {
+      throw error.response.data
+    }
   }
 
   async fetchState(): Promise<inventoryItem[]> {
@@ -65,7 +70,7 @@ export default class Client {
       case '':
         let newItem = apiResponse[0]
         this.inventory.push(newItem)
-        return [zeroValueItem, '']
+        return [newItem, '']
       default:
         throw new Error('unexpected response from the server')
     }
@@ -77,7 +82,7 @@ export default class Client {
   }
 
   getState(): inventoryItem[] {
-    return this.inventory
+    return [...this.inventory]
   }
 
   getName(id: number): string {
@@ -85,6 +90,6 @@ export default class Client {
     if (item) {
       return item.name
     }
-    return ''
+    throw `inventory item with ${id} not found`
   }
 }

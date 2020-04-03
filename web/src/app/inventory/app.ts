@@ -2,12 +2,12 @@ import Client, { inventoryItem } from './client'
 import StockClient from '../stock/client'
 
 export interface Page {
-  toggleNameError(_v: boolean): void
+  toggleNameError(v: boolean): void
   name(): string
   resetName(): void
-  toggleUniqueError(_v: boolean): void
-  addBtnEnabled(_v: boolean): void
-  renderTable(_data: inventoryItem[]): void
+  toggleUniqueError(v: boolean): void
+  addBtnEnabled(v: boolean): void
+  renderTable(data: inventoryItem[]): void
 }
 
 export default class App {
@@ -21,11 +21,13 @@ export default class App {
     this.page = page
   }
 
-  init() {
-    this.client.fetchState().then(() => {
-      let data = this.client.getState()
-      this.page.renderTable(data)
-    })
+  init(): Promise<any> {
+    return this.client.fetchState()
+  }
+
+  show() {
+    let data = this.client.getState()
+    this.page.renderTable(data)
   }
 
   onNameChange() {

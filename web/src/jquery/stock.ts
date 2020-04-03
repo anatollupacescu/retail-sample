@@ -10,8 +10,8 @@ export function initializeStock(inventoryClient: Client, stockClient: StockClien
     tab: JQuery<HTMLElement> = $('#stock-tab')
 
   let page: Page = {
-    getID: (): string => <string>nameInput.val(),
-    getQty: (): number => <number>qtyInput.val(),
+    getID: (): string => String(nameInput.val()),
+    getQty: (): number => Number(qtyInput.val()),
     resetQty: (): void => resetValue(qtyInput),
     toggleError: (v: boolean): void => toggleError(v),
     populateDropdown: (data: inventoryItemDTO[]): void => populateDropdown(data, nameInput),

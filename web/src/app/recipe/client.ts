@@ -62,7 +62,7 @@ export default class RecipeClient {
   }
 
   getRecipes(): Recipe[] {
-    return this.recipes
+    return [...this.recipes]
   }
 
   getByID(id: number): Recipe {

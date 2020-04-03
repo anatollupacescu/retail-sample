@@ -1,20 +1,15 @@
 import $ = require('jquery')
 
-import Client from '../app/inventory/client'
+import Client, { inventoryItem } from '../app/inventory/client'
 import App, { Page } from '../app/inventory/app'
 import StockClient from '../app/stock/client'
 
-interface inventoryItem {
-  id: number
-  name: string
-}
-
 export function initializeInventory(client: Client, stock: StockClient) {
-  let nameInput: JQuery<HTMLElement> = $('#name')
-  let form: JQuery<HTMLElement> = $('#mainForm')
+  let nameInput = $('#name')
+  let form = $('#mainForm')
 
   let page: Page = {
-    name: () => getNameValue(nameInput),
+    name: () => getStringValue(nameInput),
     resetName: () => setNameEmpty(nameInput),
     toggleNameError: (v: boolean) => toggleEmptyNameError(v),
     toggleUniqueError: (v: boolean) => toggleUniqueNameError(v),
@@ -33,14 +28,14 @@ export function initializeInventory(client: Client, stock: StockClient) {
     app.onNameChange()
   })
 
-  app.init()
+  app.init().then(() => app.show())
 }
 
-function getNameValue(nameInput: JQuery<HTMLElement>): string {
-  return <string>nameInput.val()
+function getStringValue(nameInput: JQuery): string {
+  return String(nameInput.val())
 }
 
-function setNameEmpty(nameInput: JQuery<HTMLElement>): void {
+function setNameEmpty(nameInput: JQuery): void {
   nameInput.val('')
 }
 

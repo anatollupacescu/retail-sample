@@ -30,7 +30,7 @@ describe('saving a recipe', () => {
   })
 
   describe('when recipe is correct', () => {
-    let app = new RecipeClient('')
+    let app = new RecipeClient()
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe', () => ({
       data: {

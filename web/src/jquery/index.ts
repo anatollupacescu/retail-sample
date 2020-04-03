@@ -44,4 +44,6 @@ $(document).ready(async () => {
   initializeStock(inventory, stock)
 
   initializeOrder(stock, recipe, order)
+
+  $('#inventory-tab').click()
 })

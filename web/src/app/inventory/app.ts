@@ -21,13 +21,10 @@ export default class App {
     this.page = page
   }
 
-  init(): Promise<any> {
-    return this.client.fetchState()
-  }
-
-  show() {
-    let data = this.client.getState()
-    this.page.renderTable(data)
+  init() {
+    this.client.fetchState().then(data => {
+      this.page.renderTable(data)
+    })
   }
 
   onNameChange() {

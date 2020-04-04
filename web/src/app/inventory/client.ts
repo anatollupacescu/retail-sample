@@ -24,8 +24,7 @@ export default class Client {
   }
 
   async fetchState(): Promise<inventoryItem[]> {
-    const data = await this.apiFetchState()
-    this.inventory = data.data.data
+    this.inventory = await this.apiFetchState()
     return this.inventory
   }
 

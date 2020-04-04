@@ -28,7 +28,7 @@ export function initializeInventory(client: Client, stock: StockClient) {
     app.onNameChange()
   })
 
-  app.init().then(() => app.show())
+  app.init()
 }
 
 function getStringValue(nameInput: JQuery): string {

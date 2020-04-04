@@ -5,13 +5,6 @@ export interface inventoryItem {
   name: string
 }
 
-type AddItemResult = [inventoryItem, string]
-
-const zeroValueItem: inventoryItem = {
-  id: 0,
-  name: ''
-}
-
 export default class Client {
   private endpoint: string
   private inventory: inventoryItem[]
@@ -36,43 +29,43 @@ export default class Client {
     return this.inventory
   }
 
-  async apiAddItem(name: string): Promise<AddItemResult> {
+  async apiAddItem(name: string): Promise<any> {
     try {
-      let res = await axios.post(this.endpoint, {
+      let payload = {
         name: name
-      })
-      let createdItem: inventoryItem = res.data.data
-      return [createdItem, '']
+      }
+      let res = await axios.post(this.endpoint, payload)
+      return res.data.data
     } catch (error) {
-      return [zeroValueItem, error.response.data]
+      throw error.response.data
     }
   }
 
-  async addItem(itemName: string): Promise<AddItemResult> {
+  async addItem(itemName: string): Promise<inventoryItem> {
     const errMsgEmptyName = 'name empty',
       errMsgNamePresent = 'name present'
 
     if (!itemName || itemName.length === 0) {
-      return [zeroValueItem, errMsgEmptyName]
+      throw errMsgEmptyName
     }
 
     if (!this.isUnique(itemName)) {
-      return [zeroValueItem, errMsgNamePresent]
+      throw errMsgNamePresent
     }
 
-    let apiResponse = await this.apiAddItem(itemName)
-
-    switch (apiResponse[1]) {
-      case 'ERR_EMPTY':
-        return [zeroValueItem, errMsgEmptyName]
-      case 'ERR_UNIQUE':
-        return [zeroValueItem, errMsgNamePresent]
-      case '':
-        let newItem = apiResponse[0]
-        this.inventory.push(newItem)
-        return [newItem, '']
-      default:
-        throw new Error('unexpected response from the server')
+    try {
+      let newItem = await this.apiAddItem(itemName)
+      this.inventory.push(newItem)
+      return newItem
+    } catch (error) {
+      switch (error) {
+        case 'ERR_EMPTY':
+          throw errMsgEmptyName
+        case 'ERR_UNIQUE':
+          throw errMsgNamePresent
+        default:
+          throw new Error('unexpected response from the server')
+      }
     }
   }
 

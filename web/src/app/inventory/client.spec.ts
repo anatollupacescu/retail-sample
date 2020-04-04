@@ -1,35 +1,34 @@
 import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
-
 import Client from './client'
+
+import chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
 
 chai.use(spies)
 let expect = chai.expect
+let sandbox = chai.spy.sandbox();
 
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
     let app = new Client()
-    let mockApi = chai.spy.on(app, 'apiAddItem')
+    let mockApi = sandbox.on(app, 'apiAddItem')
 
-    it('should err', async () => {
-      // no done
-      let result = await app.addItem('')
-      expect(mockApi).to.not.have.been.called
-      expect(result[1]).to.equal('name empty')
+    it('errors simple', () => {
+      expect(app.addItem('')).to.be.rejectedWith('name empty')
+      expect(mockApi).to.have.been.called.exactly(0)
       expect(app.getState()).to.have.length(0)
     })
   })
 
   describe('when server says item name is empty', () => {
     let app = new Client()
-    let mockApi = chai.spy.on(app, 'apiAddItem')
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => { throw 'ERR_EMPTY' })
 
-    it('should err', async () => {
-      // no done
-      let result = await app.addItem('')
-      expect(mockApi).to.not.have.been.called
-      expect(result[1]).to.equal('name empty')
+    it('errors', () => {
+      expect(app.addItem('')).to.be.rejectedWith('name empty')
+      expect(mockApi).to.have.been.called.exactly(0)
       expect(app.getState()).to.have.length(0)
     })
   })
@@ -46,10 +45,9 @@ describe('saving a new item', () => {
 
     let mockApi = chai.spy.on(app, 'apiAddItem')
 
-    it('should err without calling api', async () => {
-      let result = await app.addItem('test')
-      expect(mockApi).to.have.not.been.called
-      expect(result[1]).to.equal('name present')
+    it('errors with the correct message', () => {
+      expect(app.addItem('test')).to.be.rejectedWith('name present')
+      expect(mockApi).to.have.been.called.exactly(0)
       expect(app.getState()).to.have.length(1)
     })
   })
@@ -57,13 +55,12 @@ describe('saving a new item', () => {
   describe('when server says item name is already present', () => {
     let app = new Client()
 
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => [null, 'ERR_UNIQUE'])
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => { throw 'ERR_UNIQUE' })
 
-    it('should err', async () => {
-      let result = await app.addItem('test')
+    it('errors with the correct message', () => {
+      expect(app.addItem('present')).to.be.rejectedWith('name present')
       expect(mockApi).to.have.been.called.exactly(1)
-      expect(result[1]).to.equal('name present')
-      expect(app.getState()).to.be.empty
+      expect(app.getState()).to.have.length(0)
     })
   })
 
@@ -80,12 +77,13 @@ describe('saving a new item', () => {
       id: 2,
       name: 'test2'
     }
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => [apiResponse, ''])
+
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => apiResponse)
 
     it('should make the api call', async () => {
       let result = await app.addItem('test2')
-      expect(mockApi).to.have.been.called
-      expect(result[1]).to.be.empty
+      expect(result).to.equal(apiResponse)
+      expect(mockApi).to.have.been.called.once
       expect(app.getState()).to.have.length(2)
       expect(app.getState()).to.have.members([...initialData, apiResponse])
     })
@@ -100,15 +98,17 @@ describe('fetching inventory state', () => {
     name: 'item1'
   }
 
+  let apiItems = [apiItem]
   var mockApi = chai.spy.on(app, 'apiFetchState', () => ({
     data: {
-      data: [apiItem]
+      data: apiItems
     }
   }))
 
   it('should make the api call', async () => {
-    await app.fetchState()
-    expect(mockApi).to.have.been.called.exactly(1)
+    let result = await app.fetchState()
+    expect(result).to.equal(apiItems)
+    expect(mockApi).to.have.been.called.once
     expect(app.getState()).to.have.length(1)
     expect(app.getState()[0]).to.equal(apiItem)
   })

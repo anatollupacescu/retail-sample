@@ -5,8 +5,6 @@ export interface Position {
   qty: number
 }
 
-type ApiResponse = Record<number, number>
-
 export default class StockClient {
   private endpoint: string
   private data: Position[]
@@ -23,12 +21,12 @@ export default class StockClient {
     })
   }
 
-  private async apiProvision(data: any): Promise<ApiResponse> {
+  private async apiProvision(data: any): Promise<any> {
     try {
       let res: AxiosResponse = await axios.post(this.endpoint, data)
       return res.data.data
     } catch (error) {
-      return Promise.reject(`got error provisioning: ${error}`)
+      throw error.response.data.trim()
     }
   }
 
@@ -63,7 +61,7 @@ export default class StockClient {
       let res = await axios.get(this.endpoint)
       return res.data.data
     } catch (error) {
-      return Promise.reject(error)
+      throw error.response.data.trim()
     }
   }
 

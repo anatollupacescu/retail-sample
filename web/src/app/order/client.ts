@@ -6,8 +6,6 @@ export interface Record {
   qty: number
 }
 
-type AddOrderResult = [number, string]
-
 export default class OrderClient {
   private endpoint: string
   private orders: Record[]
@@ -22,7 +20,7 @@ export default class OrderClient {
       let data = await axios.get(this.endpoint)
       return data.data.data
     } catch (error) {
-      return Promise.reject(error.response.data.trim())
+      throw error.response.data.trim()
     }
   }
 
@@ -30,40 +28,38 @@ export default class OrderClient {
     this.orders = await this.apiFetchOrders()
   }
 
-  private async apiAddOrder(recipeID: number, qty: number): Promise<AddOrderResult> {
+  private async apiAddOrder(recipeID: number, qty: number): Promise<any> {
     try {
       let res = await axios.post(this.endpoint, { id: Number(recipeID), qty: Number(qty) })
-      return [res.data.data.id, '']
+      return res.data.data.id
     } catch (error) {
-      return [0, error.response.data.trim()]
+      throw error.response.data.trim()
     }
   }
 
   async addOrder(recipeID: number, qty: number): Promise<string> {
     if (!qty || qty === 0) {
-      return 'quantity mandatory'
+      throw 'quantity mandatory'
     }
 
-    let result = await this.apiAddOrder(recipeID, qty)
+    try {
+      let newID = await this.apiAddOrder(recipeID, qty)
 
-    let err = result[1]
+      this.orders.push({
+        id: newID,
+        recipeID: recipeID,
+        qty: qty
+      })
 
-    switch (err) {
-      case 'not enough stock':
-        return 'not enough stock'
-      case '':
-        break
-      default:
-        throw `unknown error: ${err}`
+      return newID
+    } catch (error) {
+      switch (error) {
+        case 'not enough stock':
+          throw 'not enough stock'
+        default:
+          throw `unknown error: ${error}`
+      }
     }
-
-    this.orders.push({
-      id: result[0],
-      recipeID: recipeID,
-      qty: qty
-    })
-
-    return ''
   }
 
   getOrders(): Record[] {

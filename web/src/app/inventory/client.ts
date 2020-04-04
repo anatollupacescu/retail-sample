@@ -36,7 +36,7 @@ export default class Client {
       let res = await axios.post(this.endpoint, payload)
       return res.data.data
     } catch (error) {
-      throw error.response.data
+      throw error.response.data.trim()
     }
   }
 

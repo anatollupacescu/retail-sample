@@ -15,12 +15,12 @@ export default class RecipeClient {
   private endpoint: string
   private recipes: Recipe[]
 
-  constructor(url: string = '', recipe: Recipe[] = []) {
+  constructor(url: string = '', initial: Recipe[] = []) {
     this.endpoint = `${url}/recipe`
-    this.recipes = recipe
+    this.recipes = [...initial]
   }
 
-  apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
+  async apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
     let items: any = {}
     ingredients.forEach(i => {
       items[i.id] = i.qty
@@ -29,22 +29,28 @@ export default class RecipeClient {
       name: name,
       items: items
     }
-    return axios.post(this.endpoint, payload)
+    try {
+      let res = await axios.post(this.endpoint, payload)
+      return res.data.data
+    } catch (error) {
+      throw error.response.data.trim()
+    }
   }
 
   async saveRecipe(name: string, ingredients: RecipeItem[]): Promise<string> {
     let found = this.recipes.find(r => r.name === name)
 
     if (found) {
-      return 'name present'
+      throw 'name present'
     }
 
     let data = await this.apiSaveRecipe(name, ingredients)
 
-    Object.keys(data.data.data).forEach((i: any) => {
+    Object.keys(data).forEach((name: any) => {
+      let id = data[name]
       this.recipes.push({
-        id: Number(data.data.data[i]),
-        name: String(i),
+        id: Number(id),
+        name: String(name),
         items: ingredients
       })
     })
@@ -52,13 +58,19 @@ export default class RecipeClient {
     return ''
   }
 
-  apiFetchRecipes(): Promise<any> {
-    return axios.get(this.endpoint)
+  async apiFetchRecipes(): Promise<any> {
+    try {
+      let res = await axios.get(this.endpoint)
+      return res.data.data
+    } catch (error) {
+      throw error.response.data.trim()
+    }
   }
 
   async fetchRecipes(): Promise<any> {
     let data = await this.apiFetchRecipes()
-    this.recipes = data.data.data
+    this.recipes = data
+    return this.recipes
   }
 
   getRecipes(): Recipe[] {

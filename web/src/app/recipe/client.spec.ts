@@ -21,10 +21,9 @@ describe('saving a recipe', () => {
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
-    it('should err', async () => {
-      let result = await app.saveRecipe('test', [])
-      expect(mockApi).to.not.have.been.called
-      expect(result).to.equal('name present')
+    it('should err', () => {
+      expect(app.saveRecipe('test', [])).to.be.rejectedWith('name present')
+      expect(mockApi).to.have.been.called.exactly(0)
       expect(app.getRecipes()).to.have.length(1)
     })
   })
@@ -33,34 +32,26 @@ describe('saving a recipe', () => {
     let app = new RecipeClient()
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe', () => ({
-      data: {
-        data: {
-          test: 1
-        }
-      }
+      test: 1
     }))
 
     it('makes the api call', async () => {
       await app.saveRecipe('name', [{ id: 1, qty: 2 }])
-      expect(mockApi).to.have.been.called
+      expect(mockApi).to.have.been.called.once
       expect(app.getRecipes()).to.have.length(1)
     })
   })
 })
 
 describe('fetching recipes', () => {
-  let app = new RecipeClient('')
+  let app = new RecipeClient()
 
-  var mockApi = chai.spy.on(app, 'apiFetchRecipes', () => ({
-    data: {
-      data: [
-        {
-          name: 'item1',
-          id: 2
-        }
-      ]
+  var mockApi = chai.spy.on(app, 'apiFetchRecipes', () => [
+    {
+      name: 'item1',
+      id: 2
     }
-  }))
+  ])
 
   it('should make the api call', async () => {
     await app.fetchRecipes()

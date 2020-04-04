@@ -58,11 +58,14 @@ export default class Order {
   }
 
   init() {
-    this.client.fetchOrders().then(() => {
-      let data: Record[] = this.client.getOrders()
-      let rows = this.toRows(data)
-      this.page.populateTable(rows)
-    })
+    this.client
+      .fetchOrders()
+      .then(() => {
+        let data: Record[] = this.client.getOrders()
+        let rows = this.toRows(data)
+        this.page.populateTable(rows)
+      })
+      .catch(err => console.error(err))
   }
 
   badQuantity(qty: any): boolean {
@@ -82,13 +85,16 @@ export default class Order {
       return
     }
 
-    let result = await this.client.addOrder(recipeID, qty)
-
-    switch (result) {
-      case 'not enough stock':
-        this.page.toggleNotEnoughStockError(true)
-        this.page.toggleSubmitButtonState(false)
-        return
+    try {
+      let result = await this.client.addOrder(recipeID, qty)
+      console.log('got new order with id', result)
+    } catch (error) {
+      switch (error) {
+        case 'not enough stock':
+          this.page.toggleNotEnoughStockError(true)
+          this.page.toggleSubmitButtonState(false)
+          return
+      }
     }
 
     let data: Record[] = this.client.getOrders()

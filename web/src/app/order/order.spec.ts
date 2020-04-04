@@ -44,7 +44,6 @@ describe('place order', () => {
     expect(getQty).to.have.been.called.once
     expect(getRecipe).to.have.been.called.once
     expect(addOrder).to.have.been.called.once
-    // expect(substractFromPosition).to.have.been.called.exactly(1)
   })
 })
 

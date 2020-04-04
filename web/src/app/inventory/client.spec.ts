@@ -103,11 +103,7 @@ describe('fetching inventory state', () => {
   }
 
   let apiItems = [apiItem]
-  var mockApi = chai.spy.on(app, 'apiFetchState', () => ({
-    data: {
-      data: apiItems
-    }
-  }))
+  var mockApi = chai.spy.on(app, 'apiFetchState', () => apiItems)
 
   it('should make the api call', async () => {
     let result = await app.fetchState()

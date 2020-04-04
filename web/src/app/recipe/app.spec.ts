@@ -50,7 +50,7 @@ describe('add ingredient', () => {
       getID = chai.spy.on(page, 'ingredientID', () => '1'),
       qtyErr = chai.spy.on(page, 'toggleQtyError'),
       popTable = chai.spy.on(page, 'populateIngredientsTable'),
-      invLookup = chai.spy.on(inv, "getName", () => "test")
+      invLookup = chai.spy.on(inv, 'getName', () => 'test')
 
     let app = new App(inv, client, page)
 
@@ -67,7 +67,7 @@ describe('add ingredient', () => {
 
 describe('add recipe', () => {
   describe('when name is invalid', () => {
-    it('errors', () => { })
+    it('errors', () => {})
   })
 })
 
@@ -76,23 +76,23 @@ function noOpPage(): Page {
     ingredientID: (): number => {
       return 0
     },
-    removeIngredientFromDropdown: (_s: string): void => { },
-    toggleAddToListBtnDisabledState: (_v: boolean): void => { },
-    toggleNoIngredientsError: (_v: boolean): void => { },
-    toggleNoUniqueNameError: (_v: boolean): void => { },
+    removeIngredientFromDropdown: (_s: string): void => {},
+    toggleAddToListBtnDisabledState: (_v: boolean): void => {},
+    toggleNoIngredientsError: (_v: boolean): void => {},
+    toggleNoUniqueNameError: (_v: boolean): void => {},
     recipeName: (): string => {
       return ''
     },
-    resetRecipeName: (): void => { },
-    toggleAddRecipeButtonState: (_v: boolean): void => { },
-    toggleRecipeNameError: (_v: boolean): void => { },
-    populateIngredientsDropdown: (_dtos: optionDTO[]): void => { },
-    populateIngredientsTable: (_dtos: ingredientDTO[]): void => { },
-    populateTable: (_rows: recipeDTO[]): void => { },
+    resetRecipeName: (): void => {},
+    toggleAddRecipeButtonState: (_v: boolean): void => {},
+    toggleRecipeNameError: (_v: boolean): void => {},
+    populateIngredientsDropdown: (_dtos: optionDTO[]): void => {},
+    populateIngredientsTable: (_dtos: ingredientDTO[]): void => {},
+    populateTable: (_rows: recipeDTO[]): void => {},
     ingredientQty: (): number => {
       return 0
     },
-    resetQty: (): void => { },
-    toggleQtyError: (_v: boolean): void => { }
+    resetQty: (): void => {},
+    toggleQtyError: (_v: boolean): void => {}
   }
 }

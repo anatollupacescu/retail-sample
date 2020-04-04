@@ -3,12 +3,12 @@ import chai = require('chai')
 import spies = require('chai-spies')
 import Client from './client'
 
-import chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
+import chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
 
 chai.use(spies)
 let expect = chai.expect
-let sandbox = chai.spy.sandbox();
+let sandbox = chai.spy.sandbox()
 
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
@@ -24,7 +24,9 @@ describe('saving a new item', () => {
 
   describe('when server says item name is empty', () => {
     let app = new Client()
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => { throw 'ERR_EMPTY' })
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => {
+      throw 'ERR_EMPTY'
+    })
 
     it('errors', () => {
       expect(app.addItem('')).to.be.rejectedWith('name empty')
@@ -55,7 +57,9 @@ describe('saving a new item', () => {
   describe('when server says item name is already present', () => {
     let app = new Client()
 
-    let mockApi = chai.spy.on(app, 'apiAddItem', () => { throw 'ERR_UNIQUE' })
+    let mockApi = chai.spy.on(app, 'apiAddItem', () => {
+      throw 'ERR_UNIQUE'
+    })
 
     it('errors with the correct message', () => {
       expect(app.addItem('present')).to.be.rejectedWith('name present')

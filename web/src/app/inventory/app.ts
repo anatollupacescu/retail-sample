@@ -46,25 +46,28 @@ export default class App {
   onSubmit() {
     let name: string = this.page.name()
 
-    this.client.addItem(name).then((addedItem: inventoryItem) => {
-      this.stock.addPosition(addedItem.id)
+    this.client
+      .addItem(name)
+      .then((addedItem: inventoryItem) => {
+        this.stock.addPosition(addedItem.id)
 
-      let data = this.client.getState()
-      this.page.renderTable(data)
-      this.page.resetName()
-      this.page.addBtnEnabled(false)
-    }).catch(error => {
-      switch (error) {
-        case 'name empty':
-          this.page.toggleNameError(true)
-          this.page.addBtnEnabled(false)
-          return
+        let data = this.client.getState()
+        this.page.renderTable(data)
+        this.page.resetName()
+        this.page.addBtnEnabled(false)
+      })
+      .catch(error => {
+        switch (error) {
+          case 'name empty':
+            this.page.toggleNameError(true)
+            this.page.addBtnEnabled(false)
+            return
 
-        case 'name present':
-          this.page.toggleUniqueError(true)
-          this.page.addBtnEnabled(false)
-          return
-      }
-    })
+          case 'name present':
+            this.page.toggleUniqueError(true)
+            this.page.addBtnEnabled(false)
+            return
+        }
+      })
   }
 }

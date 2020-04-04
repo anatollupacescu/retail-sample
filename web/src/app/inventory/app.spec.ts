@@ -9,7 +9,7 @@ let expect = chai.expect
 
 describe('on name change', () => {
   describe('when new value is empty', () => {
-    it('should disable the ADD button', () => { })
+    it('should disable the ADD button', () => {})
   })
 })
 
@@ -22,13 +22,13 @@ describe('on submit', () => {
 
 function noOpPage(): Page {
   return {
-    toggleNameError: (_v: boolean): void => { },
+    toggleNameError: (_v: boolean): void => {},
     name: (): string => {
       return ''
     },
-    resetName: (): void => { },
-    toggleUniqueError: (_v: boolean): void => { },
-    addBtnEnabled: (_v: boolean): void => { },
-    renderTable: (_data: inventoryItem[]): void => { }
+    resetName: (): void => {},
+    toggleUniqueError: (_v: boolean): void => {},
+    addBtnEnabled: (_v: boolean): void => {},
+    renderTable: (_data: inventoryItem[]): void => {}
   }
 }

@@ -1,7 +1,8 @@
-package retailsampleapp1
+package retailsample
 
 import (
 	"errors"
+	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
@@ -36,17 +37,32 @@ type Orders interface {
 	All() []order.Order
 }
 
-type Stock interface {
-	Quantity(int) int
-	Provision(int, int) int
-	Sell([]recipe.Ingredient, int) error
-}
+type ( //provision log
+	ProvisionEntry struct {
+		Time time.Time
+		ID   int
+		Qty  int
+	}
 
-type StockPosition struct {
-	ID   int
-	Name string
-	Qty  int
-}
+	ProvisionLog interface {
+		Add(ProvisionEntry)
+		List() []ProvisionEntry
+	}
+)
+
+type (
+	Stock interface {
+		Quantity(int) int
+		Provision(int, int) int
+		Sell([]recipe.Ingredient, int) error
+	}
+
+	StockPosition struct {
+		ID   int
+		Name string
+		Qty  int
+	}
+)
 
 func (a App) CurrentStock() (ps []StockPosition) {
 	for _, item := range a.Inventory.All() {

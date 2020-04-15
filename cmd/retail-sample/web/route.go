@@ -6,9 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func ConfigureRoutes(r *mux.Router) {
-	webApp := newInMemoryApp()
-
+func ConfigureRoutes(r *mux.Router, webApp WebApp) {
 	r.HandleFunc("/log/provision", webApp.GetProvisionLog).Methods(http.MethodGet)
 
 	r.HandleFunc("/inventory", webApp.GetAllInventoryItems).Methods(http.MethodGet)

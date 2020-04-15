@@ -1,4 +1,4 @@
-package retailsampleapp1_test
+package retailsample_test
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 
-	warehouse "github.com/anatollupacescu/retail-sample/internal/retail-sample1"
+	warehouse "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 
 	"github.com/stretchr/testify/assert"
 )

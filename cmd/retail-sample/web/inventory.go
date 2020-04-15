@@ -17,7 +17,7 @@ const (
 	ErrNoName = "ERR_NO_NAME"
 )
 
-func (a *WebAdapter) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -81,7 +81,7 @@ func (a *WebAdapter) CreateInventoryItem(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (a *WebAdapter) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
+func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -121,7 +121,7 @@ func isValidItemID(rid string) bool {
 	return true
 }
 
-func (a *WebAdapter) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)

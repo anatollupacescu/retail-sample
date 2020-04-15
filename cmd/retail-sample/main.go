@@ -44,8 +44,10 @@ func main() {
 		Handler: businessRouter,
 	}
 
+	webApp := web.NewInMemoryApp()
+
 	//app
-	web.ConfigureRoutes(businessRouter)
+	web.ConfigureRoutes(businessRouter, webApp)
 
 	//static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))

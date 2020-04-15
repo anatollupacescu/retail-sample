@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (a *WebAdapter) GetStock(w http.ResponseWriter, _ *http.Request) {
+func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {
@@ -39,7 +39,7 @@ func (a *WebAdapter) GetStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *WebAdapter) GetStockPosition(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -73,7 +73,7 @@ func (a *WebAdapter) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *WebAdapter) ProvisionStock(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -120,7 +120,7 @@ func (a *WebAdapter) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 }
 
-func (a *WebAdapter) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
+func (a *WebApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type entry struct {

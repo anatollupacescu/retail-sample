@@ -4,14 +4,14 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample1"
+	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 )
 
-type WebAdapter struct {
+type WebApp struct {
 	retail.App
 }
 
-func newInMemoryApp() WebAdapter {
+func NewInMemoryApp() WebApp {
 	inventryStore := inventory.NewInMemoryStore()
 	inventory := inventory.Inventory{Store: &inventryStore}
 
@@ -33,7 +33,7 @@ func newInMemoryApp() WebAdapter {
 		Stock:        stock,
 	}
 
-	return WebAdapter{
+	return WebApp{
 		App: app,
 	}
 }

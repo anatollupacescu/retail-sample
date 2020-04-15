@@ -1,4 +1,4 @@
-package retailsampleapp1
+package retailsample
 
 import (
 	"github.com/stretchr/testify/mock"

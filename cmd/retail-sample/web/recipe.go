@@ -7,7 +7,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-func (a *WebAdapter) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -65,7 +65,7 @@ func (a *WebAdapter) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *WebAdapter) ListRecipes(w http.ResponseWriter, _ *http.Request) {
+func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	type recipe struct {
@@ -111,6 +111,6 @@ func toItems(i []recipe.Ingredient) (items []item) {
 	return
 }
 
-func (a *WebAdapter) GetRecipe(w http.ResponseWriter, _ *http.Request) {
+func (a *WebApp) GetRecipe(w http.ResponseWriter, _ *http.Request) {
 	panic("not implemented")
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields() // catch unwanted fields
 
@@ -60,11 +60,11 @@ func (a *WebAdapter) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *WebAdapter) GetOrder(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) GetOrder(w http.ResponseWriter, r *http.Request) {
 	panic("not implemented")
 }
 
-func (a *WebAdapter) ListOrders(w http.ResponseWriter, r *http.Request) {
+func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

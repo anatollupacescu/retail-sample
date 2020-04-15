@@ -19,7 +19,7 @@ export interface Page {
   populateTable(rows: tableRowDTO[]): void
 }
 
-export default class Order {
+export default class App {
   private page: Page
 
   private stock: StockClient
@@ -68,7 +68,7 @@ export default class Order {
       .catch(err => console.error(err))
   }
 
-  badQuantity(qty: any): boolean {
+  private badQuantity(qty: any): boolean {
     if (!qty || Number(qty) <= 0) {
       return true
     }
@@ -86,8 +86,7 @@ export default class Order {
     }
 
     try {
-      let result = await this.client.addOrder(recipeID, qty)
-      console.log('got new order with id', result)
+      await this.client.addOrder(recipeID, qty)
     } catch (error) {
       switch (error) {
         case 'not enough stock':
@@ -108,7 +107,7 @@ export default class Order {
     this.updateStock(recipeID, qty)
   }
 
-  toRows(data: Record[]): tableRowDTO[] {
+  private toRows(data: Record[]): tableRowDTO[] {
     return data.map(record => ({
       id: String(record.id),
       recipe: this.recipe.getByID(record.recipeID).name,

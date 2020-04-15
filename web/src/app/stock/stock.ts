@@ -15,10 +15,11 @@ export interface stockTableRowDTO {
 }
 
 export interface Page {
-  getID(): string
-  getQty(): number
+  id(): string
+  qty(): number
   resetQty(): void
   toggleError(v: boolean): void
+  toggleAddBtnState(v: boolean): void
   populateTable(data: stockTableRowDTO[]): void
   populateDropdown(data: inventoryItemDTO[]): void
 }
@@ -36,6 +37,10 @@ export default class Stock {
     this.page = page
   }
 
+  init() {
+    this.client.fetchState()
+  }
+
   show() {
     let options = this.inventory.getState()
     let dtos: inventoryItemDTO[] = options.map(o => ({
@@ -48,14 +53,7 @@ export default class Stock {
     this.page.populateTable(data)
   }
 
-  init() {
-    this.client.fetchState().then(() => {
-      let data = this.computeTableRows()
-      this.page.populateTable(data)
-    })
-  }
-
-  computeTableRows(): stockTableRowDTO[] {
+  private computeTableRows(): stockTableRowDTO[] {
     let positions: Position[] = this.client.getData()
     let dict = this.toDict(positions)
 
@@ -68,7 +66,7 @@ export default class Stock {
     return this.inventory.getState().map(toDTO)
   }
 
-  toDict(i: Position[]): StockDict {
+  private toDict(i: Position[]): StockDict {
     let r: StockDict = {}
     i.forEach(e => {
       r = {
@@ -80,18 +78,19 @@ export default class Stock {
   }
 
   onQtyChange() {
-    let qty = this.page.getQty()
+    let qty = this.page.qty()
 
     if (this.badQuantity(qty)) {
       this.page.toggleError(true)
       return
     }
 
+    this.page.toggleAddBtnState(true)
     this.page.toggleError(false)
   }
 
   onProvision() {
-    let qty = this.page.getQty()
+    let qty = this.page.qty()
 
     if (this.badQuantity(qty)) {
       this.page.toggleError(true)
@@ -100,9 +99,11 @@ export default class Stock {
 
     this.page.toggleError(false)
 
-    let id = this.page.getID()
+    let id = this.page.id()
     this.client.provision(id, qty).then(() => {
       this.page.resetQty()
+      this.page.toggleAddBtnState(false)
+
       let data = this.computeTableRows()
       this.page.populateTable(data)
     })

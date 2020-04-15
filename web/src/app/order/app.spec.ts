@@ -5,7 +5,7 @@ import spies = require('chai-spies')
 chai.use(spies)
 let expect = chai.expect
 
-import Order, { Page, tableRowDTO } from './order'
+import App, { Page, tableRowDTO } from './app'
 import OrderClient from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
@@ -16,7 +16,7 @@ describe('place order', () => {
     stock = new StockClient()
 
   let page = noOpPage()
-  let app = new Order(stock, order, recipe, page)
+  let app = new App(stock, order, recipe, page)
 
   let getRecipeID = chai.spy.on(page, 'getRecipeID', () => 1)
   let getQty = chai.spy.on(page, 'getQty', () => 1)

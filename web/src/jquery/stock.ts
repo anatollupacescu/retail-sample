@@ -4,16 +4,17 @@ import Client from '../app/inventory/client'
 import StockClient from '../app/stock/client'
 
 export function initializeStock(inventoryClient: Client, stockClient: StockClient) {
-  let qtyInput: JQuery<HTMLElement> = $('#provisionQty'),
-    nameInput: JQuery<HTMLElement> = $('#inventoryItemType'),
-    addBtn: JQuery<HTMLElement> = $('#provisionStock'),
-    tab: JQuery<HTMLElement> = $('#stock-tab')
+  let qtyInput: JQuery = $('#provisionQty'),
+    nameInput: JQuery = $('#inventoryItemType'),
+    addBtn: JQuery = $('#provisionStock'),
+    tab: JQuery = $('#stock-tab')
 
   let page: Page = {
-    getID: (): string => String(nameInput.val()),
-    getQty: (): number => Number(qtyInput.val()),
+    id: (): string => String(nameInput.val()),
+    qty: (): number => Number(qtyInput.val()),
     resetQty: (): void => resetValue(qtyInput),
     toggleError: (v: boolean): void => toggleError(v),
+    toggleAddBtnState: (v: boolean): void => toggleDisabledState(v, addBtn),
     populateDropdown: (data: inventoryItemDTO[]): void => populateDropdown(data, nameInput),
     populateTable: (data: stockTableRowDTO[]): void => populateTable(data)
   }
@@ -35,6 +36,10 @@ export function initializeStock(inventoryClient: Client, stockClient: StockClien
   app.init()
 }
 
+function toggleDisabledState(enabled: boolean, input: JQuery): void {
+  input.prop('disabled', !enabled)
+}
+
 function toggleError(v: boolean): void {
   if (v) {
     setErrorMessage()
@@ -51,14 +56,14 @@ function resetErrorMessage(): void {
   $('#provisionQtyErr.invalid-feedback').removeClass('d-block')
 }
 
-function populateDropdown(items: inventoryItemDTO[], nameInput: JQuery<HTMLElement>): void {
+function populateDropdown(items: inventoryItemDTO[], nameInput: JQuery): void {
   nameInput.empty()
   items.forEach(item => {
     nameInput.append(new Option(item.name, item.id))
   })
 }
 
-function resetValue(qtyInput: JQuery<HTMLElement>): void {
+function resetValue(qtyInput: JQuery): void {
   qtyInput.val('')
 }
 

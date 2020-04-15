@@ -1,14 +1,14 @@
 import $ = require('jquery')
 
-import OrderClient, { Record } from '../app/order/client'
-import Order, { Page, tableRowDTO } from '../app/order/order'
+import OrderClient from '../app/order/client'
+import App, { Page, tableRowDTO } from '../app/order/app'
 import RecipeClient, { Recipe } from '../app/recipe/client'
 import StockClient from '../app/stock/client'
 
 export function initializeOrder(stock: StockClient, recipe: RecipeClient, order: OrderClient) {
-  let recipeInput: JQuery<HTMLElement> = $('#orderRecipe'),
-    qtyInput: JQuery<HTMLElement> = $('#orderQty'),
-    placeOrderBtn: JQuery<HTMLElement> = $('#placeOrder')
+  let recipeInput: JQuery = $('#orderRecipe'),
+    qtyInput: JQuery = $('#orderQty'),
+    placeOrderBtn: JQuery = $('#placeOrder')
 
   let page: Page = {
     toggleSubmitButtonState: (v: boolean): void => toggleSubmitButtonState(v),
@@ -21,7 +21,7 @@ export function initializeOrder(stock: StockClient, recipe: RecipeClient, order:
     populateTable: (rows: tableRowDTO[]): void => populateTable(rows)
   }
 
-  let app = new Order(stock, order, recipe, page)
+  let app = new App(stock, order, recipe, page)
 
   recipeInput.on('change', () => {
     app.recipeInputChanged()
@@ -63,11 +63,11 @@ function toggleQtyErr(v: boolean): void {
   resetQtyError()
 }
 
-function getNumberValue(input: JQuery<HTMLElement>): number {
+function getNumberValue(input: JQuery): number {
   return Number(input.val())
 }
 
-function populateDropdown(recipes: Recipe[], input: JQuery<HTMLElement>): void {
+function populateDropdown(recipes: Recipe[], input: JQuery): void {
   input.empty()
   recipes.map(item => {
     input.append(new Option(item.name, String(item.id)))
@@ -88,35 +88,7 @@ function populateTable(data: tableRowDTO[]): void {
   })
 }
 
-function placeOrder(app: Order, order: OrderClient): void {
-  /*
-  let qty = qtyInput.val()
-  if (!qty || Number(qty) === 0) {
-    showQtyError()
-    return
-  }
-
-  resetQtyError()
-
-  let recipeID = recipeInput.val()
-
-  app
-    .placeOrder(Number(recipeID), Number(qty))
-    .then(() => {
-      populateTable(order)
-      resetNotEnoughStockErr()
-      resetQty()
-    })
-    .catch(res => {
-      let errMsg = res.response.data
-      if (errMsg && errMsg.startsWith('not enough stock')) {
-        showNotEnoughStockErr()
-      }
-    })
-    */
-}
-
-function resetInput(input: JQuery<HTMLElement>): void {
+function resetInput(input: JQuery): void {
   input.val('')
 }
 

@@ -7,11 +7,11 @@ export interface inventoryItem {
 
 export default class Client {
   private endpoint: string
-  private inventory: inventoryItem[]
+  private state: inventoryItem[]
 
   constructor(url: string = '', initial: inventoryItem[] = []) {
     this.endpoint = `${url}/inventory`
-    this.inventory = [...initial]
+    this.state = [...initial]
   }
 
   private async apiFetchState(): Promise<any> {
@@ -24,8 +24,9 @@ export default class Client {
   }
 
   async fetchState(): Promise<inventoryItem[]> {
-    this.inventory = await this.apiFetchState()
-    return this.inventory
+    let apiData = await this.apiFetchState()
+    this.state = [...apiData]
+    return apiData
   }
 
   async apiAddItem(name: string): Promise<any> {
@@ -54,7 +55,7 @@ export default class Client {
 
     try {
       let newItem = await this.apiAddItem(itemName)
-      this.inventory.push(newItem)
+      this.state.push(newItem)
       return newItem
     } catch (error) {
       switch (error) {
@@ -69,16 +70,16 @@ export default class Client {
   }
 
   private isUnique(name: string) {
-    let found = this.inventory.find(item => item.name === name)
+    let found = this.state.find(item => item.name === name)
     return found === undefined
   }
 
   getState(): inventoryItem[] {
-    return [...this.inventory]
+    return [...this.state]
   }
 
   getName(id: number): string {
-    let item = this.inventory.find(i => i.id === id)
+    let item = this.state.find(i => i.id === id)
     if (item) {
       return item.name
     }

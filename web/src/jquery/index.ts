@@ -31,6 +31,8 @@ $(document).ready(async () => {
     return
   }
 
+  $('#alert').hide()
+
   let apiEndpoint = `${apiUrl}:${apiPort}`
   let inventory = new Client(apiEndpoint)
   let recipe = new RecipeClient(apiEndpoint)

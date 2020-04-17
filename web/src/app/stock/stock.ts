@@ -27,9 +27,9 @@ export interface Page {
 type StockDict = Record<string, string>
 
 export default class Stock {
-  inventory: Client
-  client: StockClient
-  page: Page
+  private inventory: Client
+  private client: StockClient
+  private page: Page
 
   constructor(inv: Client, client: StockClient, page: Page) {
     this.inventory = inv

@@ -1,5 +1,5 @@
-import Client, { inventoryItem } from '../inventory/client'
-import RecipeClient, { Recipe, RecipeItem } from './client'
+import InventoryClient, { inventoryItem } from '../inventory/client'
+import Client, { Recipe, RecipeItem } from './client'
 
 export interface optionDTO {
   id: number
@@ -42,13 +42,13 @@ export interface ingredientDTO {
 }
 
 export default class App {
-  private inventory: Client
-  private client: RecipeClient
+  private inventory: InventoryClient
+  private client: Client
   private page: Page
 
   private ingredients: ingredient[] = []
 
-  constructor(inv: Client, recipe: RecipeClient, page: Page) {
+  constructor(inv: InventoryClient, recipe: Client, page: Page) {
     this.inventory = inv
     this.client = recipe
     this.page = page
@@ -60,7 +60,7 @@ export default class App {
 
   init() {
     this.client.fetchRecipes().then(() => {
-      let recipes: Recipe[] = this.client.getRecipes()
+      let recipes: Recipe[] = this.client.getState()
       let rows: recipeDTO[] = this.toRows(recipes)
       this.page.populateTable(rows)
     })
@@ -150,7 +150,7 @@ export default class App {
           this.page.toggleNoUniqueNameError(false)
           this.page.resetRecipeName()
           this.page.toggleAddRecipeButtonState(true)
-          let recipes: Recipe[] = this.client.getRecipes()
+          let recipes: Recipe[] = this.client.getState()
           let rows: recipeDTO[] = this.toRows(recipes)
           this.page.populateTable(rows)
           break

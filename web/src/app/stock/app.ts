@@ -1,5 +1,5 @@
-import Client, { inventoryItem } from '../inventory/client'
-import StockClient from './client'
+import InventoryClient, { inventoryItem } from '../inventory/client'
+import Client from './client'
 
 import { Position } from '../stock/client'
 
@@ -26,12 +26,12 @@ export interface Page {
 
 type StockDict = Record<string, string>
 
-export default class Stock {
-  private inventory: Client
-  private client: StockClient
+export default class App {
+  private inventory: InventoryClient
+  private client: Client
   private page: Page
 
-  constructor(inv: Client, client: StockClient, page: Page) {
+  constructor(inv: InventoryClient, client: Client, page: Page) {
     this.inventory = inv
     this.client = client
     this.page = page

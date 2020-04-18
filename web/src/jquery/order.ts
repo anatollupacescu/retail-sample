@@ -1,11 +1,11 @@
 import $ = require('jquery')
 
-import OrderClient from '../app/order/client'
+import Client from '../app/order/client'
 import App, { Page, tableRowDTO } from '../app/order/app'
-import RecipeClient, { Recipe } from '../app/recipe/client'
-import StockClient from '../app/stock/client'
+import Client, { Recipe } from '../app/recipe/client'
+import Client from '../app/stock/client'
 
-export function initializeOrder(stock: StockClient, recipe: RecipeClient, order: OrderClient) {
+export function initializeOrder(stock: Client, recipe: Client, order: Client) {
   let recipeInput: JQuery = $('#orderRecipe'),
     qtyInput: JQuery = $('#orderQty'),
     placeOrderBtn: JQuery = $('#placeOrder')

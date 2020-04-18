@@ -19,7 +19,7 @@ export default class Client {
       let response = await axios.get(this.endpoint)
       return response.data.data
     } catch (error) {
-      throw error.response.data
+      throw error.response.data.trim()
     }
   }
 

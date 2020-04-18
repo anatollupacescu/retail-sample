@@ -1,11 +1,11 @@
 import Client from '../app/inventory/client'
-import RecipeClient from '../app/recipe/client'
+import Client from '../app/recipe/client'
 import App, { optionDTO, recipeDTO, ingredientDTO } from '../app/recipe/app'
 
 import $ = require('jquery')
 import { Page } from '../app/recipe/app'
 
-export function initializeRecipe(inv: Client, recipe: RecipeClient): void {
+export function initializeRecipe(inv: Client, recipe: Client): void {
   let itemNameDropdown = $('#recipeItemName'),
     itemQtyPicker = $('#recipeItemQty'),
     addItemBtn = $('#addRecipeItem'),

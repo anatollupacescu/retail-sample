@@ -24,7 +24,7 @@ describe('saving a recipe', () => {
     it('should err', () => {
       expect(app.saveRecipe('test', [])).to.be.rejectedWith('name present')
       expect(mockApi).to.have.been.called.exactly(0)
-      expect(app.getRecipes()).to.have.length(1)
+      expect(app.getState()).to.have.length(1)
     })
   })
 
@@ -38,7 +38,7 @@ describe('saving a recipe', () => {
     it('makes the api call', async () => {
       await app.saveRecipe('name', [{ id: 1, qty: 2 }])
       expect(mockApi).to.have.been.called.once
-      expect(app.getRecipes()).to.have.length(1)
+      expect(app.getState()).to.have.length(1)
     })
   })
 })
@@ -56,6 +56,6 @@ describe('fetching recipes', () => {
   it('should make the api call', async () => {
     await app.fetchRecipes()
     expect(mockApi).to.have.been.called.exactly(1)
-    expect(app.getRecipes()).to.have.length(1)
+    expect(app.getState()).to.have.length(1)
   })
 })

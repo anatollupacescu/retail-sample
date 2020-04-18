@@ -1,4 +1,4 @@
-import OrderClient, { Record } from './client'
+import Client, { Record } from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
 
@@ -24,9 +24,9 @@ export default class App {
 
   private stock: StockClient
   private recipe: RecipeClient
-  private client: OrderClient
+  private client: Client
 
-  constructor(stockClient: StockClient, orderClient: OrderClient, recipeClient: RecipeClient, page: Page) {
+  constructor(stockClient: StockClient, orderClient: Client, recipeClient: RecipeClient, page: Page) {
     this.stock = stockClient
     this.client = orderClient
     this.recipe = recipeClient
@@ -53,7 +53,7 @@ export default class App {
   }
 
   show() {
-    let items = this.recipe.getRecipes()
+    let items = this.recipe.getState()
     this.page.populateDropdown(items)
   }
 
@@ -61,7 +61,7 @@ export default class App {
     this.client
       .fetchOrders()
       .then(() => {
-        let data: Record[] = this.client.getOrders()
+        let data: Record[] = this.client.getState()
         let rows = this.toRows(data)
         this.page.populateTable(rows)
       })
@@ -96,7 +96,7 @@ export default class App {
       }
     }
 
-    let data: Record[] = this.client.getOrders()
+    let data: Record[] = this.client.getState()
 
     let rows = this.toRows(data)
     this.page.populateTable(rows)

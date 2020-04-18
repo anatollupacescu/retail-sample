@@ -4,14 +4,14 @@ import { apiIsHealthy } from '../health'
 import Client from '../app/inventory/client'
 import { initializeInventory } from './inventory'
 
-import RecipeClient from '../app/recipe/client'
+import Client from '../app/recipe/client'
 import { initializeRecipe } from './recipe'
 
 import { initializeStock } from './stock'
-import StockClient from '../app/stock/client'
+import Client from '../app/stock/client'
 
 import { initializeOrder } from './order'
-import OrderClient from '../app/order/client'
+import Client from '../app/order/client'
 
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
@@ -35,9 +35,9 @@ $(document).ready(async () => {
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
   let inventory = new Client(apiEndpoint)
-  let recipe = new RecipeClient(apiEndpoint)
-  let order = new OrderClient(apiEndpoint)
-  let stock = new StockClient(apiEndpoint)
+  let recipe = new Client(apiEndpoint)
+  let order = new Client(apiEndpoint)
+  let stock = new Client(apiEndpoint)
 
   initializeInventory(inventory, stock)
 

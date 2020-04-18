@@ -2,9 +2,9 @@ import $ = require('jquery')
 
 import Client, { inventoryItem } from '../app/inventory/client'
 import App, { Page } from '../app/inventory/app'
-import StockClient from '../app/stock/client'
+import Client from '../app/stock/client'
 
-export function initializeInventory(client: Client, stock: StockClient) {
+export function initializeInventory(client: Client, stock: Client) {
   let nameInput = $('#name')
   let form = $('#mainForm')
 

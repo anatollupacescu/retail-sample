@@ -5,17 +5,17 @@ export interface Position {
   qty: number
 }
 
-export default class StockClient {
+export default class Client {
   private endpoint: string
-  private data: Position[]
+  private state: Position[]
 
-  constructor(url: string = '', initialData: Position[] = []) {
+  constructor(url: string = '', initial: Position[] = []) {
     this.endpoint = `${url}/stock`
-    this.data = [...initialData]
+    this.state = [...initial]
   }
 
   addPosition(id: number): void {
-    this.data.push({
+    this.state.push({
       id: id,
       qty: 0
     })
@@ -40,7 +40,7 @@ export default class StockClient {
 
   updatePosition(id: number, newValue: number): void {
     let updated = false
-    this.data.map(p => {
+    this.state.map(p => {
       if (updated) return
       if (p.id === id) {
         p.qty = newValue
@@ -50,7 +50,7 @@ export default class StockClient {
   }
 
   substractFromPosition(ingredientID: number, toSubstract: number): void {
-    let ingredient = this.data.filter(p => p.id === ingredientID)
+    let ingredient = this.state.filter(p => p.id === ingredientID)
     if (ingredient && ingredient.length > 0) {
       ingredient[0].qty = ingredient[0].qty - toSubstract
     }
@@ -66,10 +66,10 @@ export default class StockClient {
   }
 
   async fetchState(): Promise<void> {
-    this.data = await this.apiFetchState()
+    this.state = await this.apiFetchState()
   }
 
   getData(): Position[] {
-    return [...this.data]
+    return [...this.state]
   }
 }

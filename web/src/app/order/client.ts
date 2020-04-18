@@ -6,13 +6,13 @@ export interface Record {
   qty: number
 }
 
-export default class OrderClient {
+export default class Client {
   private endpoint: string
-  private orders: Record[]
+  private state: Record[]
 
   constructor(url: string = '', initial: Record[] = []) {
     this.endpoint = `${url}/order`
-    this.orders = initial
+    this.state = initial
   }
 
   private async apiFetchOrders(): Promise<any> {
@@ -25,7 +25,7 @@ export default class OrderClient {
   }
 
   async fetchOrders(): Promise<any> {
-    this.orders = await this.apiFetchOrders()
+    this.state = await this.apiFetchOrders()
   }
 
   private async apiAddOrder(recipeID: number, qty: number): Promise<any> {
@@ -45,7 +45,7 @@ export default class OrderClient {
     try {
       let newID = await this.apiAddOrder(recipeID, qty)
 
-      this.orders.push({
+      this.state.push({
         id: newID,
         recipeID: recipeID,
         qty: qty
@@ -62,7 +62,7 @@ export default class OrderClient {
     }
   }
 
-  getOrders(): Record[] {
-    return [...this.orders]
+  getState(): Record[] {
+    return [...this.state]
   }
 }

@@ -4,14 +4,14 @@ import spies = require('chai-spies')
 
 import App, { Page, recipeDTO, ingredientDTO, optionDTO } from './app'
 import InventoryClient from '../inventory/client'
-import RecipeClient from './client'
+import Client from './client'
 
 chai.use(spies)
 let expect = chai.expect
 
 describe('add ingredient', () => {
   let inv = new InventoryClient(),
-    client = new RecipeClient()
+    client = new Client()
 
   describe('when given invalid quantity', () => {
     let page = noOpPage()
@@ -21,7 +21,7 @@ describe('add ingredient', () => {
 
     let app = new App(inv, client, page)
 
-    it('errors', async () => {
+    it('errors', () => {
       app.onAddIngredient()
       expect(getName).to.have.been.called.once
       expect(qtyErr).to.have.been.called.once

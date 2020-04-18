@@ -1,17 +1,17 @@
 import $ = require('jquery')
 import { apiIsHealthy } from '../health'
 
-import Client from '../app/inventory/client'
+import InventoryClient from '../app/inventory/client'
 import { initializeInventory } from './inventory'
 
-import Client from '../app/recipe/client'
+import RecipeClient from '../app/recipe/client'
 import { initializeRecipe } from './recipe'
 
 import { initializeStock } from './stock'
-import Client from '../app/stock/client'
+import StockClient from '../app/stock/client'
 
 import { initializeOrder } from './order'
-import Client from '../app/order/client'
+import OrderClient from '../app/order/client'
 
 $(document).ready(async () => {
   let apiUrl = process.env.API_URL
@@ -34,10 +34,10 @@ $(document).ready(async () => {
   $('#alert').hide()
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let inventory = new Client(apiEndpoint)
-  let recipe = new Client(apiEndpoint)
-  let order = new Client(apiEndpoint)
-  let stock = new Client(apiEndpoint)
+  let inventory = new InventoryClient(apiEndpoint)
+  let recipe = new RecipeClient(apiEndpoint)
+  let order = new OrderClient(apiEndpoint)
+  let stock = new StockClient(apiEndpoint)
 
   initializeInventory(inventory, stock)
 

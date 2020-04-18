@@ -69,7 +69,7 @@ export default class Client {
     this.state = await this.apiFetchState()
   }
 
-  getData(): Position[] {
+  getState(): Position[] {
     return [...this.state]
   }
 }

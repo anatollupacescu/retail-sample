@@ -54,7 +54,7 @@ export default class App {
   }
 
   private computeTableRows(): stockTableRowDTO[] {
-    let positions: Position[] = this.client.getData()
+    let positions: Position[] = this.client.getState()
     let dict = this.toDict(positions)
 
     let toDTO = (i: inventoryItem) => ({

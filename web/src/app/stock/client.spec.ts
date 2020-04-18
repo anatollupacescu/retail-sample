@@ -26,9 +26,9 @@ describe('provision stock', () => {
   it('calls the api and stores the state locally', async () => {
     await app.provision('1', 2)
     expect(apiProvision).to.have.been.called.once
-    expect(app.getData()).to.have.length(1)
-    expect(app.getData()[0].qty).to.equal(2)
-    expect(app.getData()[0].id).to.equal(1)
+    expect(app.getState()).to.have.length(1)
+    expect(app.getState()[0].qty).to.equal(2)
+    expect(app.getState()[0].id).to.equal(1)
   })
 })
 
@@ -44,8 +44,8 @@ describe('fetching state', () => {
   it('calls the api and stores the state locally', async () => {
     await app.fetchState()
     expect(mockApi).to.have.been.called.once
-    expect(app.getData()).to.have.length(1)
-    expect(app.getData()[0].qty).to.equal(2)
-    expect(app.getData()[0].id).to.equal(1)
+    expect(app.getState()).to.have.length(1)
+    expect(app.getState()[0].qty).to.equal(2)
+    expect(app.getState()[0].id).to.equal(1)
   })
 })

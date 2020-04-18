@@ -2,6 +2,9 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
+import chaiAsPromised = require('chai-as-promised')
+chai.use(chaiAsPromised)
+
 import RecipeClient from './client'
 
 chai.use(spies)

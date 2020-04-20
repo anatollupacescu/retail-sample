@@ -2,7 +2,6 @@ package retailsample
 
 import (
 	"errors"
-	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
@@ -39,9 +38,8 @@ type Orders interface {
 
 type ( //provision log
 	ProvisionEntry struct {
-		Time time.Time
-		ID   int
-		Qty  int
+		ID  int
+		Qty int
 	}
 
 	ProvisionLog interface {

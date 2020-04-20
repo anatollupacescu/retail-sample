@@ -135,9 +135,8 @@ func (a *WebApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 
 	for _, in := range a.App.GetProvisionLog() {
 		response.Data = append(response.Data, entry{
-			Time: in.Time,
-			ID:   int(in.ID),
-			Qty:  in.Qty,
+			ID:  int(in.ID),
+			Qty: in.Qty,
 		})
 	}
 

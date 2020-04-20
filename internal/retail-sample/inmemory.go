@@ -17,11 +17,10 @@ func (i InMemoryProvisionLog) Add(v ProvisionEntry) {
 }
 
 func (i InMemoryProvisionLog) List() (r []ProvisionEntry) {
-	for t, v := range i {
+	for _, v := range i {
 		r = append(r, ProvisionEntry{
-			Time: t,
-			ID:   v.ID,
-			Qty:  v.Qty,
+			ID:  v.ID,
+			Qty: v.Qty,
 		})
 	}
 	return

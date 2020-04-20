@@ -25,3 +25,5 @@ web/dist/
 web/*.lock
 web/src/index.html
 web/lib
+
+database/data

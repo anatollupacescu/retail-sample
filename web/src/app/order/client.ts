@@ -11,7 +11,7 @@ export default class Client {
   private state: Record[]
 
   constructor(url: string = '', initial: Record[] = []) {
-    this.endpoint = `${url}/order`
+    this.endpoint = url
     this.state = initial
   }
 

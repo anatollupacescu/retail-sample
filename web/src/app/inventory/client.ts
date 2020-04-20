@@ -10,7 +10,7 @@ export default class Client {
   private state: inventoryItem[]
 
   constructor(url: string = '', initial: inventoryItem[] = []) {
-    this.endpoint = `${url}/inventory`
+    this.endpoint = url
     this.state = [...initial]
   }
 

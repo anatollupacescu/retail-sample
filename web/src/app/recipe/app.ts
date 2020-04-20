@@ -14,7 +14,7 @@ export interface recipeDTO {
 export interface Page {
   ingredientID(): number
   removeIngredientFromDropdown(s: string): void
-  toggleAddToListBtnDisabledState(v: boolean): void
+  toggleAddToListBtnState(v: boolean): void
   toggleNoIngredientsError(v: boolean): void
 
   recipeName(): string
@@ -46,6 +46,7 @@ export default class App {
   private client: Client
   private page: Page
 
+  // belongs here because does not need persistence
   private ingredients: ingredient[] = []
 
   constructor(inv: InventoryClient, recipe: Client, page: Page) {
@@ -143,15 +144,15 @@ export default class App {
           this.page.toggleNoIngredientsError(true)
           break
         }
-        case '':
+        case '': //success
           this.ingredients = []
           this.renderIngredientsDropdown()
           this.populateIngredientsTable()
           this.page.toggleNoUniqueNameError(false)
           this.page.resetRecipeName()
           this.page.toggleAddRecipeButtonState(true)
-          let recipes: Recipe[] = this.client.getState()
-          let rows: recipeDTO[] = this.toRows(recipes)
+          let recipes = this.client.getState()
+          let rows = this.toRows(recipes)
           this.page.populateTable(rows)
           break
         default: {
@@ -162,7 +163,10 @@ export default class App {
   }
 
   private populateIngredientsTable() {
-    let dtos = this.ingredientDTOs()
+    let dtos = this.ingredients.map(i => ({
+      qty: String(i.qty),
+      name: this.inventory.getName(i.id)
+    }))
     this.page.populateIngredientsTable(dtos)
   }
 
@@ -194,17 +198,7 @@ export default class App {
     this.renderIngredientsDropdown()
 
     this.page.resetQty()
-    this.page.toggleAddToListBtnDisabledState(true)
-  }
-
-  private ingredientDTOs(): ingredientDTO[] {
-    return this.ingredients.map(i => {
-      let name = this.inventory.getName(i.id)
-      return {
-        qty: String(i.qty),
-        name: name
-      }
-    })
+    this.page.toggleAddToListBtnState(true)
   }
 
   private badQuantity(qty: number): boolean {
@@ -219,18 +213,18 @@ export default class App {
 
     if (this.badQuantity(qty)) {
       this.page.toggleQtyError(true)
-      this.page.toggleAddToListBtnDisabledState(true)
+      this.page.toggleAddToListBtnState(true)
       return
     }
 
     let id = this.page.ingredientID()
 
     if (!id || id === 0) {
-      this.page.toggleAddToListBtnDisabledState(true)
+      this.page.toggleAddToListBtnState(true)
       return
     }
 
     this.page.toggleQtyError(false)
-    this.page.toggleAddToListBtnDisabledState(false)
+    this.page.toggleAddToListBtnState(false)
   }
 }

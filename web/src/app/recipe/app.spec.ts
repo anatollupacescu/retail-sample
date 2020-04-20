@@ -77,7 +77,7 @@ function noOpPage(): Page {
       return 0
     },
     removeIngredientFromDropdown: (_s: string): void => {},
-    toggleAddToListBtnDisabledState: (_v: boolean): void => {},
+    toggleAddToListBtnState: (_v: boolean): void => {},
     toggleNoIngredientsError: (_v: boolean): void => {},
     toggleNoUniqueNameError: (_v: boolean): void => {},
     recipeName: (): string => {

@@ -34,10 +34,10 @@ $(document).ready(async () => {
   $('#alert').hide()
 
   let apiEndpoint = `${apiUrl}:${apiPort}`
-  let inventory = new InventoryClient(apiEndpoint)
-  let recipe = new RecipeClient(apiEndpoint)
-  let order = new OrderClient(apiEndpoint)
-  let stock = new StockClient(apiEndpoint)
+  let inventory = new InventoryClient(`${apiEndpoint}/inventory`)
+  let recipe = new RecipeClient(`${apiEndpoint}/recipe`)
+  let order = new OrderClient(`${apiEndpoint}/order`)
+  let stock = new StockClient(`${apiEndpoint}/stock`)
 
   initializeInventory(inventory, stock)
 

@@ -20,7 +20,7 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     resetQty: () => resetValue(itemQtyPicker),
     toggleQtyError: (v: boolean) => toggleQtyError(v),
 
-    toggleAddToListBtnDisabledState: (v: boolean): void => toggleDisabledState(v, addItemBtn),
+    toggleAddToListBtnState: (v: boolean): void => toggleDisabledState(v, addItemBtn),
 
     recipeName: (): string => getStringValue(recipeNameInput),
     resetRecipeName: () => resetValue(recipeNameInput),

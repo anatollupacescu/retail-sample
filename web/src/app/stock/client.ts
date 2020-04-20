@@ -10,7 +10,7 @@ export default class Client {
   private state: Position[]
 
   constructor(url: string = '', initial: Position[] = []) {
-    this.endpoint = `${url}/stock`
+    this.endpoint = url
     this.state = [...initial]
   }
 

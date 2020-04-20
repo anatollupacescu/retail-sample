@@ -16,7 +16,7 @@ export default class Client {
   private state: Recipe[]
 
   constructor(url: string = '', initial: Recipe[] = []) {
-    this.endpoint = `${url}/recipe`
+    this.endpoint = url
     this.state = [...initial]
   }
 

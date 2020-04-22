@@ -23,7 +23,7 @@ func (b *MockRecipeBook) Get(id recipe.ID) recipe.Recipe {
 	return b.Called(id).Get(0).(recipe.Recipe)
 }
 
-func (b *MockRecipeBook) All() []recipe.Recipe {
+func (b *MockRecipeBook) List() []recipe.Recipe {
 	return b.Called().Get(0).([]recipe.Recipe)
 }
 
@@ -75,6 +75,6 @@ func (m *MockOrders) Add(oe order.OrderEntry) order.ID {
 	return m.Called(oe).Get(0).(order.ID)
 }
 
-func (m *MockOrders) All() []order.Order {
+func (m *MockOrders) List() []order.Order {
 	return m.Called().Get(0).([]order.Order)
 }

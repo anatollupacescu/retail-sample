@@ -8,14 +8,33 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
+//Facade/Use cases
 type App struct {
 	//domain
 	Inventory  Inventory
 	Orders     Orders
 	RecipeBook RecipeBook
+
 	//app specific
 	ProvisionLog ProvisionLog
 	Stock        Stock
+
+	//unit-of-work
+	PersistentProviderFactory PersistenceProviderFactory
+}
+
+type PersistenceProviderFactory interface {
+	Begin() PersistenceProvider
+	Commit(PersistenceProvider)
+	Rollback(PersistenceProvider)
+}
+
+type PersistenceProvider interface {
+	Inventory() Inventory
+	Stock() Stock
+	ProvisionLog() ProvisionLog
+	RecipeBook() RecipeBook
+	Orders() Orders
 }
 
 type Inventory interface {
@@ -28,12 +47,12 @@ type Inventory interface {
 type RecipeBook interface {
 	Add(recipe.Name, []recipe.Ingredient) (recipe.ID, error)
 	Get(recipe.ID) recipe.Recipe
-	All() []recipe.Recipe
+	List() []recipe.Recipe
 }
 
 type Orders interface {
 	Add(order.OrderEntry) order.ID
-	All() []order.Order
+	List() []order.Order
 }
 
 type ( //provision log
@@ -81,17 +100,24 @@ var ErrInventoryItemNotFound = errors.New("inventory item not found")
 func (a App) Provision(id, qty int) (int, error) {
 	var zeroInventoryItem inventory.Item
 
+	provider := a.PersistentProviderFactory.Begin()
+	defer a.PersistentProviderFactory.Commit(provider)
+
+	inv := provider.Inventory()
+
 	itemID := inventory.ID(id)
 
-	if a.Inventory.Get(itemID) == zeroInventoryItem {
+	if inv.Get(itemID) == zeroInventoryItem {
 		return 0, ErrInventoryItemNotFound
 	}
 
-	//TODO should provision qty=0?
+	stock := provider.Stock()
 
-	newQty := a.Stock.Provision(id, qty)
+	newQty := stock.Provision(id, qty)
 
-	a.ProvisionLog.Add(ProvisionEntry{
+	provisionLog := provider.ProvisionLog()
+
+	provisionLog.Add(ProvisionEntry{
 		ID:  id,
 		Qty: qty,
 	})
@@ -113,7 +139,12 @@ var ErrRecipeNotFound = errors.New("outbound type not found")
 
 func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 	recipeID := recipe.ID(id)
-	r := a.RecipeBook.Get(recipeID)
+
+	provider := a.PersistentProviderFactory.Begin()
+
+	recipeBook := provider.RecipeBook()
+
+	r := recipeBook.Get(recipeID)
 
 	ingredients := r.Ingredients
 
@@ -121,9 +152,9 @@ func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 		return 0, ErrRecipeNotFound
 	}
 
-	//TODO zero qty?
+	stock := provider.Stock()
 
-	if err := a.Stock.Sell(ingredients, qty); err != nil {
+	if err := stock.Sell(ingredients, qty); err != nil {
 		switch err {
 		case ErrNotEnoughStock:
 			return 0, ErrNotEnoughStock
@@ -132,10 +163,14 @@ func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 		}
 	}
 
-	entryID := a.Orders.Add(order.OrderEntry{
+	orders := provider.Orders()
+
+	entryID := orders.Add(order.OrderEntry{
 		RecipeID: id,
 		Qty:      qty,
 	})
+
+	a.PersistentProviderFactory.Commit(provider)
 
 	return entryID, nil
 }

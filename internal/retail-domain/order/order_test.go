@@ -18,7 +18,7 @@ func TestOrder(t *testing.T) {
 		}
 
 		mockStore := &MockOrderStore{}
-		mockStore.On("add", mock.AnythingOfType("Order")).Return(expectedID)
+		mockStore.On("Add", mock.AnythingOfType("Order")).Return(expectedID)
 
 		orders := Orders{
 			Store: mockStore,
@@ -41,13 +41,13 @@ func TestOrder(t *testing.T) {
 		}}
 
 		mockStore := &MockOrderStore{}
-		mockStore.On("all").Return(expectedOrders)
+		mockStore.On("List").Return(expectedOrders)
 
 		orders := Orders{
 			Store: mockStore,
 		}
 
-		receivedOrders := orders.All()
+		receivedOrders := orders.List()
 
 		mockStore.AssertExpectations(t)
 		assert.Equal(t, expectedOrders, receivedOrders)

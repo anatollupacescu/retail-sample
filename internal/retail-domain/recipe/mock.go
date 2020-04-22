@@ -10,16 +10,16 @@ type MockRecipeStore struct {
 	mock.Mock
 }
 
-func (m *MockRecipeStore) add(r Recipe) (ID, error) {
+func (m *MockRecipeStore) Add(r Recipe) (ID, error) {
 	args := m.Called(r)
 	return args.Get(0).(ID), args.Error(1)
 }
 
-func (m *MockRecipeStore) all() []Recipe {
+func (m *MockRecipeStore) List() []Recipe {
 	return m.Called().Get(0).([]Recipe)
 }
 
-func (m *MockRecipeStore) get(id ID) Recipe {
+func (m *MockRecipeStore) Get(id ID) Recipe {
 	return m.Called(id).Get(0).(Recipe)
 }
 

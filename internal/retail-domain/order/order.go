@@ -17,8 +17,8 @@ type (
 	}
 
 	store interface {
-		add(Order) ID
-		all() []Order
+		Add(Order) ID
+		List() []Order
 	}
 
 	Orders struct {
@@ -32,9 +32,9 @@ func (o Orders) Add(oe OrderEntry) ID {
 		Date:       time.Now(),
 	}
 
-	return o.Store.add(ord)
+	return o.Store.Add(ord)
 }
 
-func (o Orders) All() (os []Order) {
-	return o.Store.all()
+func (o Orders) List() (os []Order) {
+	return o.Store.List()
 }

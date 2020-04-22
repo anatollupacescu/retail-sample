@@ -9,7 +9,6 @@ import (
 )
 
 //provision log
-
 type InMemoryProvisionLog map[time.Time]ProvisionEntry
 
 func (i InMemoryProvisionLog) Add(v ProvisionEntry) {
@@ -27,7 +26,6 @@ func (i InMemoryProvisionLog) List() (r []ProvisionEntry) {
 }
 
 // stock
-
 type InMemoryStock struct {
 	data map[int]int
 }

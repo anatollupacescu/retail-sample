@@ -13,14 +13,14 @@ func NewInMemoryStore() InMemoryStore {
 	}
 }
 
-func (m *InMemoryStore) add(r Recipe) (ID, error) {
+func (m *InMemoryStore) Add(r Recipe) (ID, error) {
 	*m.counter++
 	id := *m.counter
 	m.data[id] = r
 	return ID(id), nil
 }
 
-func (m *InMemoryStore) all() (r []Recipe) {
+func (m *InMemoryStore) List() (r []Recipe) {
 	for id, rp := range m.data {
 		rp.ID = ID(id)
 		r = append(r, rp)
@@ -29,6 +29,6 @@ func (m *InMemoryStore) all() (r []Recipe) {
 	return
 }
 
-func (m *InMemoryStore) get(id ID) Recipe {
+func (m *InMemoryStore) Get(id ID) Recipe {
 	return m.data[int(id)]
 }

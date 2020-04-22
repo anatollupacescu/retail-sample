@@ -21,9 +21,9 @@ type (
 	}
 
 	Store interface {
-		add(Recipe) (ID, error)
-		all() []Recipe
-		get(ID) Recipe
+		Add(Recipe) (ID, error)
+		List() []Recipe
+		Get(ID) Recipe
 	}
 
 	Book struct {
@@ -71,18 +71,18 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		}
 	}
 
-	return b.Store.add(Recipe{
+	return b.Store.Add(Recipe{
 		Name:        name,
 		Ingredients: ingredients,
 	})
 }
 
 func (b Book) Get(id ID) Recipe {
-	return b.Store.get(id)
+	return b.Store.Get(id)
 }
 
-func (b Book) All() (r []Recipe) {
-	r = append(r, b.Store.all()...)
+func (b Book) List() (r []Recipe) {
+	r = append(r, b.Store.List()...)
 
 	return
 }

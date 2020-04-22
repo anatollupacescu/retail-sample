@@ -44,7 +44,7 @@ func main() {
 		Handler: businessRouter,
 	}
 
-	webApp := web.NewInMemoryApp()
+	webApp := web.NewApp()
 
 	//app
 	web.ConfigureRoutes(businessRouter, webApp)
@@ -54,7 +54,13 @@ func main() {
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
+		var status = http.StatusOK
+
+		if !webApp.IsHealthy() {
+			status = http.StatusInternalServerError
+		}
+
+		w.WriteHeader(status)
 	})
 
 	diagRouter.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {

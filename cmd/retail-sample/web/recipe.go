@@ -80,7 +80,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]recipe, 0) //to have  '[]' instead of null
 
-	for _, r := range a.RecipeBook.All() {
+	for _, r := range a.RecipeBook.List() {
 		response.Data = append(response.Data, recipe{
 			ID:    int(r.ID),
 			Name:  string(r.Name),

@@ -80,7 +80,7 @@ func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, o := range a.Orders.All() {
+	for _, o := range a.Orders.List() {
 		e := entry{
 			ID:       int(o.ID),
 			RecipeID: o.RecipeID,

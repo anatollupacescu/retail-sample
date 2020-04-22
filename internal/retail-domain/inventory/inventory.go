@@ -13,10 +13,10 @@ type ( //inventory
 	}
 
 	Store interface {
-		add(Name) ID
-		find(Name) ID
-		get(ID) Item
-		all() []Item
+		Add(Name) ID
+		Find(Name) ID
+		Get(ID) Item
+		List() []Item
 	}
 
 	Inventory struct {
@@ -36,23 +36,23 @@ func (i Inventory) Add(name Name) (ID, error) {
 		return zeroID, ErrEmptyName
 	}
 
-	if i.Store.find(name) != zeroID {
+	if i.Store.Find(name) != zeroID {
 		return zeroID, ErrDuplicateName
 	}
 
-	newID := i.Store.add(name)
+	newID := i.Store.Add(name)
 
 	return newID, nil
 }
 
-func (i Inventory) All() (r []Item) {
-	return i.Store.all()
+func (i Inventory) List() (r []Item) {
+	return i.Store.List()
 }
 
 func (i Inventory) Find(name Name) ID {
-	return i.Store.find(name)
+	return i.Store.Find(name)
 }
 
 func (i Inventory) Get(id ID) Item {
-	return i.Store.get(id)
+	return i.Store.Get(id)
 }

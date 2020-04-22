@@ -13,7 +13,7 @@ func NewInMemoryStore() store {
 	}
 }
 
-func (m InMemoryStore) add(i Order) ID {
+func (m InMemoryStore) Add(i Order) ID {
 	*m.counter += 1
 
 	newID := ID(*m.counter)
@@ -22,7 +22,7 @@ func (m InMemoryStore) add(i Order) ID {
 	return newID
 }
 
-func (m InMemoryStore) all() (r []Order) {
+func (m InMemoryStore) List() (r []Order) {
 	for id, v := range m.data {
 		v.ID = id
 		r = append(r, v)

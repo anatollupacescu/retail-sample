@@ -6,10 +6,10 @@ type MockOrderStore struct {
 	mock.Mock
 }
 
-func (m *MockOrderStore) add(i Order) ID {
+func (m *MockOrderStore) Add(i Order) ID {
 	return m.Called(i).Get(0).(ID)
 }
 
-func (m *MockOrderStore) all() []Order {
+func (m *MockOrderStore) List() []Order {
 	return m.Called().Get(0).([]Order)
 }

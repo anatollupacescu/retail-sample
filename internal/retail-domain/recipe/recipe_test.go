@@ -58,7 +58,7 @@ func TestAddRecipe(t *testing.T) {
 		})
 
 		var expectedErr = errors.New("could not save")
-		s.On("add", mock.Anything).Return(recipe.ID(0), expectedErr)
+		s.On("Add", mock.Anything).Return(recipe.ID(0), expectedErr)
 
 		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
@@ -76,7 +76,7 @@ func TestAddRecipe(t *testing.T) {
 		i.On("Get", inventory.ID(1)).Return(inventory.Item{
 			ID: 1,
 		})
-		s.On("add", recipe.Recipe{
+		s.On("Add", recipe.Recipe{
 			Name:        "test",
 			Ingredients: []recipe.Ingredient{{ID: 1, Qty: 2}},
 		}).Return(recipe.ID(1), nil)
@@ -98,7 +98,7 @@ func TestGetRecipe(t *testing.T) {
 		b := recipe.Book{Store: s}
 
 		var zeroValueRecipe = recipe.Recipe{}
-		s.On("get", recipe.ID(1)).Return(zeroValueRecipe)
+		s.On("Get", recipe.ID(1)).Return(zeroValueRecipe)
 
 		r := b.Get(1)
 		assert.Equal(t, r, zeroValueRecipe)
@@ -117,7 +117,7 @@ func TestGetRecipe(t *testing.T) {
 				Qty: 2,
 			}},
 		}
-		s.On("get", recipe.ID(1)).Return(foundRecipe)
+		s.On("Get", recipe.ID(1)).Return(foundRecipe)
 
 		r := b.Get(1)
 		assert.Equal(t, r, foundRecipe)
@@ -134,9 +134,9 @@ func TestGetRecipeNames(t *testing.T) {
 		ID:   recipe.ID(1),
 		Name: recipe.Name("glintwine"),
 	}
-	s.On("all").Return([]recipe.Recipe{expectedRecipe})
+	s.On("List").Return([]recipe.Recipe{expectedRecipe})
 
-	r := b.All()
+	r := b.List()
 	assert.Equal(t, r, []recipe.Recipe{expectedRecipe})
 	s.AssertExpectations(t)
 }

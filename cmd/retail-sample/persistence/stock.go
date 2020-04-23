@@ -42,10 +42,10 @@ func (ps *PgxStock) Quantity(id int) int {
 }
 
 func (ps *PgxStock) Sell(ii []recipe.Ingredient, qty int) error {
-	sql := "update stock set quantity = quantity - $1 where inventoryid = $2 and quantity > $1 returning quantity"
+	sql := "update stock set quantity = quantity - $1 where inventoryid = $2"
 
 	for _, i := range ii {
-		err := ps.DB.QueryRow(context.Background(), sql, qty*i.Qty, i.ID).Scan()
+		_, err := ps.DB.Exec(context.Background(), sql, qty*i.Qty, i.ID)
 
 		if err != nil {
 			return retail.ErrNotEnoughStock

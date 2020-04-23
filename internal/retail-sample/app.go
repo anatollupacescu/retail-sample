@@ -152,18 +152,22 @@ func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 	ingredients := r.Ingredients
 
 	if ingredients == nil {
+		a.PersistentProviderFactory.Rollback(provider)
 		return 0, ErrRecipeNotFound
 	}
 
 	stock := provider.Stock()
 
-	if err := stock.Sell(ingredients, qty); err != nil {
-		switch err {
-		case ErrNotEnoughStock:
+	for _, i := range ingredients {
+		if stock.Quantity(i.ID) < qty*i.Qty {
+			a.PersistentProviderFactory.Rollback(provider)
 			return 0, ErrNotEnoughStock
-		default:
-			panic("unexpected error")
 		}
+	}
+
+	if err := stock.Sell(ingredients, qty); err != nil {
+		a.PersistentProviderFactory.Rollback(provider)
+		return 0, err
 	}
 
 	orders := provider.Orders()

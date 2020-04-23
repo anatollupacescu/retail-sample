@@ -11,9 +11,9 @@ type (
 	ID int
 
 	Order struct {
+		ID ID
 		OrderEntry
 		Date time.Time
-		ID   ID
 	}
 
 	store interface {

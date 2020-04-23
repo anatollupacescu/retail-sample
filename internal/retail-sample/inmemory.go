@@ -1,8 +1,6 @@
 package retailsample
 
 import (
-	"errors"
-
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 
 	"time"
@@ -53,8 +51,6 @@ func (s InMemoryStock) Provision(id, qty int) int {
 
 	return newQty
 }
-
-var ErrNotEnoughStock = errors.New("not enough stock")
 
 func (s InMemoryStock) Sell(ii []recipe.Ingredient, qty int) error {
 	for _, i := range ii {

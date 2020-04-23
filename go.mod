@@ -2,6 +2,7 @@ module github.com/anatollupacescu/retail-sample
 
 require (
 	github.com/gorilla/mux v1.7.4-0.20190830121156-884b5ffcbd3a
+	github.com/jackc/pgconn v0.0.0-20190824142844-760dd75542eb
 	github.com/jackc/pgtype v1.3.0
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jackc/pgx/v4 v4.0.0-pre1.0.20190824185557-6972a5742186

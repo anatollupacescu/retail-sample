@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 )
 
 type PgxStock struct {
@@ -12,39 +13,42 @@ type PgxStock struct {
 }
 
 func (ps *PgxStock) Provision(id, qty int) int {
-	sql := "update stock set qty = qty + $1 where itemid = $2 returning qty"
+	sql := `insert into stock(inventoryid, quantity) 
+					values ($1, $2) 
+					ON CONFLICT(inventoryid) DO UPDATE 
+					set quantity = stock.quantity + $2 
+					where stock.inventoryid = $1
+					returning quantity`
 
 	var newQty int
-	err := ps.DB.QueryRow(context.Background(), sql, qty, id).Scan(&newQty)
+	err := ps.DB.QueryRow(context.Background(), sql, id, qty).Scan(&newQty)
 
 	if err != nil {
-		log.Printf("got err %v", err)
+		log.Print("stock provision", err)
 	}
 
 	return newQty
 }
 
 func (ps *PgxStock) Quantity(id int) int {
-	sql := "select qty from stock where id = $1"
+	sql := "select quantity from stock where inventoryid = $1"
 
 	var qty int
-	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&qty)
+	row := ps.DB.QueryRow(context.Background(), sql, id)
 
-	if err != nil {
-		log.Printf("got err %v", err)
-	}
+	_ = row.Scan(&qty)
 
 	return qty
 }
 
 func (ps *PgxStock) Sell(ii []recipe.Ingredient, qty int) error {
-	sql := "update stock set qty = qty - $1 where itemid = $2 returning qty"
+	sql := "update stock set quantity = quantity - $1 where inventoryid = $2 and quantity > $1 returning quantity"
 
 	for _, i := range ii {
-		_, err := ps.DB.Query(context.Background(), sql, qty*i.Qty, i.ID)
+		err := ps.DB.QueryRow(context.Background(), sql, qty*i.Qty, i.ID).Scan()
 
 		if err != nil {
-			return err
+			return retail.ErrNotEnoughStock
 		}
 	}
 

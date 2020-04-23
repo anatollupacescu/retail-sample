@@ -38,7 +38,7 @@ func (m *MockInventory) Add(s inventory.Name) (inventory.ID, error) {
 	return args.Get(0).(inventory.ID), args.Error(1)
 }
 
-func (m *MockInventory) All() []inventory.Item {
+func (m *MockInventory) List() []inventory.Item {
 	args := m.Called()
 	return args.Get(0).([]inventory.Item)
 }

@@ -39,7 +39,7 @@ type PersistenceProvider interface {
 
 type Inventory interface {
 	Add(inventory.Name) (inventory.ID, error)
-	All() []inventory.Item
+	List() []inventory.Item
 	Get(inventory.ID) inventory.Item
 	Find(inventory.Name) inventory.ID
 }
@@ -82,7 +82,7 @@ type (
 )
 
 func (a App) CurrentStock() (ps []StockPosition) {
-	for _, item := range a.Inventory.All() {
+	for _, item := range a.Inventory.List() {
 		itemID := int(item.ID)
 		qty := a.Stock.Quantity(itemID)
 		ps = append(ps, StockPosition{
@@ -135,7 +135,10 @@ func (a App) GetProvisionLog() (r []ProvisionEntry) {
 	return
 }
 
-var ErrRecipeNotFound = errors.New("outbound type not found")
+var (
+	ErrRecipeNotFound = errors.New("outbound type not found")
+	ErrNotEnoughStock = errors.New("not enough stock")
+)
 
 func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
 	recipeID := recipe.ID(id)

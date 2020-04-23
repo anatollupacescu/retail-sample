@@ -40,12 +40,11 @@ func NewApp() WebApp {
 	orderStore := persistence.PgxOrderStore{DB: pool}
 	orders := order.Orders{Store: &orderStore}
 
-	provisionLog := make(retail.InMemoryProvisionLog)
-
-	recipeStore := recipe.NewInMemoryStore()
+	recipeStore := persistence.PgxRecipeStore{DB: pool}
 	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
 
-	stock := retail.NewInMemoryStock()
+	stock := &persistence.PgxStock{DB: pool}
+	provisionLog := &persistence.PgxProvisionLog{DB: pool}
 
 	app := retail.App{
 		PersistentProviderFactory: newFactory(pool),

@@ -16,17 +16,18 @@ func (ps *PgxInventoryStore) Add(n inventory.Name) inventory.ID {
 	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name) values($1) returning id", n).Scan(&id)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print("inventory add ", err)
 	}
 
 	return inventory.ID(id)
 }
 
-func (ps *PgxInventoryStore) Find(n inventory.Name) inventory.ID {
+func (ps *PgxInventoryStore) Find(n inventory.Name) (itemID inventory.ID) {
 	rows, err := ps.DB.Query(context.Background(), "select id from inventory where name = $1", n)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print("inventory find", err)
+		return
 	}
 
 	defer rows.Close()
@@ -34,13 +35,13 @@ func (ps *PgxInventoryStore) Find(n inventory.Name) inventory.ID {
 	for rows.Next() {
 		var id int32
 		if err := rows.Scan(&id); err != nil {
-			log.Fatal(err)
+			log.Print("inventory find scan", err)
 		}
 
-		return inventory.ID(id)
+		itemID = inventory.ID(id)
 	}
 
-	return inventory.ID(0)
+	return
 }
 
 func (ps *PgxInventoryStore) Get(id inventory.ID) inventory.Item {
@@ -48,7 +49,7 @@ func (ps *PgxInventoryStore) Get(id inventory.ID) inventory.Item {
 	err := ps.DB.QueryRow(context.Background(), "select name from inventory where id = $1", id).Scan(&name)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print("inventory get", err)
 	}
 
 	return inventory.Item{
@@ -57,11 +58,11 @@ func (ps *PgxInventoryStore) Get(id inventory.ID) inventory.Item {
 	}
 }
 
-func (ps *PgxInventoryStore) All() (items []inventory.Item) {
+func (ps *PgxInventoryStore) List() (items []inventory.Item) {
 	rows, err := ps.DB.Query(context.Background(), "select id, name from inventory")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Print("inventory list", err)
 	}
 
 	defer rows.Close()
@@ -70,7 +71,8 @@ func (ps *PgxInventoryStore) All() (items []inventory.Item) {
 		var id int32
 		var name string
 		if err := rows.Scan(&id, &name); err != nil {
-			log.Fatal(err)
+			log.Print("inventory list scan ", err)
+			break
 		}
 		items = append(items, inventory.Item{
 			ID:   inventory.ID(id),

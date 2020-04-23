@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -52,7 +51,7 @@ func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 
 		if _, err = fmt.Fprint(w, msg); err != nil {
-			log.Fatal(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		return
@@ -95,7 +94,7 @@ func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, tp := range a.Inventory.All() {
+	for _, tp := range a.Inventory.List() {
 		response.Data = append(response.Data, entry{
 			ID:   int(tp.ID),
 			Name: string(tp.Name),

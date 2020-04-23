@@ -20,6 +20,11 @@ type (
 		Ingredients []Ingredient
 	}
 
+	Ingredient struct {
+		ID  int
+		Qty int
+	}
+
 	Store interface {
 		Add(Recipe) (ID, error)
 		List() []Recipe
@@ -29,11 +34,6 @@ type (
 	Book struct {
 		Store     Store
 		Inventory Inventory
-	}
-
-	Ingredient struct {
-		ID  int
-		Qty int
 	}
 )
 

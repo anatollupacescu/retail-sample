@@ -1,3 +1,28 @@
+-- SELECT
+--   r.id,
+--   r.name,
+--   i.id,
+--   ri.quantity
+-- FROM
+--   recipe_ingredient ri,
+--   recipe r,
+--   inventory i
+-- WHERE
+--   ri.recipeid = r.id
+--   AND ri.inventoryid = i.id;
+
+DROP TABLE outbound_order;
+
+DROP TABLE recipe_ingredient;
+
+DROP TABLE recipe;
+
+DROP TABLE stock;
+
+DROP TABLE provisionlog;
+
+DROP TABLE inventory;
+
 CREATE TABLE inventory (
   id bigserial PRIMARY KEY,
   name varchar(36) NOT NULL

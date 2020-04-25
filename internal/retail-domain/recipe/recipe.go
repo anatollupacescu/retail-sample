@@ -8,7 +8,7 @@ import (
 
 type (
 	Inventory interface {
-		Get(inventory.ID) inventory.Item
+		Get(inventory.ID) (inventory.Item, error)
 	}
 
 	Name string
@@ -27,8 +27,8 @@ type (
 
 	Store interface {
 		Add(Recipe) (ID, error)
-		List() []Recipe
-		Get(ID) Recipe
+		List() ([]Recipe, error)
+		Get(ID) (Recipe, error)
 	}
 
 	Book struct {
@@ -63,11 +63,20 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		if v.Qty == 0 {
 			return zeroRecipeID, ErrQuantityNotProvided
 		}
+	}
 
+	for _, v := range ingredients {
 		itemID := inventory.ID(v.ID)
 
-		if b.Inventory.Get(itemID) == zeroItem {
+		_, err := b.Inventory.Get(itemID)
+
+		switch err {
+		case nil:
+			continue
+		case inventory.ErrInventoryItemNotFound:
 			return zeroRecipeID, ErrIgredientNotFound
+		default:
+			return zeroRecipeID, err
 		}
 	}
 
@@ -77,12 +86,14 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	})
 }
 
-func (b Book) Get(id ID) Recipe {
+func (b Book) Get(id ID) (Recipe, error) {
 	return b.Store.Get(id)
 }
 
-func (b Book) List() (r []Recipe) {
-	r = append(r, b.Store.List()...)
+func (b Book) List() (r []Recipe, err error) {
+	list, err := b.Store.List()
+
+	r = append(r, list...)
 
 	return
 }

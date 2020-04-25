@@ -94,14 +94,20 @@ func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, tp := range a.Inventory.List() {
+	list, err := a.Inventory.List()
+
+	switch err {
+	//TODO
+	}
+
+	for _, tp := range list {
 		response.Data = append(response.Data, entry{
 			ID:   int(tp.ID),
 			Name: string(tp.Name),
 		})
 	}
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -135,7 +141,11 @@ func (a *WebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 
 	inventoyID := inventory.ID(i)
 
-	inventoryItem := a.Inventory.Get(inventoyID)
+	inventoryItem, err := a.Inventory.Get(inventoyID)
+
+	switch err {
+	//TODO
+	}
 
 	type entry struct {
 		ID   int    `json:"id"`
@@ -151,7 +161,7 @@ func (a *WebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

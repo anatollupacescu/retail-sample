@@ -102,7 +102,7 @@ func TestProvision(t *testing.T) {
 			Stock:     warehouse.NewStockWithData(data),
 		}
 
-		_, err := app.Provision(1, 31)
+		_, err := app.Provision([]warehouse.ProvisionEntry{{ID: 1, Qty: 31}})
 
 		assert.Equal(t, warehouse.ErrInventoryItemNotFound, err)
 		i.AssertExpectations(t)
@@ -129,7 +129,7 @@ func TestProvision(t *testing.T) {
 			Stock:        warehouse.NewStockWithData(data),
 		}
 
-		qty, err := app.Provision(51, 31)
+		qty, err := app.Provision([]warehouse.ProvisionEntry{{ID: 51, Qty: 31}})
 
 		assert.NoError(t, err)
 		assert.Equal(t, 40, qty)

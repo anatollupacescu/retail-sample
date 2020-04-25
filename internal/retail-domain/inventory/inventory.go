@@ -13,10 +13,10 @@ type ( //inventory
 	}
 
 	Store interface {
-		Add(Name) ID
-		Find(Name) ID
-		Get(ID) Item
-		List() []Item
+		Add(Name) (ID, error)
+		Find(Name) (ID, error)
+		Get(ID) (Item, error)
+		List() ([]Item, error)
 	}
 
 	Inventory struct {
@@ -25,34 +25,46 @@ type ( //inventory
 )
 
 var (
+	ErrStoreItemNotFound     = errors.New("item with given id not found")
+	ErrInventoryItemNotFound = errors.New("item with given id not found")
+
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 
 	zeroID = ID(0)
 )
 
-func (i Inventory) Add(name Name) (ID, error) {
+func (i Inventory) Add(name Name) (newUD ID, err error) {
 	if name == "" {
 		return zeroID, ErrEmptyName
 	}
 
-	if i.Store.Find(name) != zeroID {
+	_, err = i.Store.Find(name)
+
+	switch err {
+	case ErrStoreItemNotFound: //success
+		return i.Store.Add(name)
+	case nil:
 		return zeroID, ErrDuplicateName
+	default:
+		return zeroID, err
 	}
-
-	newID := i.Store.Add(name)
-
-	return newID, nil
 }
 
-func (i Inventory) List() (r []Item) {
+func (i Inventory) List() ([]Item, error) {
 	return i.Store.List()
 }
 
-func (i Inventory) Find(name Name) ID {
+func (i Inventory) Find(name Name) (ID, error) {
 	return i.Store.Find(name)
 }
 
-func (i Inventory) Get(id ID) Item {
-	return i.Store.Get(id)
+func (i Inventory) Get(id ID) (Item, error) {
+	item, err := i.Store.Get(id)
+
+	if err == ErrStoreItemNotFound {
+		return zeroValueItem, ErrInventoryItemNotFound
+	}
+
+	return item, err
 }

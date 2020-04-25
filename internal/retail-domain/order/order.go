@@ -17,8 +17,8 @@ type (
 	}
 
 	store interface {
-		Add(Order) ID
-		List() []Order
+		Add(Order) (ID, error)
+		List() ([]Order, error)
 	}
 
 	Orders struct {
@@ -26,7 +26,7 @@ type (
 	}
 )
 
-func (o Orders) Add(oe OrderEntry) ID {
+func (o Orders) Add(oe OrderEntry) (ID, error) {
 	ord := Order{
 		OrderEntry: oe,
 		Date:       time.Now(),
@@ -35,6 +35,6 @@ func (o Orders) Add(oe OrderEntry) ID {
 	return o.Store.Add(ord)
 }
 
-func (o Orders) List() (os []Order) {
+func (o Orders) List() ([]Order, error) {
 	return o.Store.List()
 }

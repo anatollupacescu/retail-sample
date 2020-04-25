@@ -80,7 +80,13 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]recipe, 0) //to have  '[]' instead of null
 
-	for _, r := range a.RecipeBook.List() {
+	list, err := a.RecipeBook.List()
+
+	switch err {
+	//TODO
+	}
+
+	for _, r := range list {
 		response.Data = append(response.Data, recipe{
 			ID:    int(r.ID),
 			Name:  string(r.Name),
@@ -88,7 +94,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		})
 	}
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/persistence"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
@@ -11,6 +12,8 @@ import (
 	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+
+	kitlog "github.com/go-kit/kit/log"
 )
 
 type WebApp struct {
@@ -46,6 +49,8 @@ func NewApp() WebApp {
 	stock := &persistence.PgxStock{DB: pool}
 	provisionLog := &persistence.PgxProvisionLog{DB: pool}
 
+	_ = newGoKitLogger()
+
 	app := retail.App{
 		PersistentProviderFactory: newFactory(pool),
 		Inventory:                 inventory,
@@ -58,6 +63,14 @@ func NewApp() WebApp {
 	return WebApp{
 		App: app,
 	}
+}
+
+func newGoKitLogger() kitlog.Logger {
+	var logger kitlog.Logger
+	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC, "caller", kitlog.DefaultCaller)
+	logger.Log("msg", "got a new logger")
+	return logger
 }
 
 type (

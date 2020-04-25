@@ -1,11 +1,10 @@
 package retailsample
 
 import (
-	"errors"
-
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/pkg/errors"
 )
 
 //Facade/Use cases
@@ -39,23 +38,23 @@ type PersistenceProvider interface {
 
 type Inventory interface {
 	Add(inventory.Name) (inventory.ID, error)
-	List() []inventory.Item
-	Get(inventory.ID) inventory.Item
-	Find(inventory.Name) inventory.ID
+	List() ([]inventory.Item, error)
+	Get(inventory.ID) (inventory.Item, error)
+	Find(inventory.Name) (inventory.ID, error)
 }
 
 type RecipeBook interface {
 	Add(recipe.Name, []recipe.Ingredient) (recipe.ID, error)
-	Get(recipe.ID) recipe.Recipe
-	List() []recipe.Recipe
+	Get(recipe.ID) (recipe.Recipe, error)
+	List() ([]recipe.Recipe, error)
 }
 
 type Orders interface {
-	Add(order.OrderEntry) order.ID
-	List() []order.Order
+	Add(order.OrderEntry) (order.ID, error)
+	List() ([]order.Order, error)
 }
 
-type ( //provision log
+type ( //app specific
 	ProvisionEntry struct {
 		ID  int
 		Qty int
@@ -65,55 +64,63 @@ type ( //provision log
 		Add(ProvisionEntry)
 		List() []ProvisionEntry
 	}
-)
 
-type (
 	Stock interface {
-		Quantity(int) int
-		Provision(int, int) int
+		Quantity(int) (int, error)
+		Provision(int, int) (int, error)
 		Sell([]recipe.Ingredient, int) error
 	}
-
-	StockPosition struct {
-		ID   int
-		Name string
-		Qty  int
-	}
 )
 
-func (a App) CurrentStock() (ps []StockPosition) {
-	for _, item := range a.Inventory.List() {
-		itemID := int(item.ID)
-		qty := a.Stock.Quantity(itemID)
-		ps = append(ps, StockPosition{
-			ID:   itemID,
-			Name: string(item.Name),
-			Qty:  qty,
-		})
+func (a App) CurrentStock() (ps []StockPosition, err error) {
+	provider := a.PersistentProviderFactory.Begin()
+	defer a.PersistentProviderFactory.Commit(provider)
+
+	stock := &stock{store: provider.Stock()}
+	inv := provider.Inventory()
+
+	items, err := inv.List()
+
+	if err != nil {
+		return ps, err
 	}
 
-	return
+	return stock.CurrentStock(items), nil
 }
 
 var ErrInventoryItemNotFound = errors.New("inventory item not found")
 
-func (a App) Provision(id, qty int) (int, error) {
-	var zeroInventoryItem inventory.Item
-
+func (a App) Provision(in []ProvisionEntry) (newQty map[int]int, err error) {
 	provider := a.PersistentProviderFactory.Begin()
-	defer a.PersistentProviderFactory.Commit(provider)
+
+	defer func() {
+		if err != nil {
+			a.PersistentProviderFactory.Rollback(provider)
+			return
+		}
+		a.PersistentProviderFactory.Commit(provider)
+	}()
 
 	inv := provider.Inventory()
 
+	//>garbage
+	id := 0
+	qty := 0
+	//<garbage
+
 	itemID := inventory.ID(id)
 
-	if inv.Get(itemID) == zeroInventoryItem {
-		return 0, ErrInventoryItemNotFound
+	if _, err = inv.Get(itemID); err != nil {
+		return nil, err
 	}
 
 	stock := provider.Stock()
 
-	newQty := stock.Provision(id, qty)
+	newQty = make(map[int]int, 0)
+
+	for _, v := range in {
+		_, err = stock.Provision(v.ID, v.Qty)
+	}
 
 	provisionLog := provider.ProvisionLog()
 
@@ -125,7 +132,7 @@ func (a App) Provision(id, qty int) (int, error) {
 	return newQty, nil
 }
 
-func (a App) Quantity(id int) int {
+func (a App) Quantity(id int) (int, error) {
 	return a.Stock.Quantity(id)
 }
 
@@ -136,48 +143,46 @@ func (a App) GetProvisionLog() (r []ProvisionEntry) {
 }
 
 var (
+	BusinessErr = errors.New("business")
+
 	ErrRecipeNotFound = errors.New("outbound type not found")
 	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-func (a App) PlaceOrder(id int, qty int) (order.ID, error) {
+func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	recipeID := recipe.ID(id)
 
 	provider := a.PersistentProviderFactory.Begin()
 
+	defer func() {
+		if err != nil {
+			a.PersistentProviderFactory.Rollback(provider)
+			return
+		}
+		a.PersistentProviderFactory.Commit(provider)
+	}()
+
 	recipeBook := provider.RecipeBook()
 
-	r := recipeBook.Get(recipeID)
+	r, _ := recipeBook.Get(recipeID)
 
 	ingredients := r.Ingredients
 
+	//TODO check the error instead of nil
 	if ingredients == nil {
-		a.PersistentProviderFactory.Rollback(provider)
-		return 0, ErrRecipeNotFound
+		return 0, errors.Wrap(BusinessErr, ErrRecipeNotFound.Error())
 	}
 
-	stock := provider.Stock()
-
-	for _, i := range ingredients {
-		if stock.Quantity(i.ID) < qty*i.Qty {
-			a.PersistentProviderFactory.Rollback(provider)
-			return 0, ErrNotEnoughStock
-		}
-	}
+	stock := &stock{store: provider.Stock()}
 
 	if err := stock.Sell(ingredients, qty); err != nil {
-		a.PersistentProviderFactory.Rollback(provider)
 		return 0, err
 	}
 
 	orders := provider.Orders()
 
-	entryID := orders.Add(order.OrderEntry{
+	return orders.Add(order.OrderEntry{
 		RecipeID: id,
 		Qty:      qty,
 	})
-
-	a.PersistentProviderFactory.Commit(provider)
-
-	return entryID, nil
 }

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 	"github.com/gorilla/mux"
 )
 
@@ -24,7 +25,13 @@ func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, position := range a.CurrentStock() {
+	stockData, err := a.CurrentStock()
+
+	if err != nil {
+		//bussiness ? show details : internal &
+	}
+
+	for _, position := range stockData {
 		response.Data = append(response.Data, entry{
 			ID:   position.ID,
 			Name: position.Name,
@@ -32,7 +39,7 @@ func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 		})
 	}
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -56,7 +63,11 @@ func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 		Qty int `json:"qty"`
 	}
 
-	qty := a.Quantity(itemID)
+	qty, err := a.Quantity(itemID)
+
+	switch err {
+	//TODO
+	}
 
 	var response = struct {
 		Data entry `json:"data"`
@@ -86,34 +97,32 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type entry map[int]int
-	data := make(entry, len(requestBody))
+	entries := make([]retail.ProvisionEntry, 0)
 
 	for id, qty := range requestBody {
-		newQty, err := a.Provision(id, qty)
+		entries = append(entries, retail.ProvisionEntry{
+			ID:  id,
+			Qty: qty,
+		})
+	}
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	data, err := a.Provision(entries)
 
-		data[id] = newQty
+	if err != nil {
+		//business ? show details : internal & log
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	var response = struct {
-		Data entry `json:"data"`
+		Data map[int]int `json:"data"`
 	}{
 		Data: data,
 	}
 
-	switch len(data) {
-	case 0:
-		w.WriteHeader(http.StatusNoContent)
-	default:
-		w.WriteHeader(http.StatusCreated)
-	}
+	w.WriteHeader(http.StatusCreated)
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

@@ -2,17 +2,16 @@ package persistence
 
 import (
 	"context"
-	"log"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
+	"github.com/pkg/errors"
 )
 
 type PgxStock struct {
 	DB PgxDB
 }
 
-func (ps *PgxStock) Provision(id, qty int) int {
+func (ps *PgxStock) Provision(id, qty int) (int, error) {
 	sql := `insert into stock(inventoryid, quantity) 
 					values ($1, $2) 
 					ON CONFLICT(inventoryid) DO UPDATE 
@@ -24,21 +23,23 @@ func (ps *PgxStock) Provision(id, qty int) int {
 	err := ps.DB.QueryRow(context.Background(), sql, id, qty).Scan(&newQty)
 
 	if err != nil {
-		log.Print("stock provision", err)
+		return 0, errors.Wrapf(DBErr, "provision stock: %v", err)
 	}
 
-	return newQty
+	return newQty, nil
 }
 
-func (ps *PgxStock) Quantity(id int) int {
+func (ps *PgxStock) Quantity(id int) (int, error) {
 	sql := "select quantity from stock where inventoryid = $1"
 
 	var qty int
-	row := ps.DB.QueryRow(context.Background(), sql, id)
+	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&qty)
 
-	_ = row.Scan(&qty)
+	if err != nil {
+		return 0, errors.Wrapf(DBErr, "get stock quantity: %v", err)
+	}
 
-	return qty
+	return qty, nil
 }
 
 func (ps *PgxStock) Sell(ii []recipe.Ingredient, qty int) error {
@@ -48,7 +49,7 @@ func (ps *PgxStock) Sell(ii []recipe.Ingredient, qty int) error {
 		_, err := ps.DB.Exec(context.Background(), sql, qty*i.Qty, i.ID)
 
 		if err != nil {
-			return retail.ErrNotEnoughStock
+			return errors.Wrapf(DBErr, "update stock: %v", err)
 		}
 	}
 

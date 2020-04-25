@@ -40,16 +40,16 @@ func NewInMemoryStock() Stock {
 	}
 }
 
-func (s InMemoryStock) Quantity(id int) int {
-	return s.data[id]
+func (s InMemoryStock) Quantity(id int) (int, error) {
+	return s.data[id], nil
 }
 
-func (s InMemoryStock) Provision(id, qty int) int {
+func (s InMemoryStock) Provision(id, qty int) (int, error) {
 	newQty := s.data[id] + qty
 
 	s.data[id] = newQty
 
-	return newQty
+	return newQty, nil
 }
 
 func (s InMemoryStock) Sell(ii []recipe.Ingredient, qty int) error {

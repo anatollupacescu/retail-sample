@@ -2,54 +2,50 @@ package persistence
 
 import (
 	"context"
-	"errors"
-	"log"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/pkg/errors"
 )
 
 type PgxRecipeStore struct {
 	DB PgxDB
 }
 
-var DbErr = errors.New("request to the database failedd")
-
 func (pr *PgxRecipeStore) Add(r recipe.Recipe) (recipe.ID, error) {
+	sql := "insert into recipe(name) values($1) returning id"
+
 	var (
 		recipeID int32
 		zeroID   = recipe.ID(recipeID)
 	)
 
-	sql := "insert into recipe(name) values($1) returning id"
 	err := pr.DB.QueryRow(context.Background(), sql, r.Name).Scan(&recipeID)
 
 	if err != nil {
-		log.Print("recipe add", err)
-		return zeroID, DbErr
+		return zeroID, errors.Wrapf(DBErr, "add recipe: %v", err)
 	}
 
 	sql = "insert into recipe_ingredient(recipeid, inventoryid, quantity) values($1, $2, $3)"
+
 	for _, i := range r.Ingredients {
 		_, err = pr.DB.Exec(context.Background(), sql, recipeID, i.ID, i.Qty)
 
 		if err != nil {
-			log.Print("recipe ingredient add", err)
-			return zeroID, nil
+			return zeroID, errors.Wrapf(DBErr, "add recipe ingredient: %v", err)
 		}
 	}
 
 	return recipe.ID(recipeID), nil
 }
 
-func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe) {
+func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	sql := "select name from recipe where id = $1"
 
 	var name string
-	err := pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&name)
+	err = pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&name)
 
 	if err != nil {
-		log.Print("recipe get", err)
-		return
+		return r, errors.Wrapf(DBErr, "get recipe: %v", err)
 	}
 
 	sql = "select inventoryid, quantity from recipe_ingredient where recipeid = $1"
@@ -57,8 +53,7 @@ func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe) {
 	rows, err := pr.DB.Query(context.Background(), sql, recipeID)
 
 	if err != nil {
-		log.Print("recipe get ingredients ", err)
-		return
+		return r, errors.Wrapf(DBErr, "get recipe ingredients: %v", err)
 	}
 
 	defer rows.Close()
@@ -69,9 +64,8 @@ func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe) {
 		var itemid int64
 		var qty int16
 
-		if err := rows.Scan(&itemid, &qty); err != nil {
-			log.Print("recipe scan ingredients", err)
-			return
+		if err = rows.Scan(&itemid, &qty); err != nil {
+			return r, errors.Wrapf(DBErr, "scan recipe ingredients: %v", err)
 		}
 
 		ingredients = append(ingredients, recipe.Ingredient{
@@ -81,10 +75,11 @@ func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe) {
 	}
 
 	r.Ingredients = ingredients
+
 	return
 }
 
-func (pr *PgxRecipeStore) List() (recipes []recipe.Recipe) {
+func (pr *PgxRecipeStore) List() (recipes []recipe.Recipe, err error) {
 	sql := `SELECT
 						r.id,
 						r.name,
@@ -101,8 +96,7 @@ func (pr *PgxRecipeStore) List() (recipes []recipe.Recipe) {
 	rows, err := pr.DB.Query(context.Background(), sql)
 
 	if err != nil {
-		log.Print("recipe list", err)
-		return nil
+		return recipes, errors.Wrapf(DBErr, "list recipes: %v", err)
 	}
 
 	defer rows.Close()
@@ -125,8 +119,7 @@ func (pr *PgxRecipeStore) List() (recipes []recipe.Recipe) {
 		)
 
 		if err := rows.Scan(&recipeID, &name, &ingredientID, &qty); err != nil {
-			log.Print("recipe list scan", err)
-			return nil
+			return recipes, errors.Wrapf(DBErr, "scan recipes: %v", err)
 		}
 
 		key := key{id: recipeID, name: name}

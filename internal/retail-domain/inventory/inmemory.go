@@ -17,7 +17,7 @@ func NewInMemoryStore() InMemoryStore {
 	}
 }
 
-func (m *InMemoryStore) Add(s Name) ID {
+func (m *InMemoryStore) Add(s Name) (ID, error) {
 	*m.counter += 1
 
 	newID := ID(*m.counter)
@@ -26,35 +26,35 @@ func (m *InMemoryStore) Add(s Name) ID {
 		Name: s,
 	}
 
-	return newID
+	return newID, nil
 }
 
-func (m *InMemoryStore) Find(s Name) ID {
+func (m *InMemoryStore) Find(s Name) (ID, error) {
 	for id, v := range m.data {
 		if v.Name == s {
-			return id
+			return id, nil
 		}
 	}
 
-	return ID(0)
+	return ID(0), ErrStoreItemNotFound
 }
 
 var zeroValueItem = Item{}
 
-func (m *InMemoryStore) Get(wantedID ID) Item {
+func (m *InMemoryStore) Get(wantedID ID) (Item, error) {
 	for id, v := range m.data {
 		if wantedID == id {
 			return Item{
 				ID:   id,
 				Name: v.Name,
-			}
+			}, nil
 		}
 	}
 
-	return zeroValueItem
+	return zeroValueItem, nil
 }
 
-func (m *InMemoryStore) All() (t []Item) {
+func (m *InMemoryStore) All() (t []Item, err error) {
 	for k, v := range m.data {
 		t = append(t, Item{
 			ID:   k,

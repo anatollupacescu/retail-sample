@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var internalServerError = "internal server error"
+
 func ConfigureRoutes(r *mux.Router, webApp WebApp) {
 	r.HandleFunc("/log/provision", webApp.GetProvisionLog).Methods(http.MethodGet)
 

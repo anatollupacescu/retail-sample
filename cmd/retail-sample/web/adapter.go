@@ -3,13 +3,14 @@ package web
 import (
 	"context"
 	"log"
-	"os"
+	"sync/atomic"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/persistence"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/stock"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
@@ -24,7 +25,7 @@ func (w *WebApp) IsHealthy() bool {
 	return true
 }
 
-func NewApp() WebApp {
+func NewApp(logger kitlog.Logger) WebApp {
 	config, err := pgxpool.ParseConfig("postgres://docker:docker@localhost:5432/retail?pool_max_conns=10")
 
 	if err != nil {
@@ -46,31 +47,32 @@ func NewApp() WebApp {
 	recipeStore := persistence.PgxRecipeStore{DB: pool}
 	recipeBook := recipe.Book{Store: &recipeStore, Inventory: &inventory}
 
-	stock := &persistence.PgxStock{DB: pool}
+	stockStore := &persistence.PgxStockStore{DB: pool}
+	stock := stock.Stock{Store: stockStore}
+
 	provisionLog := &persistence.PgxProvisionLog{DB: pool}
 
-	_ = newGoKitLogger()
+	counter := new(int32)
 
 	app := retail.App{
+
+		NewLogger: func() retail.Logger {
+			seq := atomic.AddInt32(counter, 1)
+			return kitlog.With(logger, "request_id", seq)
+		},
+
 		PersistentProviderFactory: newFactory(pool),
-		Inventory:                 inventory,
-		Orders:                    orders,
-		ProvisionLog:              provisionLog,
-		RecipeBook:                recipeBook,
-		Stock:                     stock,
+
+		Inventory:    inventory,
+		Orders:       orders,
+		ProvisionLog: provisionLog,
+		RecipeBook:   recipeBook,
+		Stock:        stock,
 	}
 
 	return WebApp{
 		App: app,
 	}
-}
-
-func newGoKitLogger() kitlog.Logger {
-	var logger kitlog.Logger
-	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
-	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC, "caller", kitlog.DefaultCaller)
-	logger.Log("msg", "got a new logger")
-	return logger
 }
 
 type (
@@ -129,9 +131,9 @@ func (pp *PgxTransactionalProvider) Orders() retail.Orders {
 	return order.Orders{Store: &orderStore}
 }
 
-//no store since are not domain
 func (pp *PgxTransactionalProvider) Stock() retail.Stock {
-	return &persistence.PgxStock{DB: pp.tx}
+	store := &persistence.PgxStockStore{DB: pp.tx}
+	return stock.Stock{Store: store}
 }
 
 func (pp *PgxTransactionalProvider) ProvisionLog() retail.ProvisionLog {

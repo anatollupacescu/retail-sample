@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -10,31 +11,31 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/web"
 	"github.com/anatollupacescu/retail-sample/internal/version"
 
 	"github.com/rs/cors"
+
+	kitlog "github.com/go-kit/kit/log"
 )
 
+func newGoKitLogger() kitlog.Logger {
+	var logger kitlog.Logger
+	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
+	return logger
+}
+
 func main() {
-	logger := logrus.New().WithField("version", version.Version)
-
-	logger.Infof(
-		"The application [%v %v] is starting...",
-		version.BuildTime,
-		version.Commit,
-	)
-
 	port := os.Getenv("PORT")
 	if port == "" {
-		logger.Fatal("Business logic port is not set")
+		log.Fatal("Business logic port is not set")
 	}
 
 	diagPort := os.Getenv("DIAG_PORT")
 	if diagPort == "" {
-		logger.Fatal("Diagnostics port is not set")
+		log.Fatal("Diagnostics port is not set")
 	}
 
 	businessRouter := mux.NewRouter()
@@ -44,7 +45,16 @@ func main() {
 		Handler: businessRouter,
 	}
 
-	webApp := web.NewApp()
+	baseLogger := newGoKitLogger()
+
+	logger := kitlog.With(baseLogger, "version", version.Version,
+		"build_time", version.BuildTime,
+		"commit", version.Commit)
+
+	logger.Log("msg", "the application is starting")
+
+	appLogger := kitlog.With(baseLogger, "caller", kitlog.DefaultCaller)
+	webApp := web.NewApp(appLogger)
 
 	//app
 	web.ConfigureRoutes(businessRouter, webApp)
@@ -64,8 +74,6 @@ func main() {
 	})
 
 	diagRouter.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
-		logger.Info("Received ready request")
-		time.Sleep(time.Minute)
 		w.WriteHeader(http.StatusOK)
 	})
 
@@ -79,7 +87,7 @@ func main() {
 	shutdown := make(chan error, 2)
 
 	go func() {
-		logger.Info("Business logic server is preparing on port ", port)
+		logger.Log("msg", "business logic server is starting", "port", port)
 
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
@@ -88,8 +96,10 @@ func main() {
 	}()
 
 	go func() {
-		logger.Info("Diagnostics server is preparing on port ", diagPort)
+		logger.Log("msg", "diagnostics server is starting", "port", diagPort)
+
 		err := diag.ListenAndServe()
+
 		if err != nil && err != http.ErrServerClosed {
 			shutdown <- err
 		}
@@ -100,10 +110,10 @@ func main() {
 
 	select {
 	case x := <-interrupt:
-		logger.Infof("Received `%v`.", x)
+		logger.Log("msg", "received", "signal", x)
 
 	case err := <-shutdown:
-		logger.Infof("Received shutdown message: %v", err)
+		logger.Log("msg", "received shutdown request", "signal", err)
 	}
 
 	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
@@ -111,11 +121,11 @@ func main() {
 
 	err := diag.Shutdown(timeout)
 	if err != nil {
-		logger.Error(err)
+		logger.Log("msg", "diagnostic server shutdown failed", "error", err)
 	}
 
 	err = server.Shutdown(timeout)
 	if err != nil {
-		logger.Error(err)
+		logger.Log("msg", "business server shutdown failed", "error", err)
 	}
 }

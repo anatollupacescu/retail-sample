@@ -1,3 +1,6 @@
 #!/bin/bash
 
-echo '' | mustache template/index.mustache > src/index.html
+echo -e \
+"title: Stock management\n"\
+"year: 2024" \
+| mustache template/index.mustache > src/index.html

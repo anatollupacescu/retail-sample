@@ -2,12 +2,9 @@ package web
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/persistence"
-	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
-	"github.com/pkg/errors"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +19,7 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -36,17 +33,16 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 
 	entryID, err := a.App.PlaceOrder(recipeID, orderQty)
 
-	if err != nil {
-		switch errors.Cause(err) {
-		case retail.BusinessErr:
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			break
-		case persistence.DBErr:
-			log.Printf("request to place order: %v", err)
-			fallthrough
-		default:
-			http.Error(w, "unexpected error", http.StatusInternalServerError)
-		}
+	switch err {
+	case nil:
+		break
+	case inventory.ErrDuplicateName:
+		fallthrough
+	case inventory.ErrEmptyName:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	default:
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -71,7 +67,7 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
 
@@ -114,6 +110,6 @@ func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

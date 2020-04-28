@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
@@ -23,25 +23,20 @@ func (ps *PgxInventoryStore) Add(n inventory.Name) (inventory.ID, error) {
 	return inventory.ID(id), nil
 }
 
-func (ps *PgxInventoryStore) Find(n inventory.Name) (itemID inventory.ID, err error) {
-	rows, err := ps.DB.Query(context.Background(), "select id from inventory where name = $1", n)
+func (ps *PgxInventoryStore) Find(n inventory.Name) (inventory.ID, error) {
+	var id int
+	err := ps.DB.QueryRow(context.Background(), "select id from inventory where name = $1", n).Scan(&id)
 
-	if err != nil {
+	switch err {
+	case nil:
+		break
+	case pgx.ErrNoRows:
+		return inventory.ID(0), inventory.ErrStoreItemNotFound
+	default:
 		return inventory.ID(0), errors.Wrapf(DBErr, "find inventory item id: %v", err)
 	}
 
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int32
-		if err = rows.Scan(&id); err != nil {
-			return inventory.ID(0), errors.Wrapf(DBErr, "scan inventory item id: %v", err)
-		}
-
-		itemID = inventory.ID(id)
-	}
-
-	return
+	return inventory.ID(id), nil
 }
 
 func (ps *PgxInventoryStore) Get(id inventory.ID) (inventory.Item, error) {

@@ -25,8 +25,8 @@ type ( //inventory
 )
 
 var (
-	ErrStoreItemNotFound     = errors.New("item with given id not found")
-	ErrInventoryItemNotFound = errors.New("item with given id not found")
+	ErrStoreItemNotFound     = errors.New("item not found")
+	ErrInventoryItemNotFound = errors.New("item not found")
 
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
@@ -34,12 +34,12 @@ var (
 	zeroID = ID(0)
 )
 
-func (i Inventory) Add(name Name) (newUD ID, err error) {
+func (i Inventory) Add(name Name) (ID, error) {
 	if name == "" {
 		return zeroID, ErrEmptyName
 	}
 
-	_, err = i.Store.Find(name)
+	_, err := i.Store.Find(name)
 
 	switch err {
 	case ErrStoreItemNotFound: //success

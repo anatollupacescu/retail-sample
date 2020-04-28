@@ -61,12 +61,14 @@ type MockInboundLog struct {
 	mock.Mock
 }
 
-func (m *MockInboundLog) Add(i ProvisionEntry) {
-	_ = m.Called(i)
+func (m *MockInboundLog) Add(i ProvisionEntry) error {
+	args := m.Called(i)
+	return args.Error(0)
 }
 
-func (m *MockInboundLog) List() []ProvisionEntry {
-	return nil
+func (m *MockInboundLog) List() ([]ProvisionEntry, error) {
+	args := m.Called()
+	return args.Get(0).([]ProvisionEntry), args.Error(1)
 }
 
 type MockOrders struct {

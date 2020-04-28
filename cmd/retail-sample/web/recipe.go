@@ -19,12 +19,12 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	if requestBody.Name == nil {
-		http.Error(w, "name can not be empty", http.StatusBadRequest)
+		http.Error(w, "name is mandatory", http.StatusBadRequest)
 		return
 	}
 
@@ -41,8 +41,17 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	recipeID, err := a.RecipeBook.Add(recipeName, ingredients)
 
-	if err != nil {
+	switch err {
+	case nil:
+		break
+	case recipe.ErrEmptyName:
+		fallthrough
+	case recipe.ErrIgredientNotFound:
+		fallthrough
+	case recipe.ErrNoIngredients:
 		http.Error(w, err.Error(), http.StatusBadRequest)
+	default:
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -61,7 +70,7 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
@@ -97,7 +106,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 

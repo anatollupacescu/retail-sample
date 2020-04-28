@@ -29,12 +29,12 @@ func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	var requestPayload payload
 
 	if err := d.Decode(&requestPayload); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	itemName := inventory.Name(requestPayload.Name)
-	createdID, err := a.Inventory.Add(itemName)
+	itemName := requestPayload.Name
+	createdID, err := a.AddToInventory(itemName)
 
 	if err != nil {
 		var msg string
@@ -76,7 +76,7 @@ func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
@@ -94,10 +94,10 @@ func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	list, err := a.Inventory.List()
+	list, err := a.ListInventoryItems()
 
-	switch err {
-	//TODO
+	if err != nil {
+		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
 	for _, tp := range list {
@@ -110,7 +110,7 @@ func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
 
@@ -164,6 +164,6 @@ func (a *WebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

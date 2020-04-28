@@ -24,6 +24,6 @@ build:
 		-o bin/retail ${PROJECT}/cmd/retail-sample
 
 run:
-	PORT=8080 DIAG_PORT=8081 go run cmd/retail-sample/main.go
+	@PORT=8080 DIAG_PORT=8081 go run cmd/retail-sample/main.go
 
 .PHONY: test format build build/docker run

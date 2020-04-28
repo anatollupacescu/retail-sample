@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
 	"github.com/gorilla/mux"
 )
@@ -42,7 +43,7 @@ func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
@@ -80,7 +81,7 @@ func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
@@ -93,7 +94,7 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	var requestBody map[int]int
 
 	if err := d.Decode(&requestBody); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
@@ -108,10 +109,14 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 
 	data, err := a.Provision(entries)
 
-	if err != nil {
-		//business ? show details : internal & log
+	switch err {
+	case nil:
+		break
+	case inventory.ErrInventoryItemNotFound:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	default:
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 
 	var response = struct {
@@ -125,7 +130,7 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
@@ -142,16 +147,23 @@ func (a *WebApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 		Data []entry `json:"data"`
 	}
 
-	for _, in := range a.App.GetProvisionLog() {
+	provisionLog, err := a.App.GetProvisionLog()
+
+	if err != nil {
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	for _, in := range provisionLog {
 		response.Data = append(response.Data, entry{
 			ID:  int(in.ID),
 			Qty: in.Qty,
 		})
 	}
 
-	err := json.NewEncoder(w).Encode(response)
+	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

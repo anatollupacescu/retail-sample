@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-type PgxStock struct {
+type PgxStockStore struct {
 	DB PgxDB
 }
 
-func (ps *PgxStock) Provision(id, qty int) (int, error) {
+func (ps *PgxStockStore) Provision(id, qty int) (int, error) {
 	sql := `insert into stock(inventoryid, quantity) 
 					values ($1, $2) 
 					ON CONFLICT(inventoryid) DO UPDATE 
@@ -29,20 +29,20 @@ func (ps *PgxStock) Provision(id, qty int) (int, error) {
 	return newQty, nil
 }
 
-func (ps *PgxStock) Quantity(id int) (int, error) {
+func (ps *PgxStockStore) Quantity(id int) (int, error) {
 	sql := "select quantity from stock where inventoryid = $1"
 
 	var qty int
 	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&qty)
 
 	if err != nil {
-		return 0, errors.Wrapf(DBErr, "get stock quantity: %v", err)
+		return 0, errors.Wrapf(DBErr, "get stock quantity for item with id %v: %v", id, err)
 	}
 
 	return qty, nil
 }
 
-func (ps *PgxStock) Sell(ii []recipe.Ingredient, qty int) error {
+func (ps *PgxStockStore) Sell(ii []recipe.Ingredient, qty int) error {
 	sql := "update stock set quantity = quantity - $1 where inventoryid = $2"
 
 	for _, i := range ii {

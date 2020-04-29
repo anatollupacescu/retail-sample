@@ -29,7 +29,8 @@ func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	stockData, err := a.CurrentStock()
 
 	if err != nil {
-		//bussiness ? show details : internal &
+		//TODO bussiness ? show details : internal &
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	for _, position := range stockData {

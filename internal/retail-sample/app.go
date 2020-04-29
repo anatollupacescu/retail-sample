@@ -77,11 +77,6 @@ type ( //app specific
 		ID  int
 		Qty int
 	}
-	ProvisionLogEntry struct {
-		ID     int
-		OldQty int
-		NewQty int
-	}
 
 	ProvisionLog interface {
 		Add(ProvisionEntry) error
@@ -247,19 +242,25 @@ func (a App) Quantity(id int) (qty int, err error) {
 		logger.Log("msg", "[get stock quantity] fetch from store", "error", err)
 	}
 
-	return qty, err
+	return
 }
 
 func (a App) GetProvisionLog() (r []ProvisionEntry, err error) {
+	logger := a.NewLogger()
+
+	logger.Log("msg", "[get provision log] enter method")
+	defer logger.Log("msg", "[get provision log] exit method")
+
 	list, err := a.ProvisionLog.List()
 
 	if err != nil {
-		return nil, err
+		logger.Log("msg", "[get provision log] fetch from store", "error", err)
+		return
 	}
 
 	r = append(r, list...)
 
-	return r, err
+	return
 }
 
 var (

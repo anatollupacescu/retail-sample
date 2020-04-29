@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
@@ -35,7 +36,12 @@ func (ps *PgxStockStore) Quantity(id int) (int, error) {
 	var qty int
 	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&qty)
 
-	if err != nil {
+	switch err {
+	case nil:
+		break
+	case pgx.ErrNoRows:
+		return 0, nil
+	default:
 		return 0, errors.Wrapf(DBErr, "get stock quantity for item with id %v: %v", id, err)
 	}
 

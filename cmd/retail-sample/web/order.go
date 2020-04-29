@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-sample/stock"
 )
 
 func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
@@ -36,6 +37,8 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case nil:
 		break
+	case stock.ErrNotEnoughStock:
+		fallthrough
 	case inventory.ErrDuplicateName:
 		fallthrough
 	case inventory.ErrEmptyName:

@@ -18,6 +18,7 @@ import (
 )
 
 type WebApp struct {
+	Logger
 	retail.App
 }
 
@@ -25,8 +26,8 @@ func (w *WebApp) IsHealthy() bool {
 	return true
 }
 
-func NewApp(logger kitlog.Logger) WebApp {
-	config, err := pgxpool.ParseConfig("postgres://docker:docker@localhost:5432/retail?pool_max_conns=10")
+func NewApp(logger kitlog.Logger, dbConnection string) WebApp {
+	config, err := pgxpool.ParseConfig(dbConnection)
 
 	if err != nil {
 		log.Fatal(err)
@@ -54,14 +55,16 @@ func NewApp(logger kitlog.Logger) WebApp {
 
 	counter := new(int32)
 
+	newLoggerFactory := func() retail.Logger {
+		seq := atomic.AddInt32(counter, 1)
+		return loggerWrapper{
+			kitlog.With(logger, "request_id", seq),
+		}
+	}
+
 	app := retail.App{
-
-		NewLogger: func() retail.Logger {
-			seq := atomic.AddInt32(counter, 1)
-			return kitlog.With(logger, "request_id", seq)
-		},
-
-		PersistentProviderFactory: newFactory(pool),
+		NewLogger:                 newLoggerFactory,
+		PersistentProviderFactory: newPersistenceFactory(pool),
 
 		Inventory:    inventory,
 		Orders:       orders,
@@ -71,8 +74,23 @@ func NewApp(logger kitlog.Logger) WebApp {
 	}
 
 	return WebApp{
+		Logger: loggerWrapper{
+			kitlog.With(logger, kitlog.DefaultCaller),
+		},
 		App: app,
 	}
+}
+
+type Logger interface {
+	Log(keyvals ...interface{})
+}
+
+type loggerWrapper struct {
+	kitlog.Logger
+}
+
+func (lw loggerWrapper) Log(args ...interface{}) {
+	_ = lw.Logger.Log(args...)
 }
 
 type (
@@ -111,7 +129,7 @@ func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) {
 	}
 }
 
-func newFactory(pool *pgxpool.Pool) *PgxProviderFactory {
+func newPersistenceFactory(pool *pgxpool.Pool) *PgxProviderFactory {
 	return &PgxProviderFactory{pool: pool}
 }
 

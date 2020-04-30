@@ -3,34 +3,33 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-sample/stock"
+	"github.com/gorilla/mux"
 )
 
 func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
+	d.DisallowUnknownFields()
 
 	var requestBody struct {
-		ID  *int `json:"id"` // pointer so we can test for field absence
-		Qty *int `json:"qty"`
+		ID  int `json:"id"`
+		Qty int `json:"qty"`
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
+		a.Logger.Log("action", "decode request payload", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	if requestBody.ID == nil || requestBody.Qty == nil {
-		http.Error(w, "name or quantity not provided", http.StatusBadRequest)
-		return
-	}
-
-	recipeID := *requestBody.ID
-	orderQty := *requestBody.Qty
+	recipeID := requestBody.ID
+	orderQty := requestBody.Qty
 
 	entryID, err := a.App.PlaceOrder(recipeID, orderQty)
 
@@ -49,16 +48,16 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type DescriptorEntity struct {
+	type descriptorEntity struct {
 		ID       int `json:"id"`
 		RecipeID int `json:"recipeID"`
 		Qty      int `json:"qty"`
 	}
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data descriptorEntity `json:"data"`
 	}{
-		Data: DescriptorEntity{
+		Data: descriptorEntity{
 			ID:       int(entryID),
 			RecipeID: recipeID,
 			Qty:      orderQty,
@@ -70,12 +69,55 @@ func (a *WebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
+		a.Logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
 
 func (a *WebApp) GetOrder(w http.ResponseWriter, r *http.Request) {
-	panic("not implemented")
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["orderID"]
+
+	id, _ := strconv.Atoi(rid)
+
+	orderID := order.ID(id)
+
+	ordr, err := a.Orders.Get(orderID)
+
+	switch err {
+	case nil:
+		break
+	case order.ErrOrderNotFound:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	default:
+		a.Logger.Log("action", "call application", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	type entry struct {
+		RecipeID int `json:"recipeID"`
+		Qty      int `json:"qty"`
+	}
+
+	var response = struct {
+		Data entry `json:"data"`
+	}{
+		Data: entry{
+			RecipeID: ordr.RecipeID,
+			Qty:      ordr.Qty,
+		},
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		a.Logger.Log("action", "encode response", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+	}
 }
 
 func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
@@ -96,8 +138,9 @@ func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	list, err := a.Orders.List()
 
-	switch err {
-	//TODO
+	if err != nil {
+		a.Logger.Log("action", "call application", "error", err)
+		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
 	for _, o := range list {
@@ -113,6 +156,7 @@ func (a *WebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
+		a.Logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

@@ -24,10 +24,16 @@ type (
 	}
 )
 
+var ErrItemNotFound = errors.New("stock item not found")
+
 func (s Stock) CurrentStock(ii []inventory.Item) (ps []StockPosition, err error) {
 	for _, item := range ii {
 		itemID := int(item.ID)
 		qty, err := s.Store.Quantity(itemID)
+
+		if err == ErrItemNotFound {
+			continue
+		}
 
 		if err != nil {
 			return nil, err
@@ -75,7 +81,7 @@ func (s Stock) Quantity(id int) (qty int, err error) {
 }
 
 func (s Stock) Provision(in []StockProvisionEntry) (map[int]int, error) {
-	out := make(map[int]int, 0)
+	out := make(map[int]int)
 
 	for _, spe := range in {
 		newQty, err := s.Store.Provision(spe.ID, spe.Qty)

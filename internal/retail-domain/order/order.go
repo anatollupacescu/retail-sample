@@ -1,6 +1,9 @@
 package order
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type (
 	OrderEntry struct {
@@ -18,6 +21,7 @@ type (
 
 	store interface {
 		Add(Order) (ID, error)
+		Get(ID) (Order, error)
 		List() ([]Order, error)
 	}
 
@@ -25,6 +29,12 @@ type (
 		Store store
 	}
 )
+
+var ErrOrderNotFound = errors.New("order not found")
+
+func (o Orders) Get(id ID) (Order, error) {
+	return o.Store.Get(id)
+}
 
 func (o Orders) Add(oe OrderEntry) (ID, error) {
 	ord := Order{

@@ -15,5 +15,5 @@ func TestCurrentStock(t *testing.T) {
 }
 
 func TestSell(t *testing.T) {
-	t.Skip("TODO)
+	t.Skip("TODO")
 }

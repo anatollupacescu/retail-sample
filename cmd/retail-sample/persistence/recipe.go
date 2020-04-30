@@ -3,7 +3,9 @@ package persistence
 import (
 	"context"
 
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +46,12 @@ func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	var name string
 	err = pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&name)
 
-	if err != nil {
+	switch err {
+	case nil:
+		break
+	case pgx.ErrNoRows:
+		return r, order.ErrOrderNotFound
+	default:
 		return r, errors.Wrapf(DBErr, "get recipe: %v", err)
 	}
 

@@ -75,6 +75,11 @@ type MockOrders struct {
 	mock.Mock
 }
 
+func (m *MockOrders) Get(id order.ID) (order.Order, error) {
+	args := m.Called(id)
+	return args.Get(0).(order.Order), args.Error(1)
+}
+
 func (m *MockOrders) Add(oe order.OrderEntry) (order.ID, error) {
 	args := m.Called(oe)
 	return args.Get(0).(order.ID), args.Error(1)

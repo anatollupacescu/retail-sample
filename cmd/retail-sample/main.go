@@ -15,46 +15,34 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/web"
 	"github.com/anatollupacescu/retail-sample/internal/version"
 
-	"github.com/rs/cors"
-
+	"github.com/ardanlabs/conf"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/rs/cors"
 )
 
-func newGoKitLogger() kitlog.Logger {
-	var logger kitlog.Logger
-	logger = kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
-	logger = kitlog.With(logger, "ts", kitlog.DefaultTimestampUTC)
-	return logger
+type serverConfig struct {
+	DatabaseURL    string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10,env:DB_URL"`
+	BusinessPort   string `conf:"default:8080,env:PORT"`
+	DiagnosticPort string `conf:"default:8081,env:DIAG_PORT"`
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Fatal("Business logic port is not set")
-	}
-
-	diagPort := os.Getenv("DIAG_PORT")
-	if diagPort == "" {
-		log.Fatal("Diagnostics port is not set")
+	var config serverConfig
+	if err := conf.Parse(os.Environ(), "MAIN_CONFIG", &config); err != nil {
+		log.Fatal("parse server configuration values")
 	}
 
 	businessRouter := mux.NewRouter()
 
 	server := http.Server{
-		Addr:    net.JoinHostPort("", port),
+		Addr:    net.JoinHostPort("", config.BusinessPort),
 		Handler: businessRouter,
 	}
 
-	baseLogger := newGoKitLogger()
+	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
-	logger := kitlog.With(baseLogger, "version", version.Version,
-		"build_time", version.BuildTime,
-		"commit", version.Commit)
-
-	logger.Log("msg", "the application is starting")
-
-	appLogger := kitlog.With(baseLogger, "caller", kitlog.DefaultCaller)
-	webApp := web.NewApp(appLogger)
+	webApp := web.NewApp(baseLogger, config.DatabaseURL)
 
 	//app
 	web.ConfigureRoutes(businessRouter, webApp)
@@ -80,14 +68,18 @@ func main() {
 	corsDiagRouter := cors.Default().Handler(diagRouter)
 
 	diag := http.Server{
-		Addr:    net.JoinHostPort("", diagPort),
+		Addr:    net.JoinHostPort("", config.DiagnosticPort),
 		Handler: corsDiagRouter,
 	}
 
 	shutdown := make(chan error, 2)
 
+	logger := kitlog.With(baseLogger, "version", version.Version,
+		"build_time", version.BuildTime,
+		"commit", version.Commit)
+
 	go func() {
-		logger.Log("msg", "business logic server is starting", "port", port)
+		_ = logger.Log("msg", "business logic server is starting", "port", config.BusinessPort)
 
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
@@ -96,7 +88,7 @@ func main() {
 	}()
 
 	go func() {
-		logger.Log("msg", "diagnostics server is starting", "port", diagPort)
+		_ = logger.Log("msg", "diagnostics server is starting", "port", config.DiagnosticPort)
 
 		err := diag.ListenAndServe()
 
@@ -110,10 +102,10 @@ func main() {
 
 	select {
 	case x := <-interrupt:
-		logger.Log("msg", "received", "signal", x)
+		_ = logger.Log("msg", "received", "signal", x)
 
 	case err := <-shutdown:
-		logger.Log("msg", "received shutdown request", "signal", err)
+		_ = logger.Log("msg", "received shutdown request", "signal", err)
 	}
 
 	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
@@ -121,11 +113,11 @@ func main() {
 
 	err := diag.Shutdown(timeout)
 	if err != nil {
-		logger.Log("msg", "diagnostic server shutdown failed", "error", err)
+		_ = logger.Log("msg", "diagnostic server shutdown failed", "error", err)
 	}
 
 	err = server.Shutdown(timeout)
 	if err != nil {
-		logger.Log("msg", "business server shutdown failed", "error", err)
+		_ = logger.Log("msg", "business server shutdown failed", "error", err)
 	}
 }

@@ -23,12 +23,10 @@ type App struct {
 	//unit-of-work
 	PersistentProviderFactory PersistenceProviderFactory
 	NewLogger                 LoggerFactory
-
-	counter *int32
 }
 
 type Logger interface {
-	Log(keyvals ...interface{}) error
+	Log(keyvals ...interface{})
 }
 
 type LoggerFactory func() Logger
@@ -69,6 +67,7 @@ type RecipeBook interface {
 
 type Orders interface {
 	Add(order.OrderEntry) (order.ID, error)
+	Get(order.ID) (order.Order, error)
 	List() ([]order.Order, error)
 }
 
@@ -88,7 +87,7 @@ func (a App) ListInventoryItems() ([]inventory.Item, error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[list inventory items] enter method")
-	defer logger.Log("msg", "[list inventory items] exit method")
+	defer logger.Log("msg", "exit method")
 
 	provider := a.PersistentProviderFactory.Begin()
 	defer a.PersistentProviderFactory.Commit(provider)
@@ -98,7 +97,7 @@ func (a App) ListInventoryItems() ([]inventory.Item, error) {
 	res, err := inv.List()
 
 	if err != nil {
-		logger.Log("msg", "[list inventory items]", "error", err)
+		logger.Log("msg", "fetch items from store", "error", err)
 	}
 
 	return res, err
@@ -108,17 +107,17 @@ func (a App) AddToInventory(name string) (newID inventory.ID, err error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[add inventory item] enter method")
-	defer logger.Log("msg", "[add inventory item] exit method")
+	defer logger.Log("msg", "exit method")
 
 	provider := a.PersistentProviderFactory.Begin()
 
 	defer func() {
 		if err != nil {
-			logger.Log("msg", "[provision stock] rollback")
+			logger.Log("msg", "rollback")
 			a.PersistentProviderFactory.Rollback(provider)
 			return
 		}
-		logger.Log("msg", "[provision stock] commit")
+		logger.Log("msg", "commit")
 		a.PersistentProviderFactory.Commit(provider)
 	}()
 
@@ -127,7 +126,7 @@ func (a App) AddToInventory(name string) (newID inventory.ID, err error) {
 	newID, err = inv.Add(inventory.Name(name))
 
 	if err != nil {
-		logger.Log("msg", "[add inventory item]", "error", err)
+		logger.Log("msg", "add item to store", "error", err)
 	}
 
 	return
@@ -137,25 +136,25 @@ func (a App) CurrentStock() (currentStock []stock.StockPosition, err error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[current stock] enter method")
-	defer logger.Log("msg", "[current stock] exit method")
+	defer logger.Log("msg", "exit method")
 
 	provider := a.PersistentProviderFactory.Begin()
 	defer a.PersistentProviderFactory.Commit(provider)
 
-	stock := provider.Stock()
 	inv := provider.Inventory()
 
 	items, err := inv.List()
 
 	if err != nil {
-		logger.Log("msg", "[current stock] fetch inventory items", "error", err)
+		logger.Log("msg", "fetch inventory items", "error", err)
 		return
 	}
 
+	stock := provider.Stock()
 	currentStock, err = stock.CurrentStock(items)
 
 	if err != nil {
-		logger.Log("msg", "[current stock] fetch current stock", "error", err)
+		logger.Log("msg", "fetch current stock", "error", err)
 	}
 
 	return
@@ -165,17 +164,17 @@ func (a App) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err error)
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[provision stock] enter method")
-	defer logger.Log("msg", "[provision stock] exit method")
+	defer logger.Log("msg", "exit method")
 
 	provider := a.PersistentProviderFactory.Begin()
 
 	defer func() {
 		if err != nil {
-			logger.Log("msg", "[provision stock] rollback")
+			logger.Log("msg", "rollback")
 			a.PersistentProviderFactory.Rollback(provider)
 			return
 		}
-		logger.Log("msg", "[provision stock] commit")
+		logger.Log("msg", "commit")
 		a.PersistentProviderFactory.Commit(provider)
 	}()
 
@@ -189,7 +188,7 @@ func (a App) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err error)
 		itemID := inventory.ID(id)
 
 		if _, err = inv.Get(itemID); err != nil {
-			logger.Log("msg", "[provision stock] check inventory item exists", "id", id, "error", err)
+			logger.Log("msg", "check inventory item exists", "id", id, "error", err)
 			return nil, err
 		}
 
@@ -206,7 +205,7 @@ func (a App) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err error)
 	updatedQtys, err = st.Provision(spes)
 
 	if err != nil {
-		logger.Log("msg", "[provision stock] provision item", "error", err)
+		logger.Log("msg", "provision item", "error", err)
 		return nil, err
 	}
 
@@ -219,7 +218,7 @@ func (a App) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err error)
 		}
 
 		if err := provisionLog.Add(entry); err != nil {
-			logger.Log("msg", "[provision stock] log provision entry", "error", err)
+			logger.Log("msg", "log provision entry", "error", err)
 			break
 		}
 	}
@@ -231,7 +230,7 @@ func (a App) Quantity(id int) (qty int, err error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[get stock quantity] enter method")
-	defer logger.Log("msg", "[get stock quantity] exit method")
+	defer logger.Log("msg", "exit method")
 
 	provider := a.PersistentProviderFactory.Begin()
 	defer a.PersistentProviderFactory.Commit(provider)
@@ -239,7 +238,7 @@ func (a App) Quantity(id int) (qty int, err error) {
 	qty, err = provider.Stock().Quantity(id)
 
 	if err != nil {
-		logger.Log("msg", "[get stock quantity] fetch from store", "error", err)
+		logger.Log("msg", "fetch from store", "error", err)
 	}
 
 	return
@@ -249,12 +248,12 @@ func (a App) GetProvisionLog() (r []ProvisionEntry, err error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[get provision log] enter method")
-	defer logger.Log("msg", "[get provision log] exit method")
+	defer logger.Log("msg", "exit method")
 
 	list, err := a.ProvisionLog.List()
 
 	if err != nil {
-		logger.Log("msg", "[get provision log] fetch from store", "error", err)
+		logger.Log("msg", "fetch from store", "error", err)
 		return
 	}
 
@@ -272,7 +271,7 @@ func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	logger := a.NewLogger()
 
 	logger.Log("msg", "[place order] enter method")
-	defer logger.Log("msg", "[place order] exit method")
+	defer logger.Log("msg", "exit method")
 
 	recipeID := recipe.ID(id)
 
@@ -280,11 +279,11 @@ func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 
 	defer func() {
 		if err != nil {
-			logger.Log("msg", "[place order] rollback")
+			logger.Log("msg", "rollback")
 			a.PersistentProviderFactory.Rollback(provider)
 			return
 		}
-		logger.Log("msg", "[place order] commit")
+		logger.Log("msg", "commit")
 		a.PersistentProviderFactory.Commit(provider)
 	}()
 
@@ -293,7 +292,7 @@ func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	r, err := recipeBook.Get(recipeID)
 
 	if err != nil {
-		logger.Log("msg", "[place order] get recipe by id", "id", recipeID, "error", err)
+		logger.Log("msg", "get recipe by id", "id", recipeID, "error", err)
 		return order.ID(0), err
 	}
 
@@ -302,6 +301,7 @@ func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	stock := provider.Stock()
 
 	if err := stock.Sell(ingredients, qty); err != nil {
+		logger.Log("msg", "sell from the stock", "id", recipeID, "error", err)
 		return 0, err
 	}
 
@@ -313,7 +313,7 @@ func (a App) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	})
 
 	if err != nil {
-		logger.Log("msg", "[place order] save new order", "error", err)
+		logger.Log("msg", "save new order", "error", err)
 		return order.ID(0), err
 	}
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
@@ -56,4 +57,37 @@ func (po *PgxOrderStore) List() (orders []order.Order, err error) {
 	}
 
 	return
+}
+
+func (po *PgxOrderStore) Get(id order.ID) (result order.Order, err error) {
+	sql := `
+		select 
+			recipeid, quantity 
+		from 
+			outbound_order 
+		where 
+			id = $1`
+
+	var (
+		recipeID int
+		qty      int
+	)
+
+	err = po.DB.QueryRow(context.Background(), sql).Scan(&recipeID, &qty)
+
+	switch err {
+	case nil:
+		break
+	case pgx.ErrNoRows:
+		return result, order.ErrOrderNotFound
+	default:
+		return result, errors.Wrapf(DBErr, "get inventory item by id: %v", err)
+	}
+
+	return order.Order{
+		OrderEntry: order.OrderEntry{
+			RecipeID: recipeID,
+			Qty:      qty,
+		},
+	}, nil
 }

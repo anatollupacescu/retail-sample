@@ -44,13 +44,9 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-var (
-	zeroRecipeID = ID(0)
-
-	zeroItem inventory.Item
-)
-
 func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
+	var zeroRecipeID = ID(0)
+
 	if name == "" {
 		return zeroRecipeID, ErrEmptyName
 	}
@@ -85,6 +81,8 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		Ingredients: ingredients,
 	})
 }
+
+var ErrRecipeNotFound = errors.New("recipe not found")
 
 func (b Book) Get(id ID) (Recipe, error) {
 	return b.Store.Get(id)

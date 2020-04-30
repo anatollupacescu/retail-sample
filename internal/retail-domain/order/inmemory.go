@@ -30,3 +30,7 @@ func (m InMemoryStore) List() (r []Order, err error) {
 
 	return
 }
+
+func (m InMemoryStore) Get(id ID) (o Order, err error) {
+	return m.data[id], nil
+}

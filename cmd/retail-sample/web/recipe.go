@@ -3,28 +3,26 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/gorilla/mux"
 )
 
 func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields() // catch unwanted fields
+	d.DisallowUnknownFields()
 
 	var requestBody struct {
-		Name  *string     `json:"name"` // pointer so we can test for field absence
+		Name  string      `json:"name"` // pointer so we can test for field absence
 		Items map[int]int `json:"items"`
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
+		a.Logger.Log("action", "decode request payload", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
-		return
-	}
-
-	if requestBody.Name == nil {
-		http.Error(w, "name is mandatory", http.StatusBadRequest)
 		return
 	}
 
@@ -37,7 +35,7 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	var recipeName = recipe.Name(*requestBody.Name)
+	var recipeName = recipe.Name(requestBody.Name)
 
 	recipeID, err := a.RecipeBook.Add(recipeName, ingredients)
 
@@ -51,16 +49,17 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	case recipe.ErrNoIngredients:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	default:
+		a.Logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	type DescriptorEntity map[recipe.Name]recipe.ID
+	type descriptorEntity map[recipe.Name]recipe.ID
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data descriptorEntity `json:"data"`
 	}{
-		Data: DescriptorEntity{
+		Data: descriptorEntity{
 			recipeName: recipeID,
 		},
 	}
@@ -77,6 +76,13 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	list, err := a.RecipeBook.List()
+
+	if err != nil {
+		a.Logger.Log("action", "call application", "error", err)
+		http.Error(w, internalServerError, http.StatusBadRequest)
+	}
+
 	type recipe struct {
 		ID    int    `json:"id"`
 		Name  string `json:"name"`
@@ -87,13 +93,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		Data []recipe `json:"data"`
 	}
 
-	response.Data = make([]recipe, 0) //to have  '[]' instead of null
-
-	list, err := a.RecipeBook.List()
-
-	switch err {
-	//TODO
-	}
+	response.Data = make([]recipe, 0)
 
 	for _, r := range list {
 		response.Data = append(response.Data, recipe{
@@ -106,6 +106,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
+		a.Logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -126,6 +127,42 @@ func toItems(i []recipe.Ingredient) (items []item) {
 	return
 }
 
-func (a *WebApp) GetRecipe(w http.ResponseWriter, _ *http.Request) {
-	panic("not implemented")
+func (a *WebApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["recipeID"]
+
+	i, _ := strconv.Atoi(rid)
+
+	recipeID := recipe.ID(i)
+
+	rcp, err := a.RecipeBook.Get(recipeID)
+
+	switch err {
+	case nil:
+		break
+	case recipe.ErrRecipeNotFound:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	default:
+		a.Logger.Log("action", "call application", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	var response = struct {
+		Name  string `json:"name"`
+		Items []item `json:"items"`
+	}{
+		Name:  string(rcp.Name),
+		Items: toItems(rcp.Ingredients),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		a.Logger.Log("action", "encode response", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+	}
 }

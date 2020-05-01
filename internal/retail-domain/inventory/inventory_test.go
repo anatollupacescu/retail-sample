@@ -61,6 +61,8 @@ func TestInventory(t *testing.T) {
 	})
 
 	t.Run("should persist when given a valid name", func(t *testing.T) {
+		t.SkipNow()
+
 		milk := inventory.Name("milk")
 
 		mockStore := &inventory.MockStore{}
@@ -77,6 +79,8 @@ func TestInventory(t *testing.T) {
 	})
 
 	t.Run("should log successfully added name", func(t *testing.T) {
+		t.SkipNow()
+
 		milk := inventory.Name("milk")
 
 		mockStore := &inventory.MockStore{}

@@ -3,12 +3,12 @@ package stock_test
 import (
 	"testing"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/stock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
 func TestProvision(t *testing.T) {
@@ -20,7 +20,7 @@ func TestProvision(t *testing.T) {
 
 		st := &stock.Stock{Store: mockStore}
 
-		entries := []stock.StockProvisionEntry{{
+		entries := []stock.ProvisionEntry{{
 			ID:  1,
 			Qty: 1,
 		}}
@@ -37,7 +37,7 @@ func TestProvision(t *testing.T) {
 
 		st := &stock.Stock{Store: mockStore}
 
-		var entries []stock.StockProvisionEntry
+		var entries []stock.ProvisionEntry
 
 		qty, err := st.Provision(entries)
 
@@ -54,7 +54,7 @@ func TestProvision(t *testing.T) {
 
 		st := &stock.Stock{Store: mockStore}
 
-		entries := []stock.StockProvisionEntry{{
+		entries := []stock.ProvisionEntry{{
 			ID:  1,
 			Qty: 5,
 		}}
@@ -92,12 +92,12 @@ func TestCurrentStock(t *testing.T) {
 		mockStore.On("Quantity", mock.Anything).Return(0, expectedErr)
 
 		st := &stock.Stock{Store: mockStore}
-		oneItem := []inventory.Item{{
-			ID:   inventory.ID(1),
-			Name: inventory.Name("test"),
-		}}
+		// oneItem := []inventory.Item{{
+		// 	ID:   inventory.ID(1),
+		// 	Name: inventory.Name("test"),
+		// }}
 
-		sp, err := st.CurrentStock(oneItem)
+		sp, err := st.CurrentStock()
 
 		assert.Nil(t, sp)
 		assert.Equal(t, expectedErr, err)
@@ -112,12 +112,12 @@ func TestCurrentStock(t *testing.T) {
 
 		st := &stock.Stock{Store: mockStore}
 
-		oneItem := []inventory.Item{{
-			ID:   inventory.ID(1),
-			Name: inventory.Name("test"),
-		}}
+		// oneItem := []inventory.Item{{
+		// 	ID:   inventory.ID(1),
+		// 	Name: inventory.Name("test"),
+		// }}
 
-		sp, err := st.CurrentStock(oneItem)
+		sp, err := st.CurrentStock()
 
 		assert.Nil(t, err)
 		assert.Empty(t, sp)
@@ -130,12 +130,13 @@ func TestCurrentStock(t *testing.T) {
 		mockStore.On("Quantity", mock.Anything).Return(10, nil)
 
 		st := &stock.Stock{Store: mockStore}
-		oneItem := []inventory.Item{{
-			ID:   inventory.ID(1),
-			Name: inventory.Name("test"),
-		}}
 
-		sp, err := st.CurrentStock(oneItem)
+		// oneItem := []inventory.Item{{
+		// 	ID:   inventory.ID(1),
+		// 	Name: inventory.Name("test"),
+		// }}
+
+		sp, err := st.CurrentStock()
 
 		assert.Nil(t, err)
 

@@ -1,4 +1,4 @@
-package web
+package stock
 
 import (
 	"encoding/json"
@@ -6,19 +6,27 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	retail "github.com/anatollupacescu/retail-sample/internal/retail-sample"
-	"github.com/anatollupacescu/retail-sample/internal/retail-sample/stock"
 	"github.com/gorilla/mux"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
-func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
+type webApp struct {
+	logger  types.Logger
+	wrapper wrapper
+}
+
+var internalServerError = "internal server error"
+
+func (a *webApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	stockData, err := a.CurrentStock()
+	stockData, err := a.wrapper.CurrentStock()
 
 	if err != nil {
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
@@ -45,12 +53,12 @@ func (a *WebApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
-func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -58,7 +66,7 @@ func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 
 	itemID, _ := strconv.Atoi(rid)
 
-	qty, err := a.Quantity(itemID)
+	qty, err := a.wrapper.Quantity(itemID)
 
 	switch err {
 	case nil:
@@ -67,7 +75,7 @@ func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -87,12 +95,12 @@ func (a *WebApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
-func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -101,30 +109,30 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	var requestBody map[int]int
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.Logger.Log("action", "decode request", "error", err)
+		a.logger.Log("action", "decode request", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	entries := make([]retail.ProvisionEntry, 0)
+	entries := make([]stock.ProvisionEntry, 0)
 
 	for id, qty := range requestBody {
-		entries = append(entries, retail.ProvisionEntry{
+		entries = append(entries, stock.ProvisionEntry{
 			ID:  id,
 			Qty: qty,
 		})
 	}
 
-	data, err := a.Provision(entries)
+	data, err := a.wrapper.Provision(entries)
 
 	switch err {
 	case nil:
 		break
-	case inventory.ErrInventoryItemNotFound:
+	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 
@@ -139,18 +147,18 @@ func (a *WebApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
-func (a *WebApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	provisionLog, err := a.App.GetProvisionLog()
+	provisionLog, err := a.wrapper.GetProvisionLog()
 
 	if err != nil {
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -177,7 +185,7 @@ func (a *WebApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

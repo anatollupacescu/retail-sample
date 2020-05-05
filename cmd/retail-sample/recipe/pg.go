@@ -1,19 +1,29 @@
-package persistence
+package recipe
 
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-type PgxRecipeStore struct {
+var DBErr = errors.New("postgres")
+
+type PgxDB interface {
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error)
+}
+
+type PgxStore struct {
 	DB PgxDB
 }
 
-func (pr *PgxRecipeStore) Add(r recipe.Recipe) (recipe.ID, error) {
+func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	sql := "insert into recipe(name) values($1) returning id"
 
 	var (
@@ -40,7 +50,7 @@ func (pr *PgxRecipeStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	return recipe.ID(recipeID), nil
 }
 
-func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
+func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	sql := "select name from recipe where id = $1"
 
 	var name string
@@ -86,7 +96,7 @@ func (pr *PgxRecipeStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	return
 }
 
-func (pr *PgxRecipeStore) List() (recipes []recipe.Recipe, err error) {
+func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 	sql := `SELECT
 						r.id,
 						r.name,

@@ -1,4 +1,4 @@
-package web
+package inventory
 
 import (
 	"encoding/json"
@@ -7,10 +7,18 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
+type InventoryWebApp struct {
+	Logger  types.Logger
+	Wrapper InventoryWrapper
+}
+
+var internalServerError = "internal server error"
+
+func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -29,7 +37,7 @@ func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	itemName := requestPayload.Name
-	createdID, err := a.AddToInventory(itemName)
+	createdID, err := a.Wrapper.AddToInventory(itemName)
 
 	switch err {
 	case nil:
@@ -69,10 +77,10 @@ func (a *WebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
+func (a *InventoryWebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	list, err := a.ListInventoryItems()
+	list, err := a.Wrapper.ListInventoryItems()
 
 	if err != nil {
 		a.Logger.Log("action", "call application", "error", err)
@@ -105,22 +113,20 @@ func (a *WebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *WebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
 	rid := vars["itemID"]
 
-	i, _ := strconv.Atoi(rid)
+	id, _ := strconv.Atoi(rid)
 
-	inventoyID := inventory.ID(i)
-
-	inventoryItem, err := a.Inventory.Get(inventoyID)
+	inventoryItem, err := a.Wrapper.GetInventoryItem(id)
 
 	switch err {
 	case nil:
 		break
-	case inventory.ErrInventoryItemNotFound:
+	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:

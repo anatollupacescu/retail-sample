@@ -1,15 +1,24 @@
-package web
+package recipe
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	"github.com/gorilla/mux"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+type webApp struct {
+	wrapper wrapper
+	logger  types.Logger
+}
+
+var internalServerError = "internal server error"
+
+func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -21,7 +30,7 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.Logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -37,7 +46,7 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	var recipeName = recipe.Name(requestBody.Name)
 
-	recipeID, err := a.RecipeBook.Add(recipeName, ingredients)
+	recipeID, err := a.wrapper.Add(recipeName, ingredients)
 
 	switch err {
 	case nil:
@@ -48,8 +57,9 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		fallthrough
 	case recipe.ErrNoIngredients:
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -73,13 +83,13 @@ func (a *WebApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	list, err := a.RecipeBook.List()
+	list, err := a.wrapper.List()
 
 	if err != nil {
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
@@ -106,7 +116,7 @@ func (a *WebApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -127,7 +137,7 @@ func toItems(i []recipe.Ingredient) (items []item) {
 	return
 }
 
-func (a *WebApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -137,7 +147,7 @@ func (a *WebApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 
 	recipeID := recipe.ID(i)
 
-	rcp, err := a.RecipeBook.Get(recipeID)
+	rcp, err := a.wrapper.Get(recipeID)
 
 	switch err {
 	case nil:
@@ -146,7 +156,7 @@ func (a *WebApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -162,7 +172,7 @@ func (a *WebApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

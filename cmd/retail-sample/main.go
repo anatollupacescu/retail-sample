@@ -10,14 +10,17 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/mux"
-
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/web"
-	"github.com/anatollupacescu/retail-sample/internal/version"
-
 	"github.com/ardanlabs/conf"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
+
+	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
 type serverConfig struct {
@@ -42,10 +45,14 @@ func main() {
 	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
-	webApp := web.NewApp(baseLogger, config.DatabaseURL)
-
 	//app
-	web.ConfigureRoutes(businessRouter, webApp)
+	loggerFactory := newLoggerFactory(baseLogger)
+	persistenceFactory := newPersistentFactory(baseLogger, config.DatabaseURL)
+
+	inventory.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
+	order.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
+	recipe.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
+	stock.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
 
 	//static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
@@ -53,11 +60,11 @@ func main() {
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		var status = http.StatusOK
-
-		if !webApp.IsHealthy() {
-			status = http.StatusInternalServerError
-		}
-
+		/*
+			if !webApp.IsHealthy() {
+				status = http.StatusInternalServerError
+			}
+		*/
 		w.WriteHeader(status)
 	})
 

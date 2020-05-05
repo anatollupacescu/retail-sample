@@ -8,13 +8,13 @@ COMMIT := git-$(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
 format:
-	@goimports -w -local github.com/anatollupacescu/retail-sample cmd/ internal/
+	@goimports -w -local "github.com/anatollupacescu/retail-sample" cmd/ internal/
 
 test:
-	go test ./...
+	@go test ./...
 
 build/docker:
-	docker build .
+	@docker build .
 
 build:
 	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build \
@@ -24,6 +24,6 @@ build:
 		-o bin/retail ${PROJECT}/cmd/retail-sample
 
 run:
-	@PORT=8080 DIAG_PORT=8081 go run cmd/retail-sample/main.go
+	@go run $(shell pwd)/cmd/retail-sample
 
 .PHONY: test format build build/docker run

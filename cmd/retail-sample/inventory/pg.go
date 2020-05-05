@@ -1,29 +1,37 @@
-package persistence
+package inventory
 
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-type PgxInventoryStore struct {
+var DBErr = errors.New("postgres")
+
+type PgxDB interface {
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+}
+
+type PgxStore struct {
 	DB PgxDB
 }
 
-func (ps *PgxInventoryStore) Add(n inventory.Name) (inventory.ID, error) {
+func (ps *PgxStore) Add(n string) (int, error) {
 	var id int32
 	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name) values($1) returning id", n).Scan(&id)
 
 	if err != nil {
-		return inventory.ID(0), errors.Wrapf(DBErr, "add inventory item: %v", err)
+		return 0, errors.Wrapf(DBErr, "add inventory item: %v", err)
 	}
 
-	return inventory.ID(id), nil
+	return int(id), nil
 }
 
-func (ps *PgxInventoryStore) Find(n inventory.Name) (inventory.ID, error) {
+func (ps *PgxStore) Find(n string) (int, error) {
 	var id int
 	err := ps.DB.QueryRow(context.Background(), "select id from inventory where name = $1", n).Scan(&id)
 
@@ -31,34 +39,36 @@ func (ps *PgxInventoryStore) Find(n inventory.Name) (inventory.ID, error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return inventory.ID(0), inventory.ErrStoreItemNotFound
+		return 0, inventory.ErrItemNotFound
 	default:
-		return inventory.ID(0), errors.Wrapf(DBErr, "find inventory item id: %v", err)
+		return 0, errors.Wrapf(DBErr, "find inventory item id: %v", err)
 	}
 
-	return inventory.ID(id), nil
+	return id, nil
 }
 
-func (ps *PgxInventoryStore) Get(id inventory.ID) (inventory.Item, error) {
+func (ps *PgxStore) Get(id int) (inventory.Item, error) {
 	var name string
 	err := ps.DB.QueryRow(context.Background(), "select name from inventory where id = $1", id).Scan(&name)
+
+	var zeroItem inventory.Item
 
 	switch err {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return inventory.Item{}, inventory.ErrStoreItemNotFound
+		return zeroItem, inventory.ErrItemNotFound
 	default:
-		return inventory.Item{}, errors.Wrapf(DBErr, "get inventory item by id: %v", err)
+		return zeroItem, errors.Wrapf(DBErr, "get inventory item by id: %v", err)
 	}
 
 	return inventory.Item{
 		ID:   id,
-		Name: inventory.Name(name),
+		Name: string(name),
 	}, nil
 }
 
-func (ps *PgxInventoryStore) List() (items []inventory.Item, err error) {
+func (ps *PgxStore) List() (items []inventory.Item, err error) {
 	rows, err := ps.DB.Query(context.Background(), "select id, name from inventory")
 
 	if err != nil {
@@ -74,8 +84,8 @@ func (ps *PgxInventoryStore) List() (items []inventory.Item, err error) {
 			return nil, errors.Wrapf(DBErr, "scan inventory: %v", err)
 		}
 		items = append(items, inventory.Item{
-			ID:   inventory.ID(id),
-			Name: inventory.Name(name),
+			ID:   int(id),
+			Name: string(name),
 		})
 	}
 

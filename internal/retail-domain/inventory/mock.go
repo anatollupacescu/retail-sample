@@ -8,14 +8,14 @@ type MockStore struct {
 	mock.Mock
 }
 
-func (m *MockStore) Add(s Name) (ID, error) {
+func (m *MockStore) Add(s string) (int, error) {
 	args := m.Called(s)
-	return args.Get(0).(ID), args.Error(1)
+	return args.Get(0).(int), args.Error(1)
 }
 
-func (m *MockStore) Find(s Name) (ID, error) {
+func (m *MockStore) Find(s string) (int, error) {
 	args := m.Called(s)
-	return args.Get(0).(ID), args.Error(1)
+	return args.Get(0).(int), args.Error(1)
 }
 
 func (m *MockStore) List() ([]Item, error) {
@@ -23,7 +23,7 @@ func (m *MockStore) List() ([]Item, error) {
 	return args.Get(0).([]Item), args.Error(1)
 }
 
-func (m *MockStore) Get(id ID) (Item, error) {
+func (m *MockStore) Get(id int) (Item, error) {
 	args := m.Called()
 	return args.Get(0).(Item), args.Error(1)
 }

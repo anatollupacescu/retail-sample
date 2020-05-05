@@ -8,7 +8,7 @@ import (
 
 type (
 	Inventory interface {
-		Get(inventory.ID) (inventory.Item, error)
+		Get(int) (inventory.Item, error)
 	}
 
 	Name string
@@ -45,7 +45,7 @@ var (
 )
 
 func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
-	var zeroRecipeID = ID(0)
+	var zeroRecipeID ID
 
 	if name == "" {
 		return zeroRecipeID, ErrEmptyName
@@ -62,14 +62,14 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	}
 
 	for _, v := range ingredients {
-		itemID := inventory.ID(v.ID)
+		itemID := v.ID
 
 		_, err := b.Inventory.Get(itemID)
 
 		switch err {
 		case nil:
 			continue
-		case inventory.ErrInventoryItemNotFound:
+		case inventory.ErrItemNotFound:
 			return zeroRecipeID, ErrIgredientNotFound
 		default:
 			return zeroRecipeID, err

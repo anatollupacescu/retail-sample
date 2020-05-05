@@ -39,7 +39,7 @@ func TestAddRecipe(t *testing.T) {
 		b := recipe.Book{Store: s, Inventory: i}
 
 		var zeroInventoryItem inventory.Item
-		i.On("Get", inventory.ID(1)).Return(zeroInventoryItem, nil)
+		i.On("Get", 1).Return(zeroInventoryItem, nil)
 
 		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
@@ -54,7 +54,7 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
-		i.On("Get", inventory.ID(1)).Return(inventory.Item{
+		i.On("Get", 1).Return(inventory.Item{
 			ID: 1,
 		}, nil)
 
@@ -74,7 +74,7 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
-		i.On("Get", inventory.ID(1)).Return(inventory.Item{
+		i.On("Get", 1).Return(inventory.Item{
 			ID: 1,
 		}, nil)
 		s.On("Add", recipe.Recipe{

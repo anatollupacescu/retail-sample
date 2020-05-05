@@ -3,6 +3,9 @@ package order
 import (
 	"errors"
 	"time"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
 type (
@@ -19,18 +22,49 @@ type (
 		Date time.Time
 	}
 
-	store interface {
+	Store interface {
 		Add(Order) (ID, error)
 		Get(ID) (Order, error)
 		List() ([]Order, error)
 	}
 
 	Orders struct {
-		Store store
+		Store      Store
+		RecipeBook recipe.Book
+		Stock      stock.Stock
 	}
 )
 
 var ErrOrderNotFound = errors.New("order not found")
+
+func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
+	recipeID := recipe.ID(id)
+
+	r, err := o.RecipeBook.Get(recipeID)
+
+	var noOrderID ID
+
+	if err != nil {
+		return noOrderID, err
+	}
+
+	ingredients := r.Ingredients
+
+	if err := o.Stock.Sell(ingredients, qty); err != nil {
+		return 0, err
+	}
+
+	orderID, err = o.Add(OrderEntry{
+		RecipeID: id,
+		Qty:      qty,
+	})
+
+	if err != nil {
+		return noOrderID, err
+	}
+
+	return orderID, nil
+}
 
 func (o Orders) Get(id ID) (Order, error) {
 	return o.Store.Get(id)

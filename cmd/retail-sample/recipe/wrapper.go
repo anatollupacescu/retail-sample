@@ -8,35 +8,33 @@ import (
 type wrapper struct {
 	loggerFactory              types.LoggerFactory
 	persistenceProviderFactory types.PersistenceProviderFactory
-
-	provider types.PersistenceProvider
-	logger   types.Logger
 }
 
-func (w *wrapper) exec(methodName string, f func() error) {
+func (w *wrapper) exec(methodName string, f func(recipe.Book) error) {
 	logger := w.loggerFactory()
 
 	logger.Log("msg", "enter", "method", methodName)
 	defer logger.Log("msg", "exit", "method", methodName)
 
-	w.provider = w.persistenceProviderFactory.New()
+	provider := w.persistenceProviderFactory.New()
 
-	err := f()
+	recipes := provider.RecipeBook()
+
+	err := f(recipes)
 
 	if err != nil {
 		logger.Log("msg", "rollback")
-		w.persistenceProviderFactory.Rollback(w.provider)
+		w.persistenceProviderFactory.Rollback(provider)
 		return
 	}
 
 	logger.Log("msg", "commit")
-	w.persistenceProviderFactory.Commit(w.provider)
+	w.persistenceProviderFactory.Commit(provider)
 }
 
 func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (recipeID recipe.ID, err error) {
-	w.exec("add recipe", func() error {
-		recipes := w.provider.RecipeBook()
-		recipeID, err = recipes.Add(recipeName, recipeIngredients)
+	w.exec("add recipe", func(r recipe.Book) error {
+		recipeID, err = r.Add(recipeName, recipeIngredients)
 
 		return err
 	})
@@ -44,10 +42,9 @@ func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredie
 	return
 }
 
-func (w wrapper) Get(recipeID recipe.ID) (recipe recipe.Recipe, err error) {
-	w.exec("get recipe", func() error {
-		recipes := w.provider.RecipeBook()
-		recipe, err = recipes.Get(recipeID)
+func (w wrapper) Get(recipeID recipe.ID) (out recipe.Recipe, err error) {
+	w.exec("get recipe", func(r recipe.Book) error {
+		out, err = r.Get(recipeID)
 
 		return err
 	})
@@ -55,10 +52,9 @@ func (w wrapper) Get(recipeID recipe.ID) (recipe recipe.Recipe, err error) {
 	return
 }
 
-func (w wrapper) List() (rcps []recipe.Recipe, err error) {
-	w.exec("get recipe", func() error {
-		recipes := w.provider.RecipeBook()
-		rcps, err = recipes.List()
+func (w wrapper) List() (recipes []recipe.Recipe, err error) {
+	w.exec("get recipe", func(r recipe.Book) error {
+		recipes, err = r.List()
 
 		return err
 	})

@@ -15,8 +15,8 @@ RUN yarn build
 # linter
 FROM golang:1.14 as tester
 
-ENV VERSION 1.18.0
-ENV CHECKSUM 0ef2c502035d5f12d6d3a30a7c4469cfcae4dd3828d15fbbfb799c8331cd51c4
+ENV VERSION 1.26.0
+ENV CHECKSUM 59b0e49a4578fea574648a2fd5174ed61644c667ea1a1b54b8082fde15ef94fd
 
 RUN echo "${CHECKSUM}  golangci-lint-${VERSION}-linux-amd64.tar.gz" > CHECKSUM
 

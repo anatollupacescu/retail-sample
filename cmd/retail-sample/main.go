@@ -24,21 +24,22 @@ import (
 )
 
 type serverConfig struct {
-	DatabaseURL    string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10,env:DB_URL"`
-	BusinessPort   string `conf:"default:8080,env:PORT"`
-	DiagnosticPort string `conf:"default:8081,env:DIAG_PORT"`
+	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
+	Port        string `conf:"default:8080"`
+	DiagPort    string `conf:"default:8081"`
 }
 
 func main() {
 	var config serverConfig
-	if err := conf.Parse(os.Environ(), "MAIN_CONFIG", &config); err != nil {
-		log.Fatal("parse server configuration values")
+
+	if err := conf.Parse(nil, "RETAIL", &config); err != nil {
+		log.Fatalf("parse server configuration values: %v", err)
 	}
 
 	businessRouter := mux.NewRouter()
 
 	server := http.Server{
-		Addr:    net.JoinHostPort("", config.BusinessPort),
+		Addr:    net.JoinHostPort("", config.Port),
 		Handler: businessRouter,
 	}
 
@@ -75,7 +76,7 @@ func main() {
 	corsDiagRouter := cors.Default().Handler(diagRouter)
 
 	diag := http.Server{
-		Addr:    net.JoinHostPort("", config.DiagnosticPort),
+		Addr:    net.JoinHostPort("", config.DiagPort),
 		Handler: corsDiagRouter,
 	}
 
@@ -86,7 +87,7 @@ func main() {
 		"commit", version.Commit)
 
 	go func() {
-		_ = logger.Log("msg", "business logic server is starting", "port", config.BusinessPort)
+		_ = logger.Log("msg", "business logic server is starting", "port", config.Port)
 
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
@@ -95,7 +96,7 @@ func main() {
 	}()
 
 	go func() {
-		_ = logger.Log("msg", "diagnostics server is starting", "port", config.DiagnosticPort)
+		_ = logger.Log("msg", "diagnostics server is starting", "port", config.DiagPort)
 
 		err := diag.ListenAndServe()
 

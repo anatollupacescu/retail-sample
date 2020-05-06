@@ -86,11 +86,11 @@ func (pp *PgxTransactionalProvider) RecipeBook() recipe.Book {
 }
 
 func (pp *PgxTransactionalProvider) Orders() order.Orders {
-	orderStore := orderCmd.PgxStore{DB: pp.tx}
+	orderStore := &orderCmd.PgxStore{DB: pp.tx}
 	recipeBook := pp.RecipeBook()
 	stock := pp.Stock()
 	return order.Orders{
-		Store:      &orderStore,
+		Store:      orderStore,
 		RecipeBook: recipeBook,
 		Stock:      stock,
 	}
@@ -98,14 +98,12 @@ func (pp *PgxTransactionalProvider) Orders() order.Orders {
 
 func (pp *PgxTransactionalProvider) Stock() stock.Stock {
 	store := &stockCmd.PgxStore{DB: pp.tx}
-	inventory := pp.Inventory()
 	provisionLog := &stockCmd.PgxProvisionLog{DB: pp.tx}
-	recipeBook := pp.RecipeBook()
+	inventory := pp.Inventory()
 
 	return stock.Stock{
 		Store:        store,
 		Inventory:    inventory,
 		ProvisionLog: provisionLog,
-		RecipeBook:   recipeBook,
 	}
 }

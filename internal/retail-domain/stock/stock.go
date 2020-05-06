@@ -8,16 +8,6 @@ import (
 )
 
 type (
-	ProvisionEntry struct {
-		ID  int
-		Qty int
-	}
-
-	ProvisionLog interface {
-		List() ([]ProvisionEntry, error)
-		Add(ProvisionEntry) error
-	}
-
 	StockStore interface {
 		Quantity(int) (int, error)
 		Provision(int, int) (int, error)
@@ -25,10 +15,10 @@ type (
 	}
 
 	Stock struct {
+		Store StockStore
+
 		Inventory    Inventory
-		RecipeBook   Recipes
 		ProvisionLog ProvisionLog
-		Store        StockStore
 	}
 
 	StockPosition struct {
@@ -38,16 +28,18 @@ type (
 	}
 
 	Inventory interface {
-		Add(string) (int, error)
 		List() ([]inventory.Item, error)
 		Get(int) (inventory.Item, error)
-		Find(string) (int, error)
 	}
 
-	Recipes interface {
-		Add(recipe.Name, []recipe.Ingredient) (recipe.ID, error)
-		Get(recipe.ID) (recipe.Recipe, error)
-		List() ([]recipe.Recipe, error)
+	ProvisionEntry struct {
+		ID  int
+		Qty int
+	}
+
+	ProvisionLog interface {
+		List() ([]ProvisionEntry, error)
+		Add(ProvisionEntry) error
 	}
 )
 

@@ -518,14 +518,14 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "localhost:8080/log/provision",
+							"raw": "localhost:8080/stock/provisionlog",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"log",
-								"provision"
+								"stock",
+								"provisionlog"
 							]
 						}
 					},
@@ -1102,7 +1102,7 @@
 									"        recipeID: recipeID,",
 									"        qty: 1",
 									"    }",
-									"    ",
+									"",
 									"    pm.expect(body.data.map(dropID)).to.be.an('array')",
 									"       .that.deep.includes(expected)",
 									"})",

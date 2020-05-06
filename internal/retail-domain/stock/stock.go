@@ -97,7 +97,7 @@ func (s Stock) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err erro
 		}
 	}
 
-	updated := make(map[int]int)
+	updatedQtys = make(map[int]int)
 
 	for _, spe := range in {
 		newQty, err := s.Store.Provision(spe.ID, spe.Qty)
@@ -106,10 +106,10 @@ func (s Stock) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err erro
 			return nil, err
 		}
 
-		updated[spe.ID] = newQty
+		updatedQtys[spe.ID] = newQty
 	}
 
-	for id, qty := range updated {
+	for id, qty := range updatedQtys {
 		entry := ProvisionEntry{
 			ID:  id,
 			Qty: qty,

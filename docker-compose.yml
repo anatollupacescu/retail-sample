@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_DB=retail
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+    volumes:
+      - retail-data:/var/lib/postgresql/data/ # persist data even if container shuts down
+
+  web:
+    image: 4911c9745f59
+    links:
+      - 'db:database'
+    environment:
+      - RETAIL_PORT=8080
+      - RETAIL_DIAG_PORT=8181
+      - RETAIL_DATABASE_URL=postgres://docker:docker@db:5432/retail?pool_max_conns=10
+    ports:
+      - '8080:8080'
+      - '8081:8181'
+    depends_on:
+      - db
+
+volumes:
+  retail-data: # named volumes can be managed easier using docker-compose

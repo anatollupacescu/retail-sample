@@ -74,7 +74,7 @@ func (s Stock) CurrentStock() (ps []StockPosition, err error) {
 	return
 }
 
-var ErrNotEnoughStock = errors.New("not enough stock to sell")
+var ErrNotEnoughStock = errors.New("not enough stock")
 
 func (s Stock) Quantity(id int) (qty int, err error) {
 	return s.Store.Quantity(id)

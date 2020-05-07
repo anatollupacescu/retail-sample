@@ -22,7 +22,7 @@ func (m *InMemoryStore) Add(r domain.Recipe) (domain.ID, error) {
 	return domain.ID(id), nil
 }
 
-func (m *InMemoryStore) List() (r []domain.Recipe) {
+func (m *InMemoryStore) List() (r []domain.Recipe, err error) {
 	for id, rp := range m.data {
 		rp.ID = domain.ID(id)
 		r = append(r, rp)
@@ -31,6 +31,6 @@ func (m *InMemoryStore) List() (r []domain.Recipe) {
 	return
 }
 
-func (m *InMemoryStore) Get(id domain.ID) domain.Recipe {
-	return m.data[int(id)]
+func (m *InMemoryStore) Get(id domain.ID) (domain.Recipe, error) {
+	return m.data[int(id)], nil
 }

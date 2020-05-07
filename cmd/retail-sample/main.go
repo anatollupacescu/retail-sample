@@ -50,6 +50,8 @@ func main() {
 	loggerFactory := newLoggerFactory(baseLogger)
 	persistenceFactory := newPersistentFactory(baseLogger, config.DatabaseURL)
 
+	// persistenceFactory := newInMemoryPersistentFactory(baseLogger, config.DatabaseURL)
+
 	inventory.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
 	recipe.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
@@ -82,7 +84,8 @@ func main() {
 
 	shutdown := make(chan error, 2)
 
-	logger := kitlog.With(baseLogger, "version", version.Version,
+	logger := kitlog.With(baseLogger,
+		"version", version.Version,
 		"build_time", version.BuildTime,
 		"commit", version.Commit)
 

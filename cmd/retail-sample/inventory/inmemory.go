@@ -56,7 +56,7 @@ func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
 	return zeroValueItem, nil
 }
 
-func (m *InMemoryStore) All() (t []domain.Item, err error) {
+func (m *InMemoryStore) List() (t []domain.Item, err error) {
 	for k, v := range m.data {
 		t = append(t, domain.Item{
 			ID:   k,

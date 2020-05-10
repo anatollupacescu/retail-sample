@@ -18,11 +18,10 @@ import (
 
 type (
 	InMemoryProviderFactory struct {
-		inventory    inventory.Inventory
-		recipeBook   recipe.Book
-		orders       order.Orders
-		stock        stock.Stock
-		provisionLog stock.ProvisionLog
+		inventory  inventory.Inventory
+		recipeBook recipe.Book
+		orders     order.Orders
+		stock      stock.Stock
 	}
 
 	InMemoryProvider struct{}
@@ -30,6 +29,7 @@ type (
 
 var memFactory InMemoryProviderFactory
 
+//nolint:golint,unused,deadcode
 func newInMemoryPersistentFactory(logger kitlog.Logger, dbConn string) *InMemoryProviderFactory {
 	invStore := invCmd.NewInMemoryStore()
 	recipeStore := recipeCmd.NewInMemoryStore()
@@ -57,11 +57,10 @@ func newInMemoryPersistentFactory(logger kitlog.Logger, dbConn string) *InMemory
 	}
 
 	memFactory = InMemoryProviderFactory{
-		inventory:    inventory,
-		recipeBook:   recipeBook,
-		orders:       orders,
-		stock:        stock,
-		provisionLog: &provisionLog,
+		inventory:  inventory,
+		recipeBook: recipeBook,
+		orders:     orders,
+		stock:      stock,
 	}
 
 	return &memFactory

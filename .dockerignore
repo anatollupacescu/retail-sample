@@ -1,2 +1,3 @@
-/test/acceptance/node_modules
+/test
 /database
+/script

@@ -13,7 +13,7 @@ services:
       - retail-data:/var/lib/postgresql/data/ # persist data even if container shuts down
 
   web:
-    image: 4911c9745f59
+    build: ./
     links:
       - 'db:database'
     environment:
@@ -23,6 +23,16 @@ services:
     ports:
       - '8080:8080'
       - '8081:8181'
+    depends_on:
+      - dbmigration
+
+  dbmigration:
+    build: database/
+    links:
+      - 'db:database'
+    environment:
+      - HOST=database
+      - PORT=5432
     depends_on:
       - db
 

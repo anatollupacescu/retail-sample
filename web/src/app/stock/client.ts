@@ -39,14 +39,12 @@ export default class Client {
   }
 
   updatePosition(id: number, newValue: number): void {
-    let updated = false
-    this.state.map(p => {
-      if (updated) return
-      if (p.id === id) {
-        p.qty = newValue
-        updated = true
+    for (let p in this.state) {
+      if (id === this.state[p].id) {
+        this.state[p].qty = newValue
+        return
       }
-    })
+    }
   }
 
   substractFromPosition(ingredientID: number, toSubstract: number): void {

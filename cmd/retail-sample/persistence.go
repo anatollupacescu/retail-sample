@@ -18,11 +18,9 @@ import (
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-
-	kitlog "github.com/go-kit/kit/log"
 )
 
-func newPersistentFactory(logger kitlog.Logger, dbConn string) *PgxProviderFactory {
+func newPersistenceFactory(dbConn string) *PgxProviderFactory {
 	config, err := pgxpool.ParseConfig(dbConn)
 
 	if err != nil {
@@ -60,18 +58,28 @@ func (pf *PgxProviderFactory) New() retail.PersistenceProvider {
 	}
 }
 
-func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) {
-	provider := pp.(*PgxTransactionalProvider)
-	if err := provider.tx.Commit(context.Background()); err != nil {
-		log.Fatal(err)
+func (pf *PgxProviderFactory) ping() error {
+	tx, err := pf.pool.Begin(context.Background())
+
+	if err != nil {
+		return err
 	}
+
+	if _, err := tx.Exec(context.Background(), "SELECT true"); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) {
+func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) error {
 	provider := pp.(*PgxTransactionalProvider)
-	if err := provider.tx.Rollback(context.Background()); err != nil {
-		log.Fatal(err)
-	}
+	return provider.tx.Commit(context.Background())
+}
+
+func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) error {
+	provider := pp.(*PgxTransactionalProvider)
+	return provider.tx.Rollback(context.Background())
 }
 
 func (pp *PgxTransactionalProvider) Inventory() inventory.Inventory {

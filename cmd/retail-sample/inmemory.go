@@ -12,8 +12,6 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
 	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
-
-	kitlog "github.com/go-kit/kit/log"
 )
 
 type (
@@ -30,7 +28,7 @@ type (
 var memFactory InMemoryProviderFactory
 
 //nolint:golint,unused,deadcode
-func newInMemoryPersistentFactory(logger kitlog.Logger, dbConn string) *InMemoryProviderFactory {
+func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 	invStore := invCmd.NewInMemoryStore()
 	recipeStore := recipeCmd.NewInMemoryStore()
 	orderStore := orderCmd.NewInMemoryStore()
@@ -70,9 +68,15 @@ func (pf *InMemoryProviderFactory) New() retail.PersistenceProvider {
 	return &InMemoryProvider{}
 }
 
-func (_ *InMemoryProviderFactory) Commit(_ retail.PersistenceProvider) { /*no op*/ }
+func (_ *InMemoryProviderFactory) Commit(_ retail.PersistenceProvider) error {
+	/*no op*/
+	return nil
+}
 
-func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) { /*no op*/ }
+func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) error {
+	/*no op*/
+	return nil
+}
 
 func (i *InMemoryProvider) Inventory() inventory.Inventory {
 	return memFactory.inventory

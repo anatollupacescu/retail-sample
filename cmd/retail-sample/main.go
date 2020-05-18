@@ -19,6 +19,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
@@ -27,14 +28,17 @@ type serverConfig struct {
 	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
 	Port        string `conf:"default:8080"`
 	DiagPort    string `conf:"default:8081"`
+	InMemory    bool   `conf:"default:false"`
 }
 
 func main() {
 	var config serverConfig
 
-	if err := conf.Parse(nil, "RETAIL", &config); err != nil {
+	if err := conf.Parse(os.Args[1:], "RETAIL", &config); err != nil {
 		log.Fatalf("parse server configuration values: %v", err)
 	}
+
+	log.Fatal()
 
 	businessRouter := mux.NewRouter()
 
@@ -48,9 +52,14 @@ func main() {
 
 	//app
 	loggerFactory := newLoggerFactory(baseLogger)
-	persistenceFactory := newPersistentFactory(baseLogger, config.DatabaseURL)
 
-	// persistenceFactory := newInMemoryPersistentFactory(baseLogger, config.DatabaseURL)
+	var persistenceFactory types.PersistenceProviderFactory
+
+	if config.InMemory {
+		persistenceFactory = newInMemoryPersistentFactory()
+	} else {
+		persistenceFactory = newPersistenceFactory(config.DatabaseURL)
+	}
 
 	inventory.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
@@ -62,16 +71,10 @@ func main() {
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		var status = http.StatusOK
-		/*
-			if !webApp.IsHealthy() {
-				status = http.StatusInternalServerError
-			}
-		*/
-		w.WriteHeader(status)
-	})
-
-	diagRouter.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
+		if err := persistenceFactory.ping(); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 	})
 

@@ -16,8 +16,8 @@ type (
 
 	PersistenceProviderFactory interface {
 		New() PersistenceProvider
-		Commit(PersistenceProvider)
-		Rollback(PersistenceProvider)
+		Commit(PersistenceProvider) error
+		Rollback(PersistenceProvider) error
 	}
 
 	PersistenceProvider interface {

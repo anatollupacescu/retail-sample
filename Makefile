@@ -1,6 +1,6 @@
 PROJECT?=github.com/anatollupacescu/retail-sample
 
-GOOS?=darwin
+GOOS?=linux
 GOARCH?=amd64
 
 RELEASE?=0.0.0

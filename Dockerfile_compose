@@ -1,0 +1,7 @@
+FROM scratch
+
+COPY bin/retail /
+
+COPY /web/dist/ /web/dist/
+
+ENTRYPOINT ["/retail"]

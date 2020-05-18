@@ -38,22 +38,47 @@ export default class Client {
   }
 
   async saveRecipe(name: string, ingredients: RecipeItem[]): Promise<string> {
+    var errNameEmpty = 'name empty',
+      errNamePresent = 'name present',
+      errNoIngredients = "no ingredients"
+
+    if (name.trim() === "") {
+      throw errNameEmpty
+    }
+
+    if (ingredients.length === 0) {
+      throw errNoIngredients
+    }
+
     let found = this.state.find(r => r.name === name)
 
     if (found) {
-      throw 'name present'
+      throw errNamePresent
     }
 
-    let data = await this.apiSaveRecipe(name, ingredients)
+    try {
+      let data = await this.apiSaveRecipe(name, ingredients)
 
-    Object.keys(data).forEach((name: any) => {
-      let id = data[name]
-      this.state.push({
-        id: Number(id),
-        name: String(name),
-        items: ingredients
+      Object.keys(data).forEach((name: any) => {
+        let id = data[name]
+        this.state.push({
+          id: Number(id),
+          name: String(name),
+          items: ingredients
+        })
       })
-    })
+    } catch (error) {
+      switch (error) {
+        case "empty name":
+          throw errNameEmpty
+        case "item type already present":
+          throw errNamePresent
+        case "no ingredients provided":
+          throw errNoIngredients
+        default:
+          break;
+      }
+    }
 
     return ''
   }

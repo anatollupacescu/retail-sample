@@ -92,8 +92,8 @@ export default class App {
         case 'not enough stock':
           this.page.toggleNotEnoughStockError(true)
           this.page.toggleSubmitButtonState(false)
-          return
       }
+      return
     }
 
     let data: Record[] = this.client.getState()

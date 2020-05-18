@@ -1,4 +1,4 @@
-version: '3'
+version: '3.1'
 
 services:
   db:
@@ -13,7 +13,9 @@ services:
       - retail-data:/var/lib/postgresql/data/ # persist data even if container shuts down
 
   web:
-    build: ./
+    build:
+      context: ./
+      dockerfile: Dockerfile_compose
     links:
       - 'db:database'
     environment:

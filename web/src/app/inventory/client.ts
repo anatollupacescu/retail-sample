@@ -59,12 +59,12 @@ export default class Client {
       return newItem
     } catch (error) {
       switch (error) {
-        case 'ERR_EMPTY':
+        case "name not provided":
           throw errMsgEmptyName
-        case 'ERR_UNIQUE':
+        case "item type already present":
           throw errMsgNamePresent
         default:
-          throw new Error('unexpected response from the server')
+          throw 'unexpected response from the server'
       }
     }
   }

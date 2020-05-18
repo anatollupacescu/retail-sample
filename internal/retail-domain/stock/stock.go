@@ -123,7 +123,12 @@ func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {
 	for _, i := range ingredients {
 		presentQty, err := s.Store.Quantity(i.ID)
 
-		if err != nil {
+		switch err {
+		case nil:
+			fallthrough
+		case ErrItemNotFound:
+			break
+		default:
 			return err
 		}
 

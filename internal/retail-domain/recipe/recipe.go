@@ -39,7 +39,7 @@ type (
 
 var (
 	ErrEmptyName           = errors.New("empty name")
-	ErrNoIngredients       = errors.New("no components found")
+	ErrNoIngredients       = errors.New("no ingredients provided")
 	ErrIgredientNotFound   = errors.New("ingredient not found")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )

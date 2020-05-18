@@ -1,6 +1,9 @@
 package inventory
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type (
 	Item struct {
@@ -28,7 +31,7 @@ var (
 )
 
 func (i Inventory) Add(name string) (int, error) {
-	if name == "" {
+	if strings.TrimSpace(name) == "" {
 		return 0, ErrEmptyName
 	}
 
@@ -36,12 +39,14 @@ func (i Inventory) Add(name string) (int, error) {
 
 	switch err {
 	case ErrItemNotFound: //success
-		return i.Store.Add(name)
+		break
 	case nil:
 		return 0, ErrDuplicateName
 	default:
 		return 0, err
 	}
+
+	return i.Store.Add(name)
 }
 
 func (i Inventory) List() ([]Item, error) {

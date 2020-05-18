@@ -1,40 +1,54 @@
 # retail-sample
 
-two main areas: in & out
+**TODO**
 
-`in` has sub areas:
-* to configure item types (role: admin)
-* to enter raw materials (stock item): type and quantity (role: user)
+godoc
+inmemory as flag
 
-`out` has sub areas: 
-* configure finished product (FP) components (role: admin)
-* sell finished product (role: user)
+disabling a certain inventory item
+view recipe items
+cancel a provision
 
-## Details
+**Summary**
 
-a) item type:
-- name - unique
-- code - unique
+An attempt to design a stock management system with domain driven principles in mind.
 
-actions:
-* add if not present
-* remove if not used
-* disable if used
+It has a Go backend exposing a REST interface and using postgres for persistence.
 
-b) stock item: 
-- code - points to a certain `enabled` `item type code`
-- quantity - scalar value (integer) above zero and negative for correction/discard
+The frontend is a SPA (single page application) with a single static HTML page written using Bootstrap.
 
-action: can add new and if code is present then sum the quantity
+Both front and back-end are written in such a way that their 'business' related code is separated from the delivery code:
 
-c) finished  product type:
-- name - unique
-- a list of components, where each one has:
-    * an `item type`
-    * a quantity
+- for the back-end - all the implementation details are placed in the `cmd` folder, while all the business rules are in the `internal` directory.
 
-d) finished product out
-- type `finished product type`
-- quantity - positive `int`
+- for the front-end - the `web/src/app` folder contains all the framework free code - the domain objects, rest clients and page behaviour (error messages, controls animation) while `web/src/jquery` or `web/src/plan` (WIP) contains the means by which this logic in bound to the web page components.
 
-should update the stock - subtract the corresponding amounts
+**Commands**
+
+to start the backend
+
+> make run
+
+to start frontend
+
+> cd web; ./gen_static.sh; yarn start
+
+The code is located in the `web` directory
+
+## inventory:
+
+- a list of unique item names
+
+## stock:
+
+- a list of items that are present in the inventory AND have been provisioned
+
+## recipe:
+
+- a list of recipes, each recipe has a unique name and a list of ingredients with their quantities
+
+## order:
+
+- a list of orders that have been successfully placed.
+- if the order does not have enough stock, it will be rejected
+- if there is enough stock, the corresponding values will be substracted from the stock

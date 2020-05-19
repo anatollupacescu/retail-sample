@@ -7,6 +7,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
 	"github.com/jackc/pgconn"
+	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 

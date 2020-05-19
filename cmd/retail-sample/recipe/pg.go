@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgconn"
+	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"

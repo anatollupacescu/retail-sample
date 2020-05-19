@@ -4,17 +4,17 @@ import (
 	"context"
 	"log"
 
+	pgx "github.com/jackc/pgx/v4"
+
 	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/inventory"
 	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
 	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
 	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
-
+	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
-
-	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )

@@ -3,7 +3,6 @@ package inventory
 import (
 	"context"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"

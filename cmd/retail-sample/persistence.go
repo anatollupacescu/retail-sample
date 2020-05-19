@@ -16,7 +16,6 @@ import (
 
 	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 

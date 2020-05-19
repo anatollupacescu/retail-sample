@@ -18,10 +18,14 @@ INDEX_HTML?=src/index.html
 $(INDEX_HTML):
 	$(MAKE) gen
 
+DIST?=dist/
+
+$(DIST):
+	yarn build
+
 .PHONY: build
 
-build: $(NODE_MODULES) $(INDEX_HTML)
-	yarn build
+build: $(DIST)
 
 clean:
 	@rm -rf .cache dist

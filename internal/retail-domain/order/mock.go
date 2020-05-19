@@ -1,8 +1,9 @@
 package order
 
 import (
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
 type MockOrderStore struct {

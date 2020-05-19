@@ -71,7 +71,7 @@ func main() {
 
 	diagRouter := mux.NewRouter()
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		if err := persistenceFactory.ping(); err != nil {
+		if err := persistenceFactory.Ping(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

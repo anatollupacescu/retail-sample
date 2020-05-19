@@ -23,7 +23,21 @@ Both front and back-end are written in such a way that their 'business' related 
 
 - for the front-end - the `web/src/app` folder contains all the framework free code - the domain objects, rest clients and page behaviour (error messages, controls animation) while `web/src/jquery` or `web/src/plan` (WIP) contains the means by which this logic in bound to the web page components.
 
-**Commands**
+**Usage**
+
+##front-end
+
+enter web/ folder
+
+make gen
+
+make build
+
+##back-end
+
+make build
+
+docker-compose up --build
 
 to start the backend
 

@@ -18,6 +18,7 @@ type (
 		New() PersistenceProvider
 		Commit(PersistenceProvider) error
 		Rollback(PersistenceProvider) error
+		Ping() error
 	}
 
 	PersistenceProvider interface {

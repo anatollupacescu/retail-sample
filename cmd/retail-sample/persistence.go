@@ -58,7 +58,7 @@ func (pf *PgxProviderFactory) New() retail.PersistenceProvider {
 	}
 }
 
-func (pf *PgxProviderFactory) ping() error {
+func (pf *PgxProviderFactory) Ping() error {
 	tx, err := pf.pool.Begin(context.Background())
 
 	if err != nil {

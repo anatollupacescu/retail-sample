@@ -78,6 +78,11 @@ func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) error {
 	return nil
 }
 
+func (_ *InMemoryProviderFactory) Ping() error {
+	/*no op*/
+	return nil
+}
+
 func (i *InMemoryProvider) Inventory() inventory.Inventory {
 	return memFactory.inventory
 }

@@ -39,12 +39,13 @@ run/mem: $(BINARY)
 .PHONY: run/docker
 
 run/docker: $(BINARY)
+	$(MAKE) build/web
 	docker-compose up --build
 
 .PHONY: clean
 
 clean:
-	@rm $(BINARY)
+	@rm $(BINARY) 2> /dev/null || true
 	@$(MAKE) clean -C web/
 
 .PHONY: build/web

@@ -22,3 +22,6 @@ $(INDEX_HTML):
 
 build: $(NODE_MODULES) $(INDEX_HTML)
 	yarn build
+
+clean:
+	@rm -rf .cache dist

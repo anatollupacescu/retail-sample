@@ -36,9 +36,19 @@ $(BINARY):
 run/mem: $(BINARY)
 	$(BINARY) --in-memory
 
+.PHONY: run/docker
+
+run/docker: $(BINARY)
+	docker-compose up --build
+
 .PHONY: clean
 
 clean: $(BINARY)
 	rm $(BINARY)
 
+.PHONY: build/web
+
+build/web:
+	$(MAKE) build -C web/
+ 
 .PHONY: test format build build/docker run

@@ -8,8 +8,17 @@ $(MUSTACHE):
 $(NODE_MODULES):
 	yarn
 
+.PHONY: gen
+
 gen: $(MUSTACHE)
 	@./gen_static.sh
 
-build: $(NODE_MODULES) src/index.html
+INDEX_HTML?=src/index.html
+
+$(INDEX_HTML):
+	$(MAKE) gen
+
+.PHONY: build
+
+build: $(NODE_MODULES) $(INDEX_HTML)
 	yarn build

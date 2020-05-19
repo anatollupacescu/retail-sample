@@ -26,4 +26,19 @@ build:
 run:
 	@go run $(shell pwd)/cmd/retail-sample
 
+BINARY?=$(shell pwd)/bin/retail
+
+$(BINARY):
+	$(MAKE) build
+
+.PHONY: run/mem
+
+run/mem: $(BINARY)
+	$(BINARY) --in-memory
+
+.PHONY: clean
+
+clean: $(BINARY)
+	rm $(BINARY)
+
 .PHONY: test format build build/docker run

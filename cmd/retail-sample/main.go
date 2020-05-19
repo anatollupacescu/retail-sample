@@ -38,8 +38,6 @@ func main() {
 		log.Fatalf("parse server configuration values: %v", err)
 	}
 
-	log.Fatal()
-
 	businessRouter := mux.NewRouter()
 
 	server := http.Server{

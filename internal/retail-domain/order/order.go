@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
 type (
@@ -28,24 +27,39 @@ type (
 		List() ([]Order, error)
 	}
 
+	recipeBook interface {
+		Get(recipe.ID) (recipe.Recipe, error)
+	}
+
+	orderStock interface {
+		Sell(ingredients []recipe.Ingredient, qty int) error
+	}
+
 	Orders struct {
 		Store      Store
-		RecipeBook recipe.Book
-		Stock      stock.Stock
+		RecipeBook recipeBook
+		Stock      orderStock
 	}
 )
 
-var ErrOrderNotFound = errors.New("order not found")
+var (
+	ErrOrderNotFound   = errors.New("order not found")
+	ErrInvalidQuantity = errors.New("quantity not valid")
+)
 
 func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
+	var zeroOrderID ID
+
+	if qty <= 0 {
+		return zeroOrderID, ErrInvalidQuantity
+	}
+
 	recipeID := recipe.ID(id)
 
 	r, err := o.RecipeBook.Get(recipeID)
 
-	var noOrderID ID
-
 	if err != nil {
-		return noOrderID, err
+		return zeroOrderID, err
 	}
 
 	ingredients := r.Ingredients
@@ -54,13 +68,18 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 		return 0, err
 	}
 
-	orderID, err = o.Add(OrderEntry{
-		RecipeID: id,
-		Qty:      qty,
-	})
+	ord := Order{
+		OrderEntry: OrderEntry{
+			RecipeID: id,
+			Qty:      qty,
+		},
+		Date: time.Now(),
+	}
+
+	orderID, err = o.Store.Add(ord)
 
 	if err != nil {
-		return noOrderID, err
+		return zeroOrderID, err
 	}
 
 	return orderID, nil
@@ -68,15 +87,6 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 
 func (o Orders) Get(id ID) (Order, error) {
 	return o.Store.Get(id)
-}
-
-func (o Orders) Add(oe OrderEntry) (ID, error) {
-	ord := Order{
-		OrderEntry: oe,
-		Date:       time.Now(),
-	}
-
-	return o.Store.Add(ord)
 }
 
 func (o Orders) List() ([]Order, error) {

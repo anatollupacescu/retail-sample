@@ -31,6 +31,12 @@ export function initializeInventory(client: Client, stock: StockClient) {
   app.init()
 }
 
+function showModal() {
+  $('#showModal').on('shown.bs.modal', function () {
+    $('#myInput').trigger('focus')
+  })
+}
+
 function getStringValue(nameInput: JQuery): string {
   return String(nameInput.val())
 }

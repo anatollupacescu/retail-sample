@@ -11,7 +11,7 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     addItemBtn = $('#addRecipeItem'),
     saveRecipeBtn = $('#saveRecipe'),
     recipeNameInput = $('#recipeName')
-
+  
   let page: Page = {
     ingredientID: (): number => getNumberValue(itemNameDropdown),
     removeIngredientFromDropdown: (s: string): void => removeIngredientNameFromTheList(s),

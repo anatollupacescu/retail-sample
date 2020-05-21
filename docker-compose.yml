@@ -4,7 +4,7 @@ services:
   db:
     image: postgres
     ports:
-      - '5432'
+      - '5432:5432'
     environment:
       - POSTGRES_DB=retail
       - POSTGRES_USER=docker
@@ -35,8 +35,6 @@ services:
     environment:
       - HOST=database
       - PORT=5432
-    depends_on:
-      - db
 
 volumes:
   retail-data: # named volumes can be managed easier using docker-compose

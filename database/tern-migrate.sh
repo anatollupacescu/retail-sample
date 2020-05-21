@@ -7,4 +7,8 @@ do
   sleep 1
 done
 
+echo "running tern migrate"
+
 tern migrate
+
+echo "done"

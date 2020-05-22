@@ -55,17 +55,15 @@ export default class App {
   show() {
     let items = this.recipe.getState()
     this.page.populateDropdown(items)
+
+    let data: Record[] = this.client.getState()
+    let rows = this.toRows(data)
+    this.page.populateTable(rows)
   }
 
   init() {
-    this.client
-      .fetchOrders()
-      .then(() => {
-        let data: Record[] = this.client.getState()
-        let rows = this.toRows(data)
-        this.page.populateTable(rows)
-      })
-      .catch(err => console.error(err))
+    this.client.fetchState()
+    .catch(err => console.error(err))
   }
 
   private badQuantity(qty: any): boolean {

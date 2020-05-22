@@ -24,7 +24,7 @@ export default class Client {
     }
   }
 
-  async fetchOrders(): Promise<any> {
+  async fetchState(): Promise<any> {
     this.state = await this.apiFetchOrders()
   }
 

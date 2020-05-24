@@ -31,6 +31,15 @@ export default class App {
     })
   }
 
+  toggleItemStatus(s: boolean) {
+    if (!this.selectedID) {
+      return
+    }
+
+    this.client.toggleItemStatus(this.selectedID, s)
+      .then(this.page.populateModal)
+  }
+
   showModal() {
     if (!this.selectedID) {
       console.log('no row selected')

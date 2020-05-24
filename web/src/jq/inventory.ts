@@ -60,13 +60,37 @@ export function initializeInventory(client: Client, stock: StockClient) {
     el.toggleClass(dark)
   })
 
+  let enableItem = $('#enabledItem')
+
+  enableItem.on('click', () => {
+    app.toggleItemStatus(true)
+  })
+
+  let disableItem = $('#disabledItem')
+
+  disableItem.on('click', () => {
+    app.toggleItemStatus(false)
+  })
+
   app.init()
 }
 
 function populateModal(i: inventoryItem): void {
   $('#modalID').html(String(i.id))
   $('#modalName').html(i.name)
-  $('#modalStatus').html(String(false))
+
+  let enbl = $('#enabledItem'),
+    dsbl = $('#disabledItem')
+
+  enbl.removeClass('btn-primary')
+  dsbl.removeClass('btn-primary')
+
+  if (i.enabled) {
+    enbl.addClass('btn-primary')
+    return
+  }
+
+  dsbl.addClass('btn-primary')
 }
 
 function toggleModal(v: boolean): void {

@@ -3,6 +3,7 @@ import axios from 'axios'
 export interface inventoryItem {
   id: number
   name: string
+  enabled: boolean
 }
 
 export default class Client {
@@ -38,6 +39,10 @@ export default class Client {
     }
   }
 
+  async toggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
+    return { id: Number(id), name: 'ignore me', enabled: enabled }
+  }
+
   async fetchItem(id: string): Promise<inventoryItem> {
     try {
       return this.apiFetchItem(id)
@@ -45,7 +50,7 @@ export default class Client {
       console.log('could not fetch item with id', id, 'reason', error)
     }
 
-    return { id: 0, name: '' }
+    return { id: 0, name: '', enabled: false }
   }
 
   async apiAddItem(name: string): Promise<any> {

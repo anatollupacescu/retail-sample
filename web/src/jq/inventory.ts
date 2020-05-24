@@ -9,6 +9,8 @@ export function initializeInventory(client: Client, stock: StockClient) {
   let form = $('#mainForm')
 
   let page: Page = {
+    populateModal: (i: inventoryItem) => populateModal(i),
+    toggleModal: (v: boolean) => toggleModal(v),
     name: () => getStringValue(nameInput),
     resetName: () => setNameEmpty(nameInput),
     toggleNameError: (v: boolean) => toggleEmptyNameError(v),
@@ -28,7 +30,54 @@ export function initializeInventory(client: Client, stock: StockClient) {
     app.onNameChange()
   })
 
+  let openModalBtn = $('#openModalBtn')
+
+  openModalBtn.on('click', () => {
+    app.showModal()
+  })
+
+  let closeModalClass = $('.close-modal')
+
+  closeModalClass.on('click', () => {
+    app.closeModal()
+  })
+
+  let tableRow = $('#inventoryTable tbody')
+
+  tableRow.on('click', 'tr', function(){
+    //TODO use marker css classes to highligh specific row in the Page component
+
+    let dark = 'list-group-item-dark'
+    
+    $('#inventoryTable tbody tr').removeClass(dark)
+    
+    let el = $(this)
+    let cells = el[0].cells
+    let id = cells[0].innerHTML
+    
+    app.onRowClick(id)
+    
+    el.toggleClass(dark)
+  })
+
   app.init()
+}
+
+function populateModal(i: inventoryItem): void {
+  $('#modalID').html(String(i.id))
+  $('#modalName').html(i.name)
+  $('#modalStatus').html(String(false))
+}
+
+function toggleModal(v: boolean): void {
+  let el = $('#inventoryModal')
+  if (v) {
+    el.addClass('show')
+    el.addClass('d-block')
+    return
+  }
+  el.removeClass('show')
+  el.removeClass('d-block')
 }
 
 function getStringValue(nameInput: JQuery): string {
@@ -59,14 +108,6 @@ function toggleEmptyNameError(v: boolean): void {
   }
   $('#nonempty.invalid-feedback').removeClass('d-block')
 }
-
-/* for later
-function onTableRowClick_highlight_row(): void {
-  $('#inventoryTable tbody').on('click', 'tr', function() {
-    $(this).toggleClass('list-group-item-dark')
-  })
-}
-*/
 
 const byID = (i1: inventoryItem, i2: inventoryItem) => i1.id - i2.id
 

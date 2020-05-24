@@ -29,6 +29,25 @@ export default class Client {
     return apiData
   }
 
+  private async apiFetchItem(id: string): Promise<any> {
+    try {
+      let response = await axios.get(`${this.endpoint}/${id}`)
+      return response.data.data
+    } catch (error) {
+      throw error.response.data.trim()
+    }
+  }
+
+  async fetchItem(id: string): Promise<inventoryItem> {
+    try {
+      return this.apiFetchItem(id)
+    } catch (error) {
+      console.log('could not fetch item with id', id, 'reason', error)
+    }
+
+    return { id: 0, name: ''}
+  }
+
   async apiAddItem(name: string): Promise<any> {
     try {
       let payload = {

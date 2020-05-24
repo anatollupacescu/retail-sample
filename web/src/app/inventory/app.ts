@@ -2,6 +2,8 @@ import Client, { inventoryItem } from './client'
 import StockClient from '../stock/client'
 
 export interface Page {
+  toggleModal(v: boolean): void
+  populateModal(i: inventoryItem): void
   toggleNameError(v: boolean): void
   name(): string
   resetName(): void
@@ -15,6 +17,8 @@ export default class App {
   private stock: StockClient
   private page: Page
 
+  private selectedID: string = ''
+
   constructor(inv: Client, stock: StockClient, page: Page) {
     this.client = inv
     this.stock = stock
@@ -25,6 +29,25 @@ export default class App {
     this.client.fetchState().then(data => {
       this.page.renderTable(data)
     })
+  }
+
+  showModal() {
+    if (!this.selectedID) {
+      console.log('no row selected')
+      return
+    }
+
+    this.client.fetchItem(this.selectedID)
+      .then(this.page.populateModal)
+      .then(() => this.page.toggleModal(true))
+  }
+
+  closeModal() {
+    this.page.toggleModal(false)
+  }
+
+  onRowClick(id: string) {
+    this.selectedID = id
   }
 
   onNameChange() {

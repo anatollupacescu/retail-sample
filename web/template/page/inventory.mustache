@@ -54,4 +54,46 @@
       </table>
     </div>
   </div>
+  <div class="row pt-3">
+    <div class="col-md-12">
+      <button type="button" class="btn btn-primary" id="openModalBtn">
+        Launch demo modal
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close close-modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row pt-3">
+            <div class="col-md-12">
+              <ul>
+                <li>ID: <span id="modalID" class="pl-1" /></li>
+                <li>Name: <span id="modalName" class="pl-1" /></li>
+                <li>Status: <span id="modalStatus" class="pl-1" /></li>
+              </ul>
+            </div>
+          </div>
+          <div class="row pt-3 pl-1">
+            <div class="col-md-12">
+              <button type="button" class="btn btn-primary">Enable</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Done</button>
+      </div>
+    </div>
+  </div>
 </div>

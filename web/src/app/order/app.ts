@@ -62,8 +62,7 @@ export default class App {
   }
 
   init() {
-    this.client.fetchState()
-    .catch(err => console.error(err))
+    this.client.fetchState().catch(err => console.error(err))
   }
 
   private badQuantity(qty: any): boolean {

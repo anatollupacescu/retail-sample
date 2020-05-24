@@ -25,7 +25,7 @@ describe('saving a new item', () => {
   describe('when server says item name is empty', () => {
     let app = new Client()
     let mockApi = chai.spy.on(app, 'apiAddItem', () => {
-      throw 'ERR_EMPTY'
+      throw 'name not provided'
     })
 
     it('errors', () => {
@@ -58,7 +58,7 @@ describe('saving a new item', () => {
     let app = new Client()
 
     let mockApi = chai.spy.on(app, 'apiAddItem', () => {
-      throw 'ERR_UNIQUE'
+      throw 'item type already present'
     })
 
     it('errors with the correct message', () => {

@@ -45,7 +45,7 @@ export default class Client {
       console.log('could not fetch item with id', id, 'reason', error)
     }
 
-    return { id: 0, name: ''}
+    return { id: 0, name: '' }
   }
 
   async apiAddItem(name: string): Promise<any> {
@@ -78,9 +78,9 @@ export default class Client {
       return newItem
     } catch (error) {
       switch (error) {
-        case "name not provided":
+        case 'name not provided':
           throw errMsgEmptyName
-        case "item type already present":
+        case 'item type already present':
           throw errMsgNamePresent
         default:
           throw 'unexpected response from the server'

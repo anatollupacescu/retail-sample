@@ -11,6 +11,18 @@ chai.use(spies)
 let expect = chai.expect
 
 describe('saving a recipe', () => {
+  describe('when recipe is missing ingredients', () => {
+    let app = new RecipeClient('', [])
+
+    let mockApi = chai.spy.on(app, 'apiSaveRecipe')
+
+    it('should err', () => {
+      expect(app.saveRecipe('test', [])).to.be.rejectedWith('no ingredients')
+      expect(mockApi).to.have.been.called.exactly(0)
+      expect(app.getState()).to.have.length(0)
+    })
+  })
+
   describe('when recipe name is already taken', () => {
     let state = [
       {
@@ -25,7 +37,7 @@ describe('saving a recipe', () => {
     let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
     it('should err', () => {
-      expect(app.saveRecipe('test', [])).to.be.rejectedWith('name present')
+      expect(app.saveRecipe('test', [{ id: 1, qty: 2 }])).to.be.rejectedWith('name present')
       expect(mockApi).to.have.been.called.exactly(0)
       expect(app.getState()).to.have.length(1)
     })

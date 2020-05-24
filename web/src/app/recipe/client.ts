@@ -40,9 +40,9 @@ export default class Client {
   async saveRecipe(name: string, ingredients: RecipeItem[]): Promise<string> {
     var errNameEmpty = 'name empty',
       errNamePresent = 'name present',
-      errNoIngredients = "no ingredients"
+      errNoIngredients = 'no ingredients'
 
-    if (name.trim() === "") {
+    if (name.trim() === '') {
       throw errNameEmpty
     }
 
@@ -69,14 +69,14 @@ export default class Client {
       })
     } catch (error) {
       switch (error) {
-        case "empty name":
+        case 'empty name':
           throw errNameEmpty
-        case "item type already present":
+        case 'item type already present':
           throw errNamePresent
-        case "no ingredients provided":
+        case 'no ingredients provided':
           throw errNoIngredients
         default:
-          break;
+          break
       }
     }
 

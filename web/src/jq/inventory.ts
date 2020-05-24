@@ -44,19 +44,19 @@ export function initializeInventory(client: Client, stock: StockClient) {
 
   let tableRow = $('#inventoryTable tbody')
 
-  tableRow.on('click', 'tr', function(){
+  tableRow.on('click', 'tr', function() {
     //TODO use marker css classes to highligh specific row in the Page component
 
     let dark = 'list-group-item-dark'
-    
+
     $('#inventoryTable tbody tr').removeClass(dark)
-    
+
     let el = $(this)
     let cells = el[0].cells
     let id = cells[0].innerHTML
-    
+
     app.onRowClick(id)
-    
+
     el.toggleClass(dark)
   })
 

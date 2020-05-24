@@ -37,7 +37,8 @@ export default class App {
       return
     }
 
-    this.client.fetchItem(this.selectedID)
+    this.client
+      .fetchItem(this.selectedID)
       .then(this.page.populateModal)
       .then(() => this.page.toggleModal(true))
   }

@@ -31,6 +31,16 @@ func (ia InventoryWrapper) exec(methodName string, f func(i inventory.Inventory)
 	ia.PersistenceProviderFactory.Commit(provider)
 }
 
+func (ia InventoryWrapper) ChangeItemStatus(id int, enabled bool) (item inventory.Item, err error) {
+	ia.exec("update item status", func(i inventory.Inventory) error {
+		item, err = i.UpdateStatus(id, enabled)
+
+		return err
+	})
+
+	return
+}
+
 func (ia InventoryWrapper) AddToInventory(name string) (id int, err error) {
 	ia.exec("add to inventory", func(i inventory.Inventory) error {
 		itemName := name

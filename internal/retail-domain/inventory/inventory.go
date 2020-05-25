@@ -7,8 +7,9 @@ import (
 
 type (
 	Item struct {
-		ID   int
-		Name string
+		ID      int
+		Name    string
+		Enabled bool
 	}
 
 	Store interface {
@@ -16,6 +17,7 @@ type (
 		Find(string) (int, error)
 		Get(int) (Item, error)
 		List() ([]Item, error)
+		Update(Item) error
 	}
 
 	Inventory struct {
@@ -29,6 +31,25 @@ var (
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 )
+
+func (i Inventory) UpdateStatus(id int, enabled bool) (item Item, err error) {
+	item, err = i.Store.Get(id)
+
+	switch err {
+	case nil:
+		break
+	case ErrItemNotFound:
+		return
+	default:
+		return Item{}, err
+	}
+
+	item.Enabled = enabled
+
+	err = i.Store.Update(item)
+
+	return item, err
+}
 
 func (i Inventory) Add(name string) (int, error) {
 	if strings.TrimSpace(name) == "" {

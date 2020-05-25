@@ -3,7 +3,8 @@ package inventory
 import domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 
 type Entry struct {
-	Name string
+	Name    string
+	Enabled bool
 }
 
 type InMemoryStore struct {
@@ -25,7 +26,8 @@ func (m *InMemoryStore) Add(s string) (int, error) {
 	newID := *m.counter
 
 	m.data[newID] = Entry{
-		Name: s,
+		Name:    s,
+		Enabled: true,
 	}
 
 	return newID, nil
@@ -65,4 +67,13 @@ func (m *InMemoryStore) List() (t []domain.Item, err error) {
 	}
 
 	return
+}
+
+func (m *InMemoryStore) Update(i domain.Item) (err error) {
+	m.data[i.ID] = Entry{
+		Name:    i.Name,
+		Enabled: i.Enabled,
+	}
+
+	return nil
 }

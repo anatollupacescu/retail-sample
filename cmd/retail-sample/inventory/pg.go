@@ -3,6 +3,7 @@ package inventory
 import (
 	"context"
 
+	"github.com/jackc/pgconn"
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
@@ -14,15 +15,26 @@ var DBErr = errors.New("postgres")
 type PgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error)
 }
 
 type PgxStore struct {
 	DB PgxDB
 }
 
+func (ps *PgxStore) Update(i inventory.Item) (err error) {
+	_, err = ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
+
+	if err != nil {
+		return errors.Wrapf(DBErr, "update inventory item: %v", err)
+	}
+
+	return nil
+}
+
 func (ps *PgxStore) Add(n string) (int, error) {
 	var id int32
-	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name) values($1) returning id", n).Scan(&id)
+	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name, enabled) values($1, true) returning id", n).Scan(&id)
 
 	if err != nil {
 		return 0, errors.Wrapf(DBErr, "add inventory item: %v", err)
@@ -48,8 +60,18 @@ func (ps *PgxStore) Find(n string) (int, error) {
 }
 
 func (ps *PgxStore) Get(id int) (inventory.Item, error) {
-	var name string
-	err := ps.DB.QueryRow(context.Background(), "select name from inventory where id = $1", id).Scan(&name)
+	var (
+		name    string
+		enabled bool
+	)
+
+	sql := `select 
+						name, enabled 
+					from 
+						inventory 
+					where id = $1`
+
+	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&name, &enabled)
 
 	var zeroItem inventory.Item
 
@@ -63,13 +85,14 @@ func (ps *PgxStore) Get(id int) (inventory.Item, error) {
 	}
 
 	return inventory.Item{
-		ID:   id,
-		Name: string(name),
+		ID:      id,
+		Name:    name,
+		Enabled: enabled,
 	}, nil
 }
 
 func (ps *PgxStore) List() (items []inventory.Item, err error) {
-	rows, err := ps.DB.Query(context.Background(), "select id, name from inventory")
+	rows, err := ps.DB.Query(context.Background(), "select id, name, enabled from inventory")
 
 	if err != nil {
 		return nil, errors.Wrapf(DBErr, "list inventory: %v", err)
@@ -78,14 +101,20 @@ func (ps *PgxStore) List() (items []inventory.Item, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int32
-		var name string
+		var (
+			id      int32
+			name    string
+			enabled bool
+		)
+
 		if err := rows.Scan(&id, &name); err != nil {
 			return nil, errors.Wrapf(DBErr, "scan inventory: %v", err)
 		}
+
 		items = append(items, inventory.Item{
-			ID:   int(id),
-			Name: string(name),
+			ID:      int(id),
+			Name:    name,
+			Enabled: enabled,
 		})
 	}
 

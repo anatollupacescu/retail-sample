@@ -18,5 +18,6 @@ func ConfigureRoutes(r *mux.Router, loggerFactory types.LoggerFactory, factory t
 	}
 	r.HandleFunc("/inventory", app.GetAllInventoryItems).Methods(http.MethodGet)
 	r.HandleFunc("/inventory/{itemID}", app.GetInventoryItem).Methods(http.MethodGet)
+	r.HandleFunc("/inventory/{itemID}", app.UpdateItem).Methods(http.MethodPatch)
 	r.HandleFunc("/inventory", app.CreateInventoryItem).Methods(http.MethodPost)
 }

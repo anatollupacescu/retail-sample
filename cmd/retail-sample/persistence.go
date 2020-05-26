@@ -71,14 +71,20 @@ func (pf *PgxProviderFactory) Ping() error {
 	return nil
 }
 
-func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) error {
+func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
-	return provider.tx.Commit(context.Background())
+	err := provider.tx.Commit(context.Background())
+	if err != nil {
+		log.Printf("commit: %v", err)
+	}
 }
 
-func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) error {
+func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
-	return provider.tx.Rollback(context.Background())
+	err := provider.tx.Rollback(context.Background())
+	if err != nil {
+		log.Printf("rollback: %v", err)
+	}
 }
 
 func (pp *PgxTransactionalProvider) Inventory() inventory.Inventory {

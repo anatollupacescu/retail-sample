@@ -68,14 +68,12 @@ func (pf *InMemoryProviderFactory) New() retail.PersistenceProvider {
 	return &InMemoryProvider{}
 }
 
-func (_ *InMemoryProviderFactory) Commit(_ retail.PersistenceProvider) error {
+func (_ *InMemoryProviderFactory) Commit(_ retail.PersistenceProvider) {
 	/*no op*/
-	return nil
 }
 
-func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) error {
+func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) {
 	/*no op*/
-	return nil
 }
 
 func (_ *InMemoryProviderFactory) Ping() error {

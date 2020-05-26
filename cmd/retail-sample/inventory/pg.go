@@ -107,7 +107,7 @@ func (ps *PgxStore) List() (items []inventory.Item, err error) {
 			enabled bool
 		)
 
-		if err := rows.Scan(&id, &name); err != nil {
+		if err := rows.Scan(&id, &name, &enabled); err != nil {
 			return nil, errors.Wrapf(DBErr, "scan inventory: %v", err)
 		}
 

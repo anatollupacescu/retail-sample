@@ -12,7 +12,6 @@ import (
 )
 
 func TestAddRecipe(t *testing.T) {
-
 	t.Run("should reject empty name", func(t *testing.T) {
 		b := recipe.Book{}
 		_, err := b.Add("", nil)
@@ -31,15 +30,14 @@ func TestAddRecipe(t *testing.T) {
 		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
 	})
 
-	t.Run("should return error if incredients are no present in inventory", func(t *testing.T) {
-		t.Skip("add error on line 42")
+	t.Run("should return error if incredients are not present in inventory", func(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 
 		i := &recipe.MockInventory{}
 		b := recipe.Book{Store: s, Inventory: i}
 
 		var zeroInventoryItem inventory.Item
-		i.On("Get", 1).Return(zeroInventoryItem, nil)
+		i.On("Get", 1).Return(zeroInventoryItem, inventory.ErrItemNotFound)
 
 		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
@@ -95,7 +93,6 @@ func TestAddRecipe(t *testing.T) {
 func TestGetRecipe(t *testing.T) {
 
 	t.Run("should return zero value for non existent", func(t *testing.T) {
-		t.Skip("should return error for non existent items")
 		s := &recipe.MockRecipeStore{}
 		b := recipe.Book{Store: s}
 

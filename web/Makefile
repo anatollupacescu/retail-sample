@@ -20,12 +20,19 @@ $(INDEX_HTML):
 
 DIST?=dist/
 
-$(DIST):
+$(DIST): $(INDEX_HTML)
 	yarn build
 
 .PHONY: build
 
 build: $(DIST)
 
+.PHONY: watch
+
+watch: $(DIST)
+	@yarn watch
+
+.PHONY: clean
+
 clean:
-	@rm -rf .cache dist
+	@rm -rf .cache dist $(INDEX_HTML)s

@@ -36,8 +36,7 @@ export default class App {
       return
     }
 
-    this.client.toggleItemStatus(this.selectedID, s)
-      .then(this.page.populateModal)
+    this.client.toggleItemStatus(this.selectedID, s).then(this.page.populateModal)
   }
 
   showModal() {

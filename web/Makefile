@@ -1,4 +1,4 @@
-BIN_DIR := $(GOPATH)/bin
+BIN_DIR := $(shell go env GOPATH)/bin
 MUSTACHE := $(BIN_DIR)/mustache
 NODE_MODULES := node_modules/
 
@@ -8,15 +8,10 @@ $(MUSTACHE):
 $(NODE_MODULES):
 	yarn
 
-.PHONY: gen
-
-gen: $(MUSTACHE)
-	@./gen_static.sh
-
 INDEX_HTML?=src/index.html
 
-$(INDEX_HTML):
-	$(MAKE) gen
+$(INDEX_HTML): $(MUSTACHE)
+	@./gen_static.sh
 
 DIST?=dist/
 

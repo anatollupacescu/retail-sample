@@ -2,6 +2,8 @@ import Client, { inventoryItem } from './client'
 import StockClient from '../stock/client'
 
 export interface Page {
+  clearRow(): void
+  highlightRow(s: string): void
   toggleModal(v: boolean): void
   populateModal(i: inventoryItem): void
   toggleNameError(v: boolean): void
@@ -45,12 +47,13 @@ export default class App {
     }
 
     this.client
-      .toggleItemStatus(this.selectedID, s)
+      .toggleItemStatus(id, s)
       .then(this.page.populateModal)
       .then(() => {
         let data = this.client.getState()
         this.page.renderTable(data)
       })
+      .then(() => this.page.highlightRow(id))
   }
 
   showModal() {
@@ -72,7 +75,12 @@ export default class App {
   }
 
   onRowClick(id: string) {
+    if (id === this.selectedID) {
+      this.selectedID = ''
+      return this.page.clearRow()
+    }
     this.selectedID = id
+    this.page.highlightRow(id)
   }
 
   onNameChange() {

@@ -22,6 +22,8 @@ describe('on submit', () => {
 
 function noOpPage(): Page {
   return {
+    clearRow: (): void => {},
+    highlightRow: (_: string): void => {},
     populateModal: (_: inventoryItem): void => {},
     toggleModal: (_: boolean): void => {},
     toggleNameError: (_v: boolean): void => {},

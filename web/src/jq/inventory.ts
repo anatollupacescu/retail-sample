@@ -9,6 +9,8 @@ export function initializeInventory(client: Client, stock: StockClient) {
   let form = $('#mainForm')
 
   let page: Page = {
+    highlightRow: (id: string) => selectTableRow(id),
+    clearRow: () => clearRowSelection(),
     populateModal: (i: inventoryItem) => populateModal(i),
     toggleModal: (v: boolean) => toggleModal(v),
     name: () => getStringValue(nameInput),
@@ -43,26 +45,12 @@ export function initializeInventory(client: Client, stock: StockClient) {
   })
 
   let table = $('#inventoryTable tbody')
-  let dark = 'list-group-item-dark'
 
   table.on('click', 'tr', function() {
-    let el = $(this)
-    //TODO move to the page component
-    let wasPrevSelected = el.hasClass(dark)
-
-    $('#inventoryTable tbody tr').removeClass(dark)
-
-    if (wasPrevSelected) {
-      app.onRowClick('')
-      return
-    }
-
-    let cells = el[0].cells
-    let id = cells[0].innerHTML
-
+    let id = $(this)
+      .find('td:eq(0)')
+      .text()
     app.onRowClick(id)
-
-    el.toggleClass(dark)
   })
 
   let enableItem = $('#enabledItem')
@@ -78,6 +66,23 @@ export function initializeInventory(client: Client, stock: StockClient) {
   })
 
   app.init()
+}
+
+let dark = 'list-group-item-dark'
+
+function clearRowSelection(): void {
+  $('#inventoryTable tbody tr').removeClass(dark)
+}
+
+function selectTableRow(id: string): void {
+  $('#inventoryTable tbody tr').each(function() {
+    let currentRow = $(this)
+    let currentID = currentRow.find('td:eq(0)').text()
+
+    if (id === currentID) {
+      currentRow.addClass(dark)
+    }
+  })
 }
 
 function populateModal(i: inventoryItem): void {

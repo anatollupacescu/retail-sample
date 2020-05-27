@@ -21,7 +21,7 @@ $(INDEX_HTML):
 DIST?=dist/
 
 $(DIST): $(INDEX_HTML)
-	yarn build
+	@yarn build
 
 .PHONY: build
 
@@ -35,4 +35,4 @@ watch: $(DIST)
 .PHONY: clean
 
 clean:
-	@rm -rf .cache dist $(INDEX_HTML)s
+	@rm -rf .cache dist $(INDEX_HTML)

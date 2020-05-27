@@ -1,7 +1,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 
-{{> partial/header}}
+<head>
+    <meta charset="utf-8" content="">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" type="image/png" href="../images/favicon.png">
+    <title>{{title}}</title>
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/checkout/">
+
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.css" rel="stylesheet">
+    <style>
+        .cursor-pointer{
+            cursor: pointer;
+        }
+        tr.disabled {
+            color: gray;
+        }
+    </style>
+</head>
 
 <body class="bg-light">
 
@@ -73,7 +93,18 @@
     </div>
 </div>
 
-{{> partial/footer}}
+<footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">&copy; VICTORY {{year}}</p>
+    <ul class="list-inline">
+        <li class="list-inline-item"><a href="#">Privacy</a></li>
+        <li class="list-inline-item"><a href="#">Terms</a></li>
+        <li class="list-inline-item"><a href="#">Support</a></li>
+    </ul>
+</footer>
+
+<script src="../node_modules/jquery/dist/jquery.min.js" crossorigin="anonymous"></script>
+<script src="../node_modules/popper.js/dist/popper.min.js" crossorigin="anonymous"></script>
+<script src="../node_modules/bootstrap/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
 <script lang="application/javascript" src="jq/index.ts"></script>
 

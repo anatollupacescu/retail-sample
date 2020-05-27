@@ -32,27 +32,43 @@ export default class App {
   }
 
   toggleItemStatus(s: boolean) {
-    if (!this.selectedID) {
+    let id = this.selectedID
+
+    if (!id) {
       return
     }
 
-    this.client.toggleItemStatus(this.selectedID, s).then(this.page.populateModal)
+    let item = this.client.findByID(id)
+
+    if (item.enabled === s) {
+      throw 'already in the expected state'
+    }
+
+    this.client
+      .toggleItemStatus(this.selectedID, s)
+      .then(this.page.populateModal)
+      .then(() => {
+        let data = this.client.getState()
+        this.page.renderTable(data)
+      })
   }
 
   showModal() {
     if (!this.selectedID) {
-      console.log('no row selected')
-      return
+      throw 'no row selected'
     }
 
-    this.client
-      .fetchItem(this.selectedID)
-      .then(this.page.populateModal)
-      .then(() => this.page.toggleModal(true))
+    let modalItem = this.client.findByID(this.selectedID)
+    this.page.populateModal(modalItem)
+    this.openModal()
   }
 
   closeModal() {
     this.page.toggleModal(false)
+  }
+
+  openModal() {
+    this.page.toggleModal(true)
   }
 
   onRowClick(id: string) {

@@ -75,8 +75,8 @@ export default class App {
   }
 
   private renderIngredientsDropdown() {
-    let dropdownOptions = this.inventory.getState()
-    let filteredOptions = this.removeExisting(dropdownOptions)
+    let allInventory = this.inventory.getEnabledItems()
+    let filteredOptions = this.removeExisting(allInventory)
     let dtos = this.toOptionDTO(filteredOptions)
     this.page.populateIngredientsDropdown(dtos)
   }
@@ -88,9 +88,9 @@ export default class App {
     }))
   }
 
-  private removeExisting(dropdownOptions: inventoryItem[]): inventoryItem[] {
-    return dropdownOptions.filter(dop => {
-      let found = this.ingredients.find(i => i.id === dop.id)
+  private removeExisting(items: inventoryItem[]): inventoryItem[] {
+    return items.filter(item => {
+      let found = this.ingredients.find(i => i.id === item.id)
       return !found
     })
   }
@@ -163,10 +163,15 @@ export default class App {
   }
 
   private populateIngredientsTable() {
-    let dtos = this.ingredients.map(i => ({
-      qty: String(i.qty),
-      name: this.inventory.getName(i.id)
-    }))
+    let dtos = this.ingredients.map(i => {
+      let id = i.id.toString()
+      let item = this.inventory.findByID(id)
+      return {
+        qty: String(i.qty),
+        name: item.name
+      }
+    })
+
     this.page.populateIngredientsTable(dtos)
   }
 

@@ -11,10 +11,17 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-type InventoryWebApp struct {
-	Logger  types.Logger
-	Wrapper InventoryWrapper
-}
+type (
+	InventoryWebApp struct {
+		Logger  types.Logger
+		Wrapper InventoryWrapper
+	}
+	DescriptorEntity struct {
+		ID      int    `json:"id"`
+		Name    string `json:"name"`
+		Enabled bool   `json:"enabled"`
+	}
+)
 
 var internalServerError = "internal server error"
 
@@ -53,12 +60,6 @@ func (a *InventoryWebApp) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		a.Logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
-	}
-
-	type DescriptorEntity struct {
-		ID      int    `json:"id"`
-		Name    string `json:"name"`
-		Enabled bool   `json:"enabled"`
 	}
 
 	var response = struct {
@@ -116,17 +117,13 @@ func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	type DescriptorEntity struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	}
-
 	var response = struct {
 		Data DescriptorEntity `json:"data"`
 	}{
 		Data: DescriptorEntity{
-			ID:   int(createdID),
-			Name: requestPayload.Name,
+			ID:      int(createdID),
+			Name:    requestPayload.Name,
+			Enabled: true, //TODO fix assumption by retrieving the entity again
 		},
 	}
 
@@ -150,21 +147,17 @@ func (a *InventoryWebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Re
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
-	type entry struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	}
-
 	var response struct {
-		Data []entry `json:"data"`
+		Data []DescriptorEntity `json:"data"`
 	}
 
-	response.Data = make([]entry, 0)
+	response.Data = make([]DescriptorEntity, 0)
 
 	for _, tp := range list {
-		response.Data = append(response.Data, entry{
-			ID:   int(tp.ID),
-			Name: string(tp.Name),
+		response.Data = append(response.Data, DescriptorEntity{
+			ID:      int(tp.ID),
+			Name:    string(tp.Name),
+			Enabled: tp.Enabled,
 		})
 	}
 
@@ -198,16 +191,10 @@ func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	type entry struct {
-		ID      int    `json:"id"`
-		Name    string `json:"name"`
-		Enabled bool   `json:"enabled"`
-	}
-
 	var response = struct {
-		Data entry `json:"data"`
+		Data DescriptorEntity `json:"data"`
 	}{
-		Data: entry{
+		Data: DescriptorEntity{
 			ID:      int(inventoryItem.ID),
 			Name:    string(inventoryItem.Name),
 			Enabled: inventoryItem.Enabled,

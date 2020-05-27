@@ -42,15 +42,18 @@ export default class App {
   }
 
   show() {
-    let options = this.inventory.getState()
+    this.populateDropdown()
+    let data = this.computeTableRows()
+    this.page.populateTable(data)
+  }
+
+  private populateDropdown() {
+    let options = this.inventory.getEnabledItems()
     let dtos: inventoryItemDTO[] = options.map(o => ({
       id: String(o.id),
       name: o.name
     }))
     this.page.populateDropdown(dtos)
-
-    let data = this.computeTableRows()
-    this.page.populateTable(data)
   }
 
   private computeTableRows(): stockTableRowDTO[] {

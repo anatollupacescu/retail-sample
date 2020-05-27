@@ -24,7 +24,7 @@
   },
   "scripts": {
     "format": "prettier --write --parser typescript \"src/**/*.ts\"",
-    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "test": "mocha -v -r ts-node/register src/**/*.spec.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.spec.ts\" npm run test",
     "start": "parcel serve src/index.html",
     "build": "cross-env NODE_ENV=production parcel build --public-url . src/index.html",

@@ -39,7 +39,8 @@ describe('saving a new item', () => {
     let initialData = [
       {
         id: 1,
-        name: 'test'
+        name: 'test',
+        enabled: true
       }
     ]
 
@@ -72,7 +73,8 @@ describe('saving a new item', () => {
     let initialData = [
       {
         id: 1,
-        name: 'test1'
+        name: 'test1',
+        enabled: true
       }
     ]
     let app = new Client('', initialData)

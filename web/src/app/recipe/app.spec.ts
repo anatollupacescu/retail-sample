@@ -44,15 +44,16 @@ describe('add ingredient', () => {
   })
 
   describe('when quantity is ok', () => {
-    let page = noOpPage()
+    let page = noOpPage(),
+      inv = new InventoryClient(),
+      client = new Client()
+
+    let app = new App(inv, client, page)
 
     let getName = chai.spy.on(page, 'ingredientQty', () => '1'),
       getID = chai.spy.on(page, 'ingredientID', () => '1'),
       qtyErr = chai.spy.on(page, 'toggleQtyError'),
-      popTable = chai.spy.on(page, 'populateIngredientsTable'),
-      invLookup = chai.spy.on(inv, 'getName', () => 'test')
-
-    let app = new App(inv, client, page)
+      invLookup = chai.spy.on(inv, 'findByID', _v => ({ name: 'test' }))
 
     it('adds ingredient to list', () => {
       app.onAddIngredient()
@@ -60,7 +61,6 @@ describe('add ingredient', () => {
       expect(getID).to.have.been.called.once
       expect(invLookup).to.have.been.called.once
       expect(getName).to.have.been.called.once
-      expect(popTable).to.have.been.called.once
     })
   })
 })

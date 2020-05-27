@@ -30,9 +30,12 @@ export default class Client {
     return apiData
   }
 
-  private async apiFetchItem(id: string): Promise<any> {
+  async asyncToggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
     try {
-      let response = await axios.get(`${this.endpoint}/${id}`)
+      let payload = {
+        enabled: enabled
+      }
+      let response = await axios.patch(`${this.endpoint}/${id}`, payload)
       return response.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -40,17 +43,18 @@ export default class Client {
   }
 
   async toggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
-    return { id: Number(id), name: 'ignore me', enabled: enabled }
+    try {
+      let item = await this.asyncToggleItemStatus(id, enabled)
+      this.saveToState(item)
+      return item
+    } catch (error) {
+      throw `got error changing item status: ${error}`
+    }
   }
 
-  async fetchItem(id: string): Promise<inventoryItem> {
-    try {
-      return this.apiFetchItem(id)
-    } catch (error) {
-      console.log('could not fetch item with id', id, 'reason', error)
-    }
-
-    return { id: 0, name: '', enabled: false }
+  saveToState(item: inventoryItem) {
+    this.state = this.state.filter(i => i.id !== item.id)
+    this.state.push(item)
   }
 
   async apiAddItem(name: string): Promise<any> {
@@ -102,11 +106,16 @@ export default class Client {
     return [...this.state]
   }
 
-  getName(id: number): string {
-    let item = this.state.find(i => i.id === id)
-    if (item) {
-      return item.name
+  getEnabledItems(): inventoryItem[] {
+    return this.getState().filter(i => i.enabled)
+  }
+
+  findByID(id: string): inventoryItem {
+    let toMatch = Number.parseInt(id)
+    let found = this.state.find(i => i.id === toMatch)
+    if (!found) {
+      throw 'not found'
     }
-    throw `inventory item with ${id} not found`
+    return found
   }
 }

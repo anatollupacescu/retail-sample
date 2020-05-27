@@ -41,6 +41,7 @@ var (
 	ErrEmptyName           = errors.New("empty name")
 	ErrNoIngredients       = errors.New("no ingredients provided")
 	ErrIgredientNotFound   = errors.New("ingredient not found")
+	ErrIgredientNotEnabled = errors.New("ingredient not enabled")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
@@ -64,15 +65,19 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	for _, v := range ingredients {
 		itemID := v.ID
 
-		_, err := b.Inventory.Get(itemID)
+		item, err := b.Inventory.Get(itemID)
 
 		switch err {
 		case nil:
-			continue
+			break
 		case inventory.ErrItemNotFound:
 			return zeroRecipeID, ErrIgredientNotFound
 		default:
 			return zeroRecipeID, err
+		}
+
+		if !item.Enabled {
+			return zeroRecipeID, ErrIgredientNotEnabled
 		}
 	}
 

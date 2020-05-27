@@ -49,8 +49,9 @@ func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
 	for id, v := range m.data {
 		if wantedID == id {
 			return domain.Item{
-				ID:   id,
-				Name: v.Name,
+				ID:      id,
+				Name:    v.Name,
+				Enabled: v.Enabled,
 			}, nil
 		}
 	}
@@ -61,8 +62,9 @@ func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
 func (m *InMemoryStore) List() (t []domain.Item, err error) {
 	for k, v := range m.data {
 		t = append(t, domain.Item{
-			ID:   k,
-			Name: v.Name,
+			ID:      k,
+			Name:    v.Name,
+			Enabled: v.Enabled,
 		})
 	}
 

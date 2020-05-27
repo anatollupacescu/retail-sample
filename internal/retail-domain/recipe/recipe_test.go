@@ -30,7 +30,29 @@ func TestAddRecipe(t *testing.T) {
 		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
 	})
 
-	t.Run("should return error if incredients are not present in inventory", func(t *testing.T) {
+	t.Run("should reject if ingredients are disabled", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+
+		i := &recipe.MockInventory{}
+		b := recipe.Book{Store: s, Inventory: i}
+
+		var item = inventory.Item{
+			ID:      1,
+			Enabled: false,
+			Name:    "test",
+		}
+
+		i.On("Get", 1).Return(item, nil)
+
+		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+
+		assert.Equal(t, recipe.ErrIgredientNotEnabled, err)
+
+		s.AssertExpectations(t)
+		i.AssertExpectations(t)
+	})
+
+	t.Run("should reject if incredients are not present in inventory", func(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 
 		i := &recipe.MockInventory{}
@@ -53,7 +75,8 @@ func TestAddRecipe(t *testing.T) {
 		b := recipe.Book{Store: s, Inventory: i}
 
 		i.On("Get", 1).Return(inventory.Item{
-			ID: 1,
+			ID:      1,
+			Enabled: true,
 		}, nil)
 
 		var expectedErr = errors.New("could not save")
@@ -73,7 +96,8 @@ func TestAddRecipe(t *testing.T) {
 		b := recipe.Book{Store: s, Inventory: i}
 
 		i.On("Get", 1).Return(inventory.Item{
-			ID: 1,
+			ID:      1,
+			Enabled: true,
 		}, nil)
 		s.On("Add", recipe.Recipe{
 			Name:        "test",

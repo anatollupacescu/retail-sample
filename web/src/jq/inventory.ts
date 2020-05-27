@@ -42,16 +42,21 @@ export function initializeInventory(client: Client, stock: StockClient) {
     app.closeModal()
   })
 
-  let tableRow = $('#inventoryTable tbody')
+  let table = $('#inventoryTable tbody')
+  let dark = 'list-group-item-dark'
 
-  tableRow.on('click', 'tr', function() {
-    //TODO use marker css classes to highligh specific row in the Page component
-
-    let dark = 'list-group-item-dark'
+  table.on('click', 'tr', function() {
+    let el = $(this)
+    //TODO move to the page component
+    let wasPrevSelected = el.hasClass(dark)
 
     $('#inventoryTable tbody tr').removeClass(dark)
 
-    let el = $(this)
+    if (wasPrevSelected) {
+      app.onRowClick('')
+      return
+    }
+
     let cells = el[0].cells
     let id = cells[0].innerHTML
 
@@ -143,5 +148,8 @@ function populateTable(data: inventoryItem[]) {
     let row = <HTMLTableRowElement>table.insertRow(0)
     row.insertCell(0).innerHTML = `${element.id}`
     row.insertCell(1).innerHTML = element.name
+    if (!element.enabled) {
+      row.classList.add('disabled')
+    }
   })
 }

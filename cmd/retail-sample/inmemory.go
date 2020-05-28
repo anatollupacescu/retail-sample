@@ -27,7 +27,6 @@ type (
 
 var memFactory InMemoryProviderFactory
 
-//nolint:golint,unused,deadcode
 func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 	invStore := invCmd.NewInMemoryStore()
 	recipeStore := recipeCmd.NewInMemoryStore()

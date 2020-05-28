@@ -32,7 +32,7 @@ export function initializeInventory(client: Client, stock: StockClient) {
     app.onNameChange()
   })
 
-  let openModalBtn = $('#openModalBtn')
+  let openModalBtn = $('#openInventoryModalBtn')
 
   openModalBtn.on('click', () => {
     app.showModal()
@@ -86,8 +86,8 @@ function selectTableRow(id: string): void {
 }
 
 function populateModal(i: inventoryItem): void {
-  $('#modalID').html(String(i.id))
-  $('#modalName').html(i.name)
+  $('#inventoryModalID').html(String(i.id))
+  $('#inventoryModalName').html(i.name)
 
   let enbl = $('#enabledItem'),
     dsbl = $('#disabledItem')

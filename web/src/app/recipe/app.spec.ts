@@ -2,7 +2,7 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
-import App, { Page, recipeDTO, ingredientDTO, optionDTO } from './app'
+import App, { Page, recipeDTO, ingredientDTO, optionDTO, Modal } from './app'
 import InventoryClient from '../inventory/client'
 import Client from './client'
 
@@ -19,7 +19,9 @@ describe('add ingredient', () => {
     let getName = chai.spy.on(page, 'ingredientQty', () => '')
     let qtyErr = chai.spy.on(page, 'toggleQtyError')
 
-    let app = new App(inv, client, page)
+    let modal = noOpModal()
+
+    let app = new App(inv, client, page, modal)
 
     it('errors', () => {
       app.onAddIngredient()
@@ -34,7 +36,9 @@ describe('add ingredient', () => {
     let getName = chai.spy.on(page, 'ingredientQty', () => '-1')
     let qtyErr = chai.spy.on(page, 'toggleQtyError')
 
-    let app = new App(inv, client, page)
+    let modal = noOpModal()
+
+    let app = new App(inv, client, page, modal)
 
     it('errors', async () => {
       app.onAddIngredient()
@@ -48,7 +52,9 @@ describe('add ingredient', () => {
       inv = new InventoryClient(),
       client = new Client()
 
-    let app = new App(inv, client, page)
+    let modal = noOpModal()
+
+    let app = new App(inv, client, page, modal)
 
     let getName = chai.spy.on(page, 'ingredientQty', () => '1'),
       getID = chai.spy.on(page, 'ingredientID', () => '1'),
@@ -73,6 +79,9 @@ describe('add recipe', () => {
 
 function noOpPage(): Page {
   return {
+    clearRow: (): void => {},
+    highlightRow: (_: string): void => {},
+
     ingredientID: (): number => {
       return 0
     },
@@ -94,5 +103,12 @@ function noOpPage(): Page {
     },
     resetQty: (): void => {},
     toggleQtyError: (_v: boolean): void => {}
+  }
+}
+
+function noOpModal(): Modal {
+  return {
+    toggle: (_: boolean): void => {},
+    populate: (_: recipeDTO): void => {}
   }
 }

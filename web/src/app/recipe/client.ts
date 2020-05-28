@@ -103,10 +103,12 @@ export default class Client {
   }
 
   getByID(id: number): Recipe {
-    let r = this.state.filter(r => r.id === Number(id))
-    if (!r || r.length === 0) {
+    let r = this.state.find(r => r.id === Number(id))
+
+    if (!r) {
       throw `recipe with id ${id} not found`
     }
-    return r[0]
+
+    return r
   }
 }

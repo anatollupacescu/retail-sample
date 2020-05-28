@@ -1,9 +1,9 @@
 import InventoryClient from '../app/inventory/client'
 import Client from '../app/recipe/client'
-import App, { optionDTO, recipeDTO, ingredientDTO } from '../app/recipe/app'
+import App, { optionDTO, recipeRecordDTO, ingredientDTO, Modal } from '../app/recipe/app'
 
 import $ = require('jquery')
-import { Page } from '../app/recipe/app'
+import { Page, recipeDTO } from '../app/recipe/app'
 
 export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
   let itemNameDropdown = $('#recipeItemName'),
@@ -13,6 +13,9 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     recipeNameInput = $('#recipeName')
 
   let page: Page = {
+    clearRow: (): void => clearRowSelection(),
+    highlightRow: (s: string): void => selectTableRow(s),
+
     ingredientID: (): number => getNumberValue(itemNameDropdown),
     removeIngredientFromDropdown: (s: string): void => removeIngredientNameFromTheList(s),
     ingredientQty: (): number => getNumberValue(itemQtyPicker),
@@ -30,10 +33,15 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     toggleNoUniqueNameError: (v: boolean): void => toggleNoUniqueNameErr(v),
     populateIngredientsDropdown: (dtos: optionDTO[]): void => populateDropdown(itemNameDropdown, dtos),
     populateIngredientsTable: (dtos: ingredientDTO[]): void => populateIngredientsTable(dtos),
-    populateTable: (rows: recipeDTO[]): void => populateRecipeTable(rows)
+    populateTable: (rows: recipeRecordDTO[]): void => populateRecipeTable(rows)
   }
 
-  let app = new App(inv, recipe, page)
+  let modal: Modal = {
+    toggle: (v: boolean): void => toggleModal(v),
+    populate: (i: recipeDTO): void => populateModal(i)
+  }
+
+  let app = new App(inv, recipe, page, modal)
 
   $('#recipe-tab').on('click', () => {
     app.show()
@@ -55,7 +63,69 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     app.onSaveRecipe()
   })
 
+  let openModalBtn = $('#openRecipeModalBtn')
+
+  openModalBtn.on('click', () => {
+    app.showModal()
+  })
+
+  let closeModalClass = $('.close-modal')
+
+  closeModalClass.on('click', () => {
+    app.closeModal()
+  })
+
+  let table = $('#recipes tbody')
+
+  table.on('click', 'tr', function() {
+    let id = $(this)
+      .find('td:eq(0)')
+      .text()
+
+    app.onRowClick(id)
+  })
+
   app.init()
+}
+
+let dark = 'list-group-item-dark'
+
+function clearRowSelection(): void {
+  $('#recipes tbody tr').removeClass(dark)
+}
+
+function selectTableRow(id: string): void {
+  $('#recipes tbody tr').each(function() {
+    let currentRow = $(this)
+    let currentID = currentRow.find('td:eq(0)').text()
+
+    if (id === currentID) {
+      currentRow.addClass(dark)
+    }
+  })
+}
+
+function toggleModal(v: boolean): void {
+  let el = $('#recipeModal')
+  if (v) {
+    el.addClass('show')
+    el.addClass('d-block')
+    return
+  }
+  el.removeClass('show')
+  el.removeClass('d-block')
+}
+
+function populateModal(i: recipeDTO): void {
+  $('#recipeModalID').html(String(i.id))
+  $('#recipeModalName').html(i.name)
+  let table = <HTMLTableElement>$('#modalRecipeItems tbody')[0]
+  $('#modalRecipeItems tbody tr').remove()
+  i.items.forEach((element: ingredientDTO) => {
+    let row = <HTMLTableRowElement>table.insertRow(0)
+    row.insertCell(0).innerHTML = element.name
+    row.insertCell(1).innerHTML = String(element.qty)
+  })
 }
 
 function toggleDisabledState(v: boolean, input: JQuery): void {
@@ -112,11 +182,11 @@ function removeIngredientNameFromTheList(op: string): void {
 
 const byID = (i1: { id: number }, i2: { id: number }) => i1.id - i2.id
 
-function populateRecipeTable(recipes: recipeDTO[]): void {
+function populateRecipeTable(recipes: recipeRecordDTO[]): void {
   let rows = recipes.sort(byID)
   let table = <HTMLTableElement>$('#recipes tbody')[0]
   $('#recipes tbody tr').remove()
-  rows.forEach((element: recipeDTO) => {
+  rows.forEach((element: recipeRecordDTO) => {
     let row = <HTMLTableRowElement>table.insertRow(0)
     row.insertCell(0).innerHTML = String(element.id)
     row.insertCell(1).innerHTML = element.name

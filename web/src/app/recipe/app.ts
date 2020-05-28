@@ -6,12 +6,15 @@ export interface optionDTO {
   name: string
 }
 
-export interface recipeDTO {
+export interface recipeRecordDTO {
   id: number
   name: string
 }
 
 export interface Page {
+  clearRow(): void
+  highlightRow(s: string): void
+
   ingredientID(): number
   removeIngredientFromDropdown(s: string): void
   toggleAddToListBtnState(v: boolean): void
@@ -25,7 +28,7 @@ export interface Page {
 
   populateIngredientsDropdown(dtos: optionDTO[]): void
   populateIngredientsTable(dtos: ingredientDTO[]): void
-  populateTable(rows: recipeDTO[]): void
+  populateTable(rows: recipeRecordDTO[]): void
   ingredientQty(): number
   resetQty(): void
   toggleQtyError(v: boolean): void
@@ -36,23 +39,37 @@ interface ingredient {
   qty: number
 }
 
+export interface Modal {
+  toggle(v: boolean): void
+  populate(i: recipeDTO): void
+}
+
 export interface ingredientDTO {
   name: string
   qty: string
+}
+
+export interface recipeDTO {
+  id: number
+  name: string
+  items: ingredientDTO[]
 }
 
 export default class App {
   private inventory: InventoryClient
   private client: Client
   private page: Page
+  private modal: Modal
 
   // belongs here because does not need persistence
   private ingredients: ingredient[] = []
+  private selectedID: string = ''
 
-  constructor(inv: InventoryClient, recipe: Client, page: Page) {
+  constructor(inv: InventoryClient, recipe: Client, page: Page, modal: Modal) {
     this.inventory = inv
     this.client = recipe
     this.page = page
+    this.modal = modal
   }
 
   show() {
@@ -62,12 +79,12 @@ export default class App {
   init() {
     this.client.fetchRecipes().then(() => {
       let recipes: Recipe[] = this.client.getState()
-      let rows: recipeDTO[] = this.toRows(recipes)
+      let rows: recipeRecordDTO[] = this.toRows(recipes)
       this.page.populateTable(rows)
     })
   }
 
-  private toRows(recipes: Recipe[]): recipeDTO[] {
+  private toRows(recipes: Recipe[]): recipeRecordDTO[] {
     return recipes.map(r => ({
       id: r.id,
       name: r.name
@@ -115,6 +132,48 @@ export default class App {
   onRecipeNameChange() {
     let name = this.page.recipeName()
     this.refreshRecipeNameRelevantUI(name)
+  }
+
+  showModal() {
+    if (!this.selectedID) {
+      throw 'no row selected'
+    }
+
+    let id = Number.parseInt(this.selectedID)
+    let recipe = this.client.getByID(id)
+    let recipeDTO = this.toRecipeDTO(recipe)
+    this.modal.populate(recipeDTO)
+    this.openModal()
+  }
+
+  toRecipeDTO(r: Recipe): recipeDTO {
+    let items: ingredientDTO[] = r.items.map(i => ({
+      name: String(i.id),
+      qty: String(i.qty)
+    }))
+
+    return {
+      id: r.id,
+      name: r.name,
+      items: items
+    }
+  }
+
+  closeModal() {
+    this.modal.toggle(false)
+  }
+
+  openModal() {
+    this.modal.toggle(true)
+  }
+
+  onRowClick(id: string) {
+    if (id === this.selectedID) {
+      this.selectedID = ''
+      return this.page.clearRow()
+    }
+    this.selectedID = id
+    this.page.highlightRow(id)
   }
 
   onSaveRecipe() {

@@ -86,7 +86,7 @@
 <div class="container">
   <div class="row pt-3">
     <div class="col-md-12">
-      <table id="recipes" class="table table-striped table-bordered">
+      <table id="recipes" class="table table-bordered cursor-pointer">
         <thead>
           <tr>
             <th>ID</th>
@@ -95,6 +95,56 @@
         </thead>
         <tbody></tbody>
       </table>
+    </div>
+  </div>
+  <div class="row pt-3">
+    <div class="col-md-12">
+      <button type="button" class="btn btn-primary" id="openRecipeModalBtn">
+        Edit record
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="recipeModalLabel">View recipe</h5>
+        <button type="button" class="close close-modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              ID: <span id="recipeModalID" class="pl-1" />
+            </div>
+            <div class="col-md-12">
+              Name: <span id="recipeModalName" class="pl-1" />
+            </div>
+            <div class="col-md-12">
+              Ingredients:
+            </div>
+            <div class="col-md-12 pt-3">
+              <table id="modalRecipeItems" class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Count</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Done</button>
+      </div>
     </div>
   </div>
 </div>

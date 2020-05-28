@@ -56,7 +56,7 @@
   </div>
   <div class="row pt-3">
     <div class="col-md-12">
-      <button type="button" class="btn btn-primary" id="openModalBtn">
+      <button type="button" class="btn btn-primary" id="openInventoryModalBtn">
         Edit record
       </button>
     </div>
@@ -64,11 +64,11 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog" aria-labelledby="inventoryModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <h5 class="modal-title" id="inventoryModalLabel">Edit inventory record</h5>
         <button type="button" class="close close-modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -77,10 +77,10 @@
         <div class="container">
           <div class="row">
             <div class="col-md-12">
-              ID: <span id="modalID" class="pl-1" />
+              ID: <span id="inventoryModalID" class="pl-1" />
             </div>
             <div class="col-md-12">
-              Name: <span id="modalName" class="pl-1" />
+              Name: <span id="inventoryModalName" class="pl-1" />
             </div>
             <div class="col-md-6">
               <div class="btn-group-sm" role="group" aria-label="Item status">

@@ -25,6 +25,10 @@ func (m *MockRecipeStore) Get(id ID) (Recipe, error) {
 	return args.Get(0).(Recipe), args.Error(1)
 }
 
+func (m *MockRecipeStore) Save(r Recipe) error {
+	return m.Called(r).Error(0)
+}
+
 //Inventory
 
 type MockInventory struct {

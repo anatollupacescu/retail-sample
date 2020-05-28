@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "706b79fb-396b-41aa-b6aa-2ab3251aded2",
+		"_postman_id": "980e2405-a824-48b4-9c7f-c3ffe913f74a",
 		"name": "retail-sample-tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"id": "735cabae-6b60-4d01-8604-60f5ea912d57",
 								"exec": [
 									"pm.test(\"response should be 200\", function () {",
 									"    pm.response.to.be.ok;",
@@ -53,7 +53,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "206f07bb-2712-4a47-a239-05bea1e9fe6a",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -87,7 +87,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "25053f10-b9df-4ca6-bb35-6a5ba019f934",
+								"id": "370d3fc0-dde7-47ef-a96f-a2a6393ceb95",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name\", uuid())",
@@ -129,7 +129,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"id": "c570085a-a993-465e-881a-4c2d442cf986",
 								"exec": [
 									"pm.test(\"status is 200 OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -183,7 +183,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "75ca381f-7e07-4402-a47d-3171f54133ee",
+								"id": "a02c65ac-e755-4ad4-bed0-f3a17342d1fe",
 								"exec": [
 									"pm.test(\"status is 200 OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -239,7 +239,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "96a95f6e-6459-45ec-8c3f-97dd02411a6f",
+								"id": "c9eb19b1-a971-472c-8861-cb16a5cc8f8c",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -273,7 +273,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "0fd83a94-72aa-44c6-ad37-ea6ad74b5454",
+								"id": "b863fe5f-1d74-43c1-a878-432cfb2f1302",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"disabled_item_name\", uuid())",
@@ -315,7 +315,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2eeb0223-6098-4d8a-9bd1-41b4bd9e4178",
+								"id": "c63edad2-9c0e-4adf-abcd-ad6358d51073",
 								"exec": [
 									"pm.test(\"status is 202\", function() {",
 									"    pm.response.to.have.status(202);",
@@ -374,7 +374,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ef8510cc-f2db-4d39-85ee-719f644759d6",
+								"id": "f59365c8-9bb2-4585-a473-688f9449f104",
 								"exec": [
 									"pm.test(\"status is 200 OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -435,7 +435,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "117d3e81-dede-4496-a578-86e478185bdd",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -467,7 +467,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
+								"id": "ede6a0b0-422d-4384-89cf-4086015db443",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_1\", uuid())",
@@ -510,7 +510,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "2f0328f0-ecc8-487b-a40e-fc8bab5a19cb",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -541,7 +541,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
+								"id": "2dc3c605-92c9-49a6-988b-505a0f36d6d0",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_2\", uuid())",
@@ -583,7 +583,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "5e8ab21c-e881-4f7a-9991-aab740d98086",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -613,7 +613,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "ac3bdd1c-d58b-4718-be4a-d2762bb66b0a",
+								"id": "4db06223-3020-47a4-a548-03126837851d",
 								"exec": [
 									""
 								],
@@ -653,7 +653,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "051e9f3e-7269-4ce2-bf68-d62d9a514e4e",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -733,7 +733,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "3b8faaaf-f4b6-4be5-9caa-06aa5489d7ba",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -799,7 +799,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
+								"id": "763f9caf-bf66-4721-8d84-edb164dfe7e0",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -880,586 +880,998 @@
 			"name": "recipe",
 			"item": [
 				{
-					"name": "create one inventory item",
-					"event": [
+					"name": "create",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"save response ids to env\", function() {",
-									"    let name1 = pm.environment.get(\"test_outbound_inventory_item_name_1\");",
-									"    ",
-									"    let responseJson = pm.response.json();",
-									"    let id1 = responseJson.data.id",
-									"",
-									"    pm.environment.set(\"test_outbound_inventory_item_id_1\", id1)",
-									"})",
-									""
+							"name": "create one inventory item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "df10c79d-89cf-40c0-8cb4-c9376f7703d7",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"save response ids to env\", function() {",
+											"    let name1 = pm.environment.get(\"test_outbound_inventory_item_name_1\");",
+											"    ",
+											"    let responseJson = pm.response.json();",
+											"    let id1 = responseJson.data.id",
+											"",
+											"    pm.environment.set(\"test_outbound_inventory_item_id_1\", id1)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "b862c3ad-1100-4cf7-885c-414f8adbf6ba",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_1}}\"\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
-								"exec": [
-									"let uuid = require('uuid')",
-									"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
-									""
+							"name": "create second inventory item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "082a36a6-85be-48b7-ac7a-5f10361f70c9",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"save response ids to env\", function() {",
+											"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
+											"    let responseJson = pm.response.json();",
+											"    let id2 = responseJson.data.id",
+											"",
+											"    pm.environment.set(\"test_outbound_inventory_item_id_2\", id2)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "1b90fde0-db1f-4865-a9f9-1704f7f301a0",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"test_outbound_inventory_item_name_2\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_2}}\"\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "provision stock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "96df9c1b-c937-4108-8e06-35c00439eeb9",
+										"exec": [
+											"pm.test(\"status is 201\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"{{test_outbound_inventory_item_id_1}}\": 3, \n\t\"{{test_outbound_inventory_item_id_2}}\": 4\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/stock",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"stock"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create salad recipe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "78777b97-e35c-49fc-90c7-63ef83c49be6",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"save descriptor entity to env\", function() {",
+											"    let recipeName = pm.environment.get(\"test_outbound_recipe_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let recipeID =  responseJson.data.id",
+											"    pm.environment.set(\"test_outbound_recipe_id\", recipeID)",
+											"})",
+											"",
+											"pm.test(\"recipe data are correct\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"test_outbound_recipe_id\"),",
+											"        name: pm.environment.get(\"test_outbound_recipe_name\"),",
+											"        enabled: true",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "d3aaed68-176f-4142-9c62-fcd63e490850",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{test_outbound_recipe_name}}\",\n\t\"items\": {\n\t\t\"{{test_outbound_inventory_item_id_1}}\": 2, \n\t\t\"{{test_outbound_inventory_item_id_2}}\": 3\n\t}\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/recipe",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check recipe was created",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "1519bd2f-df6f-4b3a-83e2-61214b3dd727",
+										"exec": [
+											"pm.test(\"Should return 200 OK\", function() {",
+											"    pm.response.to.have.status(200)",
+											"})",
+											"",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"recipe data is correct\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"test_outbound_recipe_id\"),",
+											"        name: pm.environment.get(\"test_outbound_recipe_name\"),",
+											"        enabled: true",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"",
+											"    let items = [",
+											"        {",
+											"            id: pm.environment.get(\"test_outbound_inventory_item_id_1\"),",
+											"            qty: 2",
+											"        },",
+											"        {",
+											"            id: pm.environment.get(\"test_outbound_inventory_item_id_2\"),",
+											"            qty: 3",
+											"        }",
+											"    ]",
+											"",
+											"    pm.expect(jsonData.data.items).to.deep.eql(items)",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/recipe/{{test_outbound_recipe_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe",
+										"{{test_outbound_recipe_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check recipe present in the collection",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "d85d58c5-9b4b-4b4f-853d-13a4ec95de7d",
+										"exec": [
+											"pm.test(\"Should return 200\", function() {",
+											"    pm.response.to.have.status(200)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/recipe",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "place order for recipe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ac753fbf-c620-475c-b72a-78812bda4d59",
+										"exec": [
+											"pm.test(\"response is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/order",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check order is present in log",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8b51c614-2d1c-4cb6-859a-5f2aff53907d",
+										"exec": [
+											"pm.test(\"status is OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains the order\", function() {",
+											"    let body = JSON.parse(responseBody);",
+											"    let recipeID = pm.environment.get(\"test_outbound_recipe_id\");",
+											"    ",
+											"    let expected = {",
+											"        recipeID: recipeID,",
+											"        qty: 1",
+											"    }",
+											"",
+											"    pm.expect(body.data.map(dropID)).to.be.an('array')",
+											"       .that.deep.includes(expected)",
+											"})",
+											"",
+											"function dropID(e) {",
+											"    return {",
+											"        recipeID: e.recipeID,",
+											"        qty: e.qty",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/order",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "place more orders than there is stock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b5b9222d-1063-429e-8b30-928dd9364d23",
+										"exec": [
+											"pm.test(\"Should return 400\", function() {",
+											"    pm.response.to.have.status(400)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/order",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"order"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "show stock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c1f1713d-9d50-441e-8d8d-aef09b7cbbb9",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200)",
+											"})",
+											"",
+											"pm.test(\"contains updated values\", function() {",
+											"    pm.response.to.not.be.error;",
+											"    pm.response.to.be.json;",
+											"    ",
+											"    let body = JSON.parse(responseBody);",
+											"",
+											"    let obj1 = {",
+											"        id:  pm.environment.get(\"test_outbound_inventory_item_id_1\"),",
+											"        name: pm.environment.get(\"test_outbound_inventory_item_name_1\"),",
+											"        qty: 1",
+											"    }",
+											"",
+											"    let obj2 = {",
+											"        id: pm.environment.get(\"test_outbound_inventory_item_id_2\"),",
+											"        name: pm.environment.get(\"test_outbound_inventory_item_name_2\"),",
+											"        qty: 1",
+											"    }",
+											"",
+											"    pm.expect(body.data).to.be.an('array')",
+											"        .that.deep.includes(obj1)",
+											"        .and.deep.includes(obj2)",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/stock",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"stock"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_1}}\"\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				},
 				{
-					"name": "create second inventory item",
-					"event": [
+					"name": "disable",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"save response ids to env\", function() {",
-									"    let name2 = pm.environment.get(\"test_outbound_inventory_item_name_2\");",
-									"    let responseJson = pm.response.json();",
-									"    let id2 = responseJson.data.id",
-									"",
-									"    pm.environment.set(\"test_outbound_inventory_item_id_2\", id2)",
-									"})",
-									""
+							"name": "create one inventory item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b70cd3f0-9635-438e-bea0-8f87d03e38d0",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"save response ids to env\", function() {",
+											"    let name1 = pm.environment.get(\"disable_recipe_item_name_1\");",
+											"    ",
+											"    let responseJson = pm.response.json();",
+											"    let id1 = responseJson.data.id",
+											"",
+											"    pm.environment.set(\"disable_recipe_item_id_1\", id1)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "13e8d600-6296-4226-b768-ebd70dfbb2f4",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"disable_recipe_item_name_1\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\":\"{{disable_recipe_item_name_1}}\"\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"id": "81b3ec2e-02a1-422b-a5d6-bb33270f2ad6",
-								"exec": [
-									"let uuid = require('uuid')",
-									"pm.environment.set(\"test_outbound_inventory_item_name_2\", uuid())",
-									""
+							"name": "create salad recipe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f90f9b43-f344-45d1-8e1b-ea8d02fb065a",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"save descriptor entity to env\", function() {",
+											"    let recipeName = pm.environment.get(\"disable_recipe_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let recipeID =  responseJson.data.id",
+											"    pm.environment.set(\"disable_recipe_id\", recipeID)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "d3fec689-3470-44d9-a935-c1a58364de1c",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"disable_recipe_name\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{disable_recipe_name}}\",\n\t\"items\": {\n\t\t\"{{disable_recipe_item_id_1}}\": 2\n\t}\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/recipe",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check recipe is enabled",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a334c59c-ed48-4894-9edc-7a8b2fffb4d7",
+										"exec": [
+											"pm.test(\"Should return 200\", function() {",
+											"    pm.response.to.have.status(200)",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"recipe is disabled\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"disable_recipe_id\"),",
+											"        name: pm.environment.get(\"disable_recipe_name\"),",
+											"        enabled: true",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/recipe/{{disable_recipe_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe",
+										"{{disable_recipe_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disable recipe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "bb91cc43-1a7b-414f-be72-1ab4325fb757",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"recipe is disabled\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"disable_recipe_id\"),",
+											"        name: pm.environment.get(\"disable_recipe_name\"),",
+											"        enabled: false",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "d09b6722-0760-473f-b28b-14ee5434a8ad",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"enabled\": false\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/recipe/{{disable_recipe_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe",
+										"{{disable_recipe_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check recipe was disabled",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0a1d1bc1-bda3-41bc-8570-5bbb37be16b6",
+										"exec": [
+											"pm.test(\"Should return 200\", function() {",
+											"    pm.response.to.have.status(200)",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"recipe is disabled\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"disable_recipe_id\"),",
+											"        name: pm.environment.get(\"disable_recipe_name\"),",
+											"        enabled: false",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "localhost:8080/recipe/{{disable_recipe_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"recipe",
+										"{{disable_recipe_id}}"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\":\"{{test_outbound_inventory_item_name_2}}\"\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "provision stock",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is 201\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"{{test_outbound_inventory_item_id_1}}\": 3, \n\t\"{{test_outbound_inventory_item_id_2}}\": 4\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/stock",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"stock"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create salad recipe",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"save descriptor entity to env\", function() {",
-									"    let recipeName = pm.environment.get(\"test_outbound_recipe_name\");",
-									"    let responseJson = pm.response.json();",
-									"    let recipeID =  responseJson.data[recipeName]",
-									"    pm.environment.set(\"test_outbound_recipe_id\", recipeID)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "c45830f6-0b0d-4f14-a92a-3876f01b251c",
-								"exec": [
-									"let uuid = require('uuid')",
-									"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{test_outbound_recipe_name}}\",\n\t\"items\": {\n\t\t\"{{test_outbound_inventory_item_id_1}}\": 2, \n\t\t\"{{test_outbound_inventory_item_id_2}}\": 3\n\t}\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/recipe",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"recipe"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check recipe was created",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 200\", function() {",
-									"    pm.response.to.have.status(200)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "localhost:8080/recipe",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"recipe"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check recipe present in the collection",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 200\", function() {",
-									"    pm.response.to.have.status(200)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "localhost:8080/recipe",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"recipe"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "place order for recipe",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"response is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/order",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"order"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check order is present in log",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is OK\", function() {",
-									"    pm.response.to.have.status(200);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"body contains the order\", function() {",
-									"    let body = JSON.parse(responseBody);",
-									"    let recipeID = pm.environment.get(\"test_outbound_recipe_id\");",
-									"    ",
-									"    let expected = {",
-									"        recipeID: recipeID,",
-									"        qty: 1",
-									"    }",
-									"",
-									"    pm.expect(body.data.map(dropID)).to.be.an('array')",
-									"       .that.deep.includes(expected)",
-									"})",
-									"",
-									"function dropID(e) {",
-									"    return {",
-									"        recipeID: e.recipeID,",
-									"        qty: e.qty",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "localhost:8080/order",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"order"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "place more orders than there is stock",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"Should return 400\", function() {",
-									"    pm.response.to.have.status(400)",
-									"})",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"id\": {{test_outbound_recipe_id}},\n\t\"qty\": 1\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/order",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"order"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "show stock",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "3c31e861-0575-44aa-bc79-654149ef2864",
-								"exec": [
-									"pm.test(\"status is 200 OK\", function() {",
-									"    pm.response.to.have.status(200)",
-									"})",
-									"",
-									"pm.test(\"contains updated values\", function() {",
-									"    pm.response.to.not.be.error;",
-									"    pm.response.to.be.json;",
-									"    ",
-									"    let body = JSON.parse(responseBody);",
-									"",
-									"    let obj1 = {",
-									"        id:  pm.environment.get(\"test_outbound_inventory_item_id_1\"),",
-									"        name: pm.environment.get(\"test_outbound_inventory_item_name_1\"),",
-									"        qty: 1",
-									"    }",
-									"",
-									"    let obj2 = {",
-									"        id: pm.environment.get(\"test_outbound_inventory_item_id_2\"),",
-									"        name: pm.environment.get(\"test_outbound_inventory_item_name_2\"),",
-									"        qty: 1",
-									"    }",
-									"",
-									"    pm.expect(body.data).to.be.an('array')",
-									"        .that.deep.includes(obj1)",
-									"        .and.deep.includes(obj2)",
-									"})"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
-						"url": {
-							"raw": "localhost:8080/stock",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"stock"
-							]
-						}
-					},
-					"response": []
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"event": [
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "0f4044ca-3364-4a68-89c5-e1c154217936",
+						"id": "d16ce438-f09b-48a4-93e8-d8547d76cf26",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -1469,7 +1881,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "ac1236eb-af8c-429d-a7ff-818cdda25812",
+						"id": "0dc9d467-39df-42e4-a000-bd488f2d5032",
 						"type": "text/javascript",
 						"exec": [
 							""

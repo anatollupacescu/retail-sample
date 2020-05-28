@@ -32,9 +32,37 @@ func (w *wrapper) exec(methodName string, f func(recipe.Book) error) {
 	w.persistenceProviderFactory.Commit(provider)
 }
 
-func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (recipeID recipe.ID, err error) {
+func (w wrapper) Disable(id int) (re recipe.Recipe, err error) {
+	w.exec("disable recipe", func(r recipe.Book) error {
+		re, err = r.SetStatus(id, false)
+
+		return err
+	})
+
+	return
+}
+
+func (w wrapper) Enable(id int) (re recipe.Recipe, err error) {
+	w.exec("disable recipe", func(r recipe.Book) error {
+		re, err = r.SetStatus(id, true)
+
+		return err
+	})
+
+	return
+}
+
+func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (re recipe.Recipe, err error) {
 	w.exec("add recipe", func(r recipe.Book) error {
+		var recipeID recipe.ID
+
 		recipeID, err = r.Add(recipeName, recipeIngredients)
+
+		if err != nil {
+			return err
+		}
+
+		re, err = r.Get(recipeID)
 
 		return err
 	})

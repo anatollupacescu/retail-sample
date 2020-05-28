@@ -53,6 +53,7 @@ export interface recipeDTO {
   id: number
   name: string
   items: ingredientDTO[]
+  enabled: boolean
 }
 
 export default class App {
@@ -142,20 +143,28 @@ export default class App {
     let id = Number.parseInt(this.selectedID)
     let recipe = this.client.getByID(id)
     let recipeDTO = this.toRecipeDTO(recipe)
+
     this.modal.populate(recipeDTO)
     this.openModal()
   }
 
   toRecipeDTO(r: Recipe): recipeDTO {
-    let items: ingredientDTO[] = r.items.map(i => ({
-      name: String(i.id),
-      qty: String(i.qty)
-    }))
+    let dtos = []
+
+    for (let i in r.items) {
+      let item = r.items[i]
+      let name = this.inventory.findByID(String(item.id)).name
+      dtos.push({
+        name: name,
+        qty: String(item.qty)
+      })
+    }
 
     return {
       id: r.id,
       name: r.name,
-      items: items
+      items: dtos,
+      enabled: r.enabled
     }
   }
 
@@ -169,12 +178,12 @@ export default class App {
 
   onRowClick(id: string) {
     this.page.clearRow()
-    
+
     if (id === this.selectedID) {
       this.selectedID = ''
       return
     }
-    
+
     this.selectedID = id
     this.page.highlightRow(id)
   }
@@ -293,5 +302,29 @@ export default class App {
 
     this.page.toggleQtyError(false)
     this.page.toggleAddToListBtnState(false)
+  }
+
+  toggleRecipeStatus(b: boolean): void {
+    let id = this.selectedID
+
+    if (!id) {
+      throw 'no row selected'
+    }
+
+    let item = this.client.getByID(Number(id))
+
+    if (item.enabled === b) {
+      throw 'already in the expected state'
+    }
+
+    this.client
+      .toggleRecipeStatus(id, b)
+      .then(r => this.toRecipeDTO(r))
+      .then(this.modal.populate)
+      .then(() => {
+        let data = this.client.getState()
+        this.page.populateTable(data)
+      })
+      .then(() => this.page.highlightRow(id))
   }
 }

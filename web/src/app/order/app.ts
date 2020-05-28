@@ -53,7 +53,7 @@ export default class App {
   }
 
   show() {
-    let items = this.recipe.getState()
+    let items = this.recipe.getEnabledRecipes()
     this.page.populateDropdown(items)
 
     let data: Record[] = this.client.getState()

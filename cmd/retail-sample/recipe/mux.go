@@ -11,10 +11,24 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-type webApp struct {
-	wrapper wrapper
-	logger  types.Logger
-}
+type (
+	webApp struct {
+		wrapper wrapper
+		logger  types.Logger
+	}
+
+	item struct {
+		Id  int `json:"id"`
+		Qty int `json:"qty"`
+	}
+
+	entity struct {
+		ID      int    `json:"id"`
+		Name    string `json:"name"`
+		Items   []item `json:"items"`
+		Enabled bool   `json:"enabled"`
+	}
+)
 
 var internalServerError = "internal server error"
 
@@ -46,7 +60,7 @@ func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	var recipeName = recipe.Name(requestBody.Name)
 
-	recipeID, err := a.wrapper.Add(recipeName, ingredients)
+	re, err := a.wrapper.Add(recipeName, ingredients)
 
 	switch err {
 	case nil:
@@ -64,13 +78,14 @@ func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type descriptorEntity map[recipe.Name]recipe.ID
-
 	var response = struct {
-		Data descriptorEntity `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: descriptorEntity{
-			recipeName: recipeID,
+		Data: entity{
+			ID:      int(re.ID),
+			Name:    string(re.Name),
+			Items:   toItems(re.Ingredients),
+			Enabled: re.Enabled,
 		},
 	}
 
@@ -93,23 +108,18 @@ func (a *webApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
-	type recipe struct {
-		ID    int    `json:"id"`
-		Name  string `json:"name"`
-		Items []item `json:"items"`
-	}
-
 	var response struct {
-		Data []recipe `json:"data"`
+		Data []entity `json:"data"`
 	}
 
-	response.Data = make([]recipe, 0)
+	response.Data = make([]entity, 0)
 
 	for _, r := range list {
-		response.Data = append(response.Data, recipe{
-			ID:    int(r.ID),
-			Name:  string(r.Name),
-			Items: toItems(r.Ingredients),
+		response.Data = append(response.Data, entity{
+			ID:      int(r.ID),
+			Name:    string(r.Name),
+			Items:   toItems(r.Ingredients),
+			Enabled: r.Enabled,
 		})
 	}
 
@@ -119,11 +129,6 @@ func (a *webApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
 		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
-}
-
-type item struct {
-	Id  int `json:"id"`
-	Qty int `json:"qty"`
 }
 
 func toItems(i []recipe.Ingredient) (items []item) {
@@ -143,9 +148,9 @@ func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["recipeID"]
 
-	i, _ := strconv.Atoi(rid)
+	id, _ := strconv.Atoi(rid)
 
-	recipeID := recipe.ID(i)
+	recipeID := recipe.ID(id)
 
 	rcp, err := a.wrapper.Get(recipeID)
 
@@ -162,12 +167,80 @@ func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var response = struct {
-		Name  string `json:"name"`
-		Items []item `json:"items"`
+		Data entity `json:"data"`
 	}{
-		Name:  string(rcp.Name),
-		Items: toItems(rcp.Ingredients),
+		Data: entity{
+			ID:      id,
+			Name:    string(rcp.Name),
+			Items:   toItems(rcp.Ingredients),
+			Enabled: rcp.Enabled,
+		},
 	}
+
+	err = json.NewEncoder(w).Encode(response)
+
+	if err != nil {
+		a.logger.Log("action", "encode response", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+	}
+}
+
+func (a *webApp) PatchRecipe(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["recipeID"]
+
+	id, _ := strconv.Atoi(rid)
+
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	var requestBody struct {
+		Enabled bool `json:"enabled"`
+	}
+
+	if err := d.Decode(&requestBody); err != nil {
+		a.logger.Log("action", "decode request payload", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	var (
+		re  recipe.Recipe
+		err error
+	)
+
+	if requestBody.Enabled {
+		re, err = a.wrapper.Enable(id)
+	} else {
+		re, err = a.wrapper.Disable(id)
+	}
+
+	switch err {
+	case nil:
+		break
+	case recipe.ErrRecipeNotFound:
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	default:
+		a.logger.Log("action", "call application", "error", err)
+		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
+	}
+
+	var response = struct {
+		Data entity `json:"data"`
+	}{
+		Data: entity{
+			ID:      int(re.ID),
+			Name:    string(re.Name),
+			Items:   toItems(re.Ingredients),
+			Enabled: re.Enabled,
+		},
+	}
+
+	w.WriteHeader(http.StatusOK)
 
 	err = json.NewEncoder(w).Encode(response)
 

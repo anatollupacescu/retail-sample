@@ -28,7 +28,8 @@ describe('saving a recipe', () => {
       {
         id: 1,
         name: 'test',
-        items: []
+        items: [],
+        enabled: true
       }
     ]
 

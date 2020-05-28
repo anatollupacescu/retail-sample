@@ -7,7 +7,6 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
@@ -21,6 +20,22 @@ type PgxDB interface {
 
 type PgxStore struct {
 	DB PgxDB
+}
+
+func (pr *PgxStore) Save(r recipe.Recipe) error {
+	sql := "update recipe set enabled=$1 where id=$2"
+
+	tag, err := pr.DB.Exec(context.Background(), sql, r.Enabled, r.ID)
+
+	if err != nil {
+		return errors.Wrapf(DBErr, "save recipe: %v", err)
+	}
+
+	if tag.RowsAffected() != 1 {
+		return recipe.ErrRecipeNotFound
+	}
+
+	return nil
 }
 
 func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
@@ -51,16 +66,15 @@ func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 }
 
 func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
-	sql := "select name from recipe where id = $1"
+	sql := "select name, enabled from recipe where id = $1"
 
-	var name string
-	err = pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&name)
+	err = pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&r.Name, &r.Enabled)
 
 	switch err {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return r, order.ErrOrderNotFound
+		return r, recipe.ErrRecipeNotFound
 	default:
 		return r, errors.Wrapf(DBErr, "get recipe: %v", err)
 	}
@@ -91,6 +105,7 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 		})
 	}
 
+	r.ID = recipeID
 	r.Ingredients = ingredients
 
 	return

@@ -30,7 +30,7 @@ export default class Client {
     return apiData
   }
 
-  async asyncToggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
+  private async apiToggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
     try {
       let payload = {
         enabled: enabled
@@ -44,7 +44,7 @@ export default class Client {
 
   async toggleItemStatus(id: string, enabled: boolean): Promise<inventoryItem> {
     try {
-      let item = await this.asyncToggleItemStatus(id, enabled)
+      let item = await this.apiToggleItemStatus(id, enabled)
       this.saveToState(item)
       return item
     } catch (error) {
@@ -52,12 +52,12 @@ export default class Client {
     }
   }
 
-  saveToState(item: inventoryItem) {
+  private saveToState(item: inventoryItem) {
     this.state = this.state.filter(i => i.id !== item.id)
     this.state.push(item)
   }
 
-  async apiAddItem(name: string): Promise<any> {
+  private async apiAddItem(name: string): Promise<any> {
     try {
       let payload = {
         name: name

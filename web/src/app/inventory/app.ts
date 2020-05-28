@@ -62,6 +62,7 @@ export default class App {
     }
 
     let modalItem = this.client.findByID(this.selectedID)
+
     this.page.populateModal(modalItem)
     this.openModal()
   }
@@ -75,10 +76,13 @@ export default class App {
   }
 
   onRowClick(id: string) {
+    this.page.clearRow()
+
     if (id === this.selectedID) {
       this.selectedID = ''
-      return this.page.clearRow()
+      return
     }
+
     this.selectedID = id
     this.page.highlightRow(id)
   }

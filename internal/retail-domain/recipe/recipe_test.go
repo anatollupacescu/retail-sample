@@ -11,6 +11,60 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
+func TestDisableRecipe(t *testing.T) {
+	t.Run("given an unknown id", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+
+		var r recipe.Recipe
+
+		s.On("Get", mock.Anything).Return(r, recipe.ErrRecipeNotFound)
+
+		i := &recipe.MockInventory{}
+		b := recipe.Book{Store: s, Inventory: i}
+
+		_, err := b.SetStatus(1, false)
+
+		t.Run("calls store", func(t *testing.T) {
+			s.AssertExpectations(t)
+		})
+
+		t.Run("should return error", func(t *testing.T) {
+			assert.Equal(t, recipe.ErrRecipeNotFound, err)
+		})
+	})
+
+	t.Run("given a known id", func(t *testing.T) {
+		s := &recipe.MockRecipeStore{}
+
+		r := recipe.Recipe{
+			ID:          1,
+			Ingredients: nil,
+			Name:        "test",
+			Enabled:     true,
+		}
+
+		s.On("Get", mock.Anything).Return(r, nil)
+
+		var r2 = r
+		r2.Enabled = false
+
+		s.On("Save", r2).Return(nil)
+
+		b := recipe.Book{Store: s}
+
+		r2, err := b.SetStatus(1, false)
+
+		t.Run("calls store", func(t *testing.T) {
+			s.AssertExpectations(t)
+		})
+
+		t.Run("should disable recipe", func(t *testing.T) {
+			assert.NoError(t, err)
+			assert.Equal(t, false, r2.Enabled)
+		})
+	})
+}
+
 func TestAddRecipe(t *testing.T) {
 	t.Run("should reject empty name", func(t *testing.T) {
 		b := recipe.Book{}
@@ -99,9 +153,11 @@ func TestAddRecipe(t *testing.T) {
 			ID:      1,
 			Enabled: true,
 		}, nil)
+
 		s.On("Add", recipe.Recipe{
 			Name:        "test",
 			Ingredients: []recipe.Ingredient{{ID: 1, Qty: 2}},
+			Enabled:     true,
 		}).Return(recipe.ID(1), nil)
 
 		recipeID, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})

@@ -85,6 +85,18 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
     app.onRowClick(id)
   })
 
+  let enableRecipe = $('#recipeModalEnable')
+
+  enableRecipe.on('click', () => {
+    app.toggleRecipeStatus(true)
+  })
+
+  let disableRecipe = $('#recipeModalDisable')
+
+  disableRecipe.on('click', () => {
+    app.toggleRecipeStatus(false)
+  })
+
   app.init()
 }
 
@@ -126,6 +138,19 @@ function populateModal(i: recipeDTO): void {
     row.insertCell(0).innerHTML = element.name
     row.insertCell(1).innerHTML = String(element.qty)
   })
+
+  let enbl = $('#recipeModalEnable'),
+    dsbl = $('#recipeModalDisable')
+
+  enbl.removeClass('btn-primary')
+  dsbl.removeClass('btn-primary')
+
+  if (i.enabled) {
+    enbl.addClass('btn-primary')
+    return
+  }
+
+  dsbl.addClass('btn-primary')
 }
 
 function toggleDisabledState(v: boolean, input: JQuery): void {

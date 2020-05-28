@@ -19,5 +19,6 @@ func ConfigureRoutes(r *mux.Router, loggerFactory types.LoggerFactory, factory t
 
 	r.HandleFunc("/recipe", app.ListRecipes).Methods(http.MethodGet)
 	r.HandleFunc("/recipe/{recipeID}", app.GetRecipe).Methods(http.MethodGet)
+	r.HandleFunc("/recipe/{recipeID}", app.PatchRecipe).Methods(http.MethodPatch)
 	r.HandleFunc("/recipe", app.CreateRecipe).Methods(http.MethodPost)
 }

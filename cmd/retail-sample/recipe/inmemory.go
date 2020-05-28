@@ -32,5 +32,24 @@ func (m *InMemoryStore) List() (r []domain.Recipe, err error) {
 }
 
 func (m *InMemoryStore) Get(id domain.ID) (domain.Recipe, error) {
-	return m.data[int(id)], nil
+	dict := m.data
+
+	if val, ok := dict[int(id)]; ok {
+		val.ID = id
+		return val, nil
+	}
+
+	return domain.Recipe{}, domain.ErrRecipeNotFound
+}
+
+func (m *InMemoryStore) Save(r domain.Recipe) error {
+	dict := m.data
+
+	if _, ok := dict[int(r.ID)]; !ok {
+		return domain.ErrRecipeNotFound
+	}
+
+	m.data[int(r.ID)] = r
+
+	return nil
 }

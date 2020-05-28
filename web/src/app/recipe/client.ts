@@ -9,6 +9,7 @@ export interface Recipe {
   id: number
   name: string
   items: RecipeItem[]
+  enabled: boolean
 }
 
 export default class Client {
@@ -20,7 +21,7 @@ export default class Client {
     this.state = [...initial]
   }
 
-  async apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
+  private async apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
     let items: any = {}
     ingredients.forEach(i => {
       items[i.id] = i.qty
@@ -64,7 +65,8 @@ export default class Client {
         this.state.push({
           id: Number(id),
           name: String(name),
-          items: ingredients
+          items: ingredients,
+          enabled: true
         })
       })
     } catch (error) {
@@ -83,7 +85,7 @@ export default class Client {
     return ''
   }
 
-  async apiFetchRecipes(): Promise<any> {
+  private async apiFetchRecipes(): Promise<any> {
     try {
       let res = await axios.get(this.endpoint)
       return res.data.data
@@ -98,12 +100,43 @@ export default class Client {
     return data
   }
 
+  private async apiToggleRecipeStatus(id: string, enabled: boolean): Promise<Recipe> {
+    try {
+      let payload = {
+        enabled: enabled
+      }
+      let response = await axios.patch(`${this.endpoint}/${id}`, payload)
+      return response.data.data
+    } catch (error) {
+      throw error.response.data.trim()
+    }
+  }
+
+  async toggleRecipeStatus(id: string, enabled: boolean): Promise<Recipe> {
+    try {
+      let item = await this.apiToggleRecipeStatus(id, enabled)
+      this.saveToState(item)
+      return item
+    } catch (error) {
+      throw `error changing recipe status: ${error}`
+    }
+  }
+
+  private saveToState(recipe: Recipe) {
+    this.state = this.state.filter(i => i.id !== recipe.id)
+    this.state.push(recipe)
+  }
+
   getState(): Recipe[] {
     return [...this.state]
   }
 
+  getEnabledRecipes(): Recipe[] {
+    return this.getState().filter(r => r.enabled)
+  }
+
   getByID(id: number): Recipe {
-    let r = this.state.find(r => r.id === Number(id))
+    let r = this.state.find(r => r.id === id)
 
     if (!r) {
       throw `recipe with id ${id} not found`

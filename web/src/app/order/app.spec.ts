@@ -27,6 +27,7 @@ describe('place order', () => {
     recipe,
     'getByID',
     (): Recipe => ({
+      enabled: true,
       id: 1,
       name: 'test',
       items: [

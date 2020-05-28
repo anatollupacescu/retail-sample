@@ -18,6 +18,7 @@ type (
 		ID          ID
 		Name        Name
 		Ingredients []Ingredient
+		Enabled     bool
 	}
 
 	Ingredient struct {
@@ -29,6 +30,7 @@ type (
 		Add(Recipe) (ID, error)
 		List() ([]Recipe, error)
 		Get(ID) (Recipe, error)
+		Save(Recipe) error
 	}
 
 	Book struct {
@@ -84,6 +86,7 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	return b.Store.Add(Recipe{
 		Name:        name,
 		Ingredients: ingredients,
+		Enabled:     true,
 	})
 }
 
@@ -97,6 +100,20 @@ func (b Book) List() (r []Recipe, err error) {
 	list, err := b.Store.List()
 
 	r = append(r, list...)
+
+	return
+}
+
+func (b Book) SetStatus(id int, enabled bool) (r Recipe, err error) {
+	r, err = b.Store.Get(ID(id))
+
+	if err != nil {
+		return
+	}
+
+	r.Enabled = enabled
+
+	err = b.Store.Save(r)
 
 	return
 }

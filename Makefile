@@ -46,7 +46,7 @@ run/docker: $(BINARY)
 
 clean:
 	@rm $(BINARY) 2> /dev/null || true
-	@$(MAKE) clean -C web/
+	# @$(MAKE) clean -C web/
 
 .PHONY: build/web
 

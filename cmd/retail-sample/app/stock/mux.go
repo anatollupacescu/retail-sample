@@ -8,14 +8,14 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
 type (
 	webApp struct {
-		logger  types.Logger
+		logger  middleware.Logger
 		wrapper wrapper
 	}
 	entity struct {

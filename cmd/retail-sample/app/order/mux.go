@@ -11,12 +11,12 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 )
 
 type (
-	orderWebApp struct {
-		logger  types.Logger
+	webApp struct {
+		logger  middleware.Logger
 		wrapper wrapper
 	}
 
@@ -29,7 +29,7 @@ type (
 
 var internalServerError = "internal server error"
 
-func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
+func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -86,7 +86,7 @@ func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
+func (a webApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -134,7 +134,7 @@ func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a orderWebApp) getAll(w http.ResponseWriter, r *http.Request) {
+func (a webApp) getAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 

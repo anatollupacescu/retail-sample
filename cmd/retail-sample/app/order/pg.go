@@ -10,7 +10,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 )
 
-var DBErr = errors.New("postgres")
+var ErrDB = errors.New("postgres")
 
 type PgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
@@ -28,7 +28,7 @@ func (po *PgxStore) Add(o order.Order) (order.ID, error) {
 	err := po.DB.QueryRow(context.Background(), sql, o.RecipeID, o.Qty).Scan(&id)
 
 	if err != nil {
-		return order.ID(0), errors.Wrapf(DBErr, "add order: %v", err)
+		return order.ID(0), errors.Wrapf(ErrDB, "add order: %v", err)
 	}
 
 	return order.ID(id), nil
@@ -38,7 +38,7 @@ func (po *PgxStore) List() (orders []order.Order, err error) {
 	rows, err := po.DB.Query(context.Background(), "select id, recipeid, quantity, orderdate from outbound_order")
 
 	if err != nil {
-		return nil, errors.Wrapf(DBErr, "list orders: %v", err)
+		return nil, errors.Wrapf(ErrDB, "list orders: %v", err)
 	}
 
 	defer rows.Close()
@@ -51,7 +51,7 @@ func (po *PgxStore) List() (orders []order.Order, err error) {
 		)
 
 		if err := rows.Scan(&id, &recipeID, &qty, &time); err != nil {
-			return nil, errors.Wrapf(DBErr, "scan orders: %v", err)
+			return nil, errors.Wrapf(ErrDB, "scan orders: %v", err)
 		}
 
 		orders = append(orders, order.Order{
@@ -89,7 +89,7 @@ func (po *PgxStore) Get(id order.ID) (result order.Order, err error) {
 	case pgx.ErrNoRows:
 		return result, order.ErrOrderNotFound
 	default:
-		return result, errors.Wrapf(DBErr, "get inventory item by id: %v", err)
+		return result, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
 	return order.Order{

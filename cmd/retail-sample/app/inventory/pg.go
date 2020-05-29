@@ -10,7 +10,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-var DBErr = errors.New("postgres")
+var ErrDB = errors.New("postgres")
 
 type PgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
@@ -26,7 +26,7 @@ func (ps *PgxStore) Update(i inventory.Item) error {
 	tag, err := ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
 
 	if err != nil {
-		return errors.Wrapf(DBErr, "update inventory item: %v", err)
+		return errors.Wrapf(ErrDB, "update inventory item: %v", err)
 	}
 
 	if tag.RowsAffected() != 1 {
@@ -41,7 +41,7 @@ func (ps *PgxStore) Add(n string) (int, error) {
 	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name, enabled) values($1, true) returning id", n).Scan(&id)
 
 	if err != nil {
-		return 0, errors.Wrapf(DBErr, "add inventory item: %v", err)
+		return 0, errors.Wrapf(ErrDB, "add inventory item: %v", err)
 	}
 
 	return int(id), nil
@@ -57,7 +57,7 @@ func (ps *PgxStore) Find(n string) (int, error) {
 	case pgx.ErrNoRows:
 		return 0, inventory.ErrItemNotFound
 	default:
-		return 0, errors.Wrapf(DBErr, "find inventory item id: %v", err)
+		return 0, errors.Wrapf(ErrDB, "find inventory item id: %v", err)
 	}
 
 	return id, nil
@@ -85,7 +85,7 @@ func (ps *PgxStore) Get(id int) (inventory.Item, error) {
 	case pgx.ErrNoRows:
 		return zeroItem, inventory.ErrItemNotFound
 	default:
-		return zeroItem, errors.Wrapf(DBErr, "get inventory item by id: %v", err)
+		return zeroItem, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
 	return inventory.Item{
@@ -99,7 +99,7 @@ func (ps *PgxStore) List() (items []inventory.Item, err error) {
 	rows, err := ps.DB.Query(context.Background(), "select id, name, enabled from inventory")
 
 	if err != nil {
-		return nil, errors.Wrapf(DBErr, "list inventory: %v", err)
+		return nil, errors.Wrapf(ErrDB, "list inventory: %v", err)
 	}
 
 	defer rows.Close()
@@ -112,7 +112,7 @@ func (ps *PgxStore) List() (items []inventory.Item, err error) {
 		)
 
 		if err := rows.Scan(&id, &name, &enabled); err != nil {
-			return nil, errors.Wrapf(DBErr, "scan inventory: %v", err)
+			return nil, errors.Wrapf(ErrDB, "scan inventory: %v", err)
 		}
 
 		items = append(items, inventory.Item{

@@ -1,17 +1,16 @@
-package main
+package provider
 
 import (
-	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/inventory"
-	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
-	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
-	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
+	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
+	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
+	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
+	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
-
-	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 )
 
 type (
@@ -63,15 +62,15 @@ func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 	return &memFactory
 }
 
-func (pf *InMemoryProviderFactory) New() retail.PersistenceProvider {
+func (pf *InMemoryProviderFactory) New() middleware.PersistenceProvider {
 	return &InMemoryProvider{}
 }
 
-func (_ *InMemoryProviderFactory) Commit(_ retail.PersistenceProvider) {
+func (_ *InMemoryProviderFactory) Commit(_ middleware.PersistenceProvider) {
 	/*no op*/
 }
 
-func (_ *InMemoryProviderFactory) Rollback(_ retail.PersistenceProvider) {
+func (_ *InMemoryProviderFactory) Rollback(_ middleware.PersistenceProvider) {
 	/*no op*/
 }
 

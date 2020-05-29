@@ -1,4 +1,4 @@
-package types
+package middleware
 
 import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
@@ -8,12 +8,6 @@ import (
 )
 
 type (
-	Logger interface {
-		Log(keyvals ...interface{})
-	}
-
-	LoggerFactory func() Logger
-
 	PersistenceProviderFactory interface {
 		New() PersistenceProvider
 		Commit(PersistenceProvider)

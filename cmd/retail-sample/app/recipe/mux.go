@@ -7,14 +7,14 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
 type (
 	webApp struct {
 		wrapper wrapper
-		logger  types.Logger
+		logger  middleware.Logger
 	}
 
 	item struct {

@@ -10,16 +10,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ardanlabs/conf"
 	kitlog "github.com/go-kit/kit/log"
+
+	"github.com/ardanlabs/conf"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/inventory"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/provider"
 
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
@@ -48,29 +50,24 @@ func main() {
 	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
-	//app
+	// app specific
 
-	loggerFactory := newLoggerFactory(baseLogger)
+	routerLogger := middleware.WrapLogger(baseLogger)
+	loggerFactory := middleware.NewLoggerFactory(baseLogger)
 
-	var persistenceFactory types.PersistenceProviderFactory
-
-	if config.InMemory {
-		persistenceFactory = newInMemoryPersistentFactory()
-	} else {
-		persistenceFactory = newPersistenceFactory(config.DatabaseURL)
-	}
-
-	routerLogger := wrapLogger(baseLogger)
+	persistenceFactory := provider.NewPersistenceFactory(config.DatabaseURL, config.InMemory)
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	recipe.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 
-	//static
+	// static
+
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
 
 	diagRouter := mux.NewRouter()
+
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		if err := persistenceFactory.Ping(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

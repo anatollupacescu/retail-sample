@@ -1,25 +1,26 @@
-package main
+package provider
 
 import (
 	"context"
 	"log"
 
 	pgx "github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 
-	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/inventory"
-	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/order"
-	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/recipe"
-	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/stock"
-	retail "github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
+	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
+	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
+	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
-
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-func newPersistenceFactory(dbConn string) *PgxProviderFactory {
+func newPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory {
 	config, err := pgxpool.ParseConfig(dbConn)
 
 	if err != nil {
@@ -45,7 +46,7 @@ type (
 	}
 )
 
-func (pf *PgxProviderFactory) New() retail.PersistenceProvider {
+func (pf *PgxProviderFactory) New() middleware.PersistenceProvider {
 	tx, err := pf.pool.Begin(context.Background())
 
 	if err != nil {
@@ -71,7 +72,7 @@ func (pf *PgxProviderFactory) Ping() error {
 	return nil
 }
 
-func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) {
+func (pf *PgxProviderFactory) Commit(pp middleware.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
 	err := provider.tx.Commit(context.Background())
 	if err != nil {
@@ -79,7 +80,7 @@ func (pf *PgxProviderFactory) Commit(pp retail.PersistenceProvider) {
 	}
 }
 
-func (pf *PgxProviderFactory) Rollback(pp retail.PersistenceProvider) {
+func (pf *PgxProviderFactory) Rollback(pp middleware.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
 	err := provider.tx.Rollback(context.Background())
 	if err != nil {

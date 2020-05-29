@@ -756,7 +756,8 @@
 									"    let expectedObj = {",
 									"        qty: 3",
 									"    }",
-									"    pm.expect(body.data).to.eql(expectedObj)",
+									"    ",
+									"    pm.expect(body.data).to.deep.include(expectedObj)",
 									"})"
 								],
 								"type": "text/javascript"
@@ -1069,7 +1070,7 @@
 							"response": []
 						},
 						{
-							"name": "create salad recipe",
+							"name": "create a two ingredient recipe",
 							"event": [
 								{
 									"listen": "test",

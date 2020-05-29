@@ -5,15 +5,17 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 )
 
-func ConfigureRoutes(r *mux.Router, logger types.Logger, loggerFactory types.LoggerFactory, factory types.PersistenceProviderFactory) {
+func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory middleware.LoggerFactory, factory middleware.PersistenceProviderFactory) {
 	stock := webApp{
 		logger: logger,
 		wrapper: wrapper{
-			loggerFactory:              loggerFactory,
-			persistenceProviderFactory: factory,
+			Wrapper: middleware.Wrapper{
+				LoggerFactory:              loggerFactory,
+				PersistenceProviderFactory: factory,
+			},
 		},
 	}
 

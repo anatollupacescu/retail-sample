@@ -16,7 +16,7 @@ type (
 		logger  types.Logger
 		wrapper wrapper
 	}
-	descriptorEntity struct {
+	entity struct {
 		ID      int    `json:"id"`
 		Name    string `json:"name"`
 		Enabled bool   `json:"enabled"`
@@ -31,7 +31,13 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["itemID"]
 
-	id, _ := strconv.Atoi(rid)
+	id, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "inventory.update")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -43,8 +49,8 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	var requestPayload payload
 
 	if err := d.Decode(&requestPayload); err != nil {
-		a.logger.Log("action", "decode request payload", "error", err)
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		a.logger.Log("action", "decode request payload", "error", err, "method", "inventory.update")
+		http.Error(w, "parse body", http.StatusBadRequest)
 		return
 	}
 
@@ -57,15 +63,14 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data descriptorEntity `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: descriptorEntity{
+		Data: entity{
 			ID:      id,
 			Name:    item.Name,
 			Enabled: item.Enabled,
@@ -77,7 +82,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "inventory.update")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -95,13 +100,13 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	var requestPayload payload
 
 	if err := d.Decode(&requestPayload); err != nil {
-		a.logger.Log("action", "decode request payload", "error", err)
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		a.logger.Log("action", "decode request payload", "error", err, "method", "inventory.create")
+		http.Error(w, "could not parse body", http.StatusBadRequest)
 		return
 	}
 
 	itemName := requestPayload.Name
-	createdID, err := a.wrapper.create(itemName)
+	createdID, err := a.wrapper.create(itemName) //TODO should return newly created entity
 
 	switch err {
 	case nil:
@@ -112,18 +117,17 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data descriptorEntity `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: descriptorEntity{
+		Data: entity{
 			ID:      int(createdID),
 			Name:    requestPayload.Name,
-			Enabled: true, //TODO fix assumption by retrieving the entity again
+			Enabled: true,
 		},
 	}
 
@@ -132,7 +136,7 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "inventory.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -143,18 +147,17 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	list, err := a.wrapper.getAll()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
 	var response struct {
-		Data []descriptorEntity `json:"data"`
+		Data []entity `json:"data"`
 	}
 
-	response.Data = make([]descriptorEntity, 0)
+	response.Data = make([]entity, 0)
 
 	for _, tp := range list {
-		response.Data = append(response.Data, descriptorEntity{
+		response.Data = append(response.Data, entity{
 			ID:      int(tp.ID),
 			Name:    string(tp.Name),
 			Enabled: tp.Enabled,
@@ -164,7 +167,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "inventory.getAll")
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
@@ -173,9 +176,15 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
-	rid := vars["itemID"]
+	reqID := vars["itemID"]
 
-	id, _ := strconv.Atoi(rid)
+	id, err := strconv.Atoi(reqID)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "inventory.get")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	inventoryItem, err := a.wrapper.getOne(id)
 
@@ -186,15 +195,14 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data descriptorEntity `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: descriptorEntity{
+		Data: entity{
 			ID:      int(inventoryItem.ID),
 			Name:    string(inventoryItem.Name),
 			Enabled: inventoryItem.Enabled,
@@ -204,7 +212,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "inventory.get")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

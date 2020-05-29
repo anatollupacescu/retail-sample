@@ -56,7 +56,7 @@ func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
 		}
 	}
 
-	return zeroValueItem, nil
+	return zeroValueItem, domain.ErrItemNotFound
 }
 
 func (m *InMemoryStore) List() (t []domain.Item, err error) {

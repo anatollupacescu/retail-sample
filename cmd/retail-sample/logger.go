@@ -19,9 +19,9 @@ func newLoggerFactory(logger kitlog.Logger) types.LoggerFactory {
 	}
 }
 
-func newRouterLogger(logger kitlog.Logger) types.Logger {
+func wrapLogger(logger kitlog.Logger) types.Logger {
 	return loggerWrapper{
-		Logger: kitlog.With(logger, kitlog.Caller),
+		Logger: kitlog.With(logger),
 	}
 }
 

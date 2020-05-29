@@ -33,7 +33,7 @@ func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,7 @@ func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
@@ -103,7 +103,7 @@ func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -125,7 +125,7 @@ func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -149,7 +149,7 @@ func (a orderWebApp) getAll(w http.ResponseWriter, r *http.Request) {
 	list, err := a.wrapper.getAll()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
@@ -166,7 +166,7 @@ func (a orderWebApp) getAll(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

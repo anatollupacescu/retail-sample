@@ -22,11 +22,15 @@ type PgxStore struct {
 	DB PgxDB
 }
 
-func (ps *PgxStore) Update(i inventory.Item) (err error) {
-	_, err = ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
+func (ps *PgxStore) Update(i inventory.Item) error {
+	tag, err := ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
 
 	if err != nil {
 		return errors.Wrapf(DBErr, "update inventory item: %v", err)
+	}
+
+	if tag.RowsAffected() != 1 {
+		return inventory.ErrItemNotFound
 	}
 
 	return nil

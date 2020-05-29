@@ -22,7 +22,10 @@ func (ia wrapper) exec(methodName string, f func(i inventory.Inventory) error) {
 	err := f(inventory)
 
 	if err != nil {
+		logger.Log("error", err)
+
 		logger.Log("msg", "rollback")
+
 		ia.persistenceProviderFactory.Rollback(provider)
 		return
 	}

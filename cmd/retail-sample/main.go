@@ -60,7 +60,7 @@ func main() {
 		persistenceFactory = newPersistenceFactory(config.DatabaseURL)
 	}
 
-	routerLogger := newRouterLogger(baseLogger)
+	routerLogger := wrapLogger(baseLogger)
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)

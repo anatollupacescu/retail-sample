@@ -10,7 +10,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
-var DBErr = errors.New("postgres")
+var ErrDB = errors.New("postgres")
 
 type PgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
@@ -28,7 +28,7 @@ func (pr *PgxStore) Save(r recipe.Recipe) error {
 	tag, err := pr.DB.Exec(context.Background(), sql, r.Enabled, r.ID)
 
 	if err != nil {
-		return errors.Wrapf(DBErr, "save recipe: %v", err)
+		return errors.Wrapf(ErrDB, "save recipe: %v", err)
 	}
 
 	if tag.RowsAffected() != 1 {
@@ -49,7 +49,7 @@ func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	err := pr.DB.QueryRow(context.Background(), sql, r.Name).Scan(&recipeID)
 
 	if err != nil {
-		return zeroID, errors.Wrapf(DBErr, "add recipe: %v", err)
+		return zeroID, errors.Wrapf(ErrDB, "add recipe: %v", err)
 	}
 
 	sql = "insert into recipe_ingredient(recipeid, inventoryid, quantity) values($1, $2, $3)"
@@ -58,7 +58,7 @@ func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 		_, err = pr.DB.Exec(context.Background(), sql, recipeID, i.ID, i.Qty)
 
 		if err != nil {
-			return zeroID, errors.Wrapf(DBErr, "add recipe ingredient: %v", err)
+			return zeroID, errors.Wrapf(ErrDB, "add recipe ingredient: %v", err)
 		}
 	}
 
@@ -76,7 +76,7 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	case pgx.ErrNoRows:
 		return r, recipe.ErrRecipeNotFound
 	default:
-		return r, errors.Wrapf(DBErr, "get recipe: %v", err)
+		return r, errors.Wrapf(ErrDB, "get recipe: %v", err)
 	}
 
 	sql = "select inventoryid, quantity from recipe_ingredient where recipeid = $1"
@@ -84,7 +84,7 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	rows, err := pr.DB.Query(context.Background(), sql, recipeID)
 
 	if err != nil {
-		return r, errors.Wrapf(DBErr, "get recipe ingredients: %v", err)
+		return r, errors.Wrapf(ErrDB, "get recipe ingredients: %v", err)
 	}
 
 	defer rows.Close()
@@ -96,7 +96,7 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 		var qty int16
 
 		if err = rows.Scan(&itemid, &qty); err != nil {
-			return r, errors.Wrapf(DBErr, "scan recipe ingredients: %v", err)
+			return r, errors.Wrapf(ErrDB, "scan recipe ingredients: %v", err)
 		}
 
 		ingredients = append(ingredients, recipe.Ingredient{
@@ -128,7 +128,7 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 	rows, err := pr.DB.Query(context.Background(), sql)
 
 	if err != nil {
-		return recipes, errors.Wrapf(DBErr, "list recipes: %v", err)
+		return recipes, errors.Wrapf(ErrDB, "list recipes: %v", err)
 	}
 
 	defer rows.Close()
@@ -151,7 +151,7 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 		)
 
 		if err := rows.Scan(&recipeID, &name, &ingredientID, &qty); err != nil {
-			return recipes, errors.Wrapf(DBErr, "scan recipes: %v", err)
+			return recipes, errors.Wrapf(ErrDB, "scan recipes: %v", err)
 		}
 
 		key := key{id: recipeID, name: name}

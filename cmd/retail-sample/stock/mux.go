@@ -13,10 +13,17 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
-type webApp struct {
-	logger  types.Logger
-	wrapper wrapper
-}
+type (
+	webApp struct {
+		logger  types.Logger
+		wrapper wrapper
+	}
+	entity struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+		Qty  int    `json:"qty"`
+	}
+)
 
 var internalServerError = "internal server error"
 
@@ -26,24 +33,18 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	entries, err := a.wrapper.currentStock()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
-	}
-
-	type entry struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-		Qty  int    `json:"qty"`
+		return
 	}
 
 	var response struct {
-		Data []entry `json:"data"`
+		Data []entity `json:"data"`
 	}
 
-	response.Data = make([]entry, 0)
+	response.Data = make([]entity, 0)
 
 	for _, position := range entries {
-		response.Data = append(response.Data, entry{
+		response.Data = append(response.Data, entity{
 			ID:   position.ID,
 			Name: position.Name,
 			Qty:  position.Qty,
@@ -53,7 +54,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "stock.getAll")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -64,7 +65,13 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["itemID"]
 
-	itemID, _ := strconv.Atoi(rid)
+	itemID, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "stock.get")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	qty, err := a.wrapper.quantity(itemID)
 
@@ -75,19 +82,15 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	type entry struct {
-		Qty int `json:"qty"`
-	}
-
 	var response = struct {
-		Data entry `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: entry{
+		Data: entity{
+			ID:  itemID,
 			Qty: qty,
 		},
 	}
@@ -95,7 +98,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "stock.get")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -109,7 +112,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	var requestBody map[int]int
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.logger.Log("action", "decode request", "error", err)
+		a.logger.Log("action", "decode request", "error", err, "method", "stock.update")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -132,7 +135,6 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 
@@ -147,7 +149,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "stock.update")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -158,25 +160,25 @@ func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	provisionLog, err := a.wrapper.getProvisionLog()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err, "method", "stock.provisionlog")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	type entry struct {
+	type provisionLogEntity struct {
 		Time time.Time `json:"time"`
 		ID   int       `json:"id"`
 		Qty  int       `json:"qty"`
 	}
 
 	var response struct {
-		Data []entry `json:"data"`
+		Data []provisionLogEntity `json:"data"`
 	}
 
-	response.Data = make([]entry, 0)
+	response.Data = make([]provisionLogEntity, 0)
 
 	for _, in := range provisionLog {
-		response.Data = append(response.Data, entry{
+		response.Data = append(response.Data, provisionLogEntity{
 			ID:  int(in.ID),
 			Qty: in.Qty,
 		})
@@ -185,7 +187,7 @@ func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "stock.provisionlog")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

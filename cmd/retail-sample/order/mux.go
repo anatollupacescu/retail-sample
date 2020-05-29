@@ -14,10 +14,18 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 )
 
-type orderWebApp struct {
-	logger  types.Logger
-	wrapper wrapper
-}
+type (
+	orderWebApp struct {
+		logger  types.Logger
+		wrapper wrapper
+	}
+
+	entity struct {
+		ID       int `json:"id"`
+		RecipeID int `json:"recipeID"`
+		Qty      int `json:"qty"`
+	}
+)
 
 var internalServerError = "internal server error"
 
@@ -58,16 +66,10 @@ func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type descriptorEntity struct {
-		ID       int `json:"id"`
-		RecipeID int `json:"recipeID"`
-		Qty      int `json:"qty"`
-	}
-
 	var response = struct {
-		Data descriptorEntity `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: descriptorEntity{
+		Data: entity{
 			ID:       int(entryID),
 			RecipeID: recipeID,
 			Qty:      orderQty,
@@ -90,7 +92,13 @@ func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["orderID"]
 
-	id, _ := strconv.Atoi(rid)
+	id, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "order.get")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	orderID := order.ID(id)
 
@@ -108,15 +116,11 @@ func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type entry struct {
-		RecipeID int `json:"recipeID"`
-		Qty      int `json:"qty"`
-	}
-
 	var response = struct {
-		Data entry `json:"data"`
+		Data entity `json:"data"`
 	}{
-		Data: entry{
+		Data: entity{
+			ID:       int(ordr.ID),
 			RecipeID: ordr.RecipeID,
 			Qty:      ordr.Qty,
 		},
@@ -134,30 +138,24 @@ func (a orderWebApp) getAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	type entry struct {
-		ID       int `json:"id"`
-		RecipeID int `json:"recipeID"`
-		Qty      int `json:"qty"`
-	}
-
 	var response struct {
-		Data []entry `json:"data"`
+		Data []entity `json:"data"`
 	}
 
-	response.Data = make([]entry, 0)
+	response.Data = make([]entity, 0)
 
-	list, err := a.wrapper.getAll()
+	all, err := a.wrapper.getAll()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusBadRequest)
+		return
 	}
 
-	for _, o := range list {
-		e := entry{
-			ID:       int(o.ID),
-			RecipeID: o.RecipeID,
-			Qty:      o.Qty,
+	for _, ordr := range all {
+		e := entity{
+			ID:       int(ordr.ID),
+			RecipeID: ordr.RecipeID,
+			Qty:      ordr.Qty,
 		}
 
 		response.Data = append(response.Data, e)

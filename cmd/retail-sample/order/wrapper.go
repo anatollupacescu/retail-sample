@@ -26,6 +26,7 @@ func (w *wrapper) exec(methodName string, f func(o order.Orders) error) {
 	err := f(orders)
 
 	if err != nil {
+		w.logger.Log("error", err)
 		w.logger.Log("msg", "rollback")
 		w.persistenceProviderFactory.Rollback(w.provider)
 		return
@@ -38,10 +39,6 @@ func (w *wrapper) exec(methodName string, f func(o order.Orders) error) {
 func (w wrapper) create(id int, qty int) (orderID order.ID, err error) {
 	w.exec("add new order", func(o order.Orders) error {
 		orderID, err = o.PlaceOrder(id, qty)
-
-		if err != nil {
-			w.logger.Log("error", err)
-		}
 
 		return err
 	})

@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var DBErr = errors.New("postgres")
+var ErrDB = errors.New("postgres")
 
 type PgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
@@ -35,7 +35,7 @@ func (ps *PgxStore) Provision(id, qty int) (int, error) {
 	err := ps.DB.QueryRow(context.Background(), sql, id, qty).Scan(&newQty)
 
 	if err != nil {
-		return 0, errors.Wrapf(DBErr, "provision stock: %v", err)
+		return 0, errors.Wrapf(ErrDB, "provision stock: %v", err)
 	}
 
 	return newQty, nil
@@ -53,7 +53,7 @@ func (ps *PgxStore) Quantity(id int) (int, error) {
 	case pgx.ErrNoRows:
 		return 0, stock.ErrItemNotFound
 	default:
-		return 0, errors.Wrapf(DBErr, "get stock quantity for item with id %v: %v", id, err)
+		return 0, errors.Wrapf(ErrDB, "get stock quantity for item with id %v: %v", id, err)
 	}
 
 	return qty, nil
@@ -66,7 +66,7 @@ func (ps *PgxStore) Sell(ii []recipe.Ingredient, qty int) error {
 		_, err := ps.DB.Exec(context.Background(), sql, qty*i.Qty, i.ID)
 
 		if err != nil {
-			return errors.Wrapf(DBErr, "update stock: %v", err)
+			return errors.Wrapf(ErrDB, "update stock: %v", err)
 		}
 	}
 
@@ -80,7 +80,7 @@ type PgxProvisionLog struct {
 func (pl *PgxProvisionLog) Add(re stock.ProvisionEntry) error {
 	sql := "insert into provisionlog(inventoryid, quantity) values($1, $2)"
 	if _, err := pl.DB.Exec(context.Background(), sql, re.ID, re.Qty); err != nil {
-		return errors.Wrapf(DBErr, "provisionlog add: %v", err)
+		return errors.Wrapf(ErrDB, "provisionlog add: %v", err)
 	}
 
 	return nil
@@ -90,7 +90,7 @@ func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {
 	rows, err := pl.DB.Query(context.Background(), "select inventoryid, quantity from provisionlog")
 
 	if err != nil {
-		return nil, errors.Wrapf(DBErr, "provisionlog list: %v", err)
+		return nil, errors.Wrapf(ErrDB, "provisionlog list: %v", err)
 	}
 
 	defer rows.Close()
@@ -100,7 +100,7 @@ func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {
 		var qty int16
 
 		if err := rows.Scan(&id, &qty); err != nil {
-			return nil, errors.Wrapf(DBErr, "provisionlog list scan: %v", err)
+			return nil, errors.Wrapf(ErrDB, "provisionlog list scan: %v", err)
 		}
 
 		ee = append(ee, stock.ProvisionEntry{

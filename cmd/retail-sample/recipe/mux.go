@@ -18,7 +18,7 @@ type (
 	}
 
 	item struct {
-		Id  int `json:"id"`
+		ID  int `json:"id"`
 		Qty int `json:"qty"`
 	}
 
@@ -44,7 +44,7 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err, "method", "recipe.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -73,7 +73,6 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -94,6 +93,7 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
+		a.logger.Log("action", "encode response", "error", err, "method", "recipe.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -101,11 +101,11 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	list, err := a.wrapper.getAll()
+	all, err := a.wrapper.getAll()
 
 	if err != nil {
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
+		return
 	}
 
 	var response struct {
@@ -114,7 +114,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entity, 0)
 
-	for _, r := range list {
+	for _, r := range all {
 		response.Data = append(response.Data, entity{
 			ID:      int(r.ID),
 			Name:    string(r.Name),
@@ -126,7 +126,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "recipe.getAll")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -134,7 +134,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 func toItems(i []recipe.Ingredient) (items []item) {
 	for _, ri := range i {
 		items = append(items, item{
-			Id:  int(ri.ID),
+			ID:  int(ri.ID),
 			Qty: int(ri.Qty),
 		})
 	}
@@ -148,7 +148,13 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["recipeID"]
 
-	id, _ := strconv.Atoi(rid)
+	id, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "recipe.get")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	recipeID := recipe.ID(id)
 
@@ -161,7 +167,6 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -180,7 +185,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "recipe.get")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
@@ -191,7 +196,13 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	rid := vars["recipeID"]
 
-	id, _ := strconv.Atoi(rid)
+	id, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "recipe.update")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -201,17 +212,12 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := d.Decode(&requestBody); err != nil {
-		a.logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err, "method", "recipe.update")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	var (
-		re  recipe.Recipe
-		err error
-	)
-
-	re, err = a.wrapper.setStatus(id, requestBody.Enabled)
+	re, err := a.wrapper.setStatus(id, requestBody.Enabled)
 
 	switch err {
 	case nil:
@@ -220,7 +226,6 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -241,7 +246,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err, "method", "recipe.update")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

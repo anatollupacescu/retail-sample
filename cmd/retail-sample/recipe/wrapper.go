@@ -23,6 +23,7 @@ func (w *wrapper) exec(methodName string, f func(recipe.Book) error) {
 	err := f(recipes)
 
 	if err != nil {
+		logger.Log("error", err)
 		logger.Log("msg", "rollback")
 		w.persistenceProviderFactory.Rollback(provider)
 		return

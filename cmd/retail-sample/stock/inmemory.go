@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-//provision log
 type InMemoryProvisionLog map[time.Time]domain.ProvisionEntry
 
 func (i InMemoryProvisionLog) Add(v domain.ProvisionEntry) error {
@@ -27,7 +26,7 @@ func (i InMemoryProvisionLog) List() (r []domain.ProvisionEntry, err error) {
 	return
 }
 
-// stock
+//InMemoryStore store
 type InMemoryStore struct {
 	data map[int]int
 }

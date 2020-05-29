@@ -35,7 +35,7 @@ func (w *wrapper) exec(methodName string, f func() error) {
 	w.persistenceProviderFactory.Commit(w.provider)
 }
 
-func (w wrapper) Quantity(id int) (qty int, err error) {
+func (w wrapper) quantity(id int) (qty int, err error) {
 	w.exec("get stock quantity", func() error {
 		s := w.provider.Stock()
 		qty, err = s.Quantity(id)
@@ -46,7 +46,7 @@ func (w wrapper) Quantity(id int) (qty int, err error) {
 	return
 }
 
-func (w wrapper) CurrentStock() (currentStock []stock.StockPosition, err error) {
+func (w wrapper) currentStock() (currentStock []stock.StockPosition, err error) {
 	w.exec("get current stock", func() error {
 		s := w.provider.Stock()
 
@@ -58,7 +58,7 @@ func (w wrapper) CurrentStock() (currentStock []stock.StockPosition, err error) 
 	return
 }
 
-func (w wrapper) Provision(in []stock.ProvisionEntry) (updatedQtys map[int]int, err error) {
+func (w wrapper) provision(in []stock.ProvisionEntry) (updatedQtys map[int]int, err error) {
 	w.exec("provision stock", func() error {
 		s := w.provider.Stock()
 
@@ -70,7 +70,7 @@ func (w wrapper) Provision(in []stock.ProvisionEntry) (updatedQtys map[int]int, 
 	return
 }
 
-func (w wrapper) GetProvisionLog() (pl []stock.ProvisionEntry, err error) {
+func (w wrapper) getProvisionLog() (pl []stock.ProvisionEntry, err error) {
 	w.exec("get provision log", func() error {
 		s := w.provider.Stock()
 

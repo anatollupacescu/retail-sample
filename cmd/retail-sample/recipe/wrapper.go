@@ -32,9 +32,9 @@ func (w *wrapper) exec(methodName string, f func(recipe.Book) error) {
 	w.persistenceProviderFactory.Commit(provider)
 }
 
-func (w wrapper) Disable(id int) (re recipe.Recipe, err error) {
+func (w wrapper) setStatus(id int, enabled bool) (re recipe.Recipe, err error) {
 	w.exec("disable recipe", func(r recipe.Book) error {
-		re, err = r.SetStatus(id, false)
+		re, err = r.SetStatus(id, enabled)
 
 		return err
 	})
@@ -42,17 +42,7 @@ func (w wrapper) Disable(id int) (re recipe.Recipe, err error) {
 	return
 }
 
-func (w wrapper) Enable(id int) (re recipe.Recipe, err error) {
-	w.exec("disable recipe", func(r recipe.Book) error {
-		re, err = r.SetStatus(id, true)
-
-		return err
-	})
-
-	return
-}
-
-func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (re recipe.Recipe, err error) {
+func (w wrapper) create(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (re recipe.Recipe, err error) {
 	w.exec("add recipe", func(r recipe.Book) error {
 		var recipeID recipe.ID
 
@@ -70,7 +60,7 @@ func (w wrapper) Add(recipeName recipe.Name, recipeIngredients []recipe.Ingredie
 	return
 }
 
-func (w wrapper) Get(recipeID recipe.ID) (out recipe.Recipe, err error) {
+func (w wrapper) get(recipeID recipe.ID) (out recipe.Recipe, err error) {
 	w.exec("get recipe", func(r recipe.Book) error {
 		out, err = r.Get(recipeID)
 
@@ -80,7 +70,7 @@ func (w wrapper) Get(recipeID recipe.ID) (out recipe.Recipe, err error) {
 	return
 }
 
-func (w wrapper) List() (recipes []recipe.Recipe, err error) {
+func (w wrapper) getAll() (recipes []recipe.Recipe, err error) {
 	w.exec("get recipe", func(r recipe.Book) error {
 		recipes, err = r.List()
 

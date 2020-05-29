@@ -32,7 +32,7 @@ type (
 
 var internalServerError = "internal server error"
 
-func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -60,7 +60,7 @@ func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	var recipeName = recipe.Name(requestBody.Name)
 
-	re, err := a.wrapper.Add(recipeName, ingredients)
+	re, err := a.wrapper.create(recipeName, ingredients)
 
 	switch err {
 	case nil:
@@ -98,10 +98,10 @@ func (a *webApp) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *webApp) ListRecipes(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	list, err := a.wrapper.List()
+	list, err := a.wrapper.getAll()
 
 	if err != nil {
 		a.logger.Log("action", "call application", "error", err)
@@ -142,7 +142,7 @@ func toItems(i []recipe.Ingredient) (items []item) {
 	return
 }
 
-func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -152,7 +152,7 @@ func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 
 	recipeID := recipe.ID(id)
 
-	rcp, err := a.wrapper.Get(recipeID)
+	rcp, err := a.wrapper.get(recipeID)
 
 	switch err {
 	case nil:
@@ -185,7 +185,7 @@ func (a *webApp) GetRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *webApp) PatchRecipe(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -211,11 +211,7 @@ func (a *webApp) PatchRecipe(w http.ResponseWriter, r *http.Request) {
 		err error
 	)
 
-	if requestBody.Enabled {
-		re, err = a.wrapper.Enable(id)
-	} else {
-		re, err = a.wrapper.Disable(id)
-	}
+	re, err = a.wrapper.setStatus(id, requestBody.Enabled)
 
 	switch err {
 	case nil:

@@ -8,17 +8,17 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 )
 
-func ConfigureRoutes(r *mux.Router, loggerFactory types.LoggerFactory, factory types.PersistenceProviderFactory) {
-	app := webApp{
-		logger: loggerFactory(),
+func ConfigureRoutes(r *mux.Router, logger types.Logger, loggerFactory types.LoggerFactory, factory types.PersistenceProviderFactory) {
+	recipes := webApp{
+		logger: logger,
 		wrapper: wrapper{
 			loggerFactory:              loggerFactory,
 			persistenceProviderFactory: factory,
 		},
 	}
 
-	r.HandleFunc("/recipe", app.ListRecipes).Methods(http.MethodGet)
-	r.HandleFunc("/recipe/{recipeID}", app.GetRecipe).Methods(http.MethodGet)
-	r.HandleFunc("/recipe/{recipeID}", app.PatchRecipe).Methods(http.MethodPatch)
-	r.HandleFunc("/recipe", app.CreateRecipe).Methods(http.MethodPost)
+	r.HandleFunc("/recipe", recipes.getAll).Methods(http.MethodGet)
+	r.HandleFunc("/recipe/{recipeID}", recipes.get).Methods(http.MethodGet)
+	r.HandleFunc("/recipe/{recipeID}", recipes.update).Methods(http.MethodPatch)
+	r.HandleFunc("/recipe", recipes.create).Methods(http.MethodPost)
 }

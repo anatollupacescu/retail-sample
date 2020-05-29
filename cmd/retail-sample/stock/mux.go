@@ -20,10 +20,10 @@ type webApp struct {
 
 var internalServerError = "internal server error"
 
-func (a *webApp) GetStock(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	stockData, err := a.wrapper.CurrentStock()
+	entries, err := a.wrapper.currentStock()
 
 	if err != nil {
 		a.logger.Log("action", "call application", "error", err)
@@ -42,7 +42,7 @@ func (a *webApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	for _, position := range stockData {
+	for _, position := range entries {
 		response.Data = append(response.Data, entry{
 			ID:   position.ID,
 			Name: position.Name,
@@ -58,7 +58,7 @@ func (a *webApp) GetStock(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (a *webApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -66,7 +66,7 @@ func (a *webApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 
 	itemID, _ := strconv.Atoi(rid)
 
-	qty, err := a.wrapper.Quantity(itemID)
+	qty, err := a.wrapper.quantity(itemID)
 
 	switch err {
 	case nil:
@@ -100,7 +100,7 @@ func (a *webApp) GetStockPosition(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *webApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -123,7 +123,7 @@ func (a *webApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	data, err := a.wrapper.Provision(entries)
+	data, err := a.wrapper.provision(entries)
 
 	switch err {
 	case nil:
@@ -152,10 +152,10 @@ func (a *webApp) ProvisionStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *webApp) GetProvisionLog(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	provisionLog, err := a.wrapper.GetProvisionLog()
+	provisionLog, err := a.wrapper.getProvisionLog()
 
 	if err != nil {
 		a.logger.Log("action", "call application", "error", err)

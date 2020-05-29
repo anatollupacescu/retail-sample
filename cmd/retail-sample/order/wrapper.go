@@ -35,7 +35,7 @@ func (w *wrapper) exec(methodName string, f func(o order.Orders) error) {
 	w.persistenceProviderFactory.Commit(w.provider)
 }
 
-func (w wrapper) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
+func (w wrapper) create(id int, qty int) (orderID order.ID, err error) {
 	w.exec("add new order", func(o order.Orders) error {
 		orderID, err = o.PlaceOrder(id, qty)
 
@@ -49,7 +49,7 @@ func (w wrapper) PlaceOrder(id int, qty int) (orderID order.ID, err error) {
 	return
 }
 
-func (w wrapper) Get(id order.ID) (ordr order.Order, err error) {
+func (w wrapper) get(id order.ID) (ordr order.Order, err error) {
 	w.exec("get order by id", func(o order.Orders) error {
 		ordr, err = o.Get(id)
 
@@ -59,7 +59,7 @@ func (w wrapper) Get(id order.ID) (ordr order.Order, err error) {
 	return
 }
 
-func (w wrapper) List() (orders []order.Order, err error) {
+func (w wrapper) getAll() (orders []order.Order, err error) {
 	w.exec("list past orders", func(o order.Orders) error {
 		orders, err = o.List()
 

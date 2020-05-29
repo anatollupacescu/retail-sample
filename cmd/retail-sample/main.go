@@ -49,6 +49,7 @@ func main() {
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
 	//app
+
 	loggerFactory := newLoggerFactory(baseLogger)
 
 	var persistenceFactory types.PersistenceProviderFactory
@@ -59,10 +60,12 @@ func main() {
 		persistenceFactory = newPersistenceFactory(config.DatabaseURL)
 	}
 
-	inventory.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
-	order.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
-	recipe.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
-	stock.ConfigureRoutes(businessRouter, loggerFactory, persistenceFactory)
+	routerLogger := newRouterLogger(baseLogger)
+
+	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
+	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
+	recipe.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
+	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 
 	//static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))

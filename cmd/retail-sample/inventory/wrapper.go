@@ -5,33 +5,33 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-type InventoryWrapper struct {
-	LoggerFactory              types.LoggerFactory
-	PersistenceProviderFactory types.PersistenceProviderFactory
+type wrapper struct {
+	loggerFactory              types.LoggerFactory
+	persistenceProviderFactory types.PersistenceProviderFactory
 }
 
-func (ia InventoryWrapper) exec(methodName string, f func(i inventory.Inventory) error) {
-	logger := ia.LoggerFactory()
+func (ia wrapper) exec(methodName string, f func(i inventory.Inventory) error) {
+	logger := ia.loggerFactory()
 
 	logger.Log("msg", "enter", "method", methodName)
 	defer logger.Log("msg", "exit", "method", methodName)
 
-	provider := ia.PersistenceProviderFactory.New()
+	provider := ia.persistenceProviderFactory.New()
 	inventory := provider.Inventory()
 
 	err := f(inventory)
 
 	if err != nil {
 		logger.Log("msg", "rollback")
-		ia.PersistenceProviderFactory.Rollback(provider)
+		ia.persistenceProviderFactory.Rollback(provider)
 		return
 	}
 
 	logger.Log("msg", "commit")
-	ia.PersistenceProviderFactory.Commit(provider)
+	ia.persistenceProviderFactory.Commit(provider)
 }
 
-func (ia InventoryWrapper) ChangeItemStatus(id int, enabled bool) (item inventory.Item, err error) {
+func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err error) {
 	ia.exec("update item status", func(i inventory.Inventory) error {
 		item, err = i.UpdateStatus(id, enabled)
 
@@ -41,7 +41,7 @@ func (ia InventoryWrapper) ChangeItemStatus(id int, enabled bool) (item inventor
 	return
 }
 
-func (ia InventoryWrapper) AddToInventory(name string) (id int, err error) {
+func (ia wrapper) create(name string) (id int, err error) {
 	ia.exec("add to inventory", func(i inventory.Inventory) error {
 		itemName := name
 
@@ -53,7 +53,7 @@ func (ia InventoryWrapper) AddToInventory(name string) (id int, err error) {
 	return
 }
 
-func (ia InventoryWrapper) ListInventoryItems() (items []inventory.Item, err error) {
+func (ia wrapper) getAll() (items []inventory.Item, err error) {
 	ia.exec("list inventory items", func(i inventory.Inventory) error {
 		items, err = i.List()
 
@@ -63,7 +63,7 @@ func (ia InventoryWrapper) ListInventoryItems() (items []inventory.Item, err err
 	return
 }
 
-func (ia InventoryWrapper) GetInventoryItem(id int) (item inventory.Item, err error) {
+func (ia wrapper) getOne(id int) (item inventory.Item, err error) {
 	ia.exec("get inventory item", func(i inventory.Inventory) error {
 		item, err = i.Get(id)
 

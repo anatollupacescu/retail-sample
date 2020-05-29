@@ -8,16 +8,16 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/types"
 )
 
-func ConfigureRoutes(r *mux.Router, loggerFactory types.LoggerFactory, factory types.PersistenceProviderFactory) {
-	app := InventoryWebApp{
-		Logger: loggerFactory(),
-		Wrapper: InventoryWrapper{
-			LoggerFactory:              loggerFactory,
-			PersistenceProviderFactory: factory,
+func ConfigureRoutes(r *mux.Router, logger types.Logger, loggerFactory types.LoggerFactory, factory types.PersistenceProviderFactory) {
+	items := webApp{
+		logger: logger,
+		wrapper: wrapper{
+			loggerFactory:              loggerFactory,
+			persistenceProviderFactory: factory,
 		},
 	}
-	r.HandleFunc("/inventory", app.GetAllInventoryItems).Methods(http.MethodGet)
-	r.HandleFunc("/inventory/{itemID}", app.GetInventoryItem).Methods(http.MethodGet)
-	r.HandleFunc("/inventory/{itemID}", app.UpdateItem).Methods(http.MethodPatch)
-	r.HandleFunc("/inventory", app.CreateInventoryItem).Methods(http.MethodPost)
+	r.HandleFunc("/inventory", items.getAll).Methods(http.MethodGet)
+	r.HandleFunc("/inventory/{itemID}", items.get).Methods(http.MethodGet)
+	r.HandleFunc("/inventory/{itemID}", items.update).Methods(http.MethodPatch)
+	r.HandleFunc("/inventory", items.create).Methods(http.MethodPost)
 }

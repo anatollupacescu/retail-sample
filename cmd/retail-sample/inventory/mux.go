@@ -12,11 +12,11 @@ import (
 )
 
 type (
-	InventoryWebApp struct {
-		Logger  types.Logger
-		Wrapper InventoryWrapper
+	webApp struct {
+		logger  types.Logger
+		wrapper wrapper
 	}
-	DescriptorEntity struct {
+	descriptorEntity struct {
 		ID      int    `json:"id"`
 		Name    string `json:"name"`
 		Enabled bool   `json:"enabled"`
@@ -25,7 +25,7 @@ type (
 
 var internalServerError = "internal server error"
 
-func (a *InventoryWebApp) UpdateItem(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -43,12 +43,12 @@ func (a *InventoryWebApp) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	var requestPayload payload
 
 	if err := d.Decode(&requestPayload); err != nil {
-		a.Logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	item, err := a.Wrapper.ChangeItemStatus(id, requestPayload.Enabled)
+	item, err := a.wrapper.setStatus(id, requestPayload.Enabled)
 
 	switch err {
 	case nil:
@@ -57,15 +57,15 @@ func (a *InventoryWebApp) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data descriptorEntity `json:"data"`
 	}{
-		Data: DescriptorEntity{
+		Data: descriptorEntity{
 			ID:      id,
 			Name:    item.Name,
 			Enabled: item.Enabled,
@@ -77,12 +77,12 @@ func (a *InventoryWebApp) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
-func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -95,13 +95,13 @@ func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Req
 	var requestPayload payload
 
 	if err := d.Decode(&requestPayload); err != nil {
-		a.Logger.Log("action", "decode request payload", "error", err)
+		a.logger.Log("action", "decode request payload", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	itemName := requestPayload.Name
-	createdID, err := a.Wrapper.AddToInventory(itemName)
+	createdID, err := a.wrapper.create(itemName)
 
 	switch err {
 	case nil:
@@ -112,15 +112,15 @@ func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Req
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data descriptorEntity `json:"data"`
 	}{
-		Data: DescriptorEntity{
+		Data: descriptorEntity{
 			ID:      int(createdID),
 			Name:    requestPayload.Name,
 			Enabled: true, //TODO fix assumption by retrieving the entity again
@@ -132,29 +132,29 @@ func (a *InventoryWebApp) CreateInventoryItem(w http.ResponseWriter, r *http.Req
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }
 
-func (a *InventoryWebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Request) {
+func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	list, err := a.Wrapper.ListInventoryItems()
+	list, err := a.wrapper.getAll()
 
 	if err != nil {
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 
 	var response struct {
-		Data []DescriptorEntity `json:"data"`
+		Data []descriptorEntity `json:"data"`
 	}
 
-	response.Data = make([]DescriptorEntity, 0)
+	response.Data = make([]descriptorEntity, 0)
 
 	for _, tp := range list {
-		response.Data = append(response.Data, DescriptorEntity{
+		response.Data = append(response.Data, descriptorEntity{
 			ID:      int(tp.ID),
 			Name:    string(tp.Name),
 			Enabled: tp.Enabled,
@@ -164,12 +164,12 @@ func (a *InventoryWebApp) GetAllInventoryItems(w http.ResponseWriter, _ *http.Re
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
 }
 
-func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -177,7 +177,7 @@ func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Reques
 
 	id, _ := strconv.Atoi(rid)
 
-	inventoryItem, err := a.Wrapper.GetInventoryItem(id)
+	inventoryItem, err := a.wrapper.getOne(id)
 
 	switch err {
 	case nil:
@@ -186,15 +186,15 @@ func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		a.Logger.Log("action", "call application", "error", err)
+		a.logger.Log("action", "call application", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	var response = struct {
-		Data DescriptorEntity `json:"data"`
+		Data descriptorEntity `json:"data"`
 	}{
-		Data: DescriptorEntity{
+		Data: descriptorEntity{
 			ID:      int(inventoryItem.ID),
 			Name:    string(inventoryItem.Name),
 			Enabled: inventoryItem.Enabled,
@@ -204,7 +204,7 @@ func (a *InventoryWebApp) GetInventoryItem(w http.ResponseWriter, r *http.Reques
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.Logger.Log("action", "encode response", "error", err)
+		a.logger.Log("action", "encode response", "error", err)
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

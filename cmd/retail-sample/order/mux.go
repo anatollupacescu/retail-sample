@@ -21,7 +21,7 @@ type orderWebApp struct {
 
 var internalServerError = "internal server error"
 
-func (a orderWebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
+func (a orderWebApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
@@ -41,7 +41,7 @@ func (a orderWebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	recipeID := requestBody.ID
 	orderQty := requestBody.Qty
 
-	entryID, err := a.wrapper.PlaceOrder(recipeID, orderQty)
+	entryID, err := a.wrapper.create(recipeID, orderQty)
 
 	switch err {
 	case nil:
@@ -84,7 +84,7 @@ func (a orderWebApp) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a orderWebApp) GetOrder(w http.ResponseWriter, r *http.Request) {
+func (a orderWebApp) get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
@@ -94,7 +94,7 @@ func (a orderWebApp) GetOrder(w http.ResponseWriter, r *http.Request) {
 
 	orderID := order.ID(id)
 
-	ordr, err := a.wrapper.Get(orderID)
+	ordr, err := a.wrapper.get(orderID)
 
 	switch err {
 	case nil:
@@ -130,7 +130,7 @@ func (a orderWebApp) GetOrder(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a orderWebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
+func (a orderWebApp) getAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -146,7 +146,7 @@ func (a orderWebApp) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	response.Data = make([]entry, 0)
 
-	list, err := a.wrapper.List()
+	list, err := a.wrapper.getAll()
 
 	if err != nil {
 		a.logger.Log("action", "call application", "error", err)

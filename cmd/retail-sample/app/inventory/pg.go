@@ -69,11 +69,9 @@ func (ps *PgxStore) Get(id int) (inventory.Item, error) {
 		enabled bool
 	)
 
-	sql := `select 
-						name, enabled 
-					from 
-						inventory 
-					where id = $1`
+	sql := `select name, enabled 
+		from inventory 
+		where id = $1`
 
 	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&name, &enabled)
 

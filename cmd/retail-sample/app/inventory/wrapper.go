@@ -10,24 +10,20 @@ type wrapper struct {
 }
 
 func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err error) {
-	ia.Exec("update item status", func(provider types.PersistenceProvider) error {
+	return item, ia.Exec("update item status", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		item, err = i.UpdateStatus(id, enabled)
 
 		return err
 	})
-
-	return
 }
 
 func (ia wrapper) create(name string) (id int, err error) {
 	ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
-		itemName := name
-
-		id, err = i.Add(itemName)
+		id, err = i.Add(name)
 
 		return err
 	})

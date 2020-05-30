@@ -20,6 +20,16 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
+type (
+	PgxProviderFactory struct {
+		pool *pgxpool.Pool
+	}
+
+	PgxTransactionalProvider struct {
+		tx pgx.Tx
+	}
+)
+
 func newPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory {
 	config, err := pgxpool.ParseConfig(dbConn)
 
@@ -35,16 +45,6 @@ func newPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory 
 
 	return &PgxProviderFactory{pool: pool}
 }
-
-type (
-	PgxProviderFactory struct {
-		pool *pgxpool.Pool
-	}
-
-	PgxTransactionalProvider struct {
-		tx pgx.Tx
-	}
-)
 
 func (pf *PgxProviderFactory) New() middleware.PersistenceProvider {
 	tx, err := pf.pool.Begin(context.Background())

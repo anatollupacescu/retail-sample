@@ -1,21 +1,21 @@
 import { apiIsHealthy } from '../health'
 
-class Student {
-  fullName: string
+class Checker {
+  private endpoint: string
 
-  constructor(public firstName: string, public middleInitial: string, public lastName: string) {
-    this.fullName = firstName + ' ' + middleInitial + ' ' + lastName
+  constructor(public url: string) {
+    this.endpoint = `${url}/health`
   }
 
-  doGreet() {
-    return this.fullName + ' says ' + apiIsHealthy('localhost:8080/health')
+  check() {
+    return apiIsHealthy(this.endpoint)
   }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#message')?.addEventListener('keyup', function() {
-    let msg = document.querySelector('#message') as HTMLInputElement
-    let user = new Student('Jane', msg.value, 'Shapokleak')
-    console.log(user.doGreet())
+    // let msg = document.querySelector('#message') as HTMLInputElement
+    let healthChecker = new Checker('http://localhost:8080')
+    console.log(healthChecker.check())
   })
 })

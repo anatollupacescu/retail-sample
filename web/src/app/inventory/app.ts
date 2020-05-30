@@ -33,7 +33,7 @@ export default class App {
     })
   }
 
-  toggleItemStatus(s: boolean) {
+  toggleItemStatus(wantedState: boolean) {
     let id = this.selectedID
 
     if (!id) {
@@ -42,12 +42,12 @@ export default class App {
 
     let item = this.client.findByID(id)
 
-    if (item.enabled === s) {
+    if (item.enabled === wantedState) {
       throw 'already in the expected state'
     }
 
     this.client
-      .toggleItemStatus(id, s)
+      .toggleItemStatus(id, wantedState)
       .then(this.page.populateModal)
       .then(() => {
         let data = this.client.getState()

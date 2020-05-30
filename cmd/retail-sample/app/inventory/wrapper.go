@@ -20,37 +20,31 @@ func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err erro
 }
 
 func (ia wrapper) create(name string) (id int, err error) {
-	ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
+	return id, ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		id, err = i.Add(name)
 
 		return err
 	})
-
-	return
 }
 
 func (ia wrapper) getAll() (items []inventory.Item, err error) {
-	ia.Exec("list inventory items", func(provider types.PersistenceProvider) error {
+	return items, ia.Exec("list inventory items", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		items, err = i.List()
 
 		return err
 	})
-
-	return
 }
 
 func (ia wrapper) getOne(id int) (item inventory.Item, err error) {
-	ia.Exec("get inventory item", func(provider types.PersistenceProvider) error {
+	return item, ia.Exec("get inventory item", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		item, err = i.Get(id)
 
 		return err
 	})
-
-	return
 }

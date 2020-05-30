@@ -10,49 +10,41 @@ type wrapper struct {
 }
 
 func (w wrapper) quantity(id int) (qty int, err error) {
-	w.Exec("get stock quantity", func(provider types.PersistenceProvider) error {
+	return qty, w.Exec("get stock quantity", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
 		qty, err = s.Quantity(id)
 
 		return err
 	})
-
-	return
 }
 
 func (w wrapper) currentStock() (currentStock []stock.StockPosition, err error) {
-	w.Exec("get current stock", func(provider types.PersistenceProvider) error {
+	return currentStock, w.Exec("get current stock", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
 		currentStock, err = s.CurrentStock()
 
 		return err
 	})
-
-	return
 }
 
 func (w wrapper) provision(in []stock.ProvisionEntry) (updatedQtys map[int]int, err error) {
-	w.Exec("provision stock", func(provider types.PersistenceProvider) error {
+	return updatedQtys, w.Exec("provision stock", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
 		updatedQtys, err = s.Provision(in)
 
 		return err
 	})
-
-	return
 }
 
 func (w wrapper) getProvisionLog() (pl []stock.ProvisionEntry, err error) {
-	w.Exec("get provision log", func(provider types.PersistenceProvider) error {
+	return pl, w.Exec("get provision log", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
 		pl, err = s.GetProvisionLog()
 
 		return err
 	})
-
-	return
 }

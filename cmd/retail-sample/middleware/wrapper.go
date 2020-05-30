@@ -18,9 +18,7 @@ func (ia Wrapper) Exec(action string, f appHandler) (err error) {
 
 	provider := ia.PersistenceProviderFactory.New()
 
-	wrapped := recoverHandler(middleware(f, provider))
-
-	err = wrapped()
+	err = recoverFunc(middlewareFunc(f))(provider)
 
 	if err != nil {
 		logger.Log("error", err)
@@ -41,20 +39,20 @@ func (ia Wrapper) Exec(action string, f appHandler) (err error) {
 	return
 }
 
-func middleware(f appHandler, p PersistenceProvider) func() error {
-	return func() error {
+func middlewareFunc(f appHandler) appHandler {
+	return func(p PersistenceProvider) error {
 		return f(p)
 	}
 }
 
-func recoverHandler(next func() error) func() error {
-	return func() (err error) {
+func recoverFunc(next appHandler) appHandler {
+	return func(p PersistenceProvider) (err error) {
 		defer func() {
 			if r := recover(); r != nil {
 				err = fmt.Errorf("panic: %v", r)
 			}
 		}()
 
-		return next()
+		return next(p)
 	}
 }

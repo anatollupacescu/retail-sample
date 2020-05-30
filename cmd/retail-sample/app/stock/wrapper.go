@@ -29,11 +29,39 @@ func (w wrapper) currentStock() (currentStock []stock.StockPosition, err error) 
 	})
 }
 
-func (w wrapper) provision(in []stock.ProvisionEntry) (updatedQtys map[int]int, err error) {
+func (w wrapper) provision(id, qty int) (updatedQtys map[int]int, err error) {
 	return updatedQtys, w.Exec("provision stock", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
-		updatedQtys, err = s.Provision(in)
+		var provisionID int
+
+		provisionID, err = s.Provision(id, qty)
+
+		if err != nil {
+			return err
+		}
+
+		var logEntry stock.ProvisionEntry
+
+		logEntry, err = s.GetProvision(provisionID)
+
+		if err != nil {
+			return err
+		}
+
+		itemID := logEntry.ID
+
+		var stockQty int
+
+		stockQty, err = s.Quantity(itemID)
+
+		if err != nil {
+			return err
+		}
+
+		updatedQtys = map[int]int{
+			itemID: stockQty,
+		}
 
 		return err
 	})
@@ -43,7 +71,7 @@ func (w wrapper) getProvisionLog() (pl []stock.ProvisionEntry, err error) {
 	return pl, w.Exec("get provision log", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
-		pl, err = s.GetProvisionLog()
+		pl, err = s.GetAllProvisions()
 
 		return err
 	})

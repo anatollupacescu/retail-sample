@@ -1,22 +1,49 @@
 package stock
 
 import (
+	"errors"
+
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
-
-	"time"
 )
 
-type InMemoryProvisionLog map[time.Time]domain.ProvisionEntry
+type InMemoryProvisionLog struct {
+	serial *int
+	data   map[int]domain.ProvisionEntry
+}
 
-func (i InMemoryProvisionLog) Add(v domain.ProvisionEntry) error {
-	i[time.Now()] = v
+func NewInMemoryProvisionLog() domain.ProvisionLog {
+	return &InMemoryProvisionLog{
+		serial: new(int),
+		data:   make(map[int]domain.ProvisionEntry),
+	}
+}
 
-	return nil
+func (i InMemoryProvisionLog) Add(itemID, qty int) (int, error) {
+	*i.serial++
+
+	id := *i.serial
+
+	i.data[id] = domain.ProvisionEntry{
+		ID:  itemID,
+		Qty: qty,
+	}
+
+	return id, nil
+}
+
+func (i InMemoryProvisionLog) Get(id int) (e domain.ProvisionEntry, err error) {
+	var ok bool
+
+	if e, ok = i.data[id]; ok {
+		return e, nil
+	}
+
+	return e, errors.New("not found")
 }
 
 func (i InMemoryProvisionLog) List() (r []domain.ProvisionEntry, err error) {
-	for _, v := range i {
+	for _, v := range i.data {
 		r = append(r, domain.ProvisionEntry{
 			ID:  v.ID,
 			Qty: v.Qty,

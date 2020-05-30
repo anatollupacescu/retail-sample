@@ -8,6 +8,15 @@
 
 ###
 
+POST http://localhost:8080/inventory
+Content-Type: application/json
+
+{
+  "name": "garlic"
+}
+
+###
+
 GET http://localhost:8080/inventory/1
 Accept: application/json
 
@@ -22,15 +31,6 @@ Accept: application/json
 
 ###
 
-POST http://localhost:8080/inventory
-Content-Type: application/json
-
-{
-  "name": "garlic"
-}
-
-###
-
 GET http://localhost:8080/outbound
 
 ###
@@ -38,3 +38,10 @@ GET http://localhost:8080/outbound
 GET http://localhost:8080/stock
 
 ###
+
+POST http://localhost:8080/stock/1
+Content-Type: application/json
+
+{
+  "qty":4
+}

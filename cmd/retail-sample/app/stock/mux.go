@@ -103,30 +103,34 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
+func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	vars := mux.Vars(r)
+	rid := vars["itemID"]
+
+	itemID, err := strconv.Atoi(rid)
+
+	if err != nil {
+		a.logger.Log("action", "parse id", "error", err, "method", "stock.provision")
+		http.Error(w, "could not parse id", http.StatusBadRequest)
+		return
+	}
 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var requestBody map[int]int
+	var body struct {
+		Qty int `json:"qty"`
+	}
 
-	if err := d.Decode(&requestBody); err != nil {
-		a.logger.Log("action", "decode request", "error", err, "method", "stock.update")
+	if err := d.Decode(&body); err != nil {
+		a.logger.Log("action", "decode request", "error", err, "method", "stock.provision")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	entries := make([]stock.ProvisionEntry, 0)
-
-	for id, qty := range requestBody {
-		entries = append(entries, stock.ProvisionEntry{
-			ID:  id,
-			Qty: qty,
-		})
-	}
-
-	data, err := a.wrapper.provision(entries)
+	data, err := a.wrapper.provision(itemID, body.Qty)
 
 	switch err {
 	case nil:
@@ -136,6 +140,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		http.Error(w, internalServerError, http.StatusInternalServerError)
+		return
 	}
 
 	var response = struct {
@@ -149,7 +154,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		a.logger.Log("action", "encode response", "error", err, "method", "stock.update")
+		a.logger.Log("action", "encode response", "error", err, "method", "stock.provision")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
 }

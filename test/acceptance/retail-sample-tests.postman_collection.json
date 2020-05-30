@@ -578,7 +578,7 @@
 					"response": []
 				},
 				{
-					"name": "provision stock",
+					"name": "provision first item",
 					"event": [
 						{
 							"listen": "test",
@@ -599,11 +599,10 @@
 									"",
 									"pm.test(\"contains updated values\", function() {",
 									"    let id1 = pm.environment.get(\"inventory_item_id_1\")",
-									"    let id2 = pm.environment.get(\"inventory_item_id_2\")",
 									"",
 									"    let responseJson = pm.response.json();",
+									"    ",
 									"    pm.expect(responseJson.data[id1]).to.eql(3)",
-									"    pm.expect(responseJson.data[id2]).to.eql(4)",
 									"})",
 									""
 								],
@@ -632,16 +631,87 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"{{inventory_item_id_1}}\": 3, \n\t\"{{inventory_item_id_2}}\": 4\n}"
+							"raw": "{\n\t\"qty\": 3\n}"
 						},
 						"url": {
-							"raw": "localhost:8080/stock",
+							"raw": "localhost:8080/stock/{{inventory_item_id_1}}",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"stock"
+								"stock",
+								"{{inventory_item_id_1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "provision second item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "66c24674-bbe7-46e9-b7b4-09baac8baa68",
+								"exec": [
+									"pm.test(\"status is 201 CREATED\", function() {",
+									"    pm.response.to.have.status(201);",
+									"})",
+									"",
+									"pm.test(\"response time is within 20 ms\", function() {",
+									"    pm.expect(pm.response.responseTime).to.be.below(20);",
+									"})",
+									"",
+									"pm.test(\"body is json\", function() {",
+									"    pm.response.to.be.json;",
+									"})",
+									"",
+									"pm.test(\"contains updated values\", function() {",
+									"    let id2 = pm.environment.get(\"inventory_item_id_2\")",
+									"",
+									"    let responseJson = pm.response.json();",
+									"",
+									"    pm.expect(responseJson.data[id2]).to.eql(4)",
+									"})",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "92d05974-76b5-4767-9a20-5c2bf8d82ab1",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"qty\": 4\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/stock/{{inventory_item_id_2}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"stock",
+								"{{inventory_item_id_2}}"
 							]
 						}
 					},
@@ -1027,16 +1097,42 @@
 							"response": []
 						},
 						{
-							"name": "provision stock",
+							"name": "provision first item",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
-										"id": "96df9c1b-c937-4108-8e06-35c00439eeb9",
+										"id": "ef5e3d48-f442-4479-afc7-08e6e4f957a2",
 										"exec": [
-											"pm.test(\"status is 201\", function() {",
+											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
 											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"contains updated values\", function() {",
+											"    let id1 = pm.environment.get(\"test_outbound_inventory_item_id_1\")",
+											"",
+											"    let responseJson = pm.response.json();",
+											"    ",
+											"    pm.expect(responseJson.data[id1]).to.eql(3)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "9a80c5a3-3a7c-4bfc-9239-adc268536f48",
+										"exec": [
 											""
 										],
 										"type": "text/javascript"
@@ -1054,16 +1150,87 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n\t\"{{test_outbound_inventory_item_id_1}}\": 3, \n\t\"{{test_outbound_inventory_item_id_2}}\": 4\n}"
+									"raw": "{\n\t\"qty\": 3\n}"
 								},
 								"url": {
-									"raw": "localhost:8080/stock",
+									"raw": "localhost:8080/stock/{{test_outbound_inventory_item_id_1}}",
 									"host": [
 										"localhost"
 									],
 									"port": "8080",
 									"path": [
-										"stock"
+										"stock",
+										"{{test_outbound_inventory_item_id_1}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "provision second item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "90d67d29-658a-4162-bc26-ceac63b7413a",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"contains updated values\", function() {",
+											"    let id2 = pm.environment.get(\"test_outbound_inventory_item_id_2\")",
+											"",
+											"    let responseJson = pm.response.json();",
+											"",
+											"    pm.expect(responseJson.data[id2]).to.eql(4)",
+											"})",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "1cbc0ffa-b396-4aed-a65d-744b0aeecb51",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"qty\": 4\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/stock/{{test_outbound_inventory_item_id_2}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"stock",
+										"{{test_outbound_inventory_item_id_2}}"
 									]
 								}
 							},
@@ -1183,18 +1350,17 @@
 											"    ",
 											"    pm.expect(jsonData.data).to.deep.include(obj);",
 											"",
-											"    let items = [",
-											"        {",
+											"    let item1 = {",
 											"            id: pm.environment.get(\"test_outbound_inventory_item_id_1\"),",
 											"            qty: 2",
-											"        },",
-											"        {",
+											"        }",
+											"    let item2 = {",
 											"            id: pm.environment.get(\"test_outbound_inventory_item_id_2\"),",
 											"            qty: 3",
 											"        }",
-											"    ]",
 											"",
-											"    pm.expect(jsonData.data.items).to.deep.eql(items)",
+											"    pm.expect(jsonData.data.items).to.deep.contain(item1)",
+											"    pm.expect(jsonData.data.items).to.deep.contain(item2)",
 											"});"
 										],
 										"type": "text/javascript"

@@ -77,13 +77,37 @@ type PgxProvisionLog struct {
 	DB PgxDB
 }
 
-func (pl *PgxProvisionLog) Add(re stock.ProvisionEntry) error {
-	sql := "insert into provisionlog(inventoryid, quantity) values($1, $2)"
-	if _, err := pl.DB.Exec(context.Background(), sql, re.ID, re.Qty); err != nil {
-		return errors.Wrapf(ErrDB, "provisionlog add: %v", err)
+func (pl *PgxProvisionLog) Add(itemID, qty int) (id int, err error) {
+	sql := "insert into provisionlog(inventoryid, quantity) values($1, $2) returning id"
+
+	err = pl.DB.QueryRow(context.Background(), sql, itemID, qty).Scan(&id)
+
+	if err != nil {
+		return 0, errors.Wrapf(ErrDB, "update stock quantity for item %v: %v", id, err)
 	}
 
-	return nil
+	return
+}
+
+func (pl *PgxProvisionLog) Get(id int) (pe stock.ProvisionEntry, err error) {
+	sql := "select inventoryid, quantity from stock where id = $1"
+
+	var itemID, qty int
+	err = pl.DB.QueryRow(context.Background(), sql, id).Scan(&itemID, &qty)
+
+	switch err {
+	case nil:
+		break
+	case pgx.ErrNoRows:
+		return pe, stock.ErrItemNotFound
+	default:
+		return pe, errors.Wrapf(ErrDB, "get provision entry %v: %v", id, err)
+	}
+
+	return stock.ProvisionEntry{
+		ID:  itemID,
+		Qty: qty,
+	}, nil
 }
 
 func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {

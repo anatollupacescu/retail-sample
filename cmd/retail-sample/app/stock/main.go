@@ -23,5 +23,5 @@ func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory midd
 
 	r.HandleFunc("/stock", stock.getAll).Methods(http.MethodGet)
 	r.HandleFunc("/stock/{itemID}", stock.get).Methods(http.MethodGet)
-	r.HandleFunc("/stock", stock.update).Methods(http.MethodPost)
+	r.HandleFunc("/stock/{itemID}", stock.provision).Methods(http.MethodPost)
 }

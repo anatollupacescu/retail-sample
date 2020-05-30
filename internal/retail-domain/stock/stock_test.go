@@ -13,7 +13,27 @@ import (
 )
 
 func TestProvision(t *testing.T) {
-	t.Run("propates error from the store", func(t *testing.T) {
+	t.Run("given a non existent inventory item", func(t *testing.T) {
+		mockStore := &stock.MockStore{}
+
+		var expectedErr = inventory.ErrItemNotFound
+
+		inv := &stock.MockInventory{}
+		inv.On("Get", mock.Anything).Return(inventory.Item{}, inventory.ErrItemNotFound)
+
+		st := &stock.Stock{Inventory: inv}
+
+		qty, err := st.Provision(1, 1)
+
+		t.Run("returns error", func(t *testing.T) {
+			mockStore.AssertExpectations(t)
+
+			assert.Zero(t, qty)
+			assert.Equal(t, expectedErr, err)
+		})
+	})
+
+	t.Run("given that store returns error", func(t *testing.T) {
 		mockStore := &stock.MockStore{}
 
 		expectedErr := errors.New("err")
@@ -24,34 +44,16 @@ func TestProvision(t *testing.T) {
 
 		st := &stock.Stock{Store: mockStore, Inventory: inv}
 
-		entries := []stock.ProvisionEntry{{
-			ID:  1,
-			Qty: 1,
-		}}
+		qty, err := st.Provision(1, 1)
 
-		qty, err := st.Provision(entries)
-
-		assert.Zero(t, qty)
-		assert.Equal(t, expectedErr, err)
-		mockStore.AssertExpectations(t)
+		t.Run("error is propagated", func(t *testing.T) {
+			mockStore.AssertExpectations(t)
+			assert.Zero(t, qty)
+			assert.Equal(t, expectedErr, err)
+		})
 	})
 
-	t.Run("returns empty map for empty input", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-
-		st := &stock.Stock{Store: mockStore}
-
-		var entries []stock.ProvisionEntry
-
-		qty, err := st.Provision(entries)
-
-		assert.Empty(t, qty)
-		assert.Nil(t, err)
-
-		mockStore.AssertExpectations(t)
-	})
-
-	t.Run("calls store", func(t *testing.T) {
+	t.Run("given that provision log returns error", func(t *testing.T) {
 		mockStore := &stock.MockStore{}
 		mockStore.On("Provision", mock.Anything, mock.Anything).Return(10, nil)
 
@@ -59,7 +61,9 @@ func TestProvision(t *testing.T) {
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
 		provisionLog := &stock.MockProvisionLog{}
-		provisionLog.On("Add", mock.Anything).Return(nil)
+
+		var expectedErr = errors.New("expected")
+		provisionLog.On("Add", mock.Anything, mock.Anything).Return(0, expectedErr)
 
 		st := &stock.Stock{
 			Store:        mockStore,
@@ -67,17 +71,38 @@ func TestProvision(t *testing.T) {
 			ProvisionLog: provisionLog,
 		}
 
-		entries := []stock.ProvisionEntry{{
-			ID:  1,
-			Qty: 5,
-		}}
+		qty, err := st.Provision(1, 5)
 
-		qty, err := st.Provision(entries)
+		t.Run("error is propagated", func(t *testing.T) {
+			mockStore.AssertExpectations(t)
+			assert.Equal(t, expectedErr, err)
+			assert.Zero(t, qty)
+		})
+	})
 
-		assert.Nil(t, err)
-		assert.NotNil(t, qty)
-		assert.Equal(t, qty[1], 10)
-		mockStore.AssertExpectations(t)
+	t.Run("given that all calls succeed", func(t *testing.T) {
+		mockStore := &stock.MockStore{}
+		mockStore.On("Provision", mock.Anything, mock.Anything).Return(10, nil)
+
+		inv := &stock.MockInventory{}
+		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
+
+		provisionLog := &stock.MockProvisionLog{}
+		provisionLog.On("Add", mock.Anything, mock.Anything).Return(1, nil)
+
+		st := &stock.Stock{
+			Store:        mockStore,
+			Inventory:    inv,
+			ProvisionLog: provisionLog,
+		}
+
+		id, err := st.Provision(1, 5)
+
+		t.Run("return provision entry id", func(t *testing.T) {
+			mockStore.AssertExpectations(t)
+			assert.Nil(t, err)
+			assert.Equal(t, 1, id)
+		})
 	})
 }
 

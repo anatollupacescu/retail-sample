@@ -31,7 +31,7 @@ func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 	recipeStore := recipeCmd.NewInMemoryStore()
 	orderStore := orderCmd.NewInMemoryStore()
 	stockStore := stockCmd.NewInMemoryStock()
-	provisionLog := make(stockCmd.InMemoryProvisionLog)
+	provisionLog := stockCmd.NewInMemoryProvisionLog()
 
 	inventory := inventory.Inventory{Store: &invStore}
 

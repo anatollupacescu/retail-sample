@@ -39,7 +39,8 @@ type (
 
 	ProvisionLog interface {
 		List() ([]ProvisionEntry, error)
-		Add(ProvisionEntry) error
+		Add(int, int) (int, error)
+		Get(int) (ProvisionEntry, error)
 	}
 )
 
@@ -80,43 +81,30 @@ func (s Stock) Quantity(id int) (qty int, err error) {
 	return s.Store.Quantity(id)
 }
 
-func (s Stock) Provision(in []ProvisionEntry) (updatedQtys map[int]int, err error) {
-	for _, i := range in {
-		itemID := i.ID
-
-		if _, err = s.Inventory.Get(itemID); err != nil {
-			return nil, err
-		}
+func (s Stock) Provision(itemID, qty int) (id int, err error) {
+	if _, err = s.Inventory.Get(itemID); err != nil {
+		return
 	}
 
-	updatedQtys = make(map[int]int)
+	_, err = s.Store.Provision(itemID, qty)
 
-	for _, spe := range in {
-		newQty, err := s.Store.Provision(spe.ID, spe.Qty)
-
-		if err != nil {
-			return nil, err
-		}
-
-		updatedQtys[spe.ID] = newQty
+	if err != nil {
+		return
 	}
 
-	for id, qty := range updatedQtys {
-		entry := ProvisionEntry{
-			ID:  id,
-			Qty: qty,
-		}
-
-		if err = s.ProvisionLog.Add(entry); err != nil {
-			return
-		}
+	if id, err = s.ProvisionLog.Add(itemID, qty); err != nil {
+		return
 	}
 
-	return updatedQtys, nil
+	return
 }
 
-func (s Stock) GetProvisionLog() ([]ProvisionEntry, error) {
+func (s Stock) GetAllProvisions() ([]ProvisionEntry, error) {
 	return s.ProvisionLog.List()
+}
+
+func (s Stock) GetProvision(id int) (e ProvisionEntry, err error) {
+	return s.ProvisionLog.Get(id)
 }
 
 func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {

@@ -35,8 +35,14 @@ func (m *MockProvisionLog) List() ([]ProvisionEntry, error) {
 	return args.Get(0).([]ProvisionEntry), args.Error(1)
 }
 
-func (m *MockProvisionLog) Add(pe ProvisionEntry) error {
-	return m.Called(pe).Error(0)
+func (m *MockProvisionLog) Add(id, qty int) (int, error) {
+	args := m.Called(id, qty)
+	return args.Int(0), args.Error(1)
+}
+
+func (m *MockProvisionLog) Get(id int) (ProvisionEntry, error) {
+	args := m.Called(id)
+	return args.Get(0).(ProvisionEntry), args.Error(1)
 }
 
 type MockInventory struct {

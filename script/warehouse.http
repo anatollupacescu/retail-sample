@@ -32,11 +32,11 @@ Accept: application/json
 ###
 
 GET http://localhost:8080/outbound
-
+Accept: application/json
 ###
 
 GET http://localhost:8080/stock
-
+Accept: application/json
 ###
 
 POST http://localhost:8080/stock/1
@@ -45,3 +45,8 @@ Content-Type: application/json
 {
   "qty":4
 }
+
+###
+
+GET http://localhost:8080/recipe/6
+Accept: application/json

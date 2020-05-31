@@ -90,7 +90,7 @@ func (pl *PgxProvisionLog) Add(itemID, qty int) (id int, err error) {
 }
 
 func (pl *PgxProvisionLog) Get(id int) (pe stock.ProvisionEntry, err error) {
-	sql := "select inventoryid, quantity from stock where id = $1"
+	sql := "select inventoryid, quantity from provisionlog where id = $1"
 
 	var itemID, qty int
 	err = pl.DB.QueryRow(context.Background(), sql, id).Scan(&itemID, &qty)

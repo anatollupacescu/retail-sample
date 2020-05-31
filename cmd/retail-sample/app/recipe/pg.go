@@ -116,7 +116,8 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 						r.id,
 						r.name,
 						i.id,
-						ri.quantity
+						ri.quantity,
+						r.enabled
 					FROM
 						recipe_ingredient ri,
 						recipe r,
@@ -134,8 +135,9 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 	defer rows.Close()
 
 	type key struct {
-		id   int64
-		name string
+		id      int64
+		name    string
+		enabled bool
 	}
 
 	type ingredients []recipe.Ingredient
@@ -148,13 +150,14 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 			name         string
 			ingredientID int64
 			qty          int16
+			enabled      bool
 		)
 
-		if err := rows.Scan(&recipeID, &name, &ingredientID, &qty); err != nil {
+		if err := rows.Scan(&recipeID, &name, &ingredientID, &qty, &enabled); err != nil {
 			return recipes, errors.Wrapf(ErrDB, "scan recipes: %v", err)
 		}
 
-		key := key{id: recipeID, name: name}
+		key := key{id: recipeID, name: name, enabled: enabled}
 		i := recipe.Ingredient{ID: int(ingredientID), Qty: int(qty)}
 
 		recipeRecords[key] = append(recipeRecords[key], i)
@@ -164,6 +167,7 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 		recipes = append(recipes, recipe.Recipe{
 			ID:          recipe.ID(k.id),
 			Name:        recipe.Name(k.name),
+			Enabled:     k.enabled,
 			Ingredients: v,
 		})
 	}

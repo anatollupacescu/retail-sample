@@ -21,9 +21,12 @@ export default class Client {
     })
   }
 
-  private async apiProvision(data: any): Promise<any> {
+  private async apiProvision(id: string, qty: number): Promise<any> {
     try {
-      let res: AxiosResponse = await axios.post(this.endpoint, data)
+      let data = {
+        qty: qty
+      }
+      let res: AxiosResponse = await axios.post(`${this.endpoint}/${id}`, data)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -31,8 +34,7 @@ export default class Client {
   }
 
   async provision(id: string, qty: number): Promise<any> {
-    let data = { [id]: Number(qty) }
-    let stock = await this.apiProvision(data)
+    let stock = await this.apiProvision(id, qty)
     for (let id in stock) {
       this.updatePosition(Number(id), Number(stock[id]))
     }

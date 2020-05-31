@@ -9,6 +9,7 @@ export interface optionDTO {
 export interface recipeRecordDTO {
   id: number
   name: string
+  enabled: boolean
 }
 
 export interface Page {
@@ -88,7 +89,8 @@ export default class App {
   private toRows(recipes: Recipe[]): recipeRecordDTO[] {
     return recipes.map(r => ({
       id: r.id,
-      name: r.name
+      name: r.name,
+      enabled: r.enabled
     }))
   }
 

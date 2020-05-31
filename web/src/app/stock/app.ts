@@ -56,30 +56,6 @@ export default class App {
     this.page.populateDropdown(dtos)
   }
 
-  private computeTableRows(): stockTableRowDTO[] {
-    let positions: Position[] = this.client.getState()
-    let dict = this.toDict(positions)
-
-    let toDTO = (i: inventoryItem) => ({
-      id: i.id,
-      name: i.name,
-      qty: String(dict[i.id] === undefined ? 0 : dict[i.id])
-    })
-
-    return this.inventory.getState().map(toDTO)
-  }
-
-  private toDict(i: Position[]): StockDict {
-    let r: StockDict = {}
-    i.forEach(e => {
-      r = {
-        [e.id]: String(e.qty),
-        ...r
-      }
-    })
-    return r
-  }
-
   onQtyChange() {
     let qty = this.page.qty()
 
@@ -110,6 +86,30 @@ export default class App {
       let data = this.computeTableRows()
       this.page.populateTable(data)
     })
+  }
+
+  private computeTableRows(): stockTableRowDTO[] {
+    let positions: Position[] = this.client.getState()
+    let dict = this.toDict(positions)
+
+    let toDTO = (i: inventoryItem) => ({
+      id: i.id,
+      name: i.name,
+      qty: String(dict[i.id] === undefined ? 0 : dict[i.id])
+    })
+
+    return this.inventory.getState().map(toDTO)
+  }
+
+  private toDict(i: Position[]): StockDict {
+    let r: StockDict = {}
+    i.forEach(e => {
+      r = {
+        [e.id]: String(e.qty),
+        ...r
+      }
+    })
+    return r
   }
 
   private badQuantity(qty: any): boolean {

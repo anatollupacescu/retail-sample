@@ -215,6 +215,9 @@ function populateRecipeTable(recipes: recipeRecordDTO[]): void {
     let row = <HTMLTableRowElement>table.insertRow(0)
     row.insertCell(0).innerHTML = String(element.id)
     row.insertCell(1).innerHTML = element.name
+    if (!element.enabled) {
+      row.classList.add('disabled')
+    }
   })
 }
 

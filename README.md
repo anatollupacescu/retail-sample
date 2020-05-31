@@ -77,6 +77,6 @@ enter `web/` folder
 **TODO**
 
 - document backend code using godoc
-- view recipe items
 - cancel a provision
+- pagination
   ...

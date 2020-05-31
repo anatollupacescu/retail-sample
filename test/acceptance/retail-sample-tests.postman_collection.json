@@ -6,10 +6,10 @@
 	},
 	"item": [
 		{
-			"name": "initial",
+			"name": "health",
 			"item": [
 				{
-					"name": "health check",
+					"name": "check",
 					"event": [
 						{
 							"listen": "test",
@@ -45,389 +45,451 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "add inventory types",
+			"name": "inventory",
 			"item": [
 				{
-					"name": "create inventory item",
-					"event": [
+					"name": "create",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"id": "206f07bb-2712-4a47-a239-05bea1e9fe6a",
-								"exec": [
-									"pm.test(\"status is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									"",
-									"pm.test(\"response time is within 100 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(100);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"descriptor entity has an id\", function() {",
-									"    let itemName = pm.environment.get(\"inventory_item_name\");",
-									"    let responseJson = pm.response.json();",
-									"    let itemID = responseJson.data.id;",
-									"    pm.expect(itemID).to.be.above(0);",
-									"})",
-									"",
-									"pm.test(\"save inventory id\", function() {",
-									"    let itemName = pm.environment.get(\"inventory_item_name\");",
-									"    let responseJson = pm.response.json();",
-									"    let itemID = responseJson.data.id;",
-									"    pm.environment.set(\"inventory_item_id\", itemID);",
-									"})"
+							"name": "create inventory item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "206f07bb-2712-4a47-a239-05bea1e9fe6a",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 100 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(100);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"descriptor entity has an id\", function() {",
+											"    let itemName = pm.environment.get(\"inventory_item_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let itemID = responseJson.data.id;",
+											"    pm.expect(itemID).to.be.above(0);",
+											"})",
+											"",
+											"pm.test(\"save inventory id\", function() {",
+											"    let itemName = pm.environment.get(\"inventory_item_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let itemID = responseJson.data.id;",
+											"    pm.environment.set(\"inventory_item_id\", itemID);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "370d3fc0-dde7-47ef-a96f-a2a6393ceb95",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"inventory_item_name\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{inventory_item_name}}\"\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
 						},
 						{
-							"listen": "prerequest",
-							"script": {
-								"id": "370d3fc0-dde7-47ef-a96f-a2a6393ceb95",
-								"exec": [
-									"let uuid = require('uuid')",
-									"pm.environment.set(\"inventory_item_name\", uuid())",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{inventory_item_name}}\"\n}"
+							"name": "check inventory item was created",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c570085a-a993-465e-881a-4c2d442cf986",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains newly created item name\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"inventory_item_id\"),",
+											"        name: pm.environment.get(\"inventory_item_name\")",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8080/inventory/{{inventory_item_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory",
+										"{{inventory_item_id}}"
+									]
+								}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check inventory item was created",
-					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"id": "c570085a-a993-465e-881a-4c2d442cf986",
-								"exec": [
-									"pm.test(\"status is 200 OK\", function() {",
-									"    pm.response.to.have.status(200);",
-									"})",
-									"",
-									"pm.test(\"response time is within 50 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(50);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"body contains newly created item name\", function () {",
-									"    let jsonData = pm.response.json();",
-									"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
-									"    ",
-									"    let obj = {",
-									"        id: pm.environment.get(\"inventory_item_id\"),",
-									"        name: pm.environment.get(\"inventory_item_name\")",
-									"    }",
-									"    ",
-									"    pm.expect(jsonData.data).to.deep.include(obj);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
+							"name": "check item is present in list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a02c65ac-e755-4ad4-bed0-f3a17342d1fe",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains newly created item name\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
+											"    pm.expect(jsonData.data.map(toType)).to.include.members([expectedItemName]);",
+											"});",
+											"",
+											"function toType(i) {",
+											"    return i.name",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/inventory/{{inventory_item_id}}",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory",
-								"{{inventory_item_id}}"
-							]
-						}
-					},
-					"response": []
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				},
 				{
-					"name": "check item is present in list",
-					"event": [
+					"name": "disable",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"id": "a02c65ac-e755-4ad4-bed0-f3a17342d1fe",
-								"exec": [
-									"pm.test(\"status is 200 OK\", function() {",
-									"    pm.response.to.have.status(200);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"body contains newly created item name\", function () {",
-									"    let jsonData = pm.response.json();",
-									"    let expectedItemName = pm.environment.get(\"inventory_item_name\")",
-									"    pm.expect(jsonData.data.map(toType)).to.include.members([expectedItemName]);",
-									"});",
-									"",
-									"function toType(i) {",
-									"    return i.name",
-									"}"
+							"name": "create inventory item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c9eb19b1-a971-472c-8861-cb16a5cc8f8c",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"descriptor entity has an id\", function() {",
+											"    let itemName = pm.environment.get(\"disabled_item_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let itemID = responseJson.data.id;",
+											"    pm.expect(itemID).to.be.above(0);",
+											"})",
+											"",
+											"pm.test(\"save inventory id\", function() {",
+											"    let itemName = pm.environment.get(\"disabled_item_name\");",
+											"    let responseJson = pm.response.json();",
+											"    let itemID = responseJson.data.id;",
+											"    pm.environment.set(\"disabled_item_id\", itemID);",
+											"})"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "b863fe5f-1d74-43c1-a878-432cfb2f1302",
+										"exec": [
+											"let uuid = require('uuid')",
+											"pm.environment.set(\"disabled_item_name\", uuid())",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"name\": \"{{disabled_item_name}}\"\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disable item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "c63edad2-9c0e-4adf-abcd-ad6358d51073",
+										"exec": [
+											"pm.test(\"status is 202\", function() {",
+											"    pm.response.to.have.status(202);",
+											"})",
+											"",
+											"pm.test(\"response time is within 30 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(30);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains newly created item name\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    let expectedItemName = pm.environment.get(\"disabled_item_name\")",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"disabled_item_id\"),",
+											"        name: pm.environment.get(\"disabled_item_name\"),",
+											"        enabled: false",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"enabled\": false\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/inventory/{{disabled_item_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory",
+										"{{disabled_item_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check item was disabled",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f59365c8-9bb2-4585-a473-688f9449f104",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains newly created item name\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    let expectedItemName = pm.environment.get(\"disabled_item_name\")",
+											"    ",
+											"    let obj = {",
+											"        id: pm.environment.get(\"disabled_item_id\"),",
+											"        name: pm.environment.get(\"disabled_item_name\"),",
+											"        enabled: false",
+											"    }",
+											"    ",
+											"    pm.expect(jsonData.data).to.deep.include(obj);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8080/inventory/{{disabled_item_id}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory",
+										"{{disabled_item_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "check item is disabled in the collection",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "34525252-6936-43e2-a8b1-cb7a7d32547d",
+										"exec": [
+											"pm.test(\"status is 200 OK\", function() {",
+											"    pm.response.to.have.status(200);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											"pm.test(\"body is json\", function() {",
+											"    pm.response.to.be.json;",
+											"})",
+											"",
+											"pm.test(\"body contains newly created item name\", function () {",
+											"    let jsonData = pm.response.json();",
+											"    let item = {",
+											"        id: pm.environment.get(\"disabled_item_id\"),",
+											"        name: pm.environment.get(\"disabled_item_name\"),",
+											"        enabled: false",
+											"    }",
+											"    pm.expect(jsonData.data).to.deep.include(item)",
+											"});",
+											"",
+											"function toType(i) {",
+											"    return i.name",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:8080/inventory",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"inventory"
+									]
+								}
+							},
+							"response": []
 						}
 					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
 				}
 			],
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "disable inventory item",
-			"item": [
-				{
-					"name": "create inventory item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "c9eb19b1-a971-472c-8861-cb16a5cc8f8c",
-								"exec": [
-									"pm.test(\"status is 201 CREATED\", function() {",
-									"    pm.response.to.have.status(201);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"descriptor entity has an id\", function() {",
-									"    let itemName = pm.environment.get(\"disabled_item_name\");",
-									"    let responseJson = pm.response.json();",
-									"    let itemID = responseJson.data.id;",
-									"    pm.expect(itemID).to.be.above(0);",
-									"})",
-									"",
-									"pm.test(\"save inventory id\", function() {",
-									"    let itemName = pm.environment.get(\"disabled_item_name\");",
-									"    let responseJson = pm.response.json();",
-									"    let itemID = responseJson.data.id;",
-									"    pm.environment.set(\"disabled_item_id\", itemID);",
-									"})"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"id": "b863fe5f-1d74-43c1-a878-432cfb2f1302",
-								"exec": [
-									"let uuid = require('uuid')",
-									"pm.environment.set(\"disabled_item_name\", uuid())",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"name\": \"{{disabled_item_name}}\"\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/inventory",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "disable item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "c63edad2-9c0e-4adf-abcd-ad6358d51073",
-								"exec": [
-									"pm.test(\"status is 202\", function() {",
-									"    pm.response.to.have.status(202);",
-									"})",
-									"",
-									"pm.test(\"response time is within 30 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(30);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"body contains newly created item name\", function () {",
-									"    let jsonData = pm.response.json();",
-									"    let expectedItemName = pm.environment.get(\"disabled_item_name\")",
-									"    ",
-									"    let obj = {",
-									"        id: pm.environment.get(\"disabled_item_id\"),",
-									"        name: pm.environment.get(\"disabled_item_name\"),",
-									"        enabled: false",
-									"    }",
-									"    ",
-									"    pm.expect(jsonData.data).to.deep.include(obj);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"enabled\": false\n}"
-						},
-						"url": {
-							"raw": "localhost:8080/inventory/{{disabled_item_id}}",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory",
-								"{{disabled_item_id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "check item was disabled",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"id": "f59365c8-9bb2-4585-a473-688f9449f104",
-								"exec": [
-									"pm.test(\"status is 200 OK\", function() {",
-									"    pm.response.to.have.status(200);",
-									"})",
-									"",
-									"pm.test(\"response time is within 20 ms\", function() {",
-									"    pm.expect(pm.response.responseTime).to.be.below(20);",
-									"})",
-									"",
-									"pm.test(\"body is json\", function() {",
-									"    pm.response.to.be.json;",
-									"})",
-									"",
-									"pm.test(\"body contains newly created item name\", function () {",
-									"    let jsonData = pm.response.json();",
-									"    let expectedItemName = pm.environment.get(\"disabled_item_name\")",
-									"    ",
-									"    let obj = {",
-									"        id: pm.environment.get(\"disabled_item_id\"),",
-									"        name: pm.environment.get(\"disabled_item_name\"),",
-									"        enabled: false",
-									"    }",
-									"    ",
-									"    pm.expect(jsonData.data).to.deep.include(obj);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/inventory/{{disabled_item_id}}",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"inventory",
-								"{{disabled_item_id}}"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"protocolProfileBehavior": {}
-		},
-		{
-			"name": "provision stock",
+			"name": "stock",
 			"item": [
 				{
 					"name": "create one inventory item",
@@ -948,7 +1010,7 @@
 			"protocolProfileBehavior": {}
 		},
 		{
-			"name": "recipe",
+			"name": "recipe/order",
 			"item": [
 				{
 					"name": "create",
@@ -1779,6 +1841,65 @@
 							"response": []
 						},
 						{
+							"name": "provision stock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a543723f-0ec3-48ca-8aee-54f434e4506d",
+										"exec": [
+											"pm.test(\"status is 201 CREATED\", function() {",
+											"    pm.response.to.have.status(201);",
+											"})",
+											"",
+											"pm.test(\"response time is within 20 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(20);",
+											"})",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"id": "fd5b9b24-56ca-409c-92ff-276f1d758762",
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"qty\": 9\n}"
+								},
+								"url": {
+									"raw": "localhost:8080/stock/{{disable_recipe_item_id_1}}",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"stock",
+										"{{disable_recipe_item_id_1}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "create salad recipe",
 							"event": [
 								{
@@ -2053,6 +2174,57 @@
 									"path": [
 										"recipe",
 										"{{disable_recipe_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "can not place order for disabled recipe",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "84172b04-735f-46f9-bcad-275a9709ae35",
+										"exec": [
+											"pm.test(\"Should return 400\", function() {",
+											"    pm.response.to.have.status(400)",
+											"})",
+											"",
+											"pm.test(\"response time is within 50 ms\", function() {",
+											"    pm.expect(pm.response.responseTime).to.be.below(50);",
+											"})",
+											"",
+											"pm.test(\"recipe is disabled\", function () {",
+											"    pm.expect(pm.response.text()).to.include(\"invalid recipe\");",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"id\": {{disable_recipe_id}},\n\t\"qty\": 1\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8080/order",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"order"
 									]
 								}
 							},

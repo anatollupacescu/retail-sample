@@ -6,8 +6,9 @@
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
 
-###
+@host = http://localhost:8080
 
+### Create inventory item
 POST http://localhost:8080/inventory
 Content-Type: application/json
 
@@ -15,13 +16,15 @@ Content-Type: application/json
   "name": "garlic"
 }
 
-###
-
+### Get one inventory item
 GET http://localhost:8080/inventory/1
 Accept: application/json
 
-###
+### List inventory items
+GET http://localhost:8080/inventory
+Accept: application/json
 
+### Disable inventory item
 PATCH http://localhost:8080/inventory/1
 Accept: application/json
 
@@ -29,24 +32,35 @@ Accept: application/json
   "enabled": false
 }
 
-###
-
-GET http://localhost:8080/outbound
+### List orders
+GET http://localhost:8080/order
 Accept: application/json
-###
 
-GET http://localhost:8080/stock
+### Show stock
+GET http://localhost:8080/stock/7
 Accept: application/json
-###
 
-POST http://localhost:8080/stock/1
+### Provision stock
+POST http://localhost:8080/stock/7
 Content-Type: application/json
 
 {
-  "qty":4
+  "qty":14
 }
 
-###
-
-GET http://localhost:8080/recipe/6
+### List recipes
+GET http://localhost:8080/recipe
 Accept: application/json
+
+### List orders
+GET {{host}}/order
+Accept: application/json
+
+### Place new order
+POST {{host}}/order
+Content-Type: application/json
+
+{
+  "id": 2,
+  "qty": 1
+}

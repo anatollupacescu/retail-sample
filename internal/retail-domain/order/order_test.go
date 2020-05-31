@@ -22,12 +22,12 @@ func TestPlaceOrder(t *testing.T) {
 		})
 	})
 
-	t.Run("when recipe not retrieved", func(t *testing.T) {
+	t.Run("when recipe not found", func(t *testing.T) {
 		var recipeID = recipe.ID(1)
 
 		var zeroRecipe recipe.Recipe
 
-		expectedErr := errors.New("expected")
+		expectedErr := errors.New("not found")
 
 		recipeBook := &order.MockRecipeBook{}
 		recipeBook.On("Get", recipeID).Return(zeroRecipe, expectedErr)
@@ -36,12 +36,37 @@ func TestPlaceOrder(t *testing.T) {
 
 		receivedID, err := orders.PlaceOrder(1, 1)
 
-		t.Run("calls get on recipe book", func(t *testing.T) {
+		t.Run("calls recipe book", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)
 		})
 
 		t.Run("propagates the error", func(t *testing.T) {
 			assert.Equal(t, expectedErr, err)
+			assert.Equal(t, order.ID(0), receivedID)
+		})
+	})
+
+	t.Run("when recipe is disabled", func(t *testing.T) {
+		var recipeID = recipe.ID(1)
+
+		var r = recipe.Recipe{
+			ID:      recipeID,
+			Enabled: false,
+		}
+
+		recipeBook := &order.MockRecipeBook{}
+		recipeBook.On("Get", recipeID).Return(r, nil)
+
+		orders := order.Orders{RecipeBook: recipeBook}
+
+		receivedID, err := orders.PlaceOrder(1, 1)
+
+		t.Run("calls recipe book", func(t *testing.T) {
+			recipeBook.AssertExpectations(t)
+		})
+
+		t.Run("propagates the error", func(t *testing.T) {
+			assert.Equal(t, order.ErrInvalidRecipe, err)
 			assert.Equal(t, order.ID(0), receivedID)
 		})
 	})
@@ -53,6 +78,7 @@ func TestPlaceOrder(t *testing.T) {
 			ID:          recipeID,
 			Ingredients: []recipe.Ingredient{},
 			Name:        "test",
+			Enabled:     true,
 		}
 
 		recipeBook := &order.MockRecipeBook{}
@@ -85,6 +111,7 @@ func TestPlaceOrder(t *testing.T) {
 			ID:          recipeID,
 			Ingredients: []recipe.Ingredient{},
 			Name:        "test",
+			Enabled:     true,
 		}
 
 		recipeBook := &order.MockRecipeBook{}
@@ -122,6 +149,7 @@ func TestPlaceOrder(t *testing.T) {
 			ID:          recipeID,
 			Ingredients: []recipe.Ingredient{},
 			Name:        "test",
+			Enabled:     true,
 		}
 
 		recipeBook := &order.MockRecipeBook{}

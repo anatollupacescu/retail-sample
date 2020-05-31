@@ -76,6 +76,7 @@ enter `web/` folder
 
 **TODO**
 
+- errors in jsonapi format
 - document backend code using godoc
 - cancel a provision
 - pagination

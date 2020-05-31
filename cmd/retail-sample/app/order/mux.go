@@ -54,11 +54,12 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case nil:
 		break
-	case stock.ErrNotEnoughStock:
-		fallthrough
-	case inventory.ErrDuplicateName:
-		fallthrough
-	case inventory.ErrEmptyName:
+	case order.ErrInvalidRecipe,
+		order.ErrInvalidQuantity,
+		stock.ErrNotEnoughStock,
+		inventory.ErrDuplicateName,
+		inventory.ErrEmptyName:
+
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:

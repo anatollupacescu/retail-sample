@@ -43,11 +43,14 @@ run/docker: $(BINARY)
 	$(MAKE) build/web
 	docker-compose up --build
 
-.PHONY: clean
+.PHONY: clean/api clean/web
 
-clean:
+clean/api:
 	@rm $(BINARY) 2> /dev/null || true
 	# @$(MAKE) clean -C web/
+
+clean/web:
+	@$(MAKE) clean -C web/
 
 .PHONY: build/web
 

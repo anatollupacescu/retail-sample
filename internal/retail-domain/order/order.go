@@ -45,6 +45,7 @@ type (
 var (
 	ErrOrderNotFound   = errors.New("order not found")
 	ErrInvalidQuantity = errors.New("quantity not valid")
+	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
 func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
@@ -60,6 +61,10 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 
 	if err != nil {
 		return zeroOrderID, err
+	}
+
+	if !r.Enabled {
+		return zeroOrderID, ErrInvalidRecipe
 	}
 
 	ingredients := r.Ingredients

@@ -8,20 +8,20 @@ import (
 )
 
 type (
-	StockStore interface {
+	Store interface {
 		Quantity(int) (int, error)
 		Provision(int, int) (int, error)
 		Sell([]recipe.Ingredient, int) error
 	}
 
 	Stock struct {
-		Store StockStore
+		Store Store
 
 		Inventory    Inventory
 		ProvisionLog ProvisionLog
 	}
 
-	StockPosition struct {
+	Position struct {
 		ID   int
 		Name string
 		Qty  int
@@ -46,7 +46,7 @@ type (
 
 var ErrItemNotFound = errors.New("stock item not found")
 
-func (s Stock) CurrentStock() (ps []StockPosition, err error) {
+func (s Stock) CurrentStock() (ps []Position, err error) {
 	items, err := s.Inventory.List()
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (s Stock) CurrentStock() (ps []StockPosition, err error) {
 			return nil, err
 		}
 
-		ps = append(ps, StockPosition{
+		ps = append(ps, Position{
 			ID:   itemID,
 			Name: string(item.Name),
 			Qty:  qty,
@@ -112,9 +112,7 @@ func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {
 		presentQty, err := s.Store.Quantity(i.ID)
 
 		switch err {
-		case nil:
-			fallthrough
-		case ErrItemNotFound:
+		case nil, ErrItemNotFound:
 			break
 		default:
 			return err

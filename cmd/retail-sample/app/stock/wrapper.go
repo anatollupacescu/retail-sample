@@ -19,7 +19,7 @@ func (w wrapper) quantity(id int) (qty int, err error) {
 	})
 }
 
-func (w wrapper) currentStock() (currentStock []stock.StockPosition, err error) {
+func (w wrapper) currentStock() (currentStock []stock.Position, err error) {
 	return currentStock, w.Exec("get current stock", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 

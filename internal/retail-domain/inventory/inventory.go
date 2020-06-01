@@ -48,7 +48,11 @@ func (i Inventory) UpdateStatus(id int, enabled bool) (item Item, err error) {
 
 	err = i.Store.Update(item)
 
-	return item, err
+	if err != nil {
+		return Item{}, err
+	}
+
+	return item, nil
 }
 
 func (i Inventory) Add(name string) (int, error) {

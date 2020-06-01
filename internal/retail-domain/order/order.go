@@ -70,7 +70,7 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 	ingredients := r.Ingredients
 
 	if err := o.Stock.Sell(ingredients, qty); err != nil {
-		return 0, err
+		return zeroOrderID, err
 	}
 
 	ord := Order{

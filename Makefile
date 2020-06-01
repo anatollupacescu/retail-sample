@@ -13,16 +13,29 @@ format:
 test:
 	@go test ./...
 
+# build
+
+.PHONY: build build/web build/api build/docker
+
+build/web:
+	$(MAKE) build -C web/
+ 
 build/docker:
 	@docker build .
 
-build:
+build/api:
 	echo $(PROJECT)
 	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build \
 		-ldflags "-s -w -X ${PROJECT}/internal/version.Version=${RELEASE} \
 		-X ${PROJECT}/internal/version.Commit=${COMMIT} \
 		-X ${PROJECT}/internal/version.BuildTime=${BUILD_TIME}" \
 		-o bin/retail ${PROJECT}/cmd/retail-sample
+
+build: build/web build/api
+
+# run
+
+.PHONY: run/mem run/docker
 
 run:
 	@go run $(shell pwd)/cmd/retail-sample
@@ -32,32 +45,24 @@ BINARY?=$(shell pwd)/bin/retail
 $(BINARY):
 	$(MAKE) build
 
-.PHONY: run/mem
-
 run/mem: $(BINARY)
 	$(BINARY) --in-memory
-
-.PHONY: run/docker
 
 run/docker: $(BINARY)
 	$(MAKE) build/web
 	docker-compose up --build
 
-.PHONY: clean/api clean/web
+# clean
+
+.PHONY: clean clean/api clean/web
 
 clean/api:
 	@rm $(BINARY) 2> /dev/null || true
-	# @$(MAKE) clean -C web/
 
 clean/web:
 	@$(MAKE) clean -C web/
 
-.PHONY: build/web
-
-build/web:
-	$(MAKE) build -C web/
- 
-.PHONY: test format build build/docker run
+clean: clean/api clean/web
 
 BIN_DIR := $(shell go env GOPATH)/bin
 GRAPH_TOOL := $(BIN_DIR)/godepgraph

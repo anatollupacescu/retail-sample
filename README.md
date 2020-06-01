@@ -9,13 +9,13 @@ This allows to easily swap frameworks, libraries and databases without interferi
 Given that you have `yarn` and `go` installed, just run:
 
 ```sh
-make clean build/web build run/mem
+make clean build run/mem
 ```
 
 To run the app in docker compose with a postgres instance:
 
 ```sh
-make clean build/web build run/docker
+make clean build run/docker
 ```
 
 To run the acceptance tests against a running instance - enter the `test/acceptance` folder then run:
@@ -24,7 +24,7 @@ To run the acceptance tests against a running instance - enter the `test/accepta
 yarn test
 ```
 
-**Summary**
+## Summary
 
 The app has a Go backend exposing a REST interface and is using postgres for persistence.
 
@@ -36,9 +36,9 @@ Both front and back-end are written in such a way that their 'business' related 
 
 - for the front-end - the `web/src/app` folder contains all the framework free code - the domain objects, rest clients and page behaviour (error messages, controls animation) while `web/src/jquery` or `web/src/plan` (WIP) contains the means by which this logic in bound to the web page components.
 
-**Development**
+## Development
 
-## back-end
+### back-end
 
 > make run
 
@@ -46,7 +46,7 @@ Linter is going to be ran as part of building the runnable docker image:
 
 > make build/docker
 
-## front-end
+### front-end
 
 enter `web/` folder
 
@@ -54,19 +54,19 @@ enter `web/` folder
 
 ## Business domain explained
 
-**inventory**
+### inventory
 
 - a list of unique item names
 
-**stock**
+### stock
 
 - a list of items that are present in the inventory AND have been provisioned
 
-**recipe**
+### recipe
 
 - a list of recipes, each recipe has a unique name and a list of ingredients with their quantities
 
-**order**
+### order
 
 - a list of orders that have been successfully placed.
 - if the order does not have enough stock, it will be rejected
@@ -74,10 +74,21 @@ enter `web/` folder
 
 > to be continued...
 
-**TODO**
+## TODO
 
+### tech
+
+- go api tests
 - errors in jsonapi format
-- document backend code using godoc
-- cancel a provision
+- document packages with godoc
 - pagination
-  ...
+- linter yml
+- pprof
+- auth and roles
+
+### business
+
+- view provision log
+- cancel a provision
+- cancel an order
+- ...

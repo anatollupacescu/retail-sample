@@ -58,7 +58,7 @@ type InMemoryStore struct {
 	data map[int]int
 }
 
-func NewInMemoryStock() domain.StockStore {
+func NewInMemoryStock() domain.Store {
 	return InMemoryStore{
 		data: make(map[int]int),
 	}

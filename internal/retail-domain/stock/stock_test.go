@@ -186,7 +186,7 @@ func TestCurrentStock(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		expectedResult := []stock.StockPosition{{
+		expectedResult := []stock.Position{{
 			ID:   1,
 			Name: "test",
 			Qty:  10,

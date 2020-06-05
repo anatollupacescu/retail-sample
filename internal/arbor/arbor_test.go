@@ -42,6 +42,7 @@ func TestDep(t *testing.T) {
 		t.Run("test is not run when dep fails", func(t *testing.T) {
 			assert.False(t, called)
 			assert.Equal(t, "bad result", dep.failReason)
+			assert.Equal(t, pending, addTest.status)
 		})
 	})
 }
@@ -65,33 +66,44 @@ func TestOrder(t *testing.T) {
 		t.Run("dep is ran before linking test", func(t *testing.T) {
 			assert.Equal(t, "depmain", calls)
 		})
-
-		t.Log(addTest.String())
 	})
 }
 
-func TestTwoTestsDependOnOne(t *testing.T) {
+func TestDiamond(t *testing.T) {
 	t.Run("given that a common dependency succeeds", func(t *testing.T) {
 		var calls int
 
 		dep := New("dep", func() error {
-			calls++
+			calls = 1
 			return nil
 		})
 
-		first := New("dep", func() error {
+		first := New("first", func() error {
+			calls += 10
 			return nil
 		}, dep)
 
-		second := New("can add two numbers", func() error {
+		second := New("second", func() error {
+			calls += 100
 			return nil
 		}, dep)
 
-		first.Run()
-		second.Run()
+		diamond := New("diamond", func() error { return nil }, first, second)
+
+		diamond.Run()
 
 		t.Run("it is ran exactly once", func(t *testing.T) {
-			assert.Equal(t, 1, calls)
+			assert.Equal(t, 111, calls)
+		})
+
+		t.Run("will compile summary", func(t *testing.T) {
+			summary := `[diamond] ok
+	⮡[first] ok
+		⮡[dep] ok
+	⮡[second] ok
+		⮡[dep] ok
+`
+			assert.Equal(t, summary, diamond.String())
 		})
 	})
 }

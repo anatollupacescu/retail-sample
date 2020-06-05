@@ -2,16 +2,14 @@ package arbor
 
 import (
 	"fmt"
-	"strings"
 )
 
 type status int
 
 const (
 	pending = status(iota)
-	failed
-	succeeded
-	skipped
+	fail
+	pass
 )
 
 type test struct {
@@ -21,6 +19,8 @@ type test struct {
 
 	status     status
 	failReason string
+
+	Success bool
 }
 
 func New(name string, f func() error, deps ...*test) *test {
@@ -35,16 +35,16 @@ func New(name string, f func() error, deps ...*test) *test {
 func (ts *test) Run() {
 	for _, dep := range ts.deps {
 		switch dep.status {
-		case succeeded:
+		case pass:
 			continue
-		case failed:
+		case fail:
 			return
 		case pending:
 			fallthrough
 		default:
 			if dep.status == pending {
 				dep.Run()
-				if dep.status != succeeded {
+				if dep.status != pass {
 					return
 				}
 			}
@@ -53,33 +53,52 @@ func (ts *test) Run() {
 
 	err := ts.run()
 
-	ts.status = succeeded
+	ts.status = pass
+	ts.Success = true
 
 	if err != nil {
-		ts.status = failed
+		ts.status = fail
+		ts.Success = false
 		ts.failReason = err.Error()
 	}
 }
 
-func (ts *test) String() string {
-	var buffer strings.Builder
+func (ts *test) Lines() (buffer []string) {
+	var curr string
 
 	switch ts.status {
-	case succeeded:
-		buffer.WriteString(fmt.Sprintf("[%v] ok\n", ts.name))
+	case pass:
+		curr = fmt.Sprintf("\u2BA1[%v] ok\n", ts.name)
 		break
-	case failed:
-		buffer.WriteString(fmt.Sprintf("[%v] failed: %v\n", ts.name, ts.failReason))
+	case fail:
+		curr = fmt.Sprintf("\u2BA1[%v] failed: %v\n", ts.name, ts.failReason)
 		break
 	case pending:
 		fallthrough
 	default:
-		buffer.WriteString(fmt.Sprintf("[%v] not ran\n", ts.name))
+		curr = fmt.Sprintf("\u2BA1[%v] not ran\n", ts.name)
 	}
+
+	buffer = append(buffer, curr)
 
 	for _, t := range ts.deps {
-		buffer.WriteString(fmt.Sprintf("\u2BA1 %s", t.String()))
+		for _, line := range t.Lines() {
+			buffer = append(buffer, fmt.Sprintf("\t%s", line))
+		}
 	}
 
-	return buffer.String()
+	return buffer
+}
+
+func (ts *test) String() (out string) {
+	lines := ts.Lines()
+
+	out = lines[0][len("⮡"):len(lines[0])] //drop first ⮡
+
+	for i := 1; i < len(lines); i++ {
+		val := lines[i]
+		out += val
+	}
+
+	return
 }

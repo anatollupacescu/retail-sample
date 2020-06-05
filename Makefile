@@ -7,6 +7,8 @@ RELEASE?=0.0.0
 COMMIT := git-$(shell git rev-parse --short HEAD)
 BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
+.PHONY: format test
+
 format:
 	@goimports -w -local $(PROJECT) cmd/ internal/
 

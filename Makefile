@@ -26,7 +26,6 @@ build/docker:
 	@docker build .
 
 build/api:
-	echo $(PROJECT)
 	GOOS=${GOOS} GOARCH=${GOARCH} CGO_ENABLED=0 go build \
 		-ldflags "-s -w -X ${PROJECT}/internal/version.Version=${RELEASE} \
 		-X ${PROJECT}/internal/version.Commit=${COMMIT} \

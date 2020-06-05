@@ -3,6 +3,9 @@ module github.com/anatollupacescu/retail-sample
 require (
 	github.com/ardanlabs/conf v1.2.2
 	github.com/go-kit/kit v0.10.0
+	github.com/gojektech/heimdall v5.0.2+incompatible
+	github.com/gojektech/valkyrie v0.0.0-20190210220504-8f62c1e7ba45 // indirect
+	github.com/google/uuid v1.0.0
 	github.com/gorilla/mux v1.7.4
 	github.com/jackc/pgconn v1.5.0
 	github.com/jackc/pgx/v4 v4.6.0

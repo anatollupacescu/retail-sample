@@ -1,10 +1,15 @@
 package inventory
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/gojektech/heimdall/httpclient"
 	"github.com/gorilla/mux"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
@@ -20,6 +25,9 @@ type (
 		ID      int    `json:"id"`
 		Name    string `json:"name"`
 		Enabled bool   `json:"enabled"`
+	}
+	responseData struct {
+		Data entity `json:"data"`
 	}
 )
 
@@ -87,26 +95,30 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Update() (item inventory.Item, err error) {
+	return
+}
+
+type createPayload struct {
+	Name string `json:"name"`
+}
+
 func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	type payload struct {
-		Name string `json:"name"`
-	}
+	var body createPayload
 
-	var requestPayload payload
-
-	if err := d.Decode(&requestPayload); err != nil {
+	if err := d.Decode(&body); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "inventory.create")
 		http.Error(w, "could not parse body", http.StatusBadRequest)
 		return
 	}
 
-	itemName := requestPayload.Name
-	createdID, err := a.wrapper.create(itemName) //TODO should return newly created entity
+	itemName := body.Name
+	newItem, err := a.wrapper.create(itemName)
 
 	switch err {
 	case nil:
@@ -121,13 +133,11 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = struct {
-		Data entity `json:"data"`
-	}{
+	var response = responseData{
 		Data: entity{
-			ID:      int(createdID),
-			Name:    requestPayload.Name,
-			Enabled: true,
+			ID:      int(newItem.ID),
+			Name:    newItem.Name,
+			Enabled: newItem.Enabled,
 		},
 	}
 
@@ -139,6 +149,58 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 		a.logger.Log("action", "encode response", "error", err, "method", "inventory.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
+}
+
+// client
+func Create(url, name string) (item inventory.Item, err error) {
+	timeout := 100 * time.Millisecond
+
+	httpClient := httpclient.NewClient(
+		httpclient.WithHTTPTimeout(timeout),
+	)
+	headers := http.Header{}
+	headers.Set("Content-Type", "application/json")
+
+	payload := createPayload{
+		Name: name,
+	}
+
+	var data []byte
+
+	data, err = json.Marshal(payload)
+	if err != nil {
+		return item, err
+	}
+
+	body := bytes.NewReader(data)
+
+	response, err := httpClient.Post(url, body, headers)
+	if err != nil {
+		return item, err
+	}
+
+	if response.StatusCode != http.StatusCreated {
+		return item, errors.New("unexpected status code")
+	}
+
+	defer response.Body.Close()
+
+	respBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return item, err
+	}
+
+	var responseData responseData
+
+	if err = json.Unmarshal(respBody, &responseData); err != nil {
+		return item, err
+	}
+
+	return inventory.Item{
+		ID:      responseData.Data.ID,
+		Name:    responseData.Data.Name,
+		Enabled: responseData.Data.Enabled,
+	}, err
 }
 
 func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {

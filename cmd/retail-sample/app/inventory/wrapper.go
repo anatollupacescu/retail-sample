@@ -19,11 +19,19 @@ func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err erro
 	})
 }
 
-func (ia wrapper) create(name string) (id int, err error) {
-	return id, ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
+func (ia wrapper) create(name string) (item inventory.Item, err error) {
+	return item, ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
 		i := provider.Inventory()
 
+		var id int
+
 		id, err = i.Add(name)
+
+		if err != nil {
+			return err
+		}
+
+		item, err = i.Get(id)
 
 		return err
 	})

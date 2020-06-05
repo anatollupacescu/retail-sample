@@ -55,7 +55,13 @@ func main() {
 	routerLogger := middleware.WrapLogger(baseLogger)
 	loggerFactory := middleware.NewLoggerFactory(baseLogger)
 
-	persistenceFactory := provider.NewPersistenceFactory(config.DatabaseURL, config.InMemory)
+	var dbURL string
+
+	if !config.InMemory {
+		dbURL = config.DatabaseURL
+	}
+
+	persistenceFactory := provider.NewPersistenceFactory(dbURL)
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)

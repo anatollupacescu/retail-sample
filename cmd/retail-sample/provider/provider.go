@@ -1,9 +1,13 @@
 package provider
 
-import "github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+import (
+	"strings"
 
-func NewPersistenceFactory(dbConn string, inMemory bool) middleware.PersistenceProviderFactory {
-	if inMemory {
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+)
+
+func NewPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory {
+	if strings.TrimSpace(dbConn) == "" {
 		return newInMemoryPersistentFactory()
 	}
 

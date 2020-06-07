@@ -74,6 +74,24 @@ enter `web/` folder
 
 > to be continued...
 
+## Acceptance testing
+
+There is a experimental testing framework (arbor) with allows linking tests in a tree like manner.
+
+*(in the project root folder)*
+
+To start the server execute
+
+>make start/arbor
+
+Then navigate to <http://localhost:3000>
+
+To run the acceptance tests execute
+
+>make test/acceptance
+
+Then refresh the previously loaded page
+
 ## TODO
 
 ### tech

@@ -1,28 +1,65 @@
-package arbor_test
+// +build acceptance
+
+package inv_test
 
 import (
 	"errors"
+	"flag"
+	"fmt"
 	"testing"
+	"time"
 
+	faker "github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 
-	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/arbor"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-
-	"github.com/google/uuid"
+	client "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
+	web "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
+	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-var baseURL = "http://localhost:8080/inventory"
+var (
+	graphURL = flag.String("arborURL", "", "graph server URL")
+	apiURL   = flag.String("apiURL", "", "api server URL")
 
-func testCreate() error {
-	var item inventory.Item
-	var err error
+	timeout = 100 * time.Millisecond //TODO pass as flag
+)
 
-	name := uuid.New().String()
+func TestInventory(t *testing.T) {
+	if *apiURL == "" {
+		t.Fatal("api URL not provided")
+	}
 
-	if item, err = invCmd.Create(baseURL, name); err != nil {
+	create := arbor.New("create", testCreate)
+	getOne := arbor.New("get one", testGetOne, create)
+	getAll := arbor.New("get all", testGetAll, create)
+	noDuplicate := arbor.New("no duplicate", testDuplicate, create)
+	disable := arbor.New("disable", testDisable, create)
+
+	all := arbor.Suite("all", getAll, getOne, noDuplicate, disable)
+
+	all.Run()
+
+	t.Run("succeeds", func(t *testing.T) {
+		assert.Equal(t, true, all.Success)
+	})
+
+	t.Logf("\n%s", all)
+
+	js := arbor.Marshal(create, getOne, getAll, noDuplicate, disable)
+
+	arbor.Upload(*graphURL, js)
+}
+
+func testCreate() (err error) {
+	var item domain.Item
+
+	name := faker.Word()
+
+	cl := client.Post(*apiURL, timeout)
+
+	if item, err = web.Create(name, cl); err != nil {
 		return err
 	}
 	if item.Name != name {
@@ -36,41 +73,79 @@ func testCreate() error {
 }
 
 func testDuplicate() error {
-	name := uuid.New().String()
+	name := faker.Word()
 
-	_, _ = invCmd.Create(baseURL, name)
+	cl := client.Post(*apiURL, timeout)
+	_, _ = web.Create(name, cl)
 
-	if _, err := invCmd.Create(baseURL, name); err == nil {
+	if _, err := web.Create(name, cl); err == nil {
 		return errors.New("expected error")
 	}
 
 	return nil
 }
 
-func testDisable() error {
-	name := uuid.New().String()
+func testDisable() (err error) {
+	name := faker.Word()
 
-	_, _ = invCmd.Create(baseURL, name)
+	cl := client.Post(*apiURL, timeout)
+	i, _ := web.Create(name, cl)
 
-	if _, err := invCmd.Create(baseURL, name); err == nil {
-		return errors.New("expected error")
+	resourceURL := fmt.Sprintf("%s/%d", *apiURL, i.ID)
+
+	cl = client.Patch(resourceURL, timeout)
+
+	var updatedItem domain.Item
+
+	if updatedItem, err = web.Update(false, cl); err != nil {
+		return err
+	}
+
+	if updatedItem.Enabled != false {
+		return errors.New("expected resource to be updated")
 	}
 
 	return nil
 }
 
-func TestInventory(t *testing.T) {
-	create := arbor.New("create item", testCreate)
-	// getOne
-	// getAll
-	noDuplicate := arbor.New("name duplicate rejected", testDuplicate, create)
-	disable := arbor.New("disable item", testDisable, create)
+func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
+	cl := client.Get(*apiURL, timeout)
 
-	all := arbor.New("all", func() error { return nil }, noDuplicate, disable)
+	all, err := web.GetAll(cl)
 
-	all.Run()
+	if err != nil {
+		return err
+	}
 
-	t.Run("succeeds", func(t *testing.T) {
-		assert.Equal(t, true, all.Success)
-	})
+	if len(all) < 1 {
+		return errors.New("expected more items")
+	}
+
+	return nil
+}
+
+func testGetOne() (err error) {
+	name := faker.Word()
+
+	cl := client.Post(*apiURL, timeout)
+	i, _ := web.Create(name, cl)
+
+	resourceURL := fmt.Sprintf("%s/%d", *apiURL, i.ID)
+	gcl := client.Get(resourceURL, timeout)
+
+	item, err := web.Get(gcl)
+
+	if err != nil {
+		return err
+	}
+
+	if item.Name != name {
+		return errors.New("bad name")
+	}
+
+	if item.ID == 0 {
+		return errors.New("bad ID")
+	}
+
+	return nil
 }

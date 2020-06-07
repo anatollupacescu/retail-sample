@@ -77,3 +77,16 @@ graph: $(GRAPH_TOOL)
 	@$(GRAPH_TOOL) -s -novendor \
 		-o ./cmd,$(PROJECT) \
 		./cmd/retail-sample/ | dot -Tpng -o graph.png
+
+.PHONY: start/arbor
+
+start/arbor:
+	@go run $(shell pwd)/cmd/arbor
+
+.PHONY: test/acceptance
+
+test/acceptance:
+	@go test $(shell pwd)/cmd/retail-sample-test/... \
+	-v -tags=acceptance -args \
+	--apiURL=http://localhost:8080/inventory \
+	--arborURL=http://localhost:3000/data.json 

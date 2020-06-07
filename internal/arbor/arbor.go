@@ -32,6 +32,15 @@ func New(name string, f func() error, deps ...*test) *test {
 	}
 }
 
+func Suite(name string, deps ...*test) *test {
+	return &test{
+		name:   name,
+		run:    func() error { return nil },
+		status: pending,
+		deps:   deps,
+	}
+}
+
 func (ts *test) Run() {
 	for _, dep := range ts.deps {
 		switch dep.status {
@@ -68,7 +77,7 @@ func (ts *test) Lines() (buffer []string) {
 
 	switch ts.status {
 	case pass:
-		curr = fmt.Sprintf("\u2BA1[%v] ok\n", ts.name)
+		curr = fmt.Sprintf("\u2BA1[%v] passed\n", ts.name)
 		break
 	case fail:
 		curr = fmt.Sprintf("\u2BA1[%v] failed: %v\n", ts.name, ts.failReason)
@@ -76,14 +85,14 @@ func (ts *test) Lines() (buffer []string) {
 	case pending:
 		fallthrough
 	default:
-		curr = fmt.Sprintf("\u2BA1[%v] not ran\n", ts.name)
+		curr = fmt.Sprintf("\u2BA1[%v] skipped\n", ts.name)
 	}
 
 	buffer = append(buffer, curr)
 
 	for _, t := range ts.deps {
 		for _, line := range t.Lines() {
-			buffer = append(buffer, fmt.Sprintf("\t%s", line))
+			buffer = append(buffer, fmt.Sprintf("  %s", line))
 		}
 	}
 

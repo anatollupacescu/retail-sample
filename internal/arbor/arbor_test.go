@@ -88,7 +88,7 @@ func TestDiamond(t *testing.T) {
 			return nil
 		}, dep)
 
-		diamond := New("diamond", func() error { return nil }, first, second)
+		diamond := Suite("diamond", first, second)
 
 		diamond.Run()
 
@@ -97,11 +97,11 @@ func TestDiamond(t *testing.T) {
 		})
 
 		t.Run("will compile summary", func(t *testing.T) {
-			summary := `[diamond] ok
-	⮡[first] ok
-		⮡[dep] ok
-	⮡[second] ok
-		⮡[dep] ok
+			summary := `[diamond] passed
+  ⮡[first] passed
+    ⮡[dep] passed
+  ⮡[second] passed
+    ⮡[dep] passed
 `
 			assert.Equal(t, summary, diamond.String())
 		})

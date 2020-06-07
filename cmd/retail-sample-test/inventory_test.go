@@ -1,13 +1,11 @@
 // +build acceptance
 
-package inv_test
+package acceptance_test
 
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"testing"
-	"time"
 
 	faker "github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
@@ -19,19 +17,14 @@ import (
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-var (
-	graphURL = flag.String("arborURL", "", "graph server URL")
-	apiURL   = flag.String("apiURL", "", "api server URL")
-
-	timeout = 100 * time.Millisecond //TODO pass as flag
-)
+var arborURL = flag.String("arborURL", "", "graph server URL")
 
 func TestInventory(t *testing.T) {
-	if *apiURL == "" {
-		t.Fatal("api URL not provided")
-	}
+	createEmpty := arbor.New("rejects empty name", testCreateWithEmptyName)
+	createOk := arbor.New("can create", testCreate)
 
-	create := arbor.New("create", testCreate)
+	create := arbor.Suite("create", createEmpty, createOk)
+
 	getOne := arbor.New("get one", testGetOne, create)
 	getAll := arbor.New("get all", testGetAll, create)
 	noDuplicate := arbor.New("no duplicate", testDuplicate, create)
@@ -45,19 +38,29 @@ func TestInventory(t *testing.T) {
 		assert.Equal(t, true, all.Success)
 	})
 
-	t.Logf("\n%s", all)
+	t.Logf("%s\n", all)
 
-	js := arbor.Marshal(create, getOne, getAll, noDuplicate, disable)
+	report := arbor.Marshal(create, createEmpty, createOk, getOne, getAll, noDuplicate, disable)
 
-	arbor.Upload(*graphURL, js)
+	arbor.Upload(*arborURL, report)
+}
+
+func testCreateWithEmptyName() (err error) {
+	cl := client.Post()
+
+	if _, err = web.Create("", cl); err == nil {
+		return errors.New("expected err")
+	}
+
+	return nil
 }
 
 func testCreate() (err error) {
-	var item domain.Item
-
 	name := faker.Word()
 
-	cl := client.Post(*apiURL, timeout)
+	cl := client.Post()
+
+	var item domain.Item
 
 	if item, err = web.Create(name, cl); err != nil {
 		return err
@@ -75,7 +78,8 @@ func testCreate() (err error) {
 func testDuplicate() error {
 	name := faker.Word()
 
-	cl := client.Post(*apiURL, timeout)
+	cl := client.Post()
+
 	_, _ = web.Create(name, cl)
 
 	if _, err := web.Create(name, cl); err == nil {
@@ -88,12 +92,11 @@ func testDuplicate() error {
 func testDisable() (err error) {
 	name := faker.Word()
 
-	cl := client.Post(*apiURL, timeout)
+	cl := client.Post()
+
 	i, _ := web.Create(name, cl)
 
-	resourceURL := fmt.Sprintf("%s/%d", *apiURL, i.ID)
-
-	cl = client.Patch(resourceURL, timeout)
+	cl = client.Patch(i.ID)
 
 	var updatedItem domain.Item
 
@@ -109,7 +112,7 @@ func testDisable() (err error) {
 }
 
 func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
-	cl := client.Get(*apiURL, timeout)
+	cl := client.Get()
 
 	all, err := web.GetAll(cl)
 
@@ -127,11 +130,11 @@ func testGetAll() (err error) { //TODO create an item an assert it's present in 
 func testGetOne() (err error) {
 	name := faker.Word()
 
-	cl := client.Post(*apiURL, timeout)
+	cl := client.Post()
+
 	i, _ := web.Create(name, cl)
 
-	resourceURL := fmt.Sprintf("%s/%d", *apiURL, i.ID)
-	gcl := client.Get(resourceURL, timeout)
+	gcl := client.Get(i.ID)
 
 	item, err := web.Get(gcl)
 

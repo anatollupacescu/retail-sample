@@ -33,7 +33,7 @@ type output struct {
 }
 
 func Marshal(ts ...*test) string {
-	var nodes []node = make([]node, len(ts))
+	var nodes = make([]node, len(ts))
 
 	statuses := []string{"pending", "fail", "pass"}
 	for i, t := range ts {
@@ -46,7 +46,7 @@ func Marshal(ts ...*test) string {
 		nodes[i] = n
 	}
 
-	var links []link = make([]link, 0)
+	var links = make([]link, 0)
 
 	for _, t := range ts {
 		for _, d := range t.deps {

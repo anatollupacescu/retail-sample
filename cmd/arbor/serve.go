@@ -81,7 +81,7 @@ var index = `<!DOCTYPE html>
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
-  var color = d3.scaleOrdinal(d3.schemeCategory20);
+  var color = ['gray', 'red', 'green'];
 
   var simulation = d3
     .forceSimulation()
@@ -123,7 +123,7 @@ var index = `<!DOCTYPE html>
       .append("circle")
       .attr("r", 20)
       .attr("fill", function (d) {
-        return color(d.group);
+        return color[d.group];
       })
       .call(
         d3

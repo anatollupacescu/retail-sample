@@ -7,9 +7,9 @@ import (
 type status int
 
 const (
-	pending = status(iota)
-	fail
-	pass
+	Pending = status(iota)
+	Fail
+	Pass
 )
 
 type test struct {
@@ -17,8 +17,8 @@ type test struct {
 	deps []*test
 	run  func() error
 
-	status     status
-	failReason string
+	Status     status
+	FailReason string
 
 	Success bool
 }
@@ -27,7 +27,7 @@ func New(name string, f func() error, deps ...*test) *test {
 	return &test{
 		name:   name,
 		run:    f,
-		status: pending,
+		Status: Pending,
 		deps:   deps,
 	}
 }
@@ -36,24 +36,24 @@ func Suite(name string, deps ...*test) *test {
 	return &test{
 		name:   name,
 		run:    func() error { return nil },
-		status: pending,
+		Status: Pending,
 		deps:   deps,
 	}
 }
 
 func (ts *test) Run() {
 	for _, dep := range ts.deps {
-		switch dep.status {
-		case pass:
+		switch dep.Status {
+		case Pass:
 			continue
-		case fail:
+		case Fail:
 			return
-		case pending:
+		case Pending:
 			fallthrough
 		default:
-			if dep.status == pending {
+			if dep.Status == Pending {
 				dep.Run()
-				if dep.status != pass {
+				if dep.Status != Pass {
 					return
 				}
 			}
@@ -62,27 +62,27 @@ func (ts *test) Run() {
 
 	err := ts.run()
 
-	ts.status = pass
+	ts.Status = Pass
 	ts.Success = true
 
 	if err != nil {
-		ts.status = fail
+		ts.Status = Fail
 		ts.Success = false
-		ts.failReason = err.Error()
+		ts.FailReason = err.Error()
 	}
 }
 
 func (ts *test) Lines() (buffer []string) {
 	var curr string
 
-	switch ts.status {
-	case pass:
+	switch ts.Status {
+	case Pass:
 		curr = fmt.Sprintf("\u2BA1[%v] passed\n", ts.name)
 		break
-	case fail:
-		curr = fmt.Sprintf("\u2BA1[%v] failed: %v\n", ts.name, ts.failReason)
+	case Fail:
+		curr = fmt.Sprintf("\u2BA1[%v] failed: %v\n", ts.name, ts.FailReason)
 		break
-	case pending:
+	case Pending:
 		fallthrough
 	default:
 		curr = fmt.Sprintf("\u2BA1[%v] skipped\n", ts.name)

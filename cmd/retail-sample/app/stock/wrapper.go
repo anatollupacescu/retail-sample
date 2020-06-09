@@ -29,8 +29,8 @@ func (w wrapper) currentStock() (currentStock []stock.Position, err error) {
 	})
 }
 
-func (w wrapper) provision(id, qty int) (updatedQtys map[int]int, err error) {
-	return updatedQtys, w.Exec("provision stock", func(provider types.PersistenceProvider) error {
+func (w wrapper) provision(id, qty int) (newQty int, err error) {
+	return newQty, w.Exec("provision stock", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
 		var provisionID int
@@ -51,17 +51,7 @@ func (w wrapper) provision(id, qty int) (updatedQtys map[int]int, err error) {
 
 		itemID := logEntry.ID
 
-		var stockQty int
-
-		stockQty, err = s.Quantity(itemID)
-
-		if err != nil {
-			return err
-		}
-
-		updatedQtys = map[int]int{
-			itemID: stockQty,
-		}
+		newQty, err = s.Quantity(itemID)
 
 		return err
 	})

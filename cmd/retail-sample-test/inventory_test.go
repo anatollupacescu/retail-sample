@@ -4,49 +4,16 @@ package acceptance_test
 
 import (
 	"errors"
-	"flag"
-	"testing"
 
 	faker "github.com/bxcodec/faker/v3"
-	"github.com/stretchr/testify/assert"
-
-	"github.com/anatollupacescu/retail-sample/internal/arbor"
 
 	client "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	web "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-var arborURL = flag.String("arborURL", "", "graph server URL")
-
-func TestInventory(t *testing.T) {
-	createEmpty := arbor.New("rejects empty name", testCreateWithEmptyName)
-	createOk := arbor.New("can create", testCreate)
-
-	create := arbor.Suite("create", createEmpty, createOk)
-
-	getOne := arbor.New("get one", testGetOne, create)
-	getAll := arbor.New("get all", testGetAll, create)
-	noDuplicate := arbor.New("no duplicate", testDuplicate, create)
-	disable := arbor.New("disable", testDisable, create)
-
-	all := arbor.Suite("all", getAll, getOne, noDuplicate, disable)
-
-	all.Run()
-
-	t.Run("succeeds", func(t *testing.T) {
-		assert.Equal(t, true, all.Success)
-	})
-
-	t.Logf("%s\n", all)
-
-	report := arbor.Marshal(create, createEmpty, createOk, getOne, getAll, noDuplicate, disable)
-
-	arbor.Upload(*arborURL, report)
-}
-
 func testCreateWithEmptyName() (err error) {
-	cl := client.Post()
+	cl := client.Post("inventory")
 
 	if _, err = web.Create("", cl); err == nil {
 		return errors.New("expected err")
@@ -58,7 +25,7 @@ func testCreateWithEmptyName() (err error) {
 func testCreate() (err error) {
 	name := faker.Word()
 
-	cl := client.Post()
+	cl := client.Post("inventory")
 
 	var item domain.Item
 
@@ -78,7 +45,7 @@ func testCreate() (err error) {
 func testDuplicate() error {
 	name := faker.Word()
 
-	cl := client.Post()
+	cl := client.Post("inventory")
 
 	_, _ = web.Create(name, cl)
 
@@ -92,11 +59,11 @@ func testDuplicate() error {
 func testDisable() (err error) {
 	name := faker.Word()
 
-	cl := client.Post()
+	cl := client.Post("inventory")
 
 	i, _ := web.Create(name, cl)
 
-	cl = client.Patch(i.ID)
+	cl = client.Patch("inventory", i.ID)
 
 	var updatedItem domain.Item
 
@@ -112,7 +79,7 @@ func testDisable() (err error) {
 }
 
 func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
-	cl := client.Get()
+	cl := client.Get("inventory")
 
 	all, err := web.GetAll(cl)
 
@@ -130,11 +97,11 @@ func testGetAll() (err error) { //TODO create an item an assert it's present in 
 func testGetOne() (err error) {
 	name := faker.Word()
 
-	cl := client.Post()
+	cl := client.Post("inventory")
 
 	i, _ := web.Create(name, cl)
 
-	gcl := client.Get(i.ID)
+	gcl := client.Get("inventory", i.ID)
 
 	item, err := web.Get(gcl)
 

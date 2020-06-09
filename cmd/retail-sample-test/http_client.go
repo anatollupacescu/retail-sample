@@ -15,7 +15,7 @@ var (
 	timeout = 100 * time.Millisecond //TODO pass as flag
 )
 
-func Post() func(io.Reader) (*http.Response, error) {
+func Post(resourceName string) func(io.Reader) (*http.Response, error) {
 	return func(body io.Reader) (*http.Response, error) {
 		httpClient := httpclient.NewClient(
 			httpclient.WithHTTPTimeout(timeout),
@@ -23,11 +23,13 @@ func Post() func(io.Reader) (*http.Response, error) {
 		headers := http.Header{}
 		headers.Set("Content-Type", "application/json")
 
-		return httpClient.Post(*apiURL, body, headers)
+		resourceURL := fmt.Sprintf("%s/%s", *apiURL, resourceName)
+
+		return httpClient.Post(resourceURL, body, headers)
 	}
 }
 
-func Patch(id int) func(io.Reader) (*http.Response, error) {
+func Patch(resourceName string, id int) func(io.Reader) (*http.Response, error) {
 	return func(body io.Reader) (*http.Response, error) {
 		httpClient := httpclient.NewClient(
 			httpclient.WithHTTPTimeout(timeout),
@@ -35,13 +37,13 @@ func Patch(id int) func(io.Reader) (*http.Response, error) {
 		headers := http.Header{}
 		headers.Set("Content-Type", "application/json")
 
-		resourceURL := fmt.Sprintf("%s/%d", *apiURL, id)
+		resourceURL := fmt.Sprintf("%s/%s/%d", *apiURL, resourceName, id)
 
 		return httpClient.Patch(resourceURL, body, headers)
 	}
 }
 
-func Get(id... int) func() (*http.Response, error) {
+func Get(resourceName string, id ...int) func() (*http.Response, error) {
 	return func() (*http.Response, error) {
 		httpClient := httpclient.NewClient(
 			httpclient.WithHTTPTimeout(timeout),
@@ -49,10 +51,10 @@ func Get(id... int) func() (*http.Response, error) {
 		headers := http.Header{}
 		headers.Set("Accept", "application/json")
 
-		var resourceURL = *apiURL
+		var resourceURL = fmt.Sprintf("%s/%s", *apiURL, resourceName)
 
 		if len(id) == 1 {
-			resourceURL = fmt.Sprintf("%s/%d", *apiURL, id[0])
+			resourceURL = fmt.Sprintf("%s/%d", resourceURL, id[0])
 		}
 
 		return httpClient.Get(resourceURL, headers)

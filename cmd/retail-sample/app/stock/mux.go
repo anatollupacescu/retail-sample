@@ -1,7 +1,11 @@
 package stock
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -23,6 +27,9 @@ type (
 		Name string `json:"name"`
 		Qty  int    `json:"qty"`
 	}
+	collectionResponse struct {
+		Data []entity `json:"data"`
+	}
 )
 
 var internalServerError = "internal server error"
@@ -37,10 +44,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	var response struct {
-		Data []entity `json:"data"`
-	}
-
+	var response collectionResponse
 	response.Data = make([]entity, 0)
 
 	for _, position := range entries {
@@ -57,6 +61,42 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.getAll")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
+}
+
+type getFunc func() (*http.Response, error)
+
+func GetAll(get getFunc) (d []stock.Position, err error) {
+	response, err := get()
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, errors.New("unexpected status code")
+	}
+
+	defer response.Body.Close()
+
+	respBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var pos collectionResponse
+
+	if err = json.Unmarshal(respBody, &pos); err != nil {
+		return nil, err
+	}
+
+	for _, r := range pos.Data {
+		d = append(d, stock.Position{
+			ID:   r.ID,
+			Name: r.Name,
+			Qty:  r.Qty,
+		})
+	}
+
+	return d, nil
 }
 
 func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
@@ -103,6 +143,43 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Get(get getFunc) (pos stock.Position, err error) {
+	response, err := get()
+	if err != nil {
+		return pos, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return pos, errors.New("unexpected status code")
+	}
+
+	defer response.Body.Close()
+
+	respBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return pos, err
+	}
+
+	if err = json.Unmarshal(respBody, &pos); err != nil {
+		return pos, err
+	}
+
+	return pos, nil
+}
+
+type provisionPayload struct {
+	Qty int `json:"qty"`
+}
+
+type provisionResponseData struct {
+	ID  int `json:"id"`
+	Qty int `json:"qty"`
+}
+
+type provisionResponse struct {
+	Data provisionResponseData `json:"data"`
+}
+
 func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -120,9 +197,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var body struct {
-		Qty int `json:"qty"`
-	}
+	var body provisionPayload
 
 	if err := d.Decode(&body); err != nil {
 		a.logger.Log("action", "decode request", "error", err, "method", "stock.provision")
@@ -130,7 +205,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := a.wrapper.provision(itemID, body.Qty)
+	newQty, err := a.wrapper.provision(itemID, body.Qty)
 
 	switch err {
 	case nil:
@@ -143,10 +218,11 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = struct {
-		Data map[int]int `json:"data"`
-	}{
-		Data: data,
+	var response = provisionResponse{
+		Data: provisionResponseData{
+			ID:  itemID,
+			Qty: newQty,
+		},
 	}
 
 	w.WriteHeader(http.StatusCreated)
@@ -157,6 +233,46 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.provision")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 	}
+}
+
+type postFunc func(io.Reader) (*http.Response, error)
+
+func Provision(id, qty int, post postFunc) (newQty int, err error) {
+	payload := provisionPayload{
+		Qty: qty,
+	}
+
+	var data []byte
+
+	if data, err = json.Marshal(payload); err != nil {
+		return 0, err
+	}
+
+	body := bytes.NewReader(data)
+
+	response, err := post(body)
+	if err != nil {
+		return 0, err
+	}
+
+	if response.StatusCode != http.StatusAccepted {
+		return 0, errors.New("unexpected status code")
+	}
+
+	defer response.Body.Close()
+
+	respBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var responseData provisionResponse
+
+	if err = json.Unmarshal(respBody, &responseData); err != nil {
+		return 0, err
+	}
+
+	return responseData.Data.Qty, nil
 }
 
 func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {

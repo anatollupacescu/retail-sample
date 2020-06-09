@@ -1,7 +1,21 @@
-package acceptance
+// +build acceptance
 
-import "testing"
+package acceptance_test
 
-func TestStock(_ *testing.T) {
+func testProvision() (err error) {
+	/*	cl := client.Post()
 
+		if _, err = web.Provision(1, 1, cl); err != nil {
+			return err
+		}*/
+
+	return nil
+}
+
+func testGetStockPos() error {
+	return nil
+}
+
+func testGetAllStockPos() error {
+	return nil
 }

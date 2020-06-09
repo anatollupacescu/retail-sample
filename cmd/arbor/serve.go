@@ -100,6 +100,19 @@ var index = `<!DOCTYPE html>
   d3.json("/data.json", function (error, graph) {
     if (error) throw error;
 
+    svg.append("svg:defs").selectAll("marker")
+    .data(["end"])      // Different link/path types can be defined here
+    .enter().append("svg:marker")    // This section adds in the arrows
+      .attr("id", String)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 21)
+      .attr("refY", 0.5)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("orient", "auto")
+    .append("svg:path")
+      .attr("d", "M0,-5L10,0L0,5");
+      
     var link = svg
       .append("g")
       .attr("class", "links")
@@ -107,6 +120,7 @@ var index = `<!DOCTYPE html>
       .data(graph.links)
       .enter()
       .append("line")
+      .attr("marker-end", "url(#end)")
       .attr("stroke-width", function (d) {
         return Math.sqrt(d.value);
       });

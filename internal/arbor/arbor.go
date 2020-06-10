@@ -78,10 +78,8 @@ func (ts *test) Lines() (buffer []string) {
 	switch ts.Status {
 	case Pass:
 		curr = fmt.Sprintf("\u2BA1[%v] passed\n", ts.name)
-		break
 	case Fail:
 		curr = fmt.Sprintf("\u2BA1[%v] failed: %v\n", ts.name, ts.FailReason)
-		break
 	case Pending:
 		fallthrough
 	default:

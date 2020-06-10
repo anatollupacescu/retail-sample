@@ -53,7 +53,7 @@ func dataFunc(w http.ResponseWriter, r *http.Request) {
 
 func indexFunc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprintf(w, index)
+	fmt.Fprint(w, index)
 }
 
 var index = `<!DOCTYPE html>

@@ -9,14 +9,15 @@ COPY --from=mustache /go/bin/mustache /bin
 
 ADD web /web
 WORKDIR /web
+
 RUN ./gen_static.sh
 RUN yarn build
 
 # linter
 FROM golang:1.14 as tester
 
-ENV VERSION 1.26.0
-ENV CHECKSUM 59b0e49a4578fea574648a2fd5174ed61644c667ea1a1b54b8082fde15ef94fd
+ENV VERSION 1.27.0
+ENV CHECKSUM 8d345e4e88520e21c113d81978e89ad77fc5b13bfdf20e5bca86b83fc4261272
 
 RUN echo "${CHECKSUM}  golangci-lint-${VERSION}-linux-amd64.tar.gz" > CHECKSUM
 
@@ -42,7 +43,8 @@ RUN go test -timeout=600s -v --race ./...
 FROM golang:1.14 as modules
 
 ADD go.mod go.sum /m/
-RUN cd /m && go mod download
+WORKDIR /m
+RUN go mod download
 
 # Intermediate stage: Build the binary
 FROM golang:1.14 as builder
@@ -55,7 +57,7 @@ RUN mkdir -p /retail
 ADD . /retail
 WORKDIR /retail
 
-RUN GOOS=linux GOARCH=amd64 make build
+RUN GOOS=linux GOARCH=amd64 make build/api
 
 # Final stage: Run the binary
 FROM scratch

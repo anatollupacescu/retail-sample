@@ -13,9 +13,9 @@ const (
 )
 
 type test struct {
-	name string
-	deps []*test
-	run  func() error
+	name    string
+	deps    []*test
+	runFunc func() error
 
 	Status     status
 	FailReason string
@@ -25,23 +25,35 @@ type test struct {
 
 func New(name string, f func() error, deps ...*test) *test {
 	return &test{
-		name:   name,
-		run:    f,
-		Status: Pending,
-		deps:   deps,
+		name:    name,
+		runFunc: f,
+		Status:  Pending,
+		deps:    deps,
 	}
 }
 
 func Suite(name string, deps ...*test) *test {
 	return &test{
-		name:   name,
-		run:    func() error { return nil },
-		Status: Pending,
-		deps:   deps,
+		name:    name,
+		runFunc: func() error { return nil },
+		Status:  Pending,
+		deps:    deps,
 	}
 }
 
-func (ts *test) Run() {
+func Run(tt ...*test) (all []*test, success bool) {
+	success = true
+	for _, v := range tt {
+		v.run()
+		if v.Status == Fail {
+			success = false
+		}
+	}
+
+	return tt, success
+}
+
+func (ts *test) run() {
 	for _, dep := range ts.deps {
 		switch dep.Status {
 		case Pass:
@@ -52,7 +64,7 @@ func (ts *test) Run() {
 			fallthrough
 		default:
 			if dep.Status == Pending {
-				dep.Run()
+				dep.run()
 				if dep.Status != Pass {
 					return
 				}
@@ -60,7 +72,7 @@ func (ts *test) Run() {
 		}
 	}
 
-	err := ts.run()
+	err := ts.runFunc()
 
 	ts.Status = Pass
 	ts.Success = true

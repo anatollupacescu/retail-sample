@@ -15,7 +15,7 @@ var (
 	timeout = 100 * time.Millisecond //TODO pass as flag
 )
 
-func Post(resourceName string) func(io.Reader) (*http.Response, error) {
+func Post(resourceName string, id ...int) func(io.Reader) (*http.Response, error) {
 	return func(body io.Reader) (*http.Response, error) {
 		httpClient := httpclient.NewClient(
 			httpclient.WithHTTPTimeout(timeout),
@@ -24,6 +24,10 @@ func Post(resourceName string) func(io.Reader) (*http.Response, error) {
 		headers.Set("Content-Type", "application/json")
 
 		resourceURL := fmt.Sprintf("%s/%s", *apiURL, resourceName)
+
+		if len(id) > 0 {
+			resourceURL = fmt.Sprintf("%s/%d", resourceURL, id[0])
+		}
 
 		return httpClient.Post(resourceURL, body, headers)
 	}

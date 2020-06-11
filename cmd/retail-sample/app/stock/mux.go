@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -26,6 +27,9 @@ type (
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 		Qty  int    `json:"qty"`
+	}
+	singleResponse struct {
+		Data entity `json:"data"`
 	}
 	collectionResponse struct {
 		Data []entity `json:"data"`
@@ -126,9 +130,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = struct {
-		Data entity `json:"data"`
-	}{
+	var response = singleResponse{
 		Data: entity{
 			ID:  itemID,
 			Qty: qty,
@@ -160,11 +162,16 @@ func Get(get getFunc) (pos stock.Position, err error) {
 		return pos, err
 	}
 
-	if err = json.Unmarshal(respBody, &pos); err != nil {
+	var e singleResponse
+	if err = json.Unmarshal(respBody, &e); err != nil {
 		return pos, err
 	}
 
-	return pos, nil
+	return stock.Position{
+		ID:   e.Data.ID,
+		Name: e.Data.Name,
+		Qty:  e.Data.Qty,
+	}, nil
 }
 
 type provisionPayload struct {
@@ -237,7 +244,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 
 type postFunc func(io.Reader) (*http.Response, error)
 
-func Provision(id, qty int, post postFunc) (newQty int, err error) {
+func Provision(qty int, post postFunc) (newQty int, err error) {
 	payload := provisionPayload{
 		Qty: qty,
 	}
@@ -255,8 +262,11 @@ func Provision(id, qty int, post postFunc) (newQty int, err error) {
 		return 0, err
 	}
 
-	if response.StatusCode != http.StatusAccepted {
-		return 0, errors.New("unexpected status code")
+	switch response.StatusCode {
+	case http.StatusCreated, http.StatusAccepted:
+		break
+	default:
+		return 0, fmt.Errorf("unexpected status code: %v", response.Status)
 	}
 
 	defer response.Body.Close()

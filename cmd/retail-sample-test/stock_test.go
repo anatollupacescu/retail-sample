@@ -73,6 +73,10 @@ func testGetStockPos() error {
 		return fmt.Errorf("expected qty 0, got %v", pos.Qty)
 	}
 
+	if pos.Name != name {
+		return fmt.Errorf("expected name '%s', got '%s'", name, pos.Name)
+	}
+
 	return nil
 }
 

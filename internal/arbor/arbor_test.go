@@ -13,12 +13,12 @@ func TestSingle(t *testing.T) {
 	t.Run("given a single test", func(t *testing.T) {
 		var called int
 
-		add := arbor.New("test", func() error {
+		test := arbor.New("test", func() error {
 			called++
 			return nil
 		})
 
-		add.run()
+		arbor.Run(test)
 
 		t.Run("is called once", func(t *testing.T) {
 			assert.Equal(t, 1, called)
@@ -34,17 +34,17 @@ func TestDep(t *testing.T) {
 			return errors.New("bad result")
 		})
 
-		addTest := arbor.New("main", func() error {
+		test := arbor.New("main", func() error {
 			called = true
 			return nil
 		}, dep)
 
-		addTest.run()
+		arbor.Run(test)
 
 		t.Run("test is not runFunc when dep fails", func(t *testing.T) {
 			assert.False(t, called)
 			assert.Equal(t, "bad result", dep.FailReason)
-			assert.Equal(t, arbor.Pending, addTest.Status)
+			assert.Equal(t, arbor.Pending, test.Status)
 		})
 	})
 }
@@ -58,12 +58,12 @@ func TestOrder(t *testing.T) {
 			return nil
 		})
 
-		addTest := arbor.New("can add two numbers", func() error {
+		test := arbor.New("main", func() error {
 			calls += "main"
 			return nil
 		}, dep)
 
-		addTest.run()
+		arbor.Run(test)
 
 		t.Run("dep is ran before linking test", func(t *testing.T) {
 			assert.Equal(t, "depmain", calls)
@@ -92,7 +92,7 @@ func TestDiamond(t *testing.T) {
 
 		diamond := arbor.Suite("diamond", first, second)
 
-		diamond.run()
+		arbor.Run(diamond)
 
 		t.Run("it is ran exactly once", func(t *testing.T) {
 			assert.Equal(t, 111, calls)

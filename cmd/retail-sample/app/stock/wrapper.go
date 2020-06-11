@@ -2,6 +2,7 @@ package stock
 
 import (
 	types "github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 )
 
@@ -9,11 +10,25 @@ type wrapper struct {
 	types.Wrapper
 }
 
-func (w wrapper) quantity(id int) (qty int, err error) {
-	return qty, w.Exec("get stock quantity", func(provider types.PersistenceProvider) error {
+func (w wrapper) quantity(id int) (sp stock.Position, err error) {
+	return sp, w.Exec("get stock quantity", func(provider types.PersistenceProvider) error {
 		s := provider.Stock()
 
+		var qty int
 		qty, err = s.Quantity(id)
+
+		var item inventory.Item
+		item, err = provider.Inventory().Get(id)
+
+		if err != nil {
+			return err
+		}
+
+		sp = stock.Position{
+			ID:   id,
+			Name: item.Name,
+			Qty:  qty,
+		}
 
 		return err
 	})

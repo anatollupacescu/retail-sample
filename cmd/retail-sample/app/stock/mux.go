@@ -117,7 +117,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	qty, err := a.wrapper.quantity(itemID)
+	pos, err := a.wrapper.quantity(itemID)
 
 	switch err {
 	case nil:
@@ -132,8 +132,9 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 
 	var response = singleResponse{
 		Data: entity{
-			ID:  itemID,
-			Qty: qty,
+			ID:   pos.ID,
+			Qty:  pos.Qty,
+			Name: pos.Name,
 		},
 	}
 

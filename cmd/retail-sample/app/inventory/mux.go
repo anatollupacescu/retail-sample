@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -114,7 +115,7 @@ func Update(enabled bool, patch func(io.Reader) (*http.Response, error)) (item i
 	}
 
 	if response.StatusCode != http.StatusAccepted {
-		return item, errors.New("unexpected status code")
+		return item, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
 	defer response.Body.Close()
@@ -210,7 +211,7 @@ func Create(name string, post func(io.Reader) (*http.Response, error)) (item inv
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		return item, errors.New("unexpected status code")
+		return item, fmt.Errorf("unexpected status code: %v", response.StatusCode)
 	}
 
 	defer response.Body.Close()

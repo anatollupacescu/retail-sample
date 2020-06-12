@@ -1,5 +1,5 @@
-BIN_DIR := $(shell go env GOPATH)/bin
-MUSTACHE := $(BIN_DIR)/mustache
+BIN ?= $(shell go env GOPATH)/bin
+MUSTACHE := $(BIN)/mustache
 NODE_MODULES := node_modules/
 
 $(MUSTACHE):

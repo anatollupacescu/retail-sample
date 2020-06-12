@@ -10,8 +10,7 @@ COPY --from=mustache /go/bin/mustache /bin
 ADD web /web
 WORKDIR /web
 
-RUN ./gen_static.sh
-RUN yarn build
+RUN make clean build BIN=/bin
 
 # linter
 FROM golang:1.14 as tester

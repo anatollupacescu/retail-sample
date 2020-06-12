@@ -4,16 +4,17 @@ package acceptance_test
 
 import (
 	"errors"
+	"fmt"
 
-	faker "github.com/bxcodec/faker/v3"
+	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 
-	client "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
+	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	web "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 func testCreateWithEmptyName() (err error) {
-	cl := client.Post("inventory")
+	cl := http.Post("inventory")
 
 	if _, err = web.Create("", cl); err == nil {
 		return errors.New("expected err")
@@ -23,9 +24,9 @@ func testCreateWithEmptyName() (err error) {
 }
 
 func testCreate() (err error) {
-	name := faker.Word()
+	name := random.Word()
 
-	cl := client.Post("inventory")
+	cl := http.Post("inventory")
 
 	var item domain.Item
 
@@ -43,9 +44,9 @@ func testCreate() (err error) {
 }
 
 func testDuplicate() error {
-	name := faker.Word()
+	name := random.Word()
 
-	cl := client.Post("inventory")
+	cl := http.Post("inventory")
 
 	_, _ = web.Create(name, cl)
 
@@ -57,13 +58,17 @@ func testDuplicate() error {
 }
 
 func testDisable() (err error) {
-	name := faker.Word()
+	name := random.Word()
 
-	cl := client.Post("inventory")
+	cl := http.Post("inventory")
 
-	i, _ := web.Create(name, cl)
+	i, err := web.Create(name, cl)
 
-	cl = client.Patch("inventory", i.ID)
+	if err != nil {
+		return fmt.Errorf("could not create prereq inv item: %v", err)
+	}
+
+	cl = http.Patch("inventory", i.ID)
 
 	var updatedItem domain.Item
 
@@ -79,7 +84,7 @@ func testDisable() (err error) {
 }
 
 func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
-	cl := client.Get("inventory")
+	cl := http.Get("inventory")
 
 	all, err := web.GetAll(cl)
 
@@ -95,13 +100,13 @@ func testGetAll() (err error) { //TODO create an item an assert it's present in 
 }
 
 func testGetOne() (err error) {
-	name := faker.Word()
+	name := random.Word()
 
-	cl := client.Post("inventory")
+	cl := http.Post("inventory")
 
 	i, _ := web.Create(name, cl)
 
-	gcl := client.Get("inventory", i.ID)
+	gcl := http.Get("inventory", i.ID)
 
 	item, err := web.Get(gcl)
 

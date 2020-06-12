@@ -22,11 +22,11 @@ func TestAcceptance(t *testing.T) {
 	noDuplicate := arbor.New("no duplicate", testDuplicate, createOk)
 	disable := arbor.New("disable", testDisable, createOk)
 
-	getOneSP := arbor.New("get single stock position", testGetStockPos, createOk)
-	provision := arbor.New("provision stock", testProvision, getOneSP)
-	getAllSP := arbor.New("get all stock positions", testGetAllStockPos, createOk)
+	provision := arbor.New("provision stock", testProvision, createOk)
+	getOneSP := arbor.New("get single stock position", testGetStockPos, provision)
+	getAllSP := arbor.New("get all stock positions", testGetAllStockPos, provision)
 
-	all, success := arbor.Run(createEmpty, getOne, getAll, noDuplicate, disable, provision, getAllSP)
+	all, success := arbor.Run(createEmpty, getOne, getAll, noDuplicate, disable, getOneSP, getAllSP)
 
 	t.Run("succeeds", func(t *testing.T) {
 		assert.Equal(t, true, success)

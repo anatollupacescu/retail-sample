@@ -90,7 +90,7 @@ func TestDiamond(t *testing.T) {
 			return nil
 		}, dep)
 
-		diamond := arbor.Suite("diamond", first, second)
+		diamond := arbor.New("diamond", noOp, first, second)
 
 		arbor.Run(diamond)
 

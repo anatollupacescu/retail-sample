@@ -1,5 +1,3 @@
-// +build acceptance
-
 package acceptance_test
 
 import (
@@ -8,6 +6,7 @@ import (
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
+
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
@@ -21,7 +20,7 @@ func testProvision() (err error) {
 
 	item, _ := inventory.Create(name, req)
 
-	req = http.Post("stock", item.ID)
+	req = http.Add("stock", item.ID)
 
 	var (
 		reqQty = 9
@@ -35,8 +34,6 @@ func testProvision() (err error) {
 	if newQty != reqQty {
 		return errors.New("bad quantity")
 	}
-
-	// can fetch the provisioned item
 
 	gcl := http.Get("stock", item.ID)
 
@@ -62,7 +59,7 @@ func testGetStockPos() error {
 
 	//provision
 
-	req := http.Post("stock", item.ID)
+	req := http.Add("stock", item.ID)
 
 	var reqQty = 9
 
@@ -98,13 +95,13 @@ func testGetAllStockPos() error {
 
 	//provision
 
-	req := http.Post("stock", item.ID)
+	req := http.Add("stock", item.ID)
 
 	var reqQty = 9
 
 	_, _ = stock.Provision(reqQty, req)
 
-	gcl := http.Get("stock")
+	gcl := http.List("stock")
 
 	all, err := stock.GetAll(gcl)
 

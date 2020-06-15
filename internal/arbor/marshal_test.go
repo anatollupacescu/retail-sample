@@ -8,12 +8,6 @@ import (
 	arbor "github.com/anatollupacescu/retail-sample/internal/arbor"
 )
 
-func TestMarshalEmptySuite(t *testing.T) {
-	tst := arbor.Suite("new")
-	str := arbor.Marshal(tst)
-	assert.Equal(t, `{"nodes":[{"id":"new","group":0,"status":"pending"}],"links":[]}`, str)
-}
-
 func noOp() error { return nil }
 
 func TestMarshalOneChild(t *testing.T) {

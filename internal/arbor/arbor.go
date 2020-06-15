@@ -32,12 +32,12 @@ func New(name string, f func() error, deps ...*test) *test {
 	}
 }
 
-func Suite(name string, deps ...*test) *test {
+func Alias(name string, aliasFor *test) *test {
 	return &test{
 		name:    name,
 		runFunc: func() error { return nil },
 		Status:  Pending,
-		deps:    deps,
+		deps:    []*test{aliasFor},
 	}
 }
 

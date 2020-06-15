@@ -1,14 +1,11 @@
-// +build acceptance
-
 package acceptance_test
 
 import (
 	"errors"
 	"fmt"
 
-	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
-
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
+	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	web "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
@@ -84,7 +81,7 @@ func testDisable() (err error) {
 }
 
 func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
-	cl := http.Get("inventory")
+	cl := http.List("inventory")
 
 	all, err := web.GetAll(cl)
 

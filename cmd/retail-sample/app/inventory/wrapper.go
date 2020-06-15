@@ -1,16 +1,16 @@
 package inventory
 
 import (
-	types "github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
 type wrapper struct {
-	types.Wrapper
+	middleware.Wrapper
 }
 
 func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err error) {
-	return item, ia.Exec("update item status", func(provider types.PersistenceProvider) error {
+	return item, ia.Exec("update item status", func(provider middleware.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		item, err = i.UpdateStatus(id, enabled)
@@ -20,7 +20,7 @@ func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err erro
 }
 
 func (ia wrapper) create(name string) (item inventory.Item, err error) {
-	return item, ia.Exec("add to inventory", func(provider types.PersistenceProvider) error {
+	return item, ia.Exec("add to inventory", func(provider middleware.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		var id int
@@ -38,7 +38,7 @@ func (ia wrapper) create(name string) (item inventory.Item, err error) {
 }
 
 func (ia wrapper) getAll() (items []inventory.Item, err error) {
-	return items, ia.Exec("list inventory items", func(provider types.PersistenceProvider) error {
+	return items, ia.Exec("list inventory items", func(provider middleware.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		items, err = i.List()
@@ -48,7 +48,7 @@ func (ia wrapper) getAll() (items []inventory.Item, err error) {
 }
 
 func (ia wrapper) getOne(id int) (item inventory.Item, err error) {
-	return item, ia.Exec("get inventory item", func(provider types.PersistenceProvider) error {
+	return item, ia.Exec("get inventory item", func(provider middleware.PersistenceProvider) error {
 		i := provider.Inventory()
 
 		item, err = i.Get(id)

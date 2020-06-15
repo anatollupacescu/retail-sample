@@ -1,16 +1,16 @@
 package recipe
 
 import (
-	types "github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 )
 
 type wrapper struct {
-	types.Wrapper
+	middleware.Wrapper
 }
 
 func (w wrapper) setStatus(id int, enabled bool) (re recipe.Recipe, err error) {
-	return re, w.Exec("disable recipe", func(provider types.PersistenceProvider) error {
+	return re, w.Exec("disable recipe", func(provider middleware.PersistenceProvider) error {
 		r := provider.RecipeBook()
 
 		re, err = r.SetStatus(id, enabled)
@@ -20,7 +20,7 @@ func (w wrapper) setStatus(id int, enabled bool) (re recipe.Recipe, err error) {
 }
 
 func (w wrapper) create(recipeName recipe.Name, recipeIngredients []recipe.Ingredient) (re recipe.Recipe, err error) {
-	return re, w.Exec("add recipe", func(provider types.PersistenceProvider) error {
+	return re, w.Exec("add recipe", func(provider middleware.PersistenceProvider) error {
 		var recipeID recipe.ID
 
 		r := provider.RecipeBook()
@@ -38,7 +38,7 @@ func (w wrapper) create(recipeName recipe.Name, recipeIngredients []recipe.Ingre
 }
 
 func (w wrapper) get(recipeID recipe.ID) (out recipe.Recipe, err error) {
-	return out, w.Exec("get recipe", func(provider types.PersistenceProvider) error {
+	return out, w.Exec("get recipe", func(provider middleware.PersistenceProvider) error {
 		r := provider.RecipeBook()
 
 		out, err = r.Get(recipeID)
@@ -48,7 +48,7 @@ func (w wrapper) get(recipeID recipe.ID) (out recipe.Recipe, err error) {
 }
 
 func (w wrapper) getAll() (recipes []recipe.Recipe, err error) {
-	return recipes, w.Exec("get recipe", func(provider types.PersistenceProvider) error {
+	return recipes, w.Exec("get recipe", func(provider middleware.PersistenceProvider) error {
 		r := provider.RecipeBook()
 
 		recipes, err = r.List()

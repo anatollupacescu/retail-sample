@@ -13,7 +13,7 @@ format:
 	@goimports -w -local $(PROJECT) cmd/ internal/
 
 test:
-	@go test ./...
+	@go test -count=1 ./...
 
 # build
 

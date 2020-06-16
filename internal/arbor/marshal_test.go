@@ -23,6 +23,5 @@ func TestMarshalDiamond(t *testing.T) {
 	right := arbor.New("right", noOp, tail)
 	head := arbor.New("head", noOp, left, right)
 	str := arbor.Marshal(head)
-	t.Logf("got str:\n %v\n", str)
 	assert.Equal(t, `{"nodes":[{"id":"tail","group":0,"status":"pending"},{"id":"left","group":0,"status":"pending"},{"id":"right","group":0,"status":"pending"},{"id":"head","group":0,"status":"pending"}],"links":[{"source":"left","target":"tail","value":3},{"source":"right","target":"tail","value":3},{"source":"head","target":"left","value":3},{"source":"head","target":"right","value":3}]}`, str)
 }

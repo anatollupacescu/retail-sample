@@ -15,7 +15,7 @@ var (
 	timeout = 100 * time.Millisecond //TODO pass as flag
 )
 
-func Add(resourceName string, id int) func(io.Reader) (*http.Response, error) {
+func PostToID(resourceName string, id int) func(io.Reader) (*http.Response, error) {
 	return func(body io.Reader) (*http.Response, error) {
 		httpClient, headers := httpClient()
 		resourceURL := fmt.Sprintf("%s/%s/%d", *apiURL, resourceName, id)

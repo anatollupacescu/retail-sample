@@ -2,7 +2,6 @@ package acceptance_test
 
 import (
 	"errors"
-	"fmt"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
@@ -10,29 +9,32 @@ import (
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-func testCreateWithEmptyName() (err error) {
+func createRandomItem() int {
+	name := random.Name()
+	i, _ := createItem(name)
+
+	return i.ID
+}
+
+func createItem(name string) (domain.Item, error) {
 	cl := http.Post("inventory")
 
-	if _, err = web.Create("", cl); err == nil {
-		return errors.New("expected err")
-	}
-
-	return nil
+	return web.Create(name, cl)
 }
 
 func testCreate() (err error) {
-	name := random.Word()
+	name := random.Name()
 
-	cl := http.Post("inventory")
+	item, err := createItem(name)
 
-	var item domain.Item
-
-	if item, err = web.Create(name, cl); err != nil {
+	if err != nil {
 		return err
 	}
+
 	if item.Name != name {
 		return errors.New("bad name")
 	}
+
 	if item.ID == 0 {
 		return errors.New("bad id")
 	}
@@ -40,41 +42,43 @@ func testCreate() (err error) {
 	return nil
 }
 
-func testDuplicate() error {
-	name := random.Word()
+func testCreateWithEmptyName() error {
+	_, err := createItem("")
 
-	cl := http.Post("inventory")
-
-	_, _ = web.Create(name, cl)
-
-	if _, err := web.Create(name, cl); err == nil {
-		return errors.New("expected error")
+	if err == nil {
+		return errors.New("should return nil for empty name")
 	}
 
 	return nil
 }
 
-func testDisable() (err error) {
-	name := random.Word()
+func testDuplicate() error {
+	name := random.Name()
 
-	cl := http.Post("inventory")
+	_, _ = createItem(name)
 
-	i, err := web.Create(name, cl)
+	_, err := createItem(name)
 
-	if err != nil {
-		return fmt.Errorf("could not create prereq inv item: %v", err)
+	if err == nil {
+		return errors.New("should reject duplicate name")
 	}
 
-	cl = http.Patch("inventory", i.ID)
+	return nil
+}
 
-	var updatedItem domain.Item
+func testDisable() error {
+	itemID := createRandomItem()
 
-	if updatedItem, err = web.Update(false, cl); err != nil {
+	cl := http.Patch("inventory", itemID)
+
+	updatedItem, err := web.Update(false, cl)
+
+	if err != nil {
 		return err
 	}
 
 	if updatedItem.Enabled != false {
-		return errors.New("expected resource to be updated")
+		return errors.New("should disable item")
 	}
 
 	return nil
@@ -90,18 +94,16 @@ func testGetAll() (err error) { //TODO create an item an assert it's present in 
 	}
 
 	if len(all) < 1 {
-		return errors.New("expected more items")
+		return errors.New("should return multiple items")
 	}
 
 	return nil
 }
 
 func testGetOne() (err error) {
-	name := random.Word()
+	name := random.Name()
 
-	cl := http.Post("inventory")
-
-	i, _ := web.Create(name, cl)
+	i, _ := createItem(name)
 
 	gcl := http.Get("inventory", i.ID)
 
@@ -112,11 +114,11 @@ func testGetOne() (err error) {
 	}
 
 	if item.Name != name {
-		return errors.New("bad name")
+		return errors.New("should have the same name")
 	}
 
 	if item.ID == 0 {
-		return errors.New("bad ID")
+		return errors.New("should not have zero value for ID")
 	}
 
 	return nil

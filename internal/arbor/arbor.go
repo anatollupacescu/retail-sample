@@ -45,7 +45,7 @@ func Run(tt ...*test) (all []*test, success bool) {
 	success = true
 	for _, v := range tt {
 		v.run()
-		if v.Status == Fail {
+		if v.Status != Pass {
 			success = false
 		}
 	}

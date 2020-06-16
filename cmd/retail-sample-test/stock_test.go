@@ -5,71 +5,53 @@ import (
 	"fmt"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
-	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
 )
 
+func provisionStock(id, qty int) (int, error) {
+	req := http.PostToID("stock", id)
+
+	return stock.Provision(qty, req)
+}
+
 func testProvision() (err error) {
-	name := random.Word()
-
-	req := http.Post("inventory")
-
-	item, _ := inventory.Create(name, req)
-
-	req = http.Add("stock", item.ID)
+	itemID := createRandomItem()
 
 	var (
 		reqQty = 9
 		newQty int
 	)
 
-	if newQty, err = stock.Provision(reqQty, req); err != nil {
-		return err
-	}
-
-	if newQty != reqQty {
-		return errors.New("bad quantity")
-	}
-
-	gcl := http.Get("stock", item.ID)
-
-	pos, err := stock.Get(gcl)
+	newQty, err = provisionStock(itemID, reqQty)
 
 	if err != nil {
 		return err
 	}
 
-	if pos.Qty != reqQty {
-		return fmt.Errorf("expected qty %d, got %d", reqQty, pos.Qty)
+	if newQty != reqQty {
+		return errors.New("should have the provisioned quantity")
 	}
 
 	return nil
 }
 
+func getStockPos(id int) (domain.Position, error) {
+	gcl := http.Get("stock", id)
+
+	return stock.Get(gcl)
+}
+
 func testGetStockPos() error {
-	name := random.Word()
-
-	cl := http.Post("inventory")
-
-	item, _ := inventory.Create(name, cl)
-
-	//provision
-
-	req := http.Add("stock", item.ID)
+	itemID := createRandomItem()
 
 	var reqQty = 9
 
-	_, _ = stock.Provision(reqQty, req)
+	_, _ = provisionStock(itemID, reqQty)
 
-	// get
-
-	gcl := http.Get("stock", item.ID)
-
-	pos, err := stock.Get(gcl)
+	pos, err := getStockPos(itemID)
 
 	if err != nil {
 		return err
@@ -79,27 +61,15 @@ func testGetStockPos() error {
 		return fmt.Errorf("expected qty 0, got %v", pos.Qty)
 	}
 
-	if pos.Name != name {
-		return fmt.Errorf("expected name '%s', got '%s'", name, pos.Name)
-	}
-
 	return nil
 }
 
 func testGetAllStockPos() error {
-	name := random.Word()
-
-	cl := http.Post("inventory")
-
-	item, _ := inventory.Create(name, cl)
-
-	//provision
-
-	req := http.Add("stock", item.ID)
+	itemID := createRandomItem()
 
 	var reqQty = 9
 
-	_, _ = stock.Provision(reqQty, req)
+	_, _ = provisionStock(itemID, reqQty)
 
 	gcl := http.List("stock")
 
@@ -112,7 +82,7 @@ func testGetAllStockPos() error {
 	var found domain.Position
 
 	for _, v := range all {
-		if v.ID == item.ID {
+		if v.ID == itemID {
 			found = v
 		}
 	}

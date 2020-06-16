@@ -1,7 +1,11 @@
 package order
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -25,9 +29,18 @@ type (
 		RecipeID int `json:"recipeID"`
 		Qty      int `json:"qty"`
 	}
+
+	singleResponse struct {
+		Data entity `json:"data"`
+	}
 )
 
 var internalServerError = "internal server error"
+
+type createPayload struct {
+	ID  int `json:"id"`
+	Qty int `json:"qty"`
+}
 
 func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -35,19 +48,16 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var requestBody struct {
-		ID  int `json:"id"`
-		Qty int `json:"qty"`
-	}
+	var payload createPayload
 
-	if err := d.Decode(&requestBody); err != nil {
+	if err := d.Decode(&payload); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
-	recipeID := requestBody.ID
-	orderQty := requestBody.Qty
+	recipeID := payload.ID
+	orderQty := payload.Qty
 
 	entryID, err := a.wrapper.create(recipeID, orderQty)
 
@@ -67,9 +77,7 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = struct {
-		Data entity `json:"data"`
-	}{
+	var response = singleResponse{
 		Data: entity{
 			ID:       int(entryID),
 			RecipeID: recipeID,
@@ -85,6 +93,53 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
 		http.Error(w, internalServerError, http.StatusBadRequest)
 	}
+}
+
+func Create(recipeID, qty int, post func(io.Reader) (*http.Response, error)) (o order.Order, err error) {
+	payload := createPayload{
+		ID:  recipeID,
+		Qty: qty,
+	}
+
+	var data []byte
+
+	data, err = json.Marshal(payload)
+	if err != nil {
+		return o, err
+	}
+
+	body := bytes.NewReader(data)
+
+	response, err := post(body)
+
+	if err != nil {
+		return o, err
+	}
+
+	if response.StatusCode != http.StatusCreated {
+		return o, fmt.Errorf("unexpected status code: %v", response.StatusCode)
+	}
+
+	defer response.Body.Close()
+
+	respBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return o, err
+	}
+
+	var responseData singleResponse
+
+	if err = json.Unmarshal(respBody, &responseData); err != nil {
+		return o, err
+	}
+
+	return order.Order{
+		ID: order.ID(responseData.Data.ID),
+		OrderEntry: order.OrderEntry{
+			Qty:      responseData.Data.Qty,
+			RecipeID: responseData.Data.RecipeID,
+		},
+	}, err
 }
 
 func (a webApp) get(w http.ResponseWriter, r *http.Request) {

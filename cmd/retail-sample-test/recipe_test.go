@@ -3,13 +3,13 @@ package acceptance_test
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
 )
 
@@ -20,21 +20,23 @@ func createRecipe(name string, items map[int]int) (domain.Recipe, error) {
 }
 
 func testCreateRecipe() error {
-	name := random.Word()
+	id := createRandomItem()
 
-	id := createInvItem()
+	qty := rand.Intn(100) + 1
 
 	ingredients := map[int]int{
-		id: 7,
+		id: qty,
 	}
 
-	r, err := createRecipe(name, ingredients)
+	recipeName := random.Name()
+
+	r, err := createRecipe(recipeName, ingredients)
 
 	if err != nil {
 		return fmt.Errorf("could not create recipe: %v", err)
 	}
 
-	if r.Name != domain.Name(name) {
+	if r.Name != domain.Name(recipeName) {
 		return fmt.Errorf("bad name")
 	}
 
@@ -42,10 +44,12 @@ func testCreateRecipe() error {
 }
 
 func testCreateRecipeNoName() error {
-	id := createInvItem()
+	id := createRandomItem()
+
+	qty := rand.Intn(100) + 1
 
 	ingredients := map[int]int{
-		id: 7,
+		id: qty,
 	}
 
 	_, err := createRecipe("", ingredients)
@@ -58,7 +62,7 @@ func testCreateRecipeNoName() error {
 }
 
 func testCreateRecipeNoItems() error {
-	name := random.Word()
+	name := random.Name()
 
 	_, err := createRecipe(name, nil)
 
@@ -69,28 +73,18 @@ func testCreateRecipeNoItems() error {
 	return nil
 }
 
-func createInvItem() int {
-	name := random.Word()
-
-	cl := http.Post("inventory")
-
-	i, _ := inventory.Create(name, cl)
-
-	return i.ID
-}
-
 func testGetRecipe() error {
-	cl := http.Post("recipe")
+	id := createRandomItem()
 
-	id := createInvItem()
+	qty := rand.Intn(100) + 1
 
 	ingredients := map[int]int{
-		id: 4,
+		id: qty,
 	}
 
-	name := random.Word()
+	recipeName := random.Name()
 
-	r, err := recipe.Create(name, ingredients, cl)
+	r, err := createRecipe(recipeName, ingredients)
 
 	if err != nil {
 		return err
@@ -108,21 +102,21 @@ func testGetRecipe() error {
 		return errors.New("bad ID")
 	}
 
+	//TODO check ingredients
+
 	return nil
 }
 
 func testGetAllRecipe() error {
-	cl := http.Post("recipe")
-
-	id := createInvItem()
+	id := createRandomItem()
 
 	ingredients := map[int]int{
 		id: 4,
 	}
 
-	name := random.Word()
+	name := random.Name()
 
-	_, _ = recipe.Create(name, ingredients, cl)
+	_, _ = createRecipe(name, ingredients)
 
 	gcl := http.List("recipe")
 
@@ -140,19 +134,17 @@ func testGetAllRecipe() error {
 }
 
 func testDisableRecipe() error {
-	cl := http.Post("recipe")
-
-	id := createInvItem()
+	id := createRandomItem()
 
 	ingredients := map[int]int{
 		id: 41,
 	}
 
-	name := random.Word()
+	name := random.Name()
 
-	r, _ := recipe.Create(name, ingredients, cl)
+	r, _ := createRecipe(name, ingredients)
 
-	cl = http.Patch("recipe", int(r.ID))
+	cl := http.Patch("recipe", int(r.ID))
 
 	updated, err := recipe.Update(false, cl)
 

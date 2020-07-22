@@ -2,6 +2,9 @@ package acceptance_test
 
 import (
 	"errors"
+	"fmt"
+
+	"github.com/anatollupacescu/arbortest/runner"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
@@ -9,100 +12,103 @@ import (
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
 )
 
-func createRandomItem() int {
-	name := random.Name()
-	i, _ := createItem(name)
-
-	return i.ID
-}
-
 func createItem(name string) (domain.Item, error) {
 	cl := http.Post("inventory")
 
 	return web.Create(name, cl)
 }
 
-func testCreate() (err error) {
+// group:inventory
+func testCreate(t *runner.T) {
 	name := random.Name()
 
 	item, err := createItem(name)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if item.Name != name {
-		return errors.New("bad name")
+		t.Error(errors.New("bad name"))
+		return
 	}
 
 	if item.ID == 0 {
-		return errors.New("bad id")
+		t.Error(errors.New("bad id"))
 	}
-
-	return nil
 }
 
-func testCreateWithEmptyName() error {
+// group:inventory
+func testCreateWithEmptyName(t *runner.T) {
 	_, err := createItem("")
 
 	if err == nil {
-		return errors.New("should return nil for empty name")
+		t.Error(errors.New("should return error for empty name"))
 	}
-
-	return nil
 }
 
-func testDuplicate() error {
+// group:inventory
+func testDuplicate(t *runner.T) {
 	name := random.Name()
-
 	_, _ = createItem(name)
-
 	_, err := createItem(name)
 
 	if err == nil {
-		return errors.New("should reject duplicate name")
+		t.Error(errors.New("should reject duplicate name"))
 	}
-
-	return nil
 }
 
-func testDisable() error {
-	itemID := createRandomItem()
+// group:inventory
+func testDisable(t *runner.T) {
+	name := random.Name()
+	item, _ := createItem(name)
 
-	cl := http.Patch("inventory", itemID)
+	cl := http.Patch("inventory", int(item.ID))
 
 	updatedItem, err := web.Update(false, cl)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if updatedItem.Enabled != false {
-		return errors.New("should disable item")
+		t.Error(errors.New("should disable item"))
 	}
-
-	return nil
 }
 
-func testGetAll() (err error) { //TODO create an item an assert it's present in the 'all'
+// group:inventory
+func testGetAll(t *runner.T) { //TODO create an item and assert it's present in the 'all'
+	name := random.Name()
+	item, _ := createItem(name)
+
 	cl := http.List("inventory")
 
 	all, err := web.GetAll(cl)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if len(all) < 1 {
-		return errors.New("should return multiple items")
+		t.Error(errors.New("should return multiple items"))
+		return
 	}
 
-	return nil
+	for _, i := range all {
+		if i.ID == item.ID {
+			return
+		}
+	}
+
+	t.Error(fmt.Errorf("created item with ID %q wasn't found in response", item.ID))
 }
 
-func testGetOne() (err error) {
+// group:inventory
+func testGetOne(t *runner.T) {
 	name := random.Name()
-
 	i, _ := createItem(name)
 
 	gcl := http.Get("inventory", i.ID)
@@ -110,16 +116,16 @@ func testGetOne() (err error) {
 	item, err := web.Get(gcl)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if item.Name != name {
-		return errors.New("should have the same name")
+		t.Error(errors.New("should have the same name"))
+		return
 	}
 
 	if item.ID == 0 {
-		return errors.New("should not have zero value for ID")
+		t.Error(errors.New("should not have zero value for ID"))
 	}
-
-	return nil
 }

@@ -3,6 +3,8 @@ package acceptance_test
 import (
 	"errors"
 
+	"github.com/anatollupacescu/arbortest/runner"
+
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
@@ -17,8 +19,12 @@ func createOrder(recipeID, qty int) (o domain.Order, err error) {
 	return order.Create(recipeID, qty, cl)
 }
 
-func testCreateOrderOK() error {
-	id := createRandomItem()
+// group:order after:recipe
+func testCreateOrderOK(t *runner.T) {
+	createdName := random.Name()
+	item, _ := createItem(createdName)
+
+	id := item.ID
 
 	_, _ = provisionStock(id, 30)
 
@@ -33,18 +39,21 @@ func testCreateOrderOK() error {
 	o, err := createOrder(int(r.ID), 5)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if o.ID == 0 {
-		return errors.New("should have a non zero value ID")
+		t.Error(errors.New("should have a non zero value ID"))
 	}
-
-	return nil
 }
 
-func testCreateOrderWhenNotEnoughStock() error {
-	id := createRandomItem()
+// group:order
+func testCreateOrderWhenNotEnoughStock(t *runner.T) {
+	createdName := random.Name()
+	item, _ := createItem(createdName)
+
+	id := item.ID
 
 	ingredients := map[int]int{
 		id: 1,
@@ -57,8 +66,6 @@ func testCreateOrderWhenNotEnoughStock() error {
 	_, err := createOrder(int(r.ID), 1)
 
 	if err == nil {
-		return errors.New("should have rejected")
+		t.Error(errors.New("should have errored"))
 	}
-
-	return nil
 }

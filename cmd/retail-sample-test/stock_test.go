@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/anatollupacescu/arbortest/runner"
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
+	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
 
@@ -17,55 +19,65 @@ func provisionStock(id, qty int) (int, error) {
 	return stock.Provision(qty, req)
 }
 
-func testProvision() (err error) {
-	itemID := createRandomItem()
+func getStockPosition(id int) (domain.Position, error) {
+	gcl := http.Get("stock", id)
+
+	return stock.Get(gcl)
+}
+
+// group:stock after:inventory
+func testProvision(t *runner.T) {
+	createdName := random.Name()
+	item, _ := createItem(createdName)
+
+	itemID := item.ID
 
 	var (
 		reqQty = 9
 		newQty int
 	)
 
-	newQty, err = provisionStock(itemID, reqQty)
+	newQty, err := provisionStock(itemID, reqQty)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if newQty != reqQty {
-		return errors.New("should have the provisioned quantity")
+		t.Error(errors.New("should have the provisioned quantity"))
 	}
-
-	return nil
 }
 
-func getStockPos(id int) (domain.Position, error) {
-	gcl := http.Get("stock", id)
+// group:stock
+func testGetStockPos(t *runner.T) {
+	createdName := random.Name()
+	item, _ := createItem(createdName)
 
-	return stock.Get(gcl)
-}
-
-func testGetStockPos() error {
-	itemID := createRandomItem()
+	itemID := item.ID
 
 	var reqQty = 9
 
 	_, _ = provisionStock(itemID, reqQty)
 
-	pos, err := getStockPos(itemID)
+	pos, err := getStockPosition(itemID)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	if pos.Qty != reqQty {
-		return fmt.Errorf("expected qty 0, got %v", pos.Qty)
+		t.Error(fmt.Errorf("expected qty 0, got %v", pos.Qty))
 	}
-
-	return nil
 }
 
-func testGetAllStockPos() error {
-	itemID := createRandomItem()
+// group:stock
+func testGetAllStockPos(t *runner.T) {
+	createdName := random.Name()
+	item, _ := createItem(createdName)
+
+	itemID := item.ID
 
 	var reqQty = 9
 
@@ -76,7 +88,8 @@ func testGetAllStockPos() error {
 	all, err := stock.GetAll(gcl)
 
 	if err != nil {
-		return err
+		t.Error(err)
+		return
 	}
 
 	var found domain.Position
@@ -88,12 +101,11 @@ func testGetAllStockPos() error {
 	}
 
 	if found.ID == 0 {
-		return errors.New("item not found in stock")
+		t.Error(errors.New("item not found in stock"))
+		return
 	}
 
 	if found.Qty != reqQty {
-		return fmt.Errorf("expected quantity %d, got %d", reqQty, found.Qty)
+		t.Error(fmt.Errorf("expected quantity %d, got %d", reqQty, found.Qty))
 	}
-
-	return nil
 }

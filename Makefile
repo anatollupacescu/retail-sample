@@ -21,7 +21,7 @@ test:
 
 build/web:
 	$(MAKE) build -C web/
- 
+
 build/docker:
 	@docker build .
 

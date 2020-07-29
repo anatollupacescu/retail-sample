@@ -1,7 +1,7 @@
 module github.com/anatollupacescu/retail-sample
 
 require (
-	github.com/anatollupacescu/arbortest v0.0.0-20200721153849-a90eedd8e49d
+	github.com/anatollupacescu/arbortest v0.0.1
 	github.com/ardanlabs/conf v1.2.2
 	github.com/bxcodec/faker/v3 v3.3.1
 	github.com/go-kit/kit v0.10.0

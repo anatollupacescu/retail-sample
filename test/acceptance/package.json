@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "npm-check-updates": "^6.0.1",
-    "newman": "^5.0.1"
+    "newman": "^5.0.1",
+    "lodash": "4.17.19"
   }
 }

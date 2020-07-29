@@ -115,16 +115,14 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 	sql := `SELECT
 						r.id,
 						r.name,
-						i.id,
+						ri.inventoryid,
 						ri.quantity,
 						r.enabled
 					FROM
 						recipe_ingredient ri,
 						recipe r,
-						inventory i
 					WHERE
-						ri.recipeid = r.id
-						AND ri.inventoryid = i.id`
+						ri.recipeid = r.id`
 
 	rows, err := pr.DB.Query(context.Background(), sql)
 

@@ -43,6 +43,19 @@ func testCreateRecipe(t *runner.T) {
 	if r.Name != domain.Name(recipeName) {
 		t.Error(fmt.Errorf("bad name"))
 	}
+
+	if len(r.Ingredients) != 1 {
+		t.Error("expected one ingredient")
+	}
+
+	for _, i := range r.Ingredients {
+		if i.ID != item.ID {
+			t.Errorf("bad ingredient id, wanted %d got %d", item.ID, i.ID)
+		}
+		if i.Qty != qty {
+			t.Errorf("bad qty, wanted %d got %d", qty, i.Qty)
+		}
+	}
 }
 
 // group:recipe

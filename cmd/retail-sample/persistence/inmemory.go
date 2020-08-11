@@ -1,4 +1,4 @@
-package provider
+package persistence
 
 import (
 	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"

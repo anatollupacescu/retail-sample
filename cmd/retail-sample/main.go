@@ -22,7 +22,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/provider"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/persistence"
 
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
@@ -61,7 +61,7 @@ func main() {
 		dbURL = config.DatabaseURL
 	}
 
-	persistenceFactory := provider.NewPersistenceFactory(dbURL)
+	persistenceFactory := persistence.NewPersistenceFactory(dbURL)
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)

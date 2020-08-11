@@ -70,8 +70,7 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		item, err := b.Inventory.Get(itemID)
 
 		switch err {
-		case nil:
-			break
+		case nil: //continue
 		case inventory.ErrItemNotFound:
 			return zeroRecipeID, ErrIgredientNotFound
 		default:

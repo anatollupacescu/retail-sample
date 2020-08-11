@@ -36,7 +36,9 @@ type (
 	}
 )
 
-var internalServerError = "internal server error"
+func internalServerErrorMsg() string {
+	return http.StatusText(http.StatusInternalServerError)
+}
 
 func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -44,18 +46,20 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	entries, err := a.wrapper.currentStock()
 
 	if err != nil {
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 		return
 	}
 
 	var response collectionResponse
-	response.Data = make([]entity, 0)
+	response.Data = make([]entity, 0, len(entries))
 
-	for _, position := range entries {
+	for i := range entries {
+		entry := entries[i]
+
 		response.Data = append(response.Data, entity{
-			ID:   position.ID,
-			Name: position.Name,
-			Qty:  position.Qty,
+			ID:   entry.ID,
+			Name: entry.Name,
+			Qty:  entry.Qty,
 		})
 	}
 
@@ -63,7 +67,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.getAll")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -79,7 +83,9 @@ func GetAll(get getFunc) (d []stock.Position, err error) {
 		return nil, errors.New("unexpected status code")
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -92,11 +98,13 @@ func GetAll(get getFunc) (d []stock.Position, err error) {
 		return nil, err
 	}
 
-	for _, r := range pos.Data {
+	for i := range pos.Data {
+		positionData := pos.Data[i]
+
 		d = append(d, stock.Position{
-			ID:   r.ID,
-			Name: r.Name,
-			Qty:  r.Qty,
+			ID:   positionData.ID,
+			Name: positionData.Name,
+			Qty:  positionData.Qty,
 		})
 	}
 
@@ -114,6 +122,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "stock.get")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -122,11 +131,11 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case nil:
 		break
-	case stock.ErrItemNotFound:
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	case inventory.ErrItemNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -142,7 +151,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.get")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -156,7 +165,9 @@ func Get(get getFunc) (pos stock.Position, err error) {
 		return pos, errors.New("unexpected status code")
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -199,6 +210,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "stock.provision")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -207,9 +219,10 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 
 	var body provisionPayload
 
-	if err := d.Decode(&body); err != nil {
+	if err = d.Decode(&body); err != nil {
 		a.logger.Log("action", "decode request", "error", err, "method", "stock.provision")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -222,7 +235,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -239,7 +252,7 @@ func (a *webApp) provision(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.provision")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -270,7 +283,9 @@ func Provision(qty int, post postFunc) (newQty int, err error) {
 		return 0, fmt.Errorf("unexpected status code: %v", response.Status)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -293,7 +308,8 @@ func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "call application", "error", err, "method", "stock.provisionlog")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -311,7 +327,7 @@ func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 
 	for _, in := range provisionLog {
 		response.Data = append(response.Data, provisionLogEntity{
-			ID:  int(in.ID),
+			ID:  in.ID,
 			Qty: in.Qty,
 		})
 	}
@@ -320,6 +336,6 @@ func (a *webApp) getProvisionLog(w http.ResponseWriter, _ *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "stock.provisionlog")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }

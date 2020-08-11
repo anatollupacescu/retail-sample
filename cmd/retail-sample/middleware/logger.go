@@ -19,6 +19,7 @@ func NewLoggerFactory(logger kitlog.Logger) LoggerFactory {
 
 	return func() Logger {
 		seq := atomic.AddInt32(counter, 1)
+
 		return loggerWrapper{
 			kitlog.With(logger, "request_id", seq),
 		}

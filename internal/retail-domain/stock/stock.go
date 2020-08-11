@@ -54,10 +54,10 @@ func (s Stock) CurrentStock() (ps []Position, err error) {
 	}
 
 	for _, item := range items {
-		itemID := int(item.ID)
+		itemID := item.ID
 		qty, err := s.Store.Quantity(itemID)
 
-		if err == ErrItemNotFound {
+		if errors.Is(err, ErrItemNotFound) {
 			continue
 		}
 
@@ -67,7 +67,7 @@ func (s Stock) CurrentStock() (ps []Position, err error) {
 
 		ps = append(ps, Position{
 			ID:   itemID,
-			Name: string(item.Name),
+			Name: item.Name,
 			Qty:  qty,
 		})
 	}
@@ -112,8 +112,7 @@ func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {
 		presentQty, err := s.Store.Quantity(i.ID)
 
 		switch err {
-		case nil, ErrItemNotFound:
-			break
+		case nil, ErrItemNotFound: //continue
 		default:
 			return err
 		}

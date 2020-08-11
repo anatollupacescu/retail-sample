@@ -65,10 +65,12 @@ func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	return recipe.ID(recipeID), nil
 }
 
-func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
+func (pr *PgxStore) Get(recipeID recipe.ID) (recipe.Recipe, error) {
 	sql := "select name, enabled from recipe where id = $1"
 
-	err = pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&r.Name, &r.Enabled)
+	var r recipe.Recipe
+
+	err := pr.DB.QueryRow(context.Background(), sql, recipeID).Scan(&r.Name, &r.Enabled)
 
 	switch err {
 	case nil:
@@ -92,8 +94,10 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	var ingredients []recipe.Ingredient
 
 	for rows.Next() {
-		var itemid int64
-		var qty int16
+		var (
+			itemid int64
+			qty    int16
+		)
 
 		if err = rows.Scan(&itemid, &qty); err != nil {
 			return r, errors.Wrapf(ErrDB, "scan recipe ingredients: %v", err)
@@ -108,10 +112,10 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (r recipe.Recipe, err error) {
 	r.ID = recipeID
 	r.Ingredients = ingredients
 
-	return
+	return r, nil
 }
 
-func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
+func (pr *PgxStore) List() ([]recipe.Recipe, error) {
 	sql := `SELECT
 						r.id,
 						r.name,
@@ -120,14 +124,14 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 						r.enabled
 					FROM
 						recipe_ingredient ri,
-						recipe r,
+						recipe r
 					WHERE
 						ri.recipeid = r.id`
 
 	rows, err := pr.DB.Query(context.Background(), sql)
 
 	if err != nil {
-		return recipes, errors.Wrapf(ErrDB, "list recipes: %v", err)
+		return nil, errors.Wrapf(ErrDB, "list recipes: %v", err)
 	}
 
 	defer rows.Close()
@@ -138,9 +142,7 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 		enabled bool
 	}
 
-	type ingredients []recipe.Ingredient
-
-	recipeRecords := make(map[key]ingredients)
+	recipeRecords := make(map[key][]recipe.Ingredient)
 
 	for rows.Next() {
 		var (
@@ -152,14 +154,16 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 		)
 
 		if err := rows.Scan(&recipeID, &name, &ingredientID, &qty, &enabled); err != nil {
-			return recipes, errors.Wrapf(ErrDB, "scan recipes: %v", err)
+			return nil, errors.Wrapf(ErrDB, "scan recipes: %v", err)
 		}
 
-		key := key{id: recipeID, name: name, enabled: enabled}
+		recipeKey := key{id: recipeID, name: name, enabled: enabled}
 		i := recipe.Ingredient{ID: int(ingredientID), Qty: int(qty)}
 
-		recipeRecords[key] = append(recipeRecords[key], i)
+		recipeRecords[recipeKey] = append(recipeRecords[recipeKey], i)
 	}
+
+	recipes := make([]recipe.Recipe, 0, len(recipeRecords))
 
 	for k, v := range recipeRecords {
 		recipes = append(recipes, recipe.Recipe{
@@ -170,5 +174,5 @@ func (pr *PgxStore) List() (recipes []recipe.Recipe, err error) {
 		})
 	}
 
-	return
+	return recipes, nil
 }

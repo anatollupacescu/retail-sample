@@ -14,6 +14,7 @@ type InMemoryStore struct {
 
 func NewInMemoryStore() InMemoryStore {
 	zero := 0
+
 	return InMemoryStore{
 		data:    make(map[int]Entry),
 		counter: &zero,
@@ -21,7 +22,7 @@ func NewInMemoryStore() InMemoryStore {
 }
 
 func (m *InMemoryStore) Add(s string) (int, error) {
-	*m.counter += 1
+	*m.counter++
 
 	newID := *m.counter
 

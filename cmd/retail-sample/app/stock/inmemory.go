@@ -53,7 +53,7 @@ func (i InMemoryProvisionLog) List() (r []domain.ProvisionEntry, err error) {
 	return
 }
 
-//InMemoryStore store
+// InMemoryStore store.
 type InMemoryStore struct {
 	data map[int]int
 }
@@ -80,6 +80,7 @@ func (s InMemoryStore) Sell(ii []recipe.Ingredient, qty int) error {
 	for _, i := range ii {
 		presentQty := s.data[i.ID]
 		requestedQty := i.Qty * qty
+
 		if requestedQty > presentQty {
 			return domain.ErrNotEnoughStock
 		}

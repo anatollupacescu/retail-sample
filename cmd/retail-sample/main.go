@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
 	"net/http"
@@ -51,7 +52,6 @@ func main() {
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
 	// app specific
-
 	routerLogger := middleware.WrapLogger(baseLogger)
 	loggerFactory := middleware.NewLoggerFactory(baseLogger)
 
@@ -69,7 +69,6 @@ func main() {
 	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 
 	// static
-
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
 
 	diagRouter := mux.NewRouter()
@@ -89,7 +88,13 @@ func main() {
 		Handler: corsDiagRouter,
 	}
 
-	shutdown := make(chan error, 2)
+	startServers(&server, &diag, baseLogger)
+}
+
+func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
+	const serverCount = 2
+
+	shutdown := make(chan error, serverCount)
 
 	logger := kitlog.With(baseLogger,
 		"version", version.Version,
@@ -97,20 +102,20 @@ func main() {
 		"commit", version.Commit)
 
 	go func() {
-		_ = logger.Log("msg", "business logic server is starting", "port", config.Port)
+		_ = logger.Log("msg", "business logic server is starting", "port", server.Addr)
 
 		err := server.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			shutdown <- err
 		}
 	}()
 
 	go func() {
-		_ = logger.Log("msg", "diagnostics server is starting", "port", config.DiagPort)
+		_ = logger.Log("msg", "diagnostics server is starting", "port", diag.Addr)
 
 		err := diag.ListenAndServe()
 
-		if err != nil && err != http.ErrServerClosed {
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			shutdown <- err
 		}
 	}()
@@ -126,7 +131,9 @@ func main() {
 		_ = logger.Log("msg", "received shutdown request", "signal", err)
 	}
 
-	timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	const waitForShutdown = 5 * time.Second
+
+	timeout, cancelFunc := context.WithTimeout(context.Background(), waitForShutdown)
 	defer cancelFunc()
 
 	err := diag.Shutdown(timeout)

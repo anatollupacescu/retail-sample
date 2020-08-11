@@ -9,7 +9,7 @@
 @host = http://localhost:8080
 
 ### Create inventory item
-POST http://localhost:8080/inventory
+POST {{host}}/inventory
 Content-Type: application/json
 
 {
@@ -17,15 +17,15 @@ Content-Type: application/json
 }
 
 ### Get one inventory item
-GET http://localhost:8080/inventory/1
+GET {{host}}/inventory/1
 Accept: application/json
 
 ### List inventory items
-GET http://localhost:8080/inventory
+GET {{host}}/inventory
 Accept: application/json
 
 ### Disable inventory item
-PATCH http://localhost:8080/inventory/1
+PATCH {{host}}/inventory/1
 Accept: application/json
 
 {
@@ -33,15 +33,15 @@ Accept: application/json
 }
 
 ### List orders
-GET http://localhost:8080/order
+GET {{host}}/order
 Accept: application/json
 
 ### Show stock
-GET http://localhost:8080/stock/7
+GET {{host}}/stock/1
 Accept: application/json
 
 ### Provision stock
-POST http://localhost:8080/stock/7
+POST {{host}}/stock/1
 Content-Type: application/json
 
 {
@@ -49,8 +49,19 @@ Content-Type: application/json
 }
 
 ### List recipes
-GET http://localhost:8080/recipe
+GET {{host}}/recipe
 Accept: application/json
+
+### Create recipe
+POST {{host}}/recipe
+Content-Type: application/json
+
+{
+  "name": "garlic bread",
+  "items": {
+    "1": 5
+  }
+}
 
 ### List orders
 GET {{host}}/order

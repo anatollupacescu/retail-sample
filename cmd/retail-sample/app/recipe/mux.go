@@ -42,7 +42,9 @@ type (
 	}
 )
 
-var internalServerError = "internal server error"
+func internalServerErrorMsg() string {
+	return http.StatusText(http.StatusInternalServerError)
+}
 
 type createPayload struct {
 	Name  string      `json:"name"` // pointer so we can test for field absence
@@ -59,11 +61,12 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 
 	if err := d.Decode(&requestBody); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "recipe.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
-	var ingredients []recipe.Ingredient
+	var ingredients = make([]recipe.Ingredient, 0, len(requestBody.Items))
 
 	for id, qty := range requestBody.Items {
 		ingredients = append(ingredients, recipe.Ingredient{
@@ -79,11 +82,15 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case nil:
 		break
-	case recipe.ErrEmptyName, recipe.ErrIgredientNotFound, recipe.ErrNoIngredients:
+	case
+		recipe.ErrEmptyName,
+		recipe.ErrIgredientNotFound,
+		recipe.ErrQuantityNotProvided,
+		recipe.ErrNoIngredients:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -102,7 +109,7 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "recipe.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -126,11 +133,9 @@ func Create(name string, items map[int]int, post func(io.Reader) (*http.Response
 		return r, err
 	}
 
-	if response.StatusCode > 299 {
-		return r, fmt.Errorf("unexpected status code: %v", response.StatusCode)
-	}
-
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -149,18 +154,23 @@ func Create(name string, items map[int]int, post func(io.Reader) (*http.Response
 		Enabled:     responseData.Data.Enabled,
 		Ingredients: toIngredientCollection(responseData.Data.Items),
 	}
+
 	return r, nil
 }
 
-func toIngredientCollection(ii []item) (r []recipe.Ingredient) {
-	for _, i := range ii {
-		r = append(r, recipe.Ingredient{
-			ID:  i.ID,
-			Qty: i.Qty,
+func toIngredientCollection(items []item) []recipe.Ingredient {
+	ingredients := make([]recipe.Ingredient, 0, len(items))
+
+	for i := range items {
+		currentItem := items[i]
+
+		ingredients = append(ingredients, recipe.Ingredient{
+			ID:  currentItem.ID,
+			Qty: currentItem.Qty,
 		})
 	}
 
-	return
+	return ingredients
 }
 
 func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
@@ -169,7 +179,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	all, err := a.wrapper.getAll()
 
 	if err != nil {
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 		return
 	}
 
@@ -177,9 +187,11 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 		Data []entity `json:"data"`
 	}
 
-	response.Data = make([]entity, 0)
+	response.Data = make([]entity, 0, len(all))
 
-	for _, r := range all {
+	for i := range all {
+		r := all[i]
+
 		response.Data = append(response.Data, entity{
 			ID:      int(r.ID),
 			Name:    string(r.Name),
@@ -192,51 +204,57 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "recipe.getAll")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
-// client
-func GetAll(get func() (*http.Response, error)) (rs []recipe.Recipe, err error) {
+// GetAll client.
+func GetAll(get func() (*http.Response, error)) ([]recipe.Recipe, error) {
 	response, err := get()
 	if err != nil {
-		return rs, err
+		return nil, err
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return rs, fmt.Errorf("unexpected status code: %d", response.StatusCode)
+		return nil, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return rs, err
+		return nil, err
 	}
 
-	var rcps collectionResponse
+	var recipesResponse collectionResponse
 
-	if err = json.Unmarshal(respBody, &rcps); err != nil {
-		return rs, err
+	if err = json.Unmarshal(respBody, &recipesResponse); err != nil {
+		return nil, err
 	}
 
-	for _, r := range rcps.Data {
-		rs = append(rs, recipe.Recipe{
-			Enabled:     r.Enabled,
-			ID:          recipe.ID(r.ID),
-			Ingredients: toIngredientCollection(r.Items),
-			Name:        recipe.Name(r.Name),
+	recipes := make([]recipe.Recipe, 0, len(recipesResponse.Data))
+
+	for i := range recipesResponse.Data {
+		currentRecipe := recipesResponse.Data[i]
+
+		recipes = append(recipes, recipe.Recipe{
+			Enabled:     currentRecipe.Enabled,
+			ID:          recipe.ID(currentRecipe.ID),
+			Ingredients: toIngredientCollection(currentRecipe.Items),
+			Name:        recipe.Name(currentRecipe.Name),
 		})
 	}
 
-	return rs, nil
+	return recipes, nil
 }
 
 func toItems(i []recipe.Ingredient) (items []item) {
 	for _, ri := range i {
 		items = append(items, item{
-			ID:  int(ri.ID),
-			Qty: int(ri.Qty),
+			ID:  ri.ID,
+			Qty: ri.Qty,
 		})
 	}
 
@@ -254,6 +272,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "recipe.get")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -268,7 +287,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -287,11 +306,11 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "recipe.get")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
-// client
+// Get client.
 func Get(get func() (*http.Response, error)) (r recipe.Recipe, err error) {
 	response, err := get()
 	if err != nil {
@@ -302,7 +321,9 @@ func Get(get func() (*http.Response, error)) (r recipe.Recipe, err error) {
 		return r, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -338,6 +359,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "recipe.update")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -346,9 +368,10 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 
 	var requestBody updatePayload
 
-	if err := d.Decode(&requestBody); err != nil {
+	if err = d.Decode(&requestBody); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "recipe.update")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -361,7 +384,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -380,7 +403,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "recipe.update")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -402,11 +425,9 @@ func Update(enabled bool, patch func(io.Reader) (*http.Response, error)) (item r
 		return item, err
 	}
 
-	if response.StatusCode > 299 {
-		return item, fmt.Errorf("unexpected status code: %d", response.StatusCode)
-	}
-
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -419,7 +440,7 @@ func Update(enabled bool, patch func(io.Reader) (*http.Response, error)) (item r
 		return item, err
 	}
 
-	var ingredients []recipe.Ingredient
+	var ingredients = make([]recipe.Ingredient, 0, len(responseData.Data.Items))
 
 	for _, r := range responseData.Data.Items {
 		ingredients = append(ingredients, recipe.Ingredient{

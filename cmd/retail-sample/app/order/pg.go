@@ -34,7 +34,7 @@ func (po *PgxStore) Add(o order.Order) (order.ID, error) {
 	return order.ID(id), nil
 }
 
-func (po *PgxStore) List() (orders []order.Order, err error) {
+func (po *PgxStore) List() ([]order.Order, error) {
 	rows, err := po.DB.Query(context.Background(), "select id, recipeid, quantity, orderdate from outbound_order")
 
 	if err != nil {
@@ -42,6 +42,8 @@ func (po *PgxStore) List() (orders []order.Order, err error) {
 	}
 
 	defer rows.Close()
+
+	var orders = make([]order.Order, 0, len(rows.RawValues()))
 
 	for rows.Next() {
 		var (
@@ -57,14 +59,14 @@ func (po *PgxStore) List() (orders []order.Order, err error) {
 		orders = append(orders, order.Order{
 			ID:   order.ID(id),
 			Date: time,
-			OrderEntry: order.OrderEntry{
+			Entry: order.Entry{
 				RecipeID: int(recipeID),
 				Qty:      int(qty),
 			},
 		})
 	}
 
-	return
+	return orders, nil
 }
 
 func (po *PgxStore) Get(id order.ID) (result order.Order, err error) {
@@ -93,7 +95,7 @@ func (po *PgxStore) Get(id order.ID) (result order.Order, err error) {
 	}
 
 	return order.Order{
-		OrderEntry: order.OrderEntry{
+		Entry: order.Entry{
 			RecipeID: recipeID,
 			Qty:      qty,
 		},

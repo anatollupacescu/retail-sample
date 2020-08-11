@@ -120,8 +120,10 @@ func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var id int64
-		var qty int16
+		var (
+			id  int64
+			qty int16
+		)
 
 		if err := rows.Scan(&id, &qty); err != nil {
 			return nil, errors.Wrapf(ErrDB, "provisionlog list scan: %v", err)

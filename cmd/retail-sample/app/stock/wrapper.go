@@ -12,19 +12,19 @@ type wrapper struct {
 
 func (w wrapper) quantity(id int) (sp stock.Position, err error) {
 	return sp, w.Exec("get stock quantity", func(provider middleware.PersistenceProvider) error {
-		s := provider.Stock()
+		i := provider.Inventory()
 
-		var qty int
-		qty, err = s.Quantity(id)
+		var item inventory.Item
+		item, err = i.Get(id)
 
 		if err != nil {
 			return err
 		}
 
-		i := provider.Inventory()
+		s := provider.Stock()
 
-		var item inventory.Item
-		item, err = i.Get(id)
+		var qty int
+		qty, err = s.Quantity(item.ID)
 
 		if err != nil {
 			return err

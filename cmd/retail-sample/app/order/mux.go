@@ -35,7 +35,9 @@ type (
 	}
 )
 
-var internalServerError = "internal server error"
+func internalServerErrorMsg() string {
+	return http.StatusText(http.StatusInternalServerError)
+}
 
 type createPayload struct {
 	ID  int `json:"id"`
@@ -52,7 +54,8 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 
 	if err := d.Decode(&payload); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "order.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -69,11 +72,10 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 		stock.ErrNotEnoughStock,
 		inventory.ErrDuplicateName,
 		inventory.ErrEmptyName:
-
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -91,7 +93,7 @@ func (a webApp) create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 	}
 }
 
@@ -120,7 +122,9 @@ func Create(recipeID, qty int, post func(io.Reader) (*http.Response, error)) (o 
 		return o, fmt.Errorf("unexpected status code: %v", response.StatusCode)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -135,7 +139,7 @@ func Create(recipeID, qty int, post func(io.Reader) (*http.Response, error)) (o 
 
 	return order.Order{
 		ID: order.ID(responseData.Data.ID),
-		OrderEntry: order.OrderEntry{
+		Entry: order.Entry{
 			Qty:      responseData.Data.Qty,
 			RecipeID: responseData.Data.RecipeID,
 		},
@@ -153,6 +157,7 @@ func (a webApp) get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "order.get")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -168,7 +173,8 @@ func (a webApp) get(w http.ResponseWriter, r *http.Request) {
 		return
 	default:
 		a.logger.Log("action", "call application", "error", err, "method", "order.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+
 		return
 	}
 
@@ -186,7 +192,7 @@ func (a webApp) get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -203,15 +209,17 @@ func (a webApp) getAll(w http.ResponseWriter, r *http.Request) {
 	all, err := a.wrapper.getAll()
 
 	if err != nil {
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 		return
 	}
 
-	for _, ordr := range all {
+	for i := range all {
+		currentOrder := all[i]
+
 		e := entity{
-			ID:       int(ordr.ID),
-			RecipeID: ordr.RecipeID,
-			Qty:      ordr.Qty,
+			ID:       int(currentOrder.ID),
+			RecipeID: currentOrder.RecipeID,
+			Qty:      currentOrder.Qty,
 		}
 
 		response.Data = append(response.Data, e)
@@ -221,6 +229,6 @@ func (a webApp) getAll(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "order.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }

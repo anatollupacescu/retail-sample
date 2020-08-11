@@ -34,8 +34,6 @@ type (
 	}
 )
 
-var internalServerError = "internal server error"
-
 type updatePayload struct {
 	Enabled bool `json:"enabled"`
 }
@@ -51,6 +49,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "inventory.update")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -59,9 +58,10 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 
 	var requestPayload updatePayload
 
-	if err := d.Decode(&requestPayload); err != nil {
+	if err = d.Decode(&requestPayload); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "inventory.update")
 		http.Error(w, "parse body", http.StatusBadRequest)
+
 		return
 	}
 
@@ -74,7 +74,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (a *webApp) update(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "inventory.update")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
@@ -118,7 +118,9 @@ func Update(enabled bool, patch func(io.Reader) (*http.Response, error)) (item i
 		return item, fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -153,6 +155,7 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 	if err := d.Decode(&body); err != nil {
 		a.logger.Log("action", "decode request payload", "error", err, "method", "inventory.create")
 		http.Error(w, "could not parse body", http.StatusBadRequest)
+
 		return
 	}
 
@@ -168,13 +171,13 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
 	var response = singleResponse{
 		Data: entity{
-			ID:      int(newItem.ID),
+			ID:      newItem.ID,
 			Name:    newItem.Name,
 			Enabled: newItem.Enabled,
 		},
@@ -186,11 +189,11 @@ func (a *webApp) create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "inventory.create")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
-// client
+// Create client.
 func Create(name string, post func(io.Reader) (*http.Response, error)) (item inventory.Item, err error) {
 	payload := createPayload{
 		Name: name,
@@ -214,7 +217,9 @@ func Create(name string, post func(io.Reader) (*http.Response, error)) (item inv
 		return item, fmt.Errorf("unexpected status code: %v", response.StatusCode)
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -240,7 +245,7 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 	list, err := a.wrapper.getAll()
 
 	if err != nil {
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 	}
 
 	var response collectionResponse
@@ -249,8 +254,8 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 
 	for _, tp := range list {
 		response.Data = append(response.Data, entity{
-			ID:      int(tp.ID),
-			Name:    string(tp.Name),
+			ID:      tp.ID,
+			Name:    tp.Name,
 			Enabled: tp.Enabled,
 		})
 	}
@@ -259,11 +264,11 @@ func (a *webApp) getAll(w http.ResponseWriter, _ *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "inventory.getAll")
-		http.Error(w, internalServerError, http.StatusBadRequest)
+		http.Error(w, internalServerErrorMsg(), http.StatusBadRequest)
 	}
 }
 
-// client
+// GetAll client.
 func GetAll(get func() (*http.Response, error)) (arr []inventory.Item, err error) {
 	response, err := get()
 	if err != nil {
@@ -274,7 +279,9 @@ func GetAll(get func() (*http.Response, error)) (arr []inventory.Item, err error
 		return nil, errors.New("unexpected status code")
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -309,6 +316,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.logger.Log("action", "parse id", "error", err, "method", "inventory.get")
 		http.Error(w, "could not parse id", http.StatusBadRequest)
+
 		return
 	}
 
@@ -321,7 +329,7 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 		return
 	}
 
@@ -329,8 +337,8 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 		Data entity `json:"data"`
 	}{
 		Data: entity{
-			ID:      int(item.ID),
-			Name:    string(item.Name),
+			ID:      item.ID,
+			Name:    item.Name,
 			Enabled: item.Enabled,
 		},
 	}
@@ -339,11 +347,11 @@ func (a *webApp) get(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.logger.Log("action", "encode response", "error", err, "method", "inventory.get")
-		http.Error(w, internalServerError, http.StatusInternalServerError)
+		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
 	}
 }
 
-// client
+// Get client.
 func Get(get func() (*http.Response, error)) (item inventory.Item, err error) {
 	response, err := get()
 	if err != nil {
@@ -354,7 +362,9 @@ func Get(get func() (*http.Response, error)) (item inventory.Item, err error) {
 		return item, errors.New("unexpected status code")
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 
 	respBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -372,4 +382,8 @@ func Get(get func() (*http.Response, error)) (item inventory.Item, err error) {
 		Name:    one.Data.Name,
 		Enabled: one.Data.Enabled,
 	}, nil
+}
+
+func internalServerErrorMsg() string {
+	return http.StatusText(http.StatusInternalServerError)
 }

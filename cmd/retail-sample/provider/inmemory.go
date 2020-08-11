@@ -21,10 +21,10 @@ type (
 		stock      stock.Stock
 	}
 
-	InMemoryProvider struct{}
+	InMemoryProvider struct {
+		factory *InMemoryProviderFactory
+	}
 )
-
-var memFactory InMemoryProviderFactory
 
 func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 	invStore := invCmd.NewInMemoryStore()
@@ -52,45 +52,43 @@ func newInMemoryPersistentFactory() *InMemoryProviderFactory {
 		Stock:      stock,
 	}
 
-	memFactory = InMemoryProviderFactory{
+	return &InMemoryProviderFactory{
 		inventory:  inventory,
 		recipeBook: recipeBook,
 		orders:     orders,
 		stock:      stock,
 	}
-
-	return &memFactory
 }
 
-func (pf *InMemoryProviderFactory) New() middleware.PersistenceProvider {
-	return &InMemoryProvider{}
+func (f *InMemoryProviderFactory) New() middleware.PersistenceProvider {
+	return &InMemoryProvider{factory: f}
 }
 
-func (_ *InMemoryProviderFactory) Commit(_ middleware.PersistenceProvider) {
+func (*InMemoryProviderFactory) Commit(middleware.PersistenceProvider) {
 	/*no op*/
 }
 
-func (_ *InMemoryProviderFactory) Rollback(_ middleware.PersistenceProvider) {
+func (*InMemoryProviderFactory) Rollback(middleware.PersistenceProvider) {
 	/*no op*/
 }
 
-func (_ *InMemoryProviderFactory) Ping() error {
+func (*InMemoryProviderFactory) Ping() error {
 	/*no op*/
 	return nil
 }
 
-func (i *InMemoryProvider) Inventory() inventory.Inventory {
-	return memFactory.inventory
+func (p *InMemoryProvider) Inventory() inventory.Inventory {
+	return p.factory.inventory
 }
 
-func (pp *InMemoryProvider) RecipeBook() recipe.Book {
-	return memFactory.recipeBook
+func (p *InMemoryProvider) RecipeBook() recipe.Book {
+	return p.factory.recipeBook
 }
 
-func (pp *InMemoryProvider) Orders() order.Orders {
-	return memFactory.orders
+func (p *InMemoryProvider) Orders() order.Orders {
+	return p.factory.orders
 }
 
-func (pp *InMemoryProvider) Stock() stock.Stock {
-	return memFactory.stock
+func (p *InMemoryProvider) Stock() stock.Stock {
+	return p.factory.stock
 }

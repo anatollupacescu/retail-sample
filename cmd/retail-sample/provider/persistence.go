@@ -75,6 +75,7 @@ func (pf *PgxProviderFactory) Ping() error {
 func (pf *PgxProviderFactory) Commit(pp middleware.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
 	err := provider.tx.Commit(context.Background())
+
 	if err != nil {
 		log.Printf("commit: %v", err)
 	}
@@ -83,6 +84,7 @@ func (pf *PgxProviderFactory) Commit(pp middleware.PersistenceProvider) {
 func (pf *PgxProviderFactory) Rollback(pp middleware.PersistenceProvider) {
 	provider := pp.(*PgxTransactionalProvider)
 	err := provider.tx.Rollback(context.Background())
+
 	if err != nil {
 		log.Printf("rollback: %v", err)
 	}
@@ -96,6 +98,7 @@ func (pp *PgxTransactionalProvider) Inventory() inventory.Inventory {
 func (pp *PgxTransactionalProvider) RecipeBook() recipe.Book {
 	recipeStore := &recipeCmd.PgxStore{DB: pp.tx}
 	inventory := pp.Inventory()
+
 	return recipe.Book{Store: recipeStore, Inventory: inventory}
 }
 
@@ -103,6 +106,7 @@ func (pp *PgxTransactionalProvider) Orders() order.Orders {
 	orderStore := &orderCmd.PgxStore{DB: pp.tx}
 	recipeBook := pp.RecipeBook()
 	stock := pp.Stock()
+
 	return order.Orders{
 		Store:      orderStore,
 		RecipeBook: recipeBook,

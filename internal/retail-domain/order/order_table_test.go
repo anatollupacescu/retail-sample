@@ -82,8 +82,8 @@ func TestPlaceOrderT(t *testing.T) {
 			"given a valid recipe it saves it to the store",
 			&testStore{
 				add: func(o order.Order) (order.ID, error) {
-					assert.Equal(t, 1, o.OrderEntry.Qty)
-					assert.Equal(t, 45, o.OrderEntry.RecipeID)
+					assert.Equal(t, 1, o.Entry.Qty)
+					assert.Equal(t, 45, o.Entry.RecipeID)
 					return order.ID(4), nil
 				},
 			},

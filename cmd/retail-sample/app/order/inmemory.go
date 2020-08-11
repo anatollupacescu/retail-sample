@@ -9,6 +9,7 @@ type InMemoryStore struct {
 
 func NewInMemoryStore() domain.Store {
 	zero := 0
+
 	return InMemoryStore{
 		data:    make(map[domain.ID]domain.Order),
 		counter: &zero,
@@ -16,7 +17,7 @@ func NewInMemoryStore() domain.Store {
 }
 
 func (m InMemoryStore) Add(i domain.Order) (domain.ID, error) {
-	*m.counter += 1
+	*m.counter++
 
 	newID := domain.ID(*m.counter)
 	m.data[newID] = i
@@ -25,8 +26,9 @@ func (m InMemoryStore) Add(i domain.Order) (domain.ID, error) {
 }
 
 func (m InMemoryStore) List() (r []domain.Order, err error) {
-	for id, v := range m.data {
-		v.ID = domain.ID(id)
+	for id := range m.data {
+		v := m.data[id]
+		v.ID = id
 		r = append(r, v)
 	}
 

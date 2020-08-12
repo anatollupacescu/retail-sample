@@ -8,16 +8,17 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 )
 
-func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory middleware.LoggerFactory, factory middleware.PersistenceProviderFactory) {
+func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory middleware.NewLoggerFunc, factory middleware.PersistenceProviderFactory) {
 	items := webApp{
 		logger: logger,
 		wrapper: wrapper{
-			Wrapper: middleware.Wrapper{
-				LoggerFactory:              loggerFactory,
+			Middleware: middleware.Middleware{
+				NewLogger:                  loggerFactory,
 				PersistenceProviderFactory: factory,
 			},
 		},
 	}
+
 	r.HandleFunc("/inventory", items.getAll).Methods(http.MethodGet)
 	r.HandleFunc("/inventory/{itemID}", items.get).Methods(http.MethodGet)
 	r.HandleFunc("/inventory/{itemID}", items.update).Methods(http.MethodPatch)

@@ -41,19 +41,12 @@ func main() {
 		log.Fatalf("parse server configuration values: %v", err)
 	}
 
-	businessRouter := mux.NewRouter()
-
-	server := http.Server{
-		Addr:    net.JoinHostPort("", config.Port),
-		Handler: businessRouter,
-	}
-
 	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 
 	// app specific
 	routerLogger := middleware.WrapLogger(baseLogger)
-	loggerFactory := middleware.NewLoggerFactory(baseLogger)
+	loggerFactory := middleware.BuildNewLoggerFunc(baseLogger)
 
 	var dbURL string
 
@@ -62,6 +55,7 @@ func main() {
 	}
 
 	persistenceFactory := persistence.NewPersistenceFactory(dbURL)
+	businessRouter := mux.NewRouter()
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
@@ -70,6 +64,11 @@ func main() {
 
 	// static
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
+
+	server := http.Server{
+		Addr:    net.JoinHostPort("", config.Port),
+		Handler: businessRouter,
+	}
 
 	diagRouter := mux.NewRouter()
 

@@ -8,12 +8,12 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 )
 
-func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory middleware.LoggerFactory, factory middleware.PersistenceProviderFactory) {
+func ConfigureRoutes(r *mux.Router, logger middleware.Logger, loggerFactory middleware.NewLoggerFunc, factory middleware.PersistenceProviderFactory) {
 	recipes := webApp{
 		logger: logger,
 		wrapper: wrapper{
-			Wrapper: middleware.Wrapper{
-				LoggerFactory:              loggerFactory,
+			Middleware: middleware.Middleware{
+				NewLogger:                  loggerFactory,
 				PersistenceProviderFactory: factory,
 			},
 		},

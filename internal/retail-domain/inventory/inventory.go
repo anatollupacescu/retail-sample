@@ -36,8 +36,7 @@ func (i Inventory) UpdateStatus(id int, enabled bool) (item Item, err error) {
 	item, err = i.Store.Get(id)
 
 	switch err {
-	case nil:
-		break
+	case nil: // continue
 	case ErrItemNotFound:
 		return
 	default:
@@ -64,14 +63,12 @@ func (i Inventory) Add(name string) (int, error) {
 
 	switch err {
 	case ErrItemNotFound: //success
-		break
+		return i.Store.Add(name)
 	case nil:
 		return 0, ErrDuplicateName
 	default:
 		return 0, err
 	}
-
-	return i.Store.Add(name)
 }
 
 func (i Inventory) List() ([]Item, error) {

@@ -7,7 +7,7 @@ import (
 )
 
 type wrapper struct {
-	middleware.Wrapper
+	middleware.Middleware
 }
 
 func (w wrapper) quantity(id int) (sp stock.Position, err error) {

@@ -53,14 +53,12 @@ func (ps *PgxStore) Find(n string) (int, error) {
 
 	switch err {
 	case nil:
-		break
+		return id, nil
 	case pgx.ErrNoRows:
 		return 0, inventory.ErrItemNotFound
 	default:
 		return 0, errors.Wrapf(ErrDB, "find inventory item id: %v", err)
 	}
-
-	return id, nil
 }
 
 func (ps *PgxStore) Get(id int) (inventory.Item, error) {

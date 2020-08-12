@@ -6,7 +6,7 @@ import (
 )
 
 type wrapper struct {
-	middleware.Wrapper
+	middleware.Middleware
 }
 
 func (w wrapper) setStatus(id int, enabled bool) (re recipe.Recipe, err error) {

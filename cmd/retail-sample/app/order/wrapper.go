@@ -6,7 +6,7 @@ import (
 )
 
 type wrapper struct {
-	middleware.Wrapper
+	middleware.Middleware
 }
 
 func (w wrapper) create(id int, qty int) (orderID order.ID, err error) {

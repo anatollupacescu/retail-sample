@@ -11,10 +11,10 @@ type (
 		Log(keyvals ...interface{})
 	}
 
-	LoggerFactory func() Logger
+	NewLoggerFunc func() Logger
 )
 
-func NewLoggerFactory(logger kitlog.Logger) LoggerFactory {
+func BuildNewLoggerFunc(logger kitlog.Logger) NewLoggerFunc {
 	counter := new(int32)
 
 	return func() Logger {

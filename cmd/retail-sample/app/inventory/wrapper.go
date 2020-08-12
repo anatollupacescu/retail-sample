@@ -6,7 +6,7 @@ import (
 )
 
 type wrapper struct {
-	middleware.Wrapper
+	middleware.Middleware
 }
 
 func (ia wrapper) setStatus(id int, enabled bool) (item inventory.Item, err error) {

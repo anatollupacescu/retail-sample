@@ -8,14 +8,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/rs/cors"
 
 	"github.com/ardanlabs/conf"
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
@@ -35,26 +36,14 @@ type serverConfig struct {
 }
 
 func main() {
-	var config serverConfig
-
-	if err := conf.Parse(os.Args[1:], "RETAIL", &config); err != nil {
-		log.Fatalf("parse server configuration values: %v", err)
-	}
-
 	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
-
-	// app specific
 	routerLogger := middleware.WrapLogger(baseLogger)
 	loggerFactory := middleware.BuildNewLoggerFunc(baseLogger)
 
-	var dbURL string
+	config := getConfig()
+	persistenceFactory := getPersistenceFactory(config)
 
-	if !config.InMemory {
-		dbURL = config.DatabaseURL
-	}
-
-	persistenceFactory := persistence.NewPersistenceFactory(dbURL)
 	businessRouter := mux.NewRouter()
 
 	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
@@ -62,7 +51,7 @@ func main() {
 	recipe.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 
-	// static
+	// static site
 	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
 
 	server := http.Server{
@@ -80,6 +69,7 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	// needs CORS because it runs on a different port
 	corsDiagRouter := cors.Default().Handler(diagRouter)
 
 	diag := http.Server{
@@ -91,33 +81,27 @@ func main() {
 }
 
 func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
-	const serverCount = 2
-
-	shutdown := make(chan error, serverCount)
-
 	logger := kitlog.With(baseLogger,
 		"version", version.Version,
 		"build_time", version.BuildTime,
 		"commit", version.Commit)
 
-	go func() {
-		_ = logger.Log("msg", "business logic server is starting", "port", server.Addr)
+	const serverCount = 2
+	shutdown := make(chan error, serverCount)
 
-		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			shutdown <- err
+	start := func(name string, server *http.Server) {
+		_ = logger.Log("server", name, "msg", "starting", "port", server.Addr)
+
+		if err := server.ListenAndServe(); err != nil {
+			if !errors.Is(err, http.ErrServerClosed) {
+				shutdown <- err
+			}
 		}
-	}()
+	}
 
-	go func() {
-		_ = logger.Log("msg", "diagnostics server is starting", "port", diag.Addr)
+	go start("business logic", server)
 
-		err := diag.ListenAndServe()
-
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			shutdown <- err
-		}
-	}()
+	go start("diagnostic", diag)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -127,7 +111,7 @@ func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
 		_ = logger.Log("msg", "received", "signal", x)
 
 	case err := <-shutdown:
-		_ = logger.Log("msg", "received shutdown request", "signal", err)
+		_ = logger.Log("msg", "received shutdown request", "error", err)
 	}
 
 	const waitForShutdown = 5 * time.Second
@@ -135,13 +119,29 @@ func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
 	timeout, cancelFunc := context.WithTimeout(context.Background(), waitForShutdown)
 	defer cancelFunc()
 
-	err := diag.Shutdown(timeout)
-	if err != nil {
+	if err := diag.Shutdown(timeout); err != nil {
 		_ = logger.Log("msg", "diagnostic server shutdown failed", "error", err)
 	}
 
-	err = server.Shutdown(timeout)
-	if err != nil {
+	if err := server.Shutdown(timeout); err != nil {
 		_ = logger.Log("msg", "business server shutdown failed", "error", err)
 	}
+}
+
+func getConfig() (config serverConfig) {
+	if err := conf.Parse(os.Args[1:], "RETAIL", &config); err != nil {
+		log.Fatalf("parse server configuration values: %v", err)
+	}
+
+	return
+}
+
+func getPersistenceFactory(config serverConfig) middleware.PersistenceProviderFactory {
+	if !config.InMemory {
+		return persistence.NewInMemory()
+	}
+
+	dbURL := strings.TrimSpace(config.DatabaseURL)
+
+	return persistence.NewPersistenceFactory(dbURL)
 }

@@ -11,7 +11,7 @@ type Middleware struct {
 
 type appHandler func(PersistenceProvider) error
 
-func (ia Middleware) Exec(action string, handler appHandler) (err error) {
+func (ia Middleware) Exec(action string, handler appHandler) error {
 	logger := ia.NewLogger()
 	logger.Log("msg", "enter", "action", action)
 
@@ -27,19 +27,19 @@ func (ia Middleware) Exec(action string, handler appHandler) (err error) {
 		return handler(provider)
 	}
 
-	err = handlerCall()
+	err := handlerCall()
 
 	if err != nil {
 		logger.Log("error", err)
 		logger.Log("msg", "rollback")
 		ia.PersistenceProviderFactory.Rollback(provider)
 
-		return
+		return err
 	}
 
 	logger.Log("msg", "commit")
 	ia.PersistenceProviderFactory.Commit(provider)
 	logger.Log("msg", "exit")
 
-	return
+	return nil
 }

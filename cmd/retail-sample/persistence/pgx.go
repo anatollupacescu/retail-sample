@@ -30,7 +30,7 @@ type (
 	}
 )
 
-func newPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory {
+func NewPersistenceFactory(dbConn string) middleware.PersistenceProviderFactory {
 	config, err := pgxpool.ParseConfig(dbConn)
 
 	if err != nil {

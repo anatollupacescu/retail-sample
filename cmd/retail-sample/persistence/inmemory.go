@@ -26,7 +26,7 @@ type (
 	}
 )
 
-func newInMemoryPersistentFactory() *InMemoryProviderFactory {
+func NewInMemory() *InMemoryProviderFactory {
 	invStore := invCmd.NewInMemoryStore()
 	recipeStore := recipeCmd.NewInMemoryStore()
 	orderStore := orderCmd.NewInMemoryStore()

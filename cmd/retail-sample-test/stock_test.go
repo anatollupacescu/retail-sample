@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/anatollupacescu/arbortest/runner"
+
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 

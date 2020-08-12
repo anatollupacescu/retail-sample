@@ -6,6 +6,7 @@ import (
 	"math/rand"
 
 	"github.com/anatollupacescu/arbortest/runner"
+
 	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"

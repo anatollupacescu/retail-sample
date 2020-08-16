@@ -12,6 +12,13 @@ WORKDIR /web
 
 RUN make clean build BIN=/bin
 
+# modules
+FROM golang:1.14 as modules
+
+ADD go.mod go.sum /m/
+WORKDIR /m
+RUN go mod download
+
 # linter
 FROM golang:1.14 as tester
 
@@ -34,16 +41,11 @@ RUN mkdir -p /retail
 ADD . /retail
 WORKDIR /retail
 
-RUN golangci-lint run --issues-exit-code=1 --deadline=30s cmd/retail-sample/... internal/...
+COPY --from=modules /go/pkg /go/pkg
+
+RUN golangci-lint run -v cmd/retail-sample/... internal/...
 
 RUN go test -timeout=10s -v --race ./...
-
-# modules
-FROM golang:1.14 as modules
-
-ADD go.mod go.sum /m/
-WORKDIR /m
-RUN go mod download
 
 # Intermediate stage: Build the binary
 FROM golang:1.14 as builder

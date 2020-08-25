@@ -89,4 +89,4 @@ test/acceptance:
 	@go test $(shell pwd)/cmd/retail-sample-test/... \
 	-v -tags=acceptance -args \
 	--apiURL=http://localhost:8080 \
-	--arborURL=http://localhost:3000/data.json 
+	--arborURL=http://localhost:3000/data/

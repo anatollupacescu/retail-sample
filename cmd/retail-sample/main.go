@@ -137,7 +137,7 @@ func getConfig() (config serverConfig) {
 }
 
 func getPersistenceFactory(config serverConfig) middleware.PersistenceProviderFactory {
-	if !config.InMemory {
+	if config.InMemory {
 		return persistence.NewInMemory()
 	}
 

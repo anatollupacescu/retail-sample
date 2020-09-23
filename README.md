@@ -78,17 +78,17 @@ enter `web/` folder
 
 There is a experimental testing framework (arbor) with allows linking tests in a tree like manner.
 
-*(in the project root folder)*
+_(in the project root folder)_
 
 To start the server execute
 
->make start/arbor
+> make start/arbor
 
 Then navigate to <http://localhost:3000>
 
 To run the acceptance tests execute
 
->make test/acceptance
+> make test/acceptance
 
 Then refresh the previously loaded page
 
@@ -96,11 +96,8 @@ Then refresh the previously loaded page
 
 ### tech
 
-- go api tests
 - errors in jsonapi format
-- document packages with godoc
 - pagination
-- linter yml
 - pprof
 - auth and roles
 

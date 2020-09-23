@@ -47,7 +47,7 @@ $(BINARY):
 	$(MAKE) build
 
 run/mem: $(BINARY)
-	$(BINARY) --in-memory
+	$(BINARY) --in-memory=true
 
 run/docker: $(BINARY)
 	$(MAKE) build/web

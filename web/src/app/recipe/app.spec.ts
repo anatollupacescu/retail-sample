@@ -5,13 +5,14 @@ import spies = require('chai-spies')
 import App, { Page, recipeDTO, ingredientDTO, optionDTO, Modal } from './app'
 import InventoryClient from '../inventory/client'
 import Client from './client'
+import axios from "axios";
 
 chai.use(spies)
 let expect = chai.expect
 
 describe('add ingredient', () => {
-  let inv = new InventoryClient(),
-    client = new Client()
+  let inv = new InventoryClient(axios),
+    client = new Client(axios)
 
   describe('when given invalid quantity', () => {
     let page = noOpPage()
@@ -49,8 +50,8 @@ describe('add ingredient', () => {
 
   describe('when quantity is ok', () => {
     let page = noOpPage(),
-      inv = new InventoryClient(),
-      client = new Client()
+      inv = new InventoryClient(axios),
+      client = new Client(axios)
 
     let modal = noOpModal()
 

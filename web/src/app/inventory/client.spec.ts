@@ -2,9 +2,11 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 import Client from './client'
+import axios from "axios";
 
 import chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised)
+
 
 chai.use(spies)
 let expect = chai.expect
@@ -12,7 +14,7 @@ let sandbox = chai.spy.sandbox()
 
 describe('saving a new item', () => {
   describe('when item name is empty', () => {
-    let app = new Client()
+    let app = new Client(axios)
     let mockApi = sandbox.on(app, 'apiAddItem')
 
     it('errors simple', () => {
@@ -23,7 +25,7 @@ describe('saving a new item', () => {
   })
 
   describe('when server says item name is empty', () => {
-    let app = new Client()
+    let app = new Client(axios)
     let mockApi = chai.spy.on(app, 'apiAddItem', () => {
       throw 'name not provided'
     })
@@ -44,7 +46,7 @@ describe('saving a new item', () => {
       }
     ]
 
-    let app = new Client('', initialData)
+    let app = new Client(axios, initialData)
 
     let mockApi = chai.spy.on(app, 'apiAddItem')
 
@@ -56,7 +58,7 @@ describe('saving a new item', () => {
   })
 
   describe('when server says item name is already present', () => {
-    let app = new Client()
+    let app = new Client(axios)
 
     let mockApi = chai.spy.on(app, 'apiAddItem', () => {
       throw 'item type already present'
@@ -77,7 +79,7 @@ describe('saving a new item', () => {
         enabled: true
       }
     ]
-    let app = new Client('', initialData)
+    let app = new Client(axios, initialData)
 
     let apiResponse = {
       id: 2,
@@ -97,7 +99,7 @@ describe('saving a new item', () => {
 })
 
 describe('fetching inventory state', () => {
-  let app = new Client()
+  let app = new Client(axios)
 
   let apiItem = {
     id: 1,

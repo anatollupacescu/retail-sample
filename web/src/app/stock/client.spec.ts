@@ -1,7 +1,9 @@
 import 'mocha'
+
 import chai = require('chai')
 import spies = require('chai-spies')
 
+import axios from "axios";
 import StockClient from './client'
 
 chai.use(spies)
@@ -15,7 +17,7 @@ describe('provision stock', () => {
     }
   ]
 
-  let app = new StockClient('', data)
+  let app = new StockClient(axios, data)
 
   let apiProvision = chai.spy.on(app, 'apiProvision', () =>
     Promise.resolve({
@@ -33,7 +35,7 @@ describe('provision stock', () => {
 })
 
 describe('fetching state', () => {
-  let app = new StockClient()
+  let app = new StockClient(axios)
   let mockApi = chai.spy.on(app, 'apiFetchState', () => [
     {
       id: 1,

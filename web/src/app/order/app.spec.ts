@@ -9,11 +9,12 @@ import App, { Page, tableRowDTO } from './app'
 import OrderClient from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
+import axios from "axios";
 
 describe('place order', () => {
-  let order = new OrderClient(),
-    recipe = new RecipeClient(),
-    stock = new StockClient()
+  let order = new OrderClient(axios),
+    recipe = new RecipeClient(axios),
+    stock = new StockClient(axios)
 
   let page = noOpPage()
   let app = new App(stock, order, recipe, page)

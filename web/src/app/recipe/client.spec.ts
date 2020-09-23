@@ -5,6 +5,7 @@ import spies = require('chai-spies')
 import chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised)
 
+import axios from "axios"
 import RecipeClient from './client'
 
 chai.use(spies)
@@ -12,7 +13,7 @@ let expect = chai.expect
 
 describe('saving a recipe', () => {
   describe('when recipe is missing ingredients', () => {
-    let app = new RecipeClient('', [])
+    let app = new RecipeClient(axios, [])
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
@@ -33,7 +34,7 @@ describe('saving a recipe', () => {
       }
     ]
 
-    let app = new RecipeClient('', state)
+    let app = new RecipeClient(axios, state)
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe')
 
@@ -45,7 +46,7 @@ describe('saving a recipe', () => {
   })
 
   describe('when recipe is correct', () => {
-    let app = new RecipeClient()
+    let app = new RecipeClient(axios)
 
     let mockApi = chai.spy.on(app, 'apiSaveRecipe', () => ({
       test: 1
@@ -60,7 +61,7 @@ describe('saving a recipe', () => {
 })
 
 describe('fetching recipes', () => {
-  let app = new RecipeClient()
+  let app = new RecipeClient(axios)
 
   var mockApi = chai.spy.on(app, 'apiFetchRecipes', () => [
     {

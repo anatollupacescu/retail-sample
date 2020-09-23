@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import { AxiosResponse, AxiosInstance } from 'axios'
 
 export interface Position {
   id: number
@@ -6,11 +6,11 @@ export interface Position {
 }
 
 export default class Client {
-  private endpoint: string
+  private httpClient: AxiosInstance
   private state: Position[]
 
-  constructor(url: string = '', initial: Position[] = []) {
-    this.endpoint = url
+  constructor(httpClient:AxiosInstance, initial: Position[] = []) {
+    this.httpClient = httpClient
     this.state = [...initial]
   }
 
@@ -26,7 +26,7 @@ export default class Client {
       let data = {
         qty: qty
       }
-      let res: AxiosResponse = await axios.post(`${this.endpoint}/${id}`, data)
+      let res: AxiosResponse = await this.httpClient.post(`/stock/${id}`, data)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -58,7 +58,7 @@ export default class Client {
 
   private async apiFetchState(): Promise<Position[]> {
     try {
-      let res = await axios.get(this.endpoint)
+      let res = await this.httpClient.get("/stock")
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()

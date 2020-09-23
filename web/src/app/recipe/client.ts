@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { AxiosInstance } from 'axios'
 
 export interface RecipeItem {
   id: number
@@ -13,11 +13,11 @@ export interface Recipe {
 }
 
 export default class Client {
-  private endpoint: string
+  private httpClient: AxiosInstance
   private state: Recipe[]
 
-  constructor(url: string = '', initial: Recipe[] = []) {
-    this.endpoint = url
+  constructor(httpClient: AxiosInstance, initial: Recipe[] = []) {
+    this.httpClient = httpClient
     this.state = [...initial]
   }
 
@@ -31,7 +31,7 @@ export default class Client {
       items: items
     }
     try {
-      let res = await axios.post(this.endpoint, payload)
+      let res = await this.httpClient.post("/recipe", payload)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -87,7 +87,7 @@ export default class Client {
 
   private async apiFetchRecipes(): Promise<any> {
     try {
-      let res = await axios.get(this.endpoint)
+      let res = await this.httpClient.get("/recipe")
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -105,7 +105,7 @@ export default class Client {
       let payload = {
         enabled: enabled
       }
-      let response = await axios.patch(`${this.endpoint}/${id}`, payload)
+      let response = await this.httpClient.patch(`/recipe/${id}`, payload)
       return response.data.data
     } catch (error) {
       throw error.response.data.trim()

@@ -25,12 +25,14 @@ services:
     links:
       - 'db:database'
     environment:
-      - RETAIL_PORT=8080
-      - RETAIL_DIAG_PORT=8181
+      - RETAIL_FS_PORT=8080
+      - RETAIL_API_PORT=8081
+      - RETAIL_DIAG_PORT=8082
       - RETAIL_DATABASE_URL=postgres://docker:docker@db:5432/retail?pool_max_conns=10
     ports:
       - '8080:8080'
-      - '8081:8181'
+      - '8081:8081'
+      - '8082:8082'
     depends_on:
       - dbmigration
     networks:

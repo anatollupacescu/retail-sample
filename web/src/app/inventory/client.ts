@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { AxiosInstance } from 'axios'
 
 export interface inventoryItem {
   id: number
@@ -7,17 +7,17 @@ export interface inventoryItem {
 }
 
 export default class Client {
-  private endpoint: string
   private state: inventoryItem[]
+  private httpClient: AxiosInstance
 
-  constructor(url: string = '', initial: inventoryItem[] = []) {
-    this.endpoint = url
+  constructor(httpClient: AxiosInstance, initial: inventoryItem[] = []) {
+    this.httpClient = httpClient
     this.state = [...initial]
   }
 
   private async apiFetchState(): Promise<any> {
     try {
-      let response = await axios.get(this.endpoint)
+      let response = await this.httpClient.get("/inventory")
       return response.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -35,7 +35,7 @@ export default class Client {
       let payload = {
         enabled: enabled
       }
-      let response = await axios.patch(`${this.endpoint}/${id}`, payload)
+      let response = await this.httpClient.patch(`/inventory/${id}`, payload)
       return response.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -62,7 +62,7 @@ export default class Client {
       let payload = {
         name: name
       }
-      let res = await axios.post(this.endpoint, payload)
+      let res = await this.httpClient.post("/inventory", payload)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()

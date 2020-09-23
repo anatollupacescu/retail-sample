@@ -28,20 +28,32 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
-type serverConfig struct {
+// Configuration is exported to be accesible by the library
+type Configuration struct {
 	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
-	Port        string `conf:"default:8080"`
-	DiagPort    string `conf:"default:8081"`
+	FsPort      string `conf:"default:8080"`
+	APIPort     string `conf:"default:8081"`
+	DiagPort    string `conf:"default:8082"`
 	InMemory    bool   `conf:"default:false"`
 }
 
 func main() {
+	config := getConfig()
+
+	fileRouter := mux.NewRouter()
+	fileRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
+
+	fileServer := http.Server{
+		Addr:    net.JoinHostPort("", config.FsPort),
+		Handler: fileRouter,
+	}
+
 	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 	routerLogger := middleware.WrapLogger(baseLogger)
 	loggerFactory := middleware.BuildNewLoggerFunc(baseLogger)
 
-	config := getConfig()
+	/* business */
 	persistenceFactory := getPersistenceFactory(config)
 
 	businessRouter := mux.NewRouter()
@@ -51,14 +63,21 @@ func main() {
 	recipe.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
 
-	// static site
-	businessRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
+	/* TODO change 'InMemory' flag to 'Offline'
+
+	if !config.InMemory {
+		businessRouter.Use(middleware.Authenticated)
+	}
+	*/
+
+	corsBusinessRouter := cors.AllowAll().Handler(businessRouter)
 
 	server := http.Server{
-		Addr:    net.JoinHostPort("", config.Port),
-		Handler: businessRouter,
+		Addr:    net.JoinHostPort("", config.APIPort),
+		Handler: corsBusinessRouter,
 	}
 
+	/* diagnostics */
 	diagRouter := mux.NewRouter()
 
 	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -69,7 +88,6 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	// needs CORS because it runs on a different port
 	corsDiagRouter := cors.Default().Handler(diagRouter)
 
 	diag := http.Server{
@@ -77,16 +95,12 @@ func main() {
 		Handler: corsDiagRouter,
 	}
 
-	startServers(&server, &diag, baseLogger)
-}
-
-func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
 	logger := kitlog.With(baseLogger,
 		"version", version.Version,
 		"build_time", version.BuildTime,
 		"commit", version.Commit)
 
-	const serverCount = 2
+	const serverCount = 3
 	shutdown := make(chan error, serverCount)
 
 	start := func(name string, server *http.Server) {
@@ -99,9 +113,11 @@ func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
 		}
 	}
 
-	go start("business logic", server)
+	go start("file server", &fileServer)
 
-	go start("diagnostic", diag)
+	go start("business logic", &server)
+
+	go start("diagnostic", &diag)
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -128,7 +144,7 @@ func startServers(server, diag *http.Server, baseLogger kitlog.Logger) {
 	}
 }
 
-func getConfig() (config serverConfig) {
+func getConfig() (config Configuration) {
 	if err := conf.Parse(os.Args[1:], "RETAIL", &config); err != nil {
 		log.Fatalf("parse server configuration values: %v", err)
 	}
@@ -136,7 +152,7 @@ func getConfig() (config serverConfig) {
 	return
 }
 
-func getPersistenceFactory(config serverConfig) middleware.PersistenceProviderFactory {
+func getPersistenceFactory(config Configuration) middleware.PersistenceProviderFactory {
 	if config.InMemory {
 		return persistence.NewInMemory()
 	}

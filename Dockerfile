@@ -63,8 +63,9 @@ RUN GOOS=linux GOARCH=amd64 make build/api
 # Final stage: Run the binary
 FROM scratch
 
-ENV PORT 8080
-ENV DIAG_PORT 8181
+ENV FS_PORT 8080
+ENV API_PORT 8081
+ENV DIAG_PORT 8082
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
@@ -75,7 +76,8 @@ COPY --from=builder /retail/bin/retail /retail
 
 COPY --from=site /web/dist/ /web/dist/
 
-EXPOSE $PORT
+EXPOSE $FS_PORT
+EXPOSE $API_PORT
 EXPOSE $DIAG_PORT
 
 CMD ["/retail"]

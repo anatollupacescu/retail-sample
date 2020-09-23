@@ -3,7 +3,9 @@ module github.com/anatollupacescu/retail-sample
 require (
 	github.com/anatollupacescu/arbortest v0.0.2
 	github.com/ardanlabs/conf v1.2.2
+	github.com/auth0/go-jwt-middleware v0.0.0-20200810150920-a32d7af194d1
 	github.com/bxcodec/faker/v3 v3.3.1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-kit/kit v0.10.0
 	github.com/gojektech/heimdall v5.0.2+incompatible
 	github.com/gojektech/valkyrie v0.0.0-20190210220504-8f62c1e7ba45 // indirect

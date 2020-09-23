@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { AxiosInstance } from 'axios'
 
 export interface Record {
   id: number
@@ -7,17 +7,17 @@ export interface Record {
 }
 
 export default class Client {
-  private endpoint: string
+  private httpClient: AxiosInstance
   private state: Record[]
 
-  constructor(url: string = '', initial: Record[] = []) {
-    this.endpoint = url
+  constructor(httpClient:AxiosInstance, initial: Record[] = []) {
+    this.httpClient = httpClient
     this.state = initial
   }
 
   private async apiFetchOrders(): Promise<any> {
     try {
-      let data = await axios.get(this.endpoint)
+      let data = await this.httpClient.get("/order")
       return data.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -29,8 +29,9 @@ export default class Client {
   }
 
   private async apiAddOrder(recipeID: number, qty: number): Promise<any> {
+    let payload = { id: Number(recipeID), qty: Number(qty) }
     try {
-      let res = await axios.post(this.endpoint, { id: Number(recipeID), qty: Number(qty) })
+      let res = await this.httpClient.post("/order", payload)
       return res.data.data.id
     } catch (error) {
       throw error.response.data.trim()

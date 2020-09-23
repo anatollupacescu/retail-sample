@@ -46,10 +46,8 @@ export function initializeInventory(client: Client, stock: StockClient) {
 
   let table = $('#inventoryTable tbody')
 
-  table.on('click', 'tr', function() {
-    let id = $(this)
-      .find('td:eq(0)')
-      .text()
+  table.on('click', 'tr', function () {
+    let id = $(this).find('td:eq(0)').text()
     app.onRowClick(id)
   })
 
@@ -75,7 +73,7 @@ function clearRowSelection(): void {
 }
 
 function selectTableRow(id: string): void {
-  $('#inventoryTable tbody tr').each(function() {
+  $('#inventoryTable tbody tr').each(function () {
     let currentRow = $(this)
     let currentID = currentRow.find('td:eq(0)').text()
 

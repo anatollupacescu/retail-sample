@@ -87,7 +87,7 @@ export default class App {
   }
 
   private toRows(recipes: Recipe[]): recipeRecordDTO[] {
-    return recipes.map(r => ({
+    return recipes.map((r) => ({
       id: r.id,
       name: r.name,
       enabled: r.enabled
@@ -102,15 +102,15 @@ export default class App {
   }
 
   private toOptionDTO(filteredOptions: inventoryItem[]): optionDTO[] {
-    return filteredOptions.map(i => ({
+    return filteredOptions.map((i) => ({
       id: i.id,
       name: i.name
     }))
   }
 
   private removeExisting(items: inventoryItem[]): inventoryItem[] {
-    return items.filter(item => {
-      let found = this.ingredients.find(i => i.id === item.id)
+    return items.filter((item) => {
+      let found = this.ingredients.find((i) => i.id === item.id)
       return !found
     })
   }
@@ -203,7 +203,7 @@ export default class App {
 
     let recipeItems = this.toRecipeItems(this.ingredients)
 
-    this.client.saveRecipe(name, recipeItems).then(msg => {
+    this.client.saveRecipe(name, recipeItems).then((msg) => {
       switch (msg) {
         case 'name empty': {
           this.page.toggleRecipeNameError(true)
@@ -236,7 +236,7 @@ export default class App {
   }
 
   private populateIngredientsTable() {
-    let dtos = this.ingredients.map(i => {
+    let dtos = this.ingredients.map((i) => {
       let id = i.id.toString()
       let item = this.inventory.findByID(id)
       return {
@@ -249,7 +249,7 @@ export default class App {
   }
 
   private toRecipeItems(ingredients: ingredient[]): RecipeItem[] {
-    return ingredients.map(i => ({
+    return ingredients.map((i) => ({
       id: i.id,
       qty: i.qty
     }))
@@ -321,7 +321,7 @@ export default class App {
 
     this.client
       .toggleRecipeStatus(id, b)
-      .then(r => this.toRecipeDTO(r))
+      .then((r) => this.toRecipeDTO(r))
       .then(this.modal.populate)
       .then(() => {
         let data = this.client.getState()

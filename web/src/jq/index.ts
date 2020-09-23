@@ -13,13 +13,12 @@ import StockClient from '../app/stock/client'
 import { initializeOrder } from './order'
 import OrderClient from '../app/order/client'
 
-import createAuth0Client from '@auth0/auth0-spa-js';
+import createAuth0Client from '@auth0/auth0-spa-js'
 import axios from 'axios'
 
 $(async () => {
-
   let token = null
-/* 
+  /* 
   if (process.env.AUTH == "1") {
     let auth0 = await createAuth0Client({
       domain: process.env.AUTH_DOMAIN || "",
@@ -73,8 +72,8 @@ $(async () => {
 
   let httpClient = axios.create({
     baseURL: `${apiUrl}:${apiPort}`,
-    headers: token ? {'Authorization': `Bearer ${token}`} : {}
-  });
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  })
 
   let inventory = new InventoryClient(httpClient)
   let recipe = new RecipeClient(httpClient)

@@ -23,7 +23,7 @@ export default class Client {
 
   private async apiSaveRecipe(name: string, ingredients: RecipeItem[]): Promise<any> {
     let items: any = {}
-    ingredients.forEach(i => {
+    ingredients.forEach((i) => {
       items[i.id] = i.qty
     })
     let payload = {
@@ -31,7 +31,7 @@ export default class Client {
       items: items
     }
     try {
-      let res = await this.httpClient.post("/recipe", payload)
+      let res = await this.httpClient.post('/recipe', payload)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -51,7 +51,7 @@ export default class Client {
       throw errNoIngredients
     }
 
-    let found = this.state.find(r => r.name === name)
+    let found = this.state.find((r) => r.name === name)
 
     if (found) {
       throw errNamePresent
@@ -87,7 +87,7 @@ export default class Client {
 
   private async apiFetchRecipes(): Promise<any> {
     try {
-      let res = await this.httpClient.get("/recipe")
+      let res = await this.httpClient.get('/recipe')
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -123,7 +123,7 @@ export default class Client {
   }
 
   private saveToState(recipe: Recipe) {
-    this.state = this.state.filter(i => i.id !== recipe.id)
+    this.state = this.state.filter((i) => i.id !== recipe.id)
     this.state.push(recipe)
   }
 
@@ -132,11 +132,11 @@ export default class Client {
   }
 
   getEnabledRecipes(): Recipe[] {
-    return this.getState().filter(r => r.enabled)
+    return this.getState().filter((r) => r.enabled)
   }
 
   getByID(id: number): Recipe {
-    let r = this.state.find(r => r.id === id)
+    let r = this.state.find((r) => r.id === id)
 
     if (!r) {
       throw `recipe with id ${id} not found`

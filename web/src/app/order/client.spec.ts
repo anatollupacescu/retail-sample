@@ -5,7 +5,7 @@ import spies = require('chai-spies')
 import chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised)
 
-import axios from "axios";
+import axios from 'axios'
 import Client from './client'
 
 chai.use(spies)

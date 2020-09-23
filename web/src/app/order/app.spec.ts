@@ -9,7 +9,7 @@ import App, { Page, tableRowDTO } from './app'
 import OrderClient from './client'
 import StockClient from '../stock/client'
 import RecipeClient, { Recipe } from '../recipe/client'
-import axios from "axios";
+import axios from 'axios'
 
 describe('place order', () => {
   let order = new OrderClient(axios),

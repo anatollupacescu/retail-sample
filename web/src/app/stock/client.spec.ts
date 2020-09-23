@@ -3,7 +3,7 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 
-import axios from "axios";
+import axios from 'axios'
 import StockClient from './client'
 
 chai.use(spies)

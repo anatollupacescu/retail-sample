@@ -5,7 +5,7 @@ import spies = require('chai-spies')
 import App, { Page, recipeDTO, ingredientDTO, optionDTO, Modal } from './app'
 import InventoryClient from '../inventory/client'
 import Client from './client'
-import axios from "axios";
+import axios from 'axios'
 
 chai.use(spies)
 let expect = chai.expect
@@ -60,7 +60,7 @@ describe('add ingredient', () => {
     let getName = chai.spy.on(page, 'ingredientQty', () => '1'),
       getID = chai.spy.on(page, 'ingredientID', () => '1'),
       qtyErr = chai.spy.on(page, 'toggleQtyError'),
-      invLookup = chai.spy.on(inv, 'findByID', _v => ({ name: 'test' }))
+      invLookup = chai.spy.on(inv, 'findByID', (_v) => ({ name: 'test' }))
 
     it('adds ingredient to list', () => {
       app.onAddIngredient()

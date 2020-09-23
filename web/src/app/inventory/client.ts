@@ -17,7 +17,7 @@ export default class Client {
 
   private async apiFetchState(): Promise<any> {
     try {
-      let response = await this.httpClient.get("/inventory")
+      let response = await this.httpClient.get('/inventory')
       return response.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -53,7 +53,7 @@ export default class Client {
   }
 
   private saveToState(item: inventoryItem) {
-    this.state = this.state.filter(i => i.id !== item.id)
+    this.state = this.state.filter((i) => i.id !== item.id)
     this.state.push(item)
   }
 
@@ -62,7 +62,7 @@ export default class Client {
       let payload = {
         name: name
       }
-      let res = await this.httpClient.post("/inventory", payload)
+      let res = await this.httpClient.post('/inventory', payload)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -98,7 +98,7 @@ export default class Client {
   }
 
   private isUnique(name: string) {
-    let found = this.state.find(item => item.name === name)
+    let found = this.state.find((item) => item.name === name)
     return found === undefined
   }
 
@@ -107,12 +107,12 @@ export default class Client {
   }
 
   getEnabledItems(): inventoryItem[] {
-    return this.getState().filter(i => i.enabled)
+    return this.getState().filter((i) => i.enabled)
   }
 
   findByID(id: string): inventoryItem {
     let toMatch = Number.parseInt(id)
-    let found = this.state.find(i => i.id === toMatch)
+    let found = this.state.find((i) => i.id === toMatch)
     if (!found) {
       throw 'not found'
     }

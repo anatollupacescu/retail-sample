@@ -5,20 +5,22 @@ export interface Position {
   qty: number
 }
 
+export type StockDict = Record<number, number>
+
 export default class Client {
   private httpClient: AxiosInstance
-  private state: Position[]
+  private state: StockDict
 
-  constructor(httpClient:AxiosInstance, initial: Position[] = []) {
+  constructor(httpClient: AxiosInstance, initial: Position[] = []) {
     this.httpClient = httpClient
-    this.state = [...initial]
+    this.state = {}
+    initial.forEach((v) => {
+      this.state[v.id] = v.qty
+    })
   }
 
   addPosition(id: number): void {
-    this.state.push({
-      id: id,
-      qty: 0
-    })
+    this.state[id] = 0
   }
 
   private async apiProvision(id: string, qty: number): Promise<any> {
@@ -33,32 +35,18 @@ export default class Client {
     }
   }
 
-  async provision(id: string, qty: number): Promise<any> {
+  async provision(id: string, qty: number): Promise<void> {
     let stock = await this.apiProvision(id, qty)
-    for (let id in stock) {
-      this.updatePosition(Number(id), Number(stock[id]))
-    }
-  }
-
-  updatePosition(id: number, newValue: number): void {
-    for (let p in this.state) {
-      if (id === this.state[p].id) {
-        this.state[p].qty = newValue
-        return
-      }
-    }
+    this.state[stock.id] = stock.qty
   }
 
   substractFromPosition(ingredientID: number, toSubstract: number): void {
-    let ingredient = this.state.filter(p => p.id === ingredientID)
-    if (ingredient && ingredient.length > 0) {
-      ingredient[0].qty = ingredient[0].qty - toSubstract
-    }
+    this.state[ingredientID] = this.state[ingredientID] - toSubstract
   }
 
   private async apiFetchState(): Promise<Position[]> {
     try {
-      let res = await this.httpClient.get("/stock")
+      let res = await this.httpClient.get('/stock')
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -66,10 +54,14 @@ export default class Client {
   }
 
   async fetchState(): Promise<void> {
-    this.state = await this.apiFetchState()
+    let statePositions = await this.apiFetchState()
+    this.state = {}
+    statePositions.forEach((position) => {
+      this.state[position.id] = position.qty
+    })
   }
 
-  getState(): Position[] {
-    return [...this.state]
+  getState(): StockDict {
+    return this.state
   }
 }

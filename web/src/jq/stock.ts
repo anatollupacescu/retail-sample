@@ -58,7 +58,7 @@ function resetErrorMessage(): void {
 
 function populateDropdown(items: inventoryItemDTO[], nameInput: JQuery): void {
   nameInput.empty()
-  items.forEach(item => {
+  items.forEach((item) => {
     nameInput.append(new Option(item.name, item.id))
   })
 }

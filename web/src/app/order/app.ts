@@ -62,7 +62,7 @@ export default class App {
   }
 
   init() {
-    this.client.fetchState().catch(err => console.error(err))
+    this.client.fetchState().catch((err) => console.error(err))
   }
 
   private badQuantity(qty: any): boolean {
@@ -105,7 +105,7 @@ export default class App {
   }
 
   private toRows(data: Record[]): tableRowDTO[] {
-    return data.map(record => ({
+    return data.map((record) => ({
       id: String(record.id),
       recipe: this.recipe.getByID(record.recipeID).name,
       qty: String(record.qty)
@@ -115,7 +115,7 @@ export default class App {
   private updateStock(recipeID: number, orderSize: number): void {
     let recipeItems = this.recipe.getByID(recipeID).items
 
-    recipeItems.forEach(item => {
+    recipeItems.forEach((item) => {
       this.stock.substractFromPosition(item.id, item.qty * orderSize)
     })
   }

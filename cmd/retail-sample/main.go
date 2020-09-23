@@ -28,7 +28,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 
-// Configuration is exported to be accesible by the library
+// Configuration is exported to be accesible by the library.
 type Configuration struct {
 	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
 	FsPort      string `conf:"default:8080"`

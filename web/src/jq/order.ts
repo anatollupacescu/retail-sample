@@ -69,7 +69,7 @@ function getNumberValue(input: JQuery): number {
 
 function populateDropdown(recipes: Recipe[], input: JQuery): void {
   input.empty()
-  recipes.map(item => {
+  recipes.map((item) => {
     input.append(new Option(item.name, String(item.id)))
   })
 }

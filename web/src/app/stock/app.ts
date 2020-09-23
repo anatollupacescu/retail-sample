@@ -1,5 +1,5 @@
 import InventoryClient, { inventoryItem } from '../inventory/client'
-import Client from './client'
+import Client, { StockDict } from './client'
 
 import { Position } from '../stock/client'
 
@@ -24,8 +24,6 @@ export interface Page {
   populateDropdown(data: inventoryItemDTO[]): void
 }
 
-type StockDict = Record<string, string>
-
 export default class App {
   private inventory: InventoryClient
   private client: Client
@@ -49,7 +47,7 @@ export default class App {
 
   private populateDropdown() {
     let options = this.inventory.getEnabledItems()
-    let dtos: inventoryItemDTO[] = options.map(o => ({
+    let dtos: inventoryItemDTO[] = options.map((o) => ({
       id: String(o.id),
       name: o.name
     }))
@@ -89,8 +87,7 @@ export default class App {
   }
 
   private computeTableRows(): stockTableRowDTO[] {
-    let positions: Position[] = this.client.getState()
-    let dict = this.toDict(positions)
+    let dict: StockDict = this.client.getState()
 
     let toDTO = (i: inventoryItem) => ({
       id: i.id,
@@ -99,17 +96,6 @@ export default class App {
     })
 
     return this.inventory.getState().map(toDTO)
-  }
-
-  private toDict(i: Position[]): StockDict {
-    let r: StockDict = {}
-    i.forEach(e => {
-      r = {
-        [e.id]: String(e.qty),
-        ...r
-      }
-    })
-    return r
   }
 
   private badQuantity(qty: any): boolean {

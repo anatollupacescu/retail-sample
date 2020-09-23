@@ -2,11 +2,10 @@ import 'mocha'
 import chai = require('chai')
 import spies = require('chai-spies')
 import Client from './client'
-import axios from "axios";
+import axios from 'axios'
 
 import chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised)
-
 
 chai.use(spies)
 let expect = chai.expect

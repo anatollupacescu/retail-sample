@@ -28,7 +28,7 @@ export default class App {
   }
 
   init() {
-    this.client.fetchState().then(data => {
+    this.client.fetchState().then((data) => {
       this.page.renderTable(data)
     })
   }
@@ -113,7 +113,7 @@ export default class App {
         this.page.resetName()
         this.page.addBtnEnabled(false)
       })
-      .catch(error => {
+      .catch((error) => {
         switch (error) {
           case 'name empty':
             this.page.toggleNameError(true)

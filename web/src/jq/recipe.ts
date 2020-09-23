@@ -77,10 +77,8 @@ export function initializeRecipe(inv: InventoryClient, recipe: Client): void {
 
   let table = $('#recipes tbody')
 
-  table.on('click', 'tr', function() {
-    let id = $(this)
-      .find('td:eq(0)')
-      .text()
+  table.on('click', 'tr', function () {
+    let id = $(this).find('td:eq(0)').text()
 
     app.onRowClick(id)
   })
@@ -107,7 +105,7 @@ function clearRowSelection(): void {
 }
 
 function selectTableRow(id: string): void {
-  $('#recipes tbody tr').each(function() {
+  $('#recipes tbody tr').each(function () {
     let currentRow = $(this)
     let currentID = currentRow.find('td:eq(0)').text()
 

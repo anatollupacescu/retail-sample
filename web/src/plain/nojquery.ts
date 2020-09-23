@@ -12,8 +12,8 @@ class Checker {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelector('#message')?.addEventListener('keyup', function() {
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelector('#message')?.addEventListener('keyup', function () {
     // let msg = document.querySelector('#message') as HTMLInputElement
     let healthChecker = new Checker('http://localhost:8080')
     console.log(healthChecker.check())

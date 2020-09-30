@@ -13,12 +13,13 @@ import StockClient from '../app/stock/client'
 import { initializeOrder } from './order'
 import OrderClient from '../app/order/client'
 
-import createAuth0Client from '@auth0/auth0-spa-js'
 import axios from 'axios'
 
 $(async () => {
   let token = null
   /* 
+  import createAuth0Client from '@auth0/auth0-spa-js'
+  
   if (process.env.AUTH == "1") {
     let auth0 = await createAuth0Client({
       domain: process.env.AUTH_DOMAIN || "",
@@ -51,27 +52,24 @@ $(async () => {
     })
   }
  */
-  let apiUrl = process.env.API_URL
-  let apiPort = process.env.API_PORT
-  let diagPort = process.env.DIAG_PORT
+  let apiURL = process.env.API_URL
 
-  if (!apiUrl || !apiPort || !diagPort) {
-    console.error('missing configuration')
+  if (!apiURL) {
+    console.error('missing api URL')
     return
   }
 
-  let diagEndpoint = `${apiUrl}:${diagPort}`
-  let apiStatus = await apiIsHealthy(diagEndpoint)
+  let healthcheckURL = `${apiURL}/health`
+  let apiStatus = await apiIsHealthy(healthcheckURL)
 
   if (!apiStatus) {
-    console.error('diagnostic check failed', diagEndpoint)
     return
   }
 
   $('#alert').hide()
 
   let httpClient = axios.create({
-    baseURL: `${apiUrl}:${apiPort}`,
+    baseURL: apiURL,
     headers: token ? { Authorization: `Bearer ${token}` } : {}
   })
 

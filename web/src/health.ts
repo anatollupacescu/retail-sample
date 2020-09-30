@@ -4,7 +4,7 @@ export var apiIsHealthy = async (url: string): Promise<boolean> => {
   let isHealthy = false
 
   try {
-    const response = await axios.get(`${url}/health`)
+    const response = await axios.get(url)
     isHealthy = response.status === 200
   } catch (error) {
     console.error(error)

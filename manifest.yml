@@ -1,0 +1,20 @@
+applications:
+  - name: retail-sample-api
+    memory: 128M
+    timeout: 10
+    routes:
+      - route: retail-sample-api.eu-gb.mybluemix.net
+    docker:
+      image: anatollupacescu/retail-sample
+    env:
+      RETAIL_OFFLINE: false
+
+  - name: retail-sample-static
+    memory: 128M
+    timeout: 10
+    routes:
+      - route: retail-sample-static.eu-gb.mybluemix.net
+    docker:
+      image: anatollupacescu/retail-sample-static
+    env:
+      API_URL: https://e6d68d2a.eu-de.apigw.appdomain.cloud/retail-sample

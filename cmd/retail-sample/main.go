@@ -31,24 +31,14 @@ import (
 // Configuration is exported to be accesible by the library.
 type Configuration struct {
 	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
-	FsPort      string `conf:"default:8080"`
-	APIPort     string `conf:"default:8081"`
-	DiagPort    string `conf:"default:8082"`
-	InMemory    bool   `conf:"default:false"`
+	Port        string `conf:"default:8080"`
+	Offline     bool   `conf:"default:false"`
 }
 
 func main() {
 	config := getConfig()
 
-	fileRouter := mux.NewRouter()
-	fileRouter.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("./web/dist"))))
-
-	fileServer := http.Server{
-		Addr:    net.JoinHostPort("", config.FsPort),
-		Handler: fileRouter,
-	}
-
-	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stderr))
+	baseLogger := kitlog.NewLogfmtLogger(kitlog.NewSyncWriter(os.Stdout))
 	baseLogger = kitlog.With(baseLogger, "ts", kitlog.DefaultTimestampUTC)
 	routerLogger := middleware.WrapLogger(baseLogger)
 	loggerFactory := middleware.BuildNewLoggerFunc(baseLogger)
@@ -56,31 +46,21 @@ func main() {
 	/* business */
 	persistenceFactory := getPersistenceFactory(config)
 
-	businessRouter := mux.NewRouter()
+	router := mux.NewRouter()
 
-	inventory.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
-	order.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
-	recipe.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
-	stock.ConfigureRoutes(businessRouter, routerLogger, loggerFactory, persistenceFactory)
+	inventory.ConfigureRoutes(router, routerLogger, loggerFactory, persistenceFactory)
+	order.ConfigureRoutes(router, routerLogger, loggerFactory, persistenceFactory)
+	recipe.ConfigureRoutes(router, routerLogger, loggerFactory, persistenceFactory)
+	stock.ConfigureRoutes(router, routerLogger, loggerFactory, persistenceFactory)
 
-	/* TODO change 'InMemory' flag to 'Offline'
+	/* TODO finish up roles
 
 	if !config.InMemory {
 		businessRouter.Use(middleware.Authenticated)
 	}
 	*/
 
-	corsBusinessRouter := cors.AllowAll().Handler(businessRouter)
-
-	server := http.Server{
-		Addr:    net.JoinHostPort("", config.APIPort),
-		Handler: corsBusinessRouter,
-	}
-
-	/* diagnostics */
-	diagRouter := mux.NewRouter()
-
-	diagRouter.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+	router.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		if err := persistenceFactory.Ping(); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -88,11 +68,11 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	corsDiagRouter := cors.Default().Handler(diagRouter)
+	corsRouter := cors.AllowAll().Handler(router)
 
-	diag := http.Server{
-		Addr:    net.JoinHostPort("", config.DiagPort),
-		Handler: corsDiagRouter,
+	server := http.Server{
+		Addr:    net.JoinHostPort("", config.Port),
+		Handler: corsRouter,
 	}
 
 	logger := kitlog.With(baseLogger,
@@ -100,24 +80,20 @@ func main() {
 		"build_time", version.BuildTime,
 		"commit", version.Commit)
 
-	const serverCount = 3
+	logger.Log("offline", config.Offline)
+
+	const serverCount = 2
 	shutdown := make(chan error, serverCount)
 
-	start := func(name string, server *http.Server) {
-		_ = logger.Log("server", name, "msg", "starting", "port", server.Addr)
+	go func() {
+		_ = logger.Log("msg", "starting", "port", server.Addr)
 
 		if err := server.ListenAndServe(); err != nil {
 			if !errors.Is(err, http.ErrServerClosed) {
 				shutdown <- err
 			}
 		}
-	}
-
-	go start("file server", &fileServer)
-
-	go start("business logic", &server)
-
-	go start("diagnostic", &diag)
+	}()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -135,10 +111,6 @@ func main() {
 	timeout, cancelFunc := context.WithTimeout(context.Background(), waitForShutdown)
 	defer cancelFunc()
 
-	if err := diag.Shutdown(timeout); err != nil {
-		_ = logger.Log("msg", "diagnostic server shutdown failed", "error", err)
-	}
-
 	if err := server.Shutdown(timeout); err != nil {
 		_ = logger.Log("msg", "business server shutdown failed", "error", err)
 	}
@@ -153,7 +125,7 @@ func getConfig() (config Configuration) {
 }
 
 func getPersistenceFactory(config Configuration) middleware.PersistenceProviderFactory {
-	if config.InMemory {
+	if config.Offline {
 		return persistence.NewInMemory()
 	}
 

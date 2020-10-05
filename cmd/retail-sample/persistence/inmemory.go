@@ -1,16 +1,13 @@
 package persistence
 
 import (
-	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
-	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
-	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
-	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
+	"github.com/anatollupacescu/retail-sample/persistence/inmemory"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 )
 
 type (
@@ -26,12 +23,12 @@ type (
 	}
 )
 
-func NewInMemory() *InMemoryProviderFactory {
-	invStore := invCmd.NewInMemoryStore()
-	recipeStore := recipeCmd.NewInMemoryStore()
-	orderStore := orderCmd.NewInMemoryStore()
-	stockStore := stockCmd.NewInMemoryStock()
-	provisionLog := stockCmd.NewInMemoryProvisionLog()
+func New() *InMemoryProviderFactory {
+	invStore := inmemory.NewInventory()
+	recipeStore := inmemory.NewRecipe()
+	orderStore := inmemory.NewOrder()
+	stockStore := inmemory.NewStock()
+	provisionLog := inmemory.NewProvisionLog()
 
 	inventory := inventory.Inventory{Store: &invStore}
 

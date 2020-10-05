@@ -2,8 +2,8 @@ package stock
 
 import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 )
 
 type wrapper struct {

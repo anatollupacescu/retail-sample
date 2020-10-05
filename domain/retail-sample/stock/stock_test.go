@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 )
 
 func TestProvision(t *testing.T) {

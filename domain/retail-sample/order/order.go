@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 )
 
 type (

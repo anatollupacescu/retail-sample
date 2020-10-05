@@ -1,4 +1,4 @@
-package order
+package persistence
 
 import (
 	"context"
@@ -7,21 +7,19 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
 )
 
-var ErrDB = errors.New("postgres")
-
-type PgxDB interface {
+type OrderPgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 }
 
-type PgxStore struct {
-	DB PgxDB
+type OrderPgxStore struct {
+	DB OrderPgxDB
 }
 
-func (po *PgxStore) Add(o order.Order) (order.ID, error) {
+func (po *OrderPgxStore) Add(o order.Order) (order.ID, error) {
 	sql := "insert into outbound_order(recipeid, quantity) values($1, $2) returning id"
 
 	var id int32
@@ -34,7 +32,7 @@ func (po *PgxStore) Add(o order.Order) (order.ID, error) {
 	return order.ID(id), nil
 }
 
-func (po *PgxStore) List() ([]order.Order, error) {
+func (po *OrderPgxStore) List() ([]order.Order, error) {
 	rows, err := po.DB.Query(context.Background(), "select id, recipeid, quantity, orderdate from outbound_order")
 
 	if err != nil {
@@ -69,7 +67,7 @@ func (po *PgxStore) List() ([]order.Order, error) {
 	return orders, nil
 }
 
-func (po *PgxStore) Get(id order.ID) (result order.Order, err error) {
+func (po *OrderPgxStore) Get(id order.ID) (result order.Order, err error) {
 	sql := `
 		select 
 			recipeid, quantity 

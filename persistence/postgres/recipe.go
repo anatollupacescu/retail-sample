@@ -1,4 +1,4 @@
-package recipe
+package persistence
 
 import (
 	"context"
@@ -7,22 +7,20 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 )
 
-var ErrDB = errors.New("postgres")
-
-type PgxDB interface {
+type RecipePgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error)
 }
 
-type PgxStore struct {
-	DB PgxDB
+type RecipePgxStore struct {
+	DB RecipePgxDB
 }
 
-func (pr *PgxStore) Save(r recipe.Recipe) error {
+func (pr *RecipePgxStore) Save(r recipe.Recipe) error {
 	sql := "update recipe set enabled=$1 where id=$2"
 
 	tag, err := pr.DB.Exec(context.Background(), sql, r.Enabled, r.ID)
@@ -38,7 +36,7 @@ func (pr *PgxStore) Save(r recipe.Recipe) error {
 	return nil
 }
 
-func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
+func (pr *RecipePgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	sql := "insert into recipe(name) values($1) returning id"
 
 	var (
@@ -65,7 +63,7 @@ func (pr *PgxStore) Add(r recipe.Recipe) (recipe.ID, error) {
 	return recipe.ID(recipeID), nil
 }
 
-func (pr *PgxStore) Get(recipeID recipe.ID) (recipe.Recipe, error) {
+func (pr *RecipePgxStore) Get(recipeID recipe.ID) (recipe.Recipe, error) {
 	sql := "select name, enabled from recipe where id = $1"
 
 	var r recipe.Recipe
@@ -115,7 +113,7 @@ func (pr *PgxStore) Get(recipeID recipe.ID) (recipe.Recipe, error) {
 	return r, nil
 }
 
-func (pr *PgxStore) List() ([]recipe.Recipe, error) {
+func (pr *RecipePgxStore) List() ([]recipe.Recipe, error) {
 	sql := `SELECT
 						r.id,
 						r.name,

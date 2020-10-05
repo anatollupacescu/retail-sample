@@ -1,8 +1,8 @@
 package stock
 
 import (
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 
 	"github.com/pkg/errors"
 )

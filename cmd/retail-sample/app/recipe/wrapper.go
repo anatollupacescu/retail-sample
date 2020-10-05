@@ -2,7 +2,7 @@ package recipe
 
 import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 )
 
 type wrapper struct {

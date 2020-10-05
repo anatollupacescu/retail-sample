@@ -1,4 +1,4 @@
-package inventory
+package persistence
 
 import (
 	"context"
@@ -7,22 +7,22 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
 )
 
 var ErrDB = errors.New("postgres")
 
-type PgxDB interface {
+type InventoryPgxDB interface {
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error)
 }
 
-type PgxStore struct {
-	DB PgxDB
+type InventoryPgxStore struct {
+	DB InventoryPgxDB
 }
 
-func (ps *PgxStore) Update(i inventory.Item) error {
+func (ps *InventoryPgxStore) Update(i inventory.Item) error {
 	tag, err := ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (ps *PgxStore) Update(i inventory.Item) error {
 	return nil
 }
 
-func (ps *PgxStore) Add(n string) (int, error) {
+func (ps *InventoryPgxStore) Add(n string) (int, error) {
 	var id int32
 	err := ps.DB.QueryRow(context.Background(), "insert into inventory(name, enabled) values($1, true) returning id", n).Scan(&id)
 
@@ -47,7 +47,7 @@ func (ps *PgxStore) Add(n string) (int, error) {
 	return int(id), nil
 }
 
-func (ps *PgxStore) Find(n string) (int, error) {
+func (ps *InventoryPgxStore) Find(n string) (int, error) {
 	var id int
 	err := ps.DB.QueryRow(context.Background(), "select id from inventory where name = $1", n).Scan(&id)
 
@@ -61,7 +61,7 @@ func (ps *PgxStore) Find(n string) (int, error) {
 	}
 }
 
-func (ps *PgxStore) Get(id int) (inventory.Item, error) {
+func (ps *InventoryPgxStore) Get(id int) (inventory.Item, error) {
 	var (
 		name    string
 		enabled bool
@@ -91,7 +91,7 @@ func (ps *PgxStore) Get(id int) (inventory.Item, error) {
 	}, nil
 }
 
-func (ps *PgxStore) List() (items []inventory.Item, err error) {
+func (ps *InventoryPgxStore) List() (items []inventory.Item, err error) {
 	rows, err := ps.DB.Query(context.Background(), "select id, name, enabled from inventory")
 
 	if err != nil {

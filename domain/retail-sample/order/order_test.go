@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 )
 
 func TestPlaceOrder(t *testing.T) {

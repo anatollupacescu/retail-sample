@@ -11,9 +11,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 )

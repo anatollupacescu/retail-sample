@@ -3,7 +3,7 @@ package order
 import (
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 )
 
 type MockOrderStore struct {

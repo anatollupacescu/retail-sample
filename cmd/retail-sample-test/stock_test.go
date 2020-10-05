@@ -9,7 +9,7 @@ import (
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 
-	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
 )

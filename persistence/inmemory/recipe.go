@@ -1,22 +1,22 @@
-package recipe
+package inmemory
 
-import domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+import domain "github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 
-type InMemoryStore struct {
+type Recipe struct {
 	data    map[int]domain.Recipe
 	counter *int
 }
 
-func NewInMemoryStore() InMemoryStore {
+func NewRecipe() Recipe {
 	zero := 0
 
-	return InMemoryStore{
+	return Recipe{
 		data:    make(map[int]domain.Recipe),
 		counter: &zero,
 	}
 }
 
-func (m *InMemoryStore) Add(r domain.Recipe) (domain.ID, error) {
+func (m *Recipe) Add(r domain.Recipe) (domain.ID, error) {
 	*m.counter++
 	id := *m.counter
 	m.data[id] = r
@@ -24,7 +24,7 @@ func (m *InMemoryStore) Add(r domain.Recipe) (domain.ID, error) {
 	return domain.ID(id), nil
 }
 
-func (m *InMemoryStore) List() (r []domain.Recipe, err error) {
+func (m *Recipe) List() (r []domain.Recipe, err error) {
 	for id := range m.data {
 		rp := m.data[id]
 		rp.ID = domain.ID(id)
@@ -34,7 +34,7 @@ func (m *InMemoryStore) List() (r []domain.Recipe, err error) {
 	return
 }
 
-func (m *InMemoryStore) Get(id domain.ID) (domain.Recipe, error) {
+func (m *Recipe) Get(id domain.ID) (domain.Recipe, error) {
 	dict := m.data
 
 	if val, ok := dict[int(id)]; ok {
@@ -45,7 +45,7 @@ func (m *InMemoryStore) Get(id domain.ID) (domain.Recipe, error) {
 	return domain.Recipe{}, domain.ErrRecipeNotFound
 }
 
-func (m *InMemoryStore) Save(r domain.Recipe) error {
+func (m *Recipe) Save(r domain.Recipe) error {
 	dict := m.data
 
 	if _, ok := dict[int(r.ID)]; !ok {

@@ -7,17 +7,12 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	invCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
-	orderCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/order"
-	recipeCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/recipe"
-	stockCmd "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/stock"
-
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
 
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/stock"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/stock"
 )
 
 type (
@@ -91,19 +86,19 @@ func (pf *PgxProviderFactory) Rollback(pp middleware.PersistenceProvider) {
 }
 
 func (pp *PgxTransactionalProvider) Inventory() inventory.Inventory {
-	store := &invCmd.PgxStore{DB: pp.tx}
+	store := &InventoryPgxStore{DB: pp.tx}
 	return inventory.Inventory{Store: store}
 }
 
 func (pp *PgxTransactionalProvider) RecipeBook() recipe.Book {
-	recipeStore := &recipeCmd.PgxStore{DB: pp.tx}
+	recipeStore := &RecipePgxStore{DB: pp.tx}
 	inventory := pp.Inventory()
 
 	return recipe.Book{Store: recipeStore, Inventory: inventory}
 }
 
 func (pp *PgxTransactionalProvider) Orders() order.Orders {
-	orderStore := &orderCmd.PgxStore{DB: pp.tx}
+	orderStore := &OrderPgxStore{DB: pp.tx}
 	recipeBook := pp.RecipeBook()
 	stock := pp.Stock()
 
@@ -115,8 +110,8 @@ func (pp *PgxTransactionalProvider) Orders() order.Orders {
 }
 
 func (pp *PgxTransactionalProvider) Stock() stock.Stock {
-	store := &stockCmd.PgxStore{DB: pp.tx}
-	provisionLog := &stockCmd.PgxProvisionLog{DB: pp.tx}
+	store := &StockPgxStore{DB: pp.tx}
+	provisionLog := &PgxProvisionLog{DB: pp.tx}
 	inventory := pp.Inventory()
 
 	return stock.Stock{

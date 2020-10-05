@@ -2,7 +2,7 @@ package order
 
 import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/order"
 )
 
 type wrapper struct {

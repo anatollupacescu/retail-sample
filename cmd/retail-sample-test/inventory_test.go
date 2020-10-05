@@ -9,7 +9,7 @@ import (
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	web "github.com/anatollupacescu/retail-sample/cmd/retail-sample/app/inventory"
-	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
 )
 
 func createItem(name string) (domain.Item, error) {

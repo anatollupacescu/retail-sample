@@ -2,7 +2,7 @@ package inventory
 
 import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/middleware"
-	"github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
 )
 
 type wrapper struct {

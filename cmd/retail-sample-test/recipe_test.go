@@ -7,7 +7,7 @@ import (
 
 	"github.com/anatollupacescu/arbortest/runner"
 
-	domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/recipe"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail-sample/recipe"
 
 	http "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"
 	random "github.com/anatollupacescu/retail-sample/cmd/retail-sample-test"

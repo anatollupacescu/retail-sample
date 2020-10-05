@@ -1,27 +1,27 @@
-package inventory
+package inmemory
 
-import domain "github.com/anatollupacescu/retail-sample/internal/retail-domain/inventory"
+import domain "github.com/anatollupacescu/retail-sample/domain/retail-sample/inventory"
 
 type Entry struct {
 	Name    string
 	Enabled bool
 }
 
-type InMemoryStore struct {
+type Inventory struct {
 	data    map[int]Entry
 	counter *int
 }
 
-func NewInMemoryStore() InMemoryStore {
+func NewInventory() Inventory {
 	zero := 0
 
-	return InMemoryStore{
+	return Inventory{
 		data:    make(map[int]Entry),
 		counter: &zero,
 	}
 }
 
-func (m *InMemoryStore) Add(s string) (int, error) {
+func (m *Inventory) Add(s string) (int, error) {
 	*m.counter++
 
 	newID := *m.counter
@@ -34,7 +34,7 @@ func (m *InMemoryStore) Add(s string) (int, error) {
 	return newID, nil
 }
 
-func (m *InMemoryStore) Find(s string) (int, error) {
+func (m *Inventory) Find(s string) (int, error) {
 	for id, v := range m.data {
 		if v.Name == s {
 			return id, nil
@@ -44,7 +44,7 @@ func (m *InMemoryStore) Find(s string) (int, error) {
 	return 0, domain.ErrItemNotFound
 }
 
-func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
+func (m *Inventory) Get(wantedID int) (domain.Item, error) {
 	var zeroValueItem domain.Item
 
 	for id, v := range m.data {
@@ -60,7 +60,7 @@ func (m *InMemoryStore) Get(wantedID int) (domain.Item, error) {
 	return zeroValueItem, domain.ErrItemNotFound
 }
 
-func (m *InMemoryStore) List() (t []domain.Item, err error) {
+func (m *Inventory) List() (t []domain.Item, err error) {
 	for k, v := range m.data {
 		t = append(t, domain.Item{
 			ID:      k,
@@ -72,7 +72,7 @@ func (m *InMemoryStore) List() (t []domain.Item, err error) {
 	return
 }
 
-func (m *InMemoryStore) Update(i domain.Item) (err error) {
+func (m *Inventory) Update(i domain.Item) (err error) {
 	m.data[i.ID] = Entry{
 		Name:    i.Name,
 		Enabled: i.Enabled,

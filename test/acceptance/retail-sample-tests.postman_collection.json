@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "980e2405-a824-48b4-9c7f-c3ffe913f74a",
+		"_postman_id": "cc523c20-bdf7-409c-9d4b-761a01721bd3",
 		"name": "retail-sample-tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "735cabae-6b60-4d01-8604-60f5ea912d57",
+								"id": "eea105d7-c9d1-4096-8ef8-cfd1f8234e55",
 								"exec": [
 									"pm.test(\"response should be 200\", function () {",
 									"    pm.response.to.be.ok;",
@@ -29,11 +29,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8081/health",
+							"raw": "localhost:8080/health",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8080",
 							"path": [
 								"health"
 							]
@@ -56,7 +56,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "206f07bb-2712-4a47-a239-05bea1e9fe6a",
+										"id": "3678ab40-d827-4c2c-8972-0a15d31a9259",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -90,7 +90,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "370d3fc0-dde7-47ef-a96f-a2a6393ceb95",
+										"id": "f5905ee8-f206-4fab-acb6-ebc3cbea22cc",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"inventory_item_name\", uuid())",
@@ -132,7 +132,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "c570085a-a993-465e-881a-4c2d442cf986",
+										"id": "9dc19db4-9c6a-480b-9415-3deb6e219810",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -186,7 +186,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "a02c65ac-e755-4ad4-bed0-f3a17342d1fe",
+										"id": "e928ada1-2678-407d-8ac5-32c6f7e635c6",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -243,7 +243,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "c9eb19b1-a971-472c-8861-cb16a5cc8f8c",
+										"id": "aa9fd948-97c1-489a-9013-c97f28d28d16",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -277,7 +277,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "b863fe5f-1d74-43c1-a878-432cfb2f1302",
+										"id": "32e59007-62ec-41f1-a0f0-5351a75a53ca",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"disabled_item_name\", uuid())",
@@ -319,7 +319,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "c63edad2-9c0e-4adf-abcd-ad6358d51073",
+										"id": "a9299031-ea41-47f3-afd3-bbba717fac9d",
 										"exec": [
 											"pm.test(\"status is 202\", function() {",
 											"    pm.response.to.have.status(202);",
@@ -378,7 +378,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "f59365c8-9bb2-4585-a473-688f9449f104",
+										"id": "5ed01e1c-d726-43f9-9fc9-80ddd47172fc",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -433,7 +433,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "34525252-6936-43e2-a8b1-cb7a7d32547d",
+										"id": "2af58649-ff5c-481b-95c7-264977704d10",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -497,7 +497,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "117d3e81-dede-4496-a578-86e478185bdd",
+								"id": "99adc374-7d63-41cd-a167-7b6d482ee908",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -529,7 +529,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "ede6a0b0-422d-4384-89cf-4086015db443",
+								"id": "93c2f395-4656-4d5e-a8f9-e46f2a0606c2",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_1\", uuid())",
@@ -572,7 +572,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "2f0328f0-ecc8-487b-a40e-fc8bab5a19cb",
+								"id": "4d5f1ee3-d4fb-4777-ab5b-104d1d722704",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -603,7 +603,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "2dc3c605-92c9-49a6-988b-505a0f36d6d0",
+								"id": "d910ed0f-bc4c-4b6f-87a3-6bcd8e08c0bf",
 								"exec": [
 									"let uuid = require('uuid')",
 									"pm.environment.set(\"inventory_item_name_2\", uuid())",
@@ -645,7 +645,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "5e8ab21c-e881-4f7a-9991-aab740d98086",
+								"id": "6a45078c-4402-4a57-91f0-f4daf7d9db26",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -660,11 +660,11 @@
 									"})",
 									"",
 									"pm.test(\"contains updated values\", function() {",
-									"    let id1 = pm.environment.get(\"inventory_item_id_1\")",
+									"    let id = pm.environment.get(\"inventory_item_id_1\")",
 									"",
 									"    let responseJson = pm.response.json();",
-									"    ",
-									"    pm.expect(responseJson.data[id1]).to.eql(3)",
+									"    pm.expect(responseJson.data.id).to.eql(id)",
+									"    pm.expect(responseJson.data.qty).to.eql(3)",
 									"})",
 									""
 								],
@@ -674,7 +674,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "4db06223-3020-47a4-a548-03126837851d",
+								"id": "26fa6a63-9704-4b36-b0c1-ec4205a2e1d6",
 								"exec": [
 									""
 								],
@@ -715,7 +715,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "66c24674-bbe7-46e9-b7b4-09baac8baa68",
+								"id": "aa793598-ee8b-4717-a8ba-f40be4b93515",
 								"exec": [
 									"pm.test(\"status is 201 CREATED\", function() {",
 									"    pm.response.to.have.status(201);",
@@ -730,11 +730,10 @@
 									"})",
 									"",
 									"pm.test(\"contains updated values\", function() {",
-									"    let id2 = pm.environment.get(\"inventory_item_id_2\")",
-									"",
+									"    let id = pm.environment.get(\"inventory_item_id_2\")",
 									"    let responseJson = pm.response.json();",
-									"",
-									"    pm.expect(responseJson.data[id2]).to.eql(4)",
+									"    pm.expect(responseJson.data.id).to.eql(id)",
+									"    pm.expect(responseJson.data.qty).to.eql(4)",
 									"})",
 									""
 								],
@@ -744,7 +743,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "92d05974-76b5-4767-9a20-5c2bf8d82ab1",
+								"id": "a5b9234c-ce62-4f24-a077-4e49522e07ec",
 								"exec": [
 									""
 								],
@@ -785,7 +784,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "051e9f3e-7269-4ce2-bf68-d62d9a514e4e",
+								"id": "793c52b6-6e59-4c3c-84f3-e7ef3ff4eaaa",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -865,7 +864,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "3b8faaaf-f4b6-4be5-9caa-06aa5489d7ba",
+								"id": "bd47a1fe-b2dc-4f0a-91f6-83ebdf4e9ae3",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -932,7 +931,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "763f9caf-bf66-4721-8d84-edb164dfe7e0",
+								"id": "6440bb13-7341-426a-a350-806365b8a1f4",
 								"exec": [
 									"pm.test(\"status is OK\", function() {",
 									"    pm.response.to.have.status(200);",
@@ -1021,7 +1020,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "df10c79d-89cf-40c0-8cb4-c9376f7703d7",
+										"id": "24308ff3-8062-4f8c-a7f1-966e571c11e3",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1051,7 +1050,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "b862c3ad-1100-4cf7-885c-414f8adbf6ba",
+										"id": "3e596d26-04a4-4691-b8e2-23ff9103ff14",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"test_outbound_inventory_item_name_1\", uuid())",
@@ -1093,7 +1092,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "082a36a6-85be-48b7-ac7a-5f10361f70c9",
+										"id": "69bdb516-7a48-400f-bff0-0ec269a7ac03",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1122,7 +1121,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "1b90fde0-db1f-4865-a9f9-1704f7f301a0",
+										"id": "eafb003e-ce6d-4da6-871f-c198ddf63ac1",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"test_outbound_inventory_item_name_2\", uuid())",
@@ -1164,7 +1163,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "ef5e3d48-f442-4479-afc7-08e6e4f957a2",
+										"id": "fcd95a62-6215-4793-8614-c6841bfe3c35",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1179,11 +1178,10 @@
 											"})",
 											"",
 											"pm.test(\"contains updated values\", function() {",
-											"    let id1 = pm.environment.get(\"test_outbound_inventory_item_id_1\")",
-											"",
+											"    let id = pm.environment.get(\"test_outbound_inventory_item_id_1\")",
 											"    let responseJson = pm.response.json();",
-											"    ",
-											"    pm.expect(responseJson.data[id1]).to.eql(3)",
+											"    pm.expect(responseJson.data.id).to.eql(id)",
+											"    pm.expect(responseJson.data.qty).to.eql(3)",
 											"})",
 											""
 										],
@@ -1193,7 +1191,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "9a80c5a3-3a7c-4bfc-9239-adc268536f48",
+										"id": "4833ac8f-f210-4d17-ae19-4ef0fba21439",
 										"exec": [
 											""
 										],
@@ -1234,7 +1232,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "90d67d29-658a-4162-bc26-ceac63b7413a",
+										"id": "eb1cf9b4-695c-45b2-bcd7-34321ddb141f",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1249,11 +1247,10 @@
 											"})",
 											"",
 											"pm.test(\"contains updated values\", function() {",
-											"    let id2 = pm.environment.get(\"test_outbound_inventory_item_id_2\")",
-											"",
+											"    let id = pm.environment.get(\"test_outbound_inventory_item_id_2\")",
 											"    let responseJson = pm.response.json();",
-											"",
-											"    pm.expect(responseJson.data[id2]).to.eql(4)",
+											"    pm.expect(responseJson.data.id).to.eql(id)",
+											"    pm.expect(responseJson.data.qty).to.eql(4)",
 											"})",
 											""
 										],
@@ -1263,7 +1260,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "1cbc0ffa-b396-4aed-a65d-744b0aeecb51",
+										"id": "c5b3661c-337c-4611-949b-79d52040deb0",
 										"exec": [
 											""
 										],
@@ -1304,7 +1301,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "78777b97-e35c-49fc-90c7-63ef83c49be6",
+										"id": "01c4f6c5-e582-4abc-aa10-21d966739feb",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1344,7 +1341,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "d3aaed68-176f-4142-9c62-fcd63e490850",
+										"id": "528e681f-fb44-47da-aafb-a58a9f8959c4",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
@@ -1386,7 +1383,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "1519bd2f-df6f-4b3a-83e2-61214b3dd727",
+										"id": "202b0f8a-314a-4198-bfda-88891fb55482",
 										"exec": [
 											"pm.test(\"Should return 200 OK\", function() {",
 											"    pm.response.to.have.status(200)",
@@ -1465,7 +1462,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "d85d58c5-9b4b-4b4f-853d-13a4ec95de7d",
+										"id": "cd0de228-1472-44e2-b87c-c43752b7539d",
 										"exec": [
 											"pm.test(\"Should return 200 OK\", function() {",
 											"    pm.response.to.have.status(200)",
@@ -1540,7 +1537,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "ac753fbf-c620-475c-b72a-78812bda4d59",
+										"id": "bccef4ab-f158-4cb4-9a95-16fb1e4eca38",
 										"exec": [
 											"pm.test(\"response is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201)",
@@ -1583,7 +1580,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "8b51c614-2d1c-4cb6-859a-5f2aff53907d",
+										"id": "1bef31f8-6d40-421b-b62b-c0a5f71c1293",
 										"exec": [
 											"pm.test(\"status is OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -1656,7 +1653,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "b5b9222d-1063-429e-8b30-928dd9364d23",
+										"id": "9a66955f-4029-4b8a-91d6-a92feecdf635",
 										"exec": [
 											"pm.test(\"Should return 400\", function() {",
 											"    pm.response.to.have.status(400)",
@@ -1699,7 +1696,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "c1f1713d-9d50-441e-8d8d-aef09b7cbbb9",
+										"id": "4b967714-c6a5-47f5-b23c-950d8eed2910",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200)",
@@ -1774,7 +1771,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "b70cd3f0-9635-438e-bea0-8f87d03e38d0",
+										"id": "09374442-eeba-4a00-9317-8b0a56c24c2e",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1804,7 +1801,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "13e8d600-6296-4226-b768-ebd70dfbb2f4",
+										"id": "90292f5e-b6d9-4b7a-9dc3-23cf436753d1",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"disable_recipe_item_name_1\", uuid())",
@@ -1846,7 +1843,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "a543723f-0ec3-48ca-8aee-54f434e4506d",
+										"id": "0f73bf01-7953-4b60-b785-d905274cb00b",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1864,7 +1861,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "fd5b9b24-56ca-409c-92ff-276f1d758762",
+										"id": "f88a57b5-c0f4-453e-be8b-af7f2d3102c1",
 										"exec": [
 											""
 										],
@@ -1905,7 +1902,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "f90f9b43-f344-45d1-8e1b-ea8d02fb065a",
+										"id": "5f856daf-dd4f-466e-8aea-6399366a7d21",
 										"exec": [
 											"pm.test(\"status is 201 CREATED\", function() {",
 											"    pm.response.to.have.status(201);",
@@ -1933,7 +1930,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "d3fec689-3470-44d9-a935-c1a58364de1c",
+										"id": "49e5662f-0237-48eb-acd5-bb22b20d17db",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"disable_recipe_name\", uuid())",
@@ -1975,7 +1972,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "a334c59c-ed48-4894-9edc-7a8b2fffb4d7",
+										"id": "96ff59c6-4011-4128-b032-1c976f2b952a",
 										"exec": [
 											"pm.test(\"Should return 200\", function() {",
 											"    pm.response.to.have.status(200)",
@@ -2042,7 +2039,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "bb91cc43-1a7b-414f-be72-1ab4325fb757",
+										"id": "3fe0a454-a9c2-4fc1-ba6e-90c1ccf12215",
 										"exec": [
 											"pm.test(\"status is 200 OK\", function() {",
 											"    pm.response.to.have.status(200);",
@@ -2075,7 +2072,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "d09b6722-0760-473f-b28b-14ee5434a8ad",
+										"id": "673bb396-f38e-41dc-8ad0-18b6d85600b7",
 										"exec": [
 											"let uuid = require('uuid')",
 											"pm.environment.set(\"test_outbound_recipe_name\", uuid())",
@@ -2118,7 +2115,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "0a1d1bc1-bda3-41bc-8570-5bbb37be16b6",
+										"id": "6f2d5fc3-62f7-4b69-9601-982bb40e68bc",
 										"exec": [
 											"pm.test(\"Should return 200\", function() {",
 											"    pm.response.to.have.status(200)",
@@ -2185,7 +2182,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "84172b04-735f-46f9-bcad-275a9709ae35",
+										"id": "c2019938-fa45-4d57-9725-fa629d9d7551",
 										"exec": [
 											"pm.test(\"Should return 400\", function() {",
 											"    pm.response.to.have.status(400)",
@@ -2239,7 +2236,7 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "d16ce438-f09b-48a4-93e8-d8547d76cf26",
+						"id": "224d7f26-986e-4549-ab9d-3a908d12a3bc",
 						"type": "text/javascript",
 						"exec": [
 							""
@@ -2249,7 +2246,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "0dc9d467-39df-42e4-a000-bd488f2d5032",
+						"id": "d5e91a88-f0dd-4fcf-8e32-8ab9c0fdfb4c",
 						"type": "text/javascript",
 						"exec": [
 							""

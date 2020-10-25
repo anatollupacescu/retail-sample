@@ -10,10 +10,10 @@ BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 .PHONY: format test
 
 format:
-	@goimports -w -local $(PROJECT) cmd/ internal/
+	@goimports -w -local $(PROJECT) cmd/ domain/ internal/
 
 test:
-	@go test -count=1 ./...
+	@go test -count=1 ./domain/... ./internal/...
 
 # build
 

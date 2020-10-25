@@ -4,9 +4,12 @@ networks:
   shared-network:
     driver: bridge
 
+volumes:
+  retail-data: # named volumes can be managed easier using docker-compose
+
 services:
   db:
-    image: postgres
+    image: postgres:9.6
     ports:
       - '5432:5432'
     environment:
@@ -18,35 +21,12 @@ services:
     networks:
       - shared-network
 
-  web:
-    build:
-      context: ./
-      dockerfile: Dockerfile_compose
-    links:
-      - 'db:database'
-    environment:
-      - RETAIL_FS_PORT=8080
-      - RETAIL_API_PORT=8081
-      - RETAIL_DIAG_PORT=8082
-      - RETAIL_DATABASE_URL=postgres://docker:docker@db:5432/retail?pool_max_conns=10
-    ports:
-      - '8080:8080'
-      - '8081:8081'
-      - '8082:8082'
-    depends_on:
-      - dbmigration
-    networks:
-      - shared-network
-
   dbmigration:
-    build: database/
-    links:
-      - 'db:database'
+    build: cmd/retail-sample/internal/persistence/postgres/migration
+    depends_on: 
+    - db
     environment:
-      - HOST=database
+      - HOST=db
       - PORT=5432
     networks:
       - shared-network
-
-volumes:
-  retail-data: # named volumes can be managed easier using docker-compose

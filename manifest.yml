@@ -7,9 +7,6 @@ applications:
       - route: retail-sample-api.eu-gb.mybluemix.net
     docker:
       image: anatollupacescu/retail-sample
-    env:
-      RETAIL_DATABASE_URL: postgres://jolewljr:mk7rPN5MBIPFdJViYp86MatSVA7HWSEf@hanno.db.elephantsql.com:5432/jolewljr?pool_max_conns=5
-      RETAIL_OFFLINE: false
 
   - name: retail-sample-static
     memory: 128M

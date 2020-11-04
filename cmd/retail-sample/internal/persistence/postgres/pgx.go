@@ -31,11 +31,11 @@ func (t TX) Rollback(ctx context.Context) error {
 }
 
 func (t TX) Inventory() inventory.Inventory {
-	return inventory.New(&InventoryPgxStore{DB: t})
+	return inventory.New(&InventoryPgxStore{DB: t.Tx})
 }
 
 func (t TX) Orders() order.Orders {
-	s := &OrderPgxStore{DB: t}
+	s := &OrderPgxStore{DB: t.Tx}
 	rb := t.Recipe()
 	stock := t.Stock()
 
@@ -43,18 +43,18 @@ func (t TX) Orders() order.Orders {
 }
 
 func (t TX) Stock() stock.Stock {
-	store := &StockPgxStore{DB: t}
-	inventory := t.Inventory()
-	log := &PgxProvisionLog{DB: t}
+	store := &StockPgxStore{DB: t.Tx}
+	inventory := &InventoryPgxStore{DB: t.Tx}
+	log := &PgxProvisionLog{DB: t.Tx}
 
 	return stock.New(store, inventory, log)
 }
 
 func (t TX) Recipe() recipe.Book {
-	store := &RecipePgxStore{DB: t}
-	inv := t.Inventory()
+	store := &RecipePgxStore{DB: t.Tx}
+	inventory := &InventoryPgxStore{DB: t.Tx}
 
-	return recipe.New(store, inv)
+	return recipe.New(store, inventory)
 }
 
 func (db DB) Begin(ctx context.Context) (TX, error) {

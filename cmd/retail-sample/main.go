@@ -39,7 +39,6 @@ func main() {
 type Configuration struct {
 	DatabaseURL string `conf:"default:postgres://docker:docker@localhost:5432/retail?pool_max_conns=10"`
 	Port        string `conf:"default:8080"`
-	Offline     bool   `conf:"default:false"`
 }
 
 // nolint: funlen // as this is the main function it can be as long as needed
@@ -112,8 +111,6 @@ func run(config Configuration) {
 		Str("build_time", version.BuildTime).
 		Str("commit", version.Commit).
 		Logger()
-
-	bootLogger.Info().Bool("offline", config.Offline)
 
 	const serverCount = 2
 	shutdown := make(chan error, serverCount)

@@ -73,15 +73,3 @@ func (i Inventory) Add(name string) (int, error) {
 		return 0, err
 	}
 }
-
-func (i Inventory) List() ([]Item, error) {
-	return i.store.List()
-}
-
-func (i Inventory) Find(name string) (int, error) {
-	return i.store.Find(name)
-}
-
-func (i Inventory) Get(id int) (Item, error) {
-	return i.store.Get(id)
-}

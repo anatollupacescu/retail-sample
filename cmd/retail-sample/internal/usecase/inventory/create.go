@@ -4,17 +4,21 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func (a *Inventory) Create(name string) (item inventory.Item, err error) {
+type CreateDTO struct {
+	Name string
+}
+
+func (a *Inventory) Create(in CreateDTO) (item inventory.Item, err error) {
 	a.logger.Info("create", "enter")
 
 	var id int
 
-	if id, err = a.inventory.Add(name); err != nil {
+	if id, err = a.inventory.Add(in.Name); err != nil {
 		a.logger.Error("create", "call domain", err)
 		return
 	}
 
-	if item, err = a.inventory.Get(id); err != nil {
+	if item, err = a.store.Get(id); err != nil {
 		a.logger.Error("create", "retrieve new item", err)
 		return
 	}

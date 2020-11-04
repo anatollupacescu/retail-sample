@@ -20,7 +20,7 @@ func Recovery(next http.Handler) http.Handler {
 func concludeTransaction(w http.ResponseWriter, r *http.Request) {
 	logger := hlog.FromRequest(r)
 
-	tx, err := extractTransaction(r)
+	tx, err := ExtractTransaction(r)
 
 	if err != nil {
 		logger.Err(err).Msg("get transaction from context")
@@ -59,7 +59,7 @@ var (
 	errTransactionBadType  = errors.New("transaction not postgres")
 )
 
-func extractTransaction(r *http.Request) (tx persistence.TX, err error) {
+func ExtractTransaction(r *http.Request) (tx persistence.TX, err error) {
 	ctxTransaction := r.Context().Value(TxKey)
 
 	if ctxTransaction == nil {

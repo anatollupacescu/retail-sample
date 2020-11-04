@@ -43,7 +43,9 @@ func useCase(r *http.Request) (inventory.Inventory, error) {
 		logger: logger,
 	}
 
-	uc := inventory.New(r.Context(), inv, logWrapper)
+	store := &postgres.InventoryPgxStore{DB: &tx}
+
+	uc := inventory.New(r.Context(), inv, store, logWrapper)
 
 	return uc, nil
 }

@@ -10,13 +10,8 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 )
 
-type OrderPgxDB interface {
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
-}
-
 type OrderPgxStore struct {
-	DB OrderPgxDB
+	DB pgx.Tx
 }
 
 func (po *OrderPgxStore) Add(o order.Order) (order.ID, error) {

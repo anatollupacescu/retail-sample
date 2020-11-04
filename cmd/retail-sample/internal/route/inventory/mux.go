@@ -4,30 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/inventory"
-
-	"github.com/gorilla/mux"
-
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-type (
-	entity struct {
-		ID      int    `json:"id"`
-		Name    string `json:"name"`
-		Enabled bool   `json:"enabled"`
-	}
-	singleResponse struct {
-		Data entity `json:"data"`
-	}
-	collectionResponse struct {
-		Data []entity `json:"data"`
-	}
-)
-
-type updatePayload struct {
-	Enabled bool `json:"enabled"`
-}
+var serverError = http.StatusText(http.StatusInternalServerError)
 
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -35,26 +15,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
-
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
+	dto, err := toUpdateStatusDTO(r)
 
-	var requestPayload updatePayload
-
-	if err := d.Decode(&requestPayload); err != nil {
-		http.Error(w, "parse body", http.StatusBadRequest)
-
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	vars := mux.Vars(r)
-	rid := vars["itemID"]
-
-	item, err := uc.UpdateStatus(rid, requestPayload.Enabled)
+	item, err := uc.UpdateStatus(dto)
 
 	switch err {
 	case nil:
@@ -63,7 +35,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
@@ -80,12 +52,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 	}
-}
-
-type createPayload struct {
-	Name string `json:"name"`
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -94,21 +62,18 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
+	dto, err := toCreateDTO(r)
 
-	var body createPayload
-
-	if err := d.Decode(&body); err != nil {
-		http.Error(w, "could not parse body", http.StatusBadRequest)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	newItem, err := uc.Create(body.Name)
+	newItem, err := uc.Create(dto)
 
 	switch err {
 	case nil:
@@ -117,7 +82,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
@@ -135,37 +100,26 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// logger.Log("action", "encode response", "error", err, "method", "inventory.create")
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 	}
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
-
-	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
-
-		return
-	}
-
-	vars := mux.Vars(r)
-	itemID := vars["itemID"]
-
-	item, err := uc.GetByID(itemID)
+	item, err := GetByID(r)
 
 	switch err {
 	case nil:
 		break
-	case usecase.ErrBadItemID:
-		http.Error(w, "could not parse id: "+itemID, http.StatusBadRequest)
+	case ErrParseItemID:
+		http.Error(w, ErrParseItemID.Error(), http.StatusBadRequest)
 		return
 	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
@@ -180,28 +134,20 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 	}
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
-
-	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
-
-		return
-	}
-
-	all, err := uc.GetAll()
+	all, err := ListItems(r)
 
 	switch err {
 	case nil:
 		break
 	default:
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
@@ -220,10 +166,6 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, internalServerErrorMsg(), http.StatusInternalServerError)
+		http.Error(w, serverError, http.StatusInternalServerError)
 	}
-}
-
-func internalServerErrorMsg() string {
-	return http.StatusText(http.StatusInternalServerError)
 }

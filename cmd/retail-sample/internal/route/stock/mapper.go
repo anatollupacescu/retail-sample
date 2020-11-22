@@ -35,8 +35,8 @@ func toProvisionDTO(r *http.Request) (stock.UpdateDTO, error) {
 	}
 
 	dto := stock.UpdateDTO{
-		Qty:   body.Qty,
-		ReqID: id,
+		Qty:             body.Qty,
+		InventoryItemID: id,
 	}
 
 	return dto, nil

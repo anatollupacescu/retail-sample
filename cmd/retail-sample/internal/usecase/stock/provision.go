@@ -1,36 +1,45 @@
 package stock
 
-import (
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
-)
-
 type UpdateDTO struct {
-	ReqID int
-	Qty   int
+	InventoryItemID int
+	Qty             int
 }
 
-func (o *Stock) Provision(dto UpdateDTO) (stock.Position, error) {
+type Position struct {
+	ID   int
+	Name string
+	Qty  int
+}
+
+func (o *Stock) Provision(dto UpdateDTO) (Position, error) {
 	o.logger.Info("provision", "enter")
 
-	provisionID, err := o.stock.Provision(dto.ReqID, dto.Qty)
+	_, err := o.stock.Provision(dto.InventoryItemID, dto.Qty)
 	if err != nil {
 		o.logger.Error("provision", "call domain layer", err)
-		return stock.Position{}, err
+		return Position{}, err
 	}
 
-	logEntry, err := o.provisionLog.Get(provisionID)
+	qty, err := o.stockDB.Quantity(dto.InventoryItemID)
+
 	if err != nil {
-		o.logger.Error("provision", "call domain layer to retrieve provision record", err)
-		return stock.Position{}, err
+		o.logger.Error("provision", "call domain layer to retrieve quantity", err)
+		return Position{}, err
 	}
 
-	pos, err := o.stock.Position(logEntry.ID)
+	item, err := o.inventoryDB.Get(dto.InventoryItemID)
 	if err != nil {
 		o.logger.Error("provision", "call domain layer to retrieve stock position", err)
-		return stock.Position{}, err
+		return Position{}, err
 	}
 
 	o.logger.Error("provision", "success", err)
+
+	pos := Position{
+		ID:   item.ID,
+		Name: item.Name,
+		Qty:  qty,
+	}
 
 	return pos, nil
 }

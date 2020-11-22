@@ -1,2 +1,2 @@
-// Package stock holds stock relevant functionaltity
+// Package stock exports funtionality to provision and sell the stock items
 package stock

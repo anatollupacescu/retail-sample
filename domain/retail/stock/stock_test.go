@@ -106,22 +106,6 @@ func TestProvision(t *testing.T) {
 	})
 }
 
-func TestQuantity(t *testing.T) {
-	t.Run("propates from the store", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-
-		expectedErr := errors.New("err")
-		mockStore.On("Quantity", mock.Anything).Return(0, expectedErr)
-
-		st := &stock.Stock{Store: mockStore}
-		item, err := st.Position(1)
-
-		assert.Zero(t, item.Qty)
-		assert.Equal(t, expectedErr, err)
-		mockStore.AssertExpectations(t)
-	})
-}
-
 func TestSell(t *testing.T) {
 	t.Run("propagates error from store", func(t *testing.T) {
 		store := &stock.MockStore{}

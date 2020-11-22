@@ -21,12 +21,6 @@ type (
 		ProvisionLog ProvisionLog
 	}
 
-	Position struct {
-		ID   int
-		Name string
-		Qty  int
-	}
-
 	Inventory interface {
 		List() ([]inventory.Item, error)
 		Get(int) (inventory.Item, error)
@@ -44,7 +38,10 @@ type (
 	}
 )
 
-var ErrItemNotFound = errors.New("stock item not found")
+var (
+	ErrItemNotFound   = errors.New("stock item not found")
+	ErrNotEnoughStock = errors.New("not enough stock")
+)
 
 func New(store Store, inventory Inventory, log ProvisionLog) Stock {
 	return Stock{
@@ -52,30 +49,6 @@ func New(store Store, inventory Inventory, log ProvisionLog) Stock {
 		Inventory:    inventory,
 		ProvisionLog: log,
 	}
-}
-
-var ErrNotEnoughStock = errors.New("not enough stock")
-
-func (s Stock) Position(id int) (p Position, err error) {
-	qty, err := s.Store.Quantity(id)
-
-	if err != nil {
-		return Position{}, err
-	}
-
-	item, err := s.Inventory.Get(id)
-
-	if err != nil {
-		return Position{}, err
-	}
-
-	p = Position{
-		ID:   id,
-		Name: item.Name,
-		Qty:  qty,
-	}
-
-	return p, nil
 }
 
 func (s Stock) Provision(itemID, qty int) (id int, err error) {

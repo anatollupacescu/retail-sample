@@ -62,7 +62,7 @@ func (po *OrderPgxStore) List() ([]order.Order, error) {
 	return orders, nil
 }
 
-func (po *OrderPgxStore) Get(id order.ID) (result order.Order, err error) {
+func (po *OrderPgxStore) Get(id order.ID) (order.Order, error) {
 	sql := `
 		select 
 			recipeid, quantity 
@@ -76,23 +76,23 @@ func (po *OrderPgxStore) Get(id order.ID) (result order.Order, err error) {
 		qty      int
 	)
 
-	err = po.DB.QueryRow(context.Background(), sql, id).Scan(&recipeID, &qty)
+	err := po.DB.QueryRow(context.Background(), sql, id).Scan(&recipeID, &qty)
 
 	switch err {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return result, order.ErrOrderNotFound
+		return order.Order{}, order.ErrOrderNotFound
 	default:
-		return result, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
+		return order.Order{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	result = order.Order{
+	result := order.Order{
 		Entry: order.Entry{
 			RecipeID: recipeID,
 			Qty:      qty,
 		},
 	}
 
-	return
+	return result, nil
 }

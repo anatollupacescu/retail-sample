@@ -105,7 +105,7 @@ func Ping(db *DB) error {
 		return err
 	}
 
-	if _, err := tx.Exec(context.Background(), "SELECT true"); err != nil {
+	if _, err = tx.Exec(context.Background(), "SELECT true"); err != nil {
 		return err
 	}
 

@@ -7,7 +7,7 @@ import (
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
-
+	postgres "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 )
@@ -31,7 +31,10 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 	stock := tx.Stock()
 	proLog := tx.ProvisionLog()
 
-	uc := usecase.New(r.Context(), stock, proLog, logWrapper)
+	inventoryDB := &postgres.InventoryPgxStore{DB: tx.Tx}
+	stockDB := &postgres.StockPgxStore{DB: tx.Tx}
+
+	uc := usecase.New(r.Context(), stock, proLog, stockDB, inventoryDB, logWrapper)
 
 	return uc, nil
 }

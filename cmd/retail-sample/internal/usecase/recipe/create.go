@@ -2,12 +2,11 @@ package recipe
 
 import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 type CreateDTO struct {
-	Name        domain.Name
-	Ingredients []domain.Ingredient
+	Name        recipe.Name
+	Ingredients []recipe.Ingredient
 }
 
 func (o *Recipe) Create(dto CreateDTO) (recipe recipe.Recipe, err error) {

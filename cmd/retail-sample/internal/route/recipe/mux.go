@@ -7,7 +7,11 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-var serverErr = http.StatusText(http.StatusInternalServerError)
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
+}
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -15,7 +19,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -39,7 +43,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -49,7 +53,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
@@ -59,7 +63,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	all, err := getAll(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -67,7 +71,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
@@ -83,7 +87,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -91,7 +95,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
@@ -101,7 +105,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -121,7 +125,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -131,6 +135,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }

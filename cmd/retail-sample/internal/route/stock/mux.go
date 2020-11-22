@@ -7,7 +7,11 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-var serverErr = http.StatusText(http.StatusInternalServerError)
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
+}
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -15,7 +19,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	all, err := getAll(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -23,7 +27,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
@@ -39,7 +43,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -47,21 +51,12 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
 type provisionPayload struct {
 	Qty int `json:"qty"`
-}
-
-type provisionResponseData struct {
-	ID  int `json:"id"`
-	Qty int `json:"qty"`
-}
-
-type provisionResponse struct {
-	Data provisionResponseData `json:"data"`
 }
 
 func Provision(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +65,7 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -90,7 +85,7 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -100,7 +95,7 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
@@ -110,13 +105,13 @@ func GetProvisionLog(w http.ResponseWriter, r *http.Request) {
 	pl, err := getProvisionLog(r)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 
 	response := toProvisionLog(pl)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, serverErr, http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }

@@ -21,7 +21,6 @@ func (o *Stock) Provision(dto UpdateDTO) (Position, error) {
 	}
 
 	qty, err := o.stockDB.Quantity(dto.InventoryItemID)
-
 	if err != nil {
 		o.logger.Error("provision", "call domain layer to retrieve quantity", err)
 		return Position{}, err

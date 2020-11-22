@@ -11,16 +11,22 @@ type logger interface {
 	Info(string, string)
 }
 
-func New(ctx context.Context, book recipe.Book, log logger) Recipe {
+func New(ctx context.Context, book recipe.Book, recipeDB recipeDB, log logger) Recipe {
 	return Recipe{
-		ctx:    ctx,
-		book:   book,
-		logger: log,
+		ctx:      ctx,
+		book:     book,
+		recipeDB: recipeDB,
+		logger:   log,
 	}
 }
 
+type recipeDB interface {
+	Get(recipe.ID) (recipe.Recipe, error)
+}
+
 type Recipe struct {
-	logger logger
-	book   recipe.Book
-	ctx    context.Context
+	logger   logger
+	book     recipe.Book
+	recipeDB recipeDB
+	ctx      context.Context
 }

@@ -8,16 +8,15 @@ import (
 )
 
 type (
-	Store interface {
+	DB interface {
 		Quantity(int) (int, error)
 		Provision(int, int) (int, error)
 		Sell([]recipe.Ingredient, int) error
 	}
 
 	Stock struct {
-		Store Store
-
-		Inventory    Inventory
+		DB           DB
+		InventoryDB  Inventory
 		ProvisionLog ProvisionLog
 	}
 
@@ -32,9 +31,7 @@ type (
 	}
 
 	ProvisionLog interface {
-		List() ([]ProvisionEntry, error)
 		Add(int, int) (int, error)
-		Get(int) (ProvisionEntry, error)
 	}
 )
 
@@ -43,20 +40,12 @@ var (
 	ErrNotEnoughStock = errors.New("not enough stock")
 )
 
-func New(store Store, inventory Inventory, log ProvisionLog) Stock {
-	return Stock{
-		Store:        store,
-		Inventory:    inventory,
-		ProvisionLog: log,
-	}
-}
-
 func (s Stock) Provision(itemID, qty int) (id int, err error) {
-	if _, err = s.Inventory.Get(itemID); err != nil {
+	if _, err = s.InventoryDB.Get(itemID); err != nil {
 		return
 	}
 
-	_, err = s.Store.Provision(itemID, qty)
+	_, err = s.DB.Provision(itemID, qty)
 
 	if err != nil {
 		return
@@ -71,7 +60,7 @@ func (s Stock) Provision(itemID, qty int) (id int, err error) {
 
 func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {
 	for _, i := range ingredients {
-		presentQty, err := s.Store.Quantity(i.ID)
+		presentQty, err := s.DB.Quantity(i.ID)
 
 		switch err {
 		case nil, ErrItemNotFound: //continue
@@ -84,7 +73,7 @@ func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {
 		}
 	}
 
-	if err := s.Store.Sell(ingredients, qty); err != nil {
+	if err := s.DB.Sell(ingredients, qty); err != nil {
 		return err
 	}
 

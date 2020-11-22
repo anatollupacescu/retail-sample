@@ -11,22 +11,22 @@ type logger interface {
 	Info(string, string)
 }
 
-func New(ctx context.Context, inventory inventory.Inventory, store store, log logger) Inventory {
-	return Inventory{
-		ctx:       ctx,
-		inventory: inventory,
-		logger:    log,
-		store:     store,
-	}
-}
-
-type store interface {
+type inventoryDB interface {
 	Get(int) (inventory.Item, error)
 }
 
+func New(ctx context.Context, inventory inventory.Inventory, db inventoryDB, log logger) Inventory {
+	return Inventory{
+		ctx:         ctx,
+		inventory:   inventory,
+		inventoryDB: db,
+		logger:      log,
+	}
+}
+
 type Inventory struct {
-	logger    logger
-	inventory inventory.Inventory
-	store     store
-	ctx       context.Context
+	logger      logger
+	inventory   inventory.Inventory
+	inventoryDB inventoryDB
+	ctx         context.Context
 }

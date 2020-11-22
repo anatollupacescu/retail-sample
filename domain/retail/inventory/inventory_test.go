@@ -12,13 +12,13 @@ import (
 func TestUpdate(t *testing.T) {
 	t.Run("when updating a missing item", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.New(mockStore)
+		i := inventory.Inventory{DB: mockStore}
 
 		var expectedItem = inventory.Item{}
 
 		mockStore.On("Get", 1).Return(expectedItem, inventory.ErrItemNotFound)
 
-		retItem, err := i.UpdateStatus(1, false)
+		err := i.UpdateStatus(1, false)
 
 		t.Run("does not call the store", func(t *testing.T) {
 			mockStore.AssertExpectations(t)
@@ -26,13 +26,12 @@ func TestUpdate(t *testing.T) {
 
 		t.Run("propagates the error", func(t *testing.T) {
 			assert.Equal(t, inventory.ErrItemNotFound, err)
-			assert.Zero(t, retItem)
 		})
 	})
 
 	t.Run("when updating an existing item", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.New(mockStore)
+		i := inventory.Inventory{DB: mockStore}
 
 		var expectedItem = inventory.Item{
 			ID:      1,
@@ -46,7 +45,7 @@ func TestUpdate(t *testing.T) {
 		mockStore.On("Get", 1).Return(expectedItem, nil)
 		mockStore.On("Update", updatedItem).Return(nil)
 
-		retItem, err := i.UpdateStatus(1, false)
+		err := i.UpdateStatus(1, false)
 
 		t.Run("calls the store", func(t *testing.T) {
 			mockStore.AssertExpectations(t)
@@ -54,7 +53,6 @@ func TestUpdate(t *testing.T) {
 
 		t.Run("returns correct values", func(t *testing.T) {
 			assert.NoError(t, err)
-			assert.Equal(t, updatedItem, retItem)
 		})
 	})
 }
@@ -73,7 +71,7 @@ func TestAdd(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.New(mockStore)
+		i := inventory.Inventory{DB: mockStore}
 
 		mockStore.On("Find", milk).Return(1, nil)
 
@@ -93,7 +91,7 @@ func TestAdd(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.New(mockStore)
+		i := inventory.Inventory{DB: mockStore}
 
 		mockStore.On("Find", milk).Return(0, inventory.ErrItemNotFound)
 		mockStore.On("Add", milk).Return(1, nil)
@@ -114,7 +112,7 @@ func TestAdd(t *testing.T) {
 		milk := "milk"
 
 		mockStore := &inventory.MockStore{}
-		i := inventory.New(mockStore)
+		i := inventory.Inventory{DB: mockStore}
 
 		expected := errors.New("unknown")
 		mockStore.On("Find", milk).Return(0, expected)

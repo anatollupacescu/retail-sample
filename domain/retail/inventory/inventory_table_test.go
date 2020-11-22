@@ -63,7 +63,7 @@ func TestAddT(t *testing.T) {
 	for i := 0; i < len(tt); i++ {
 		test := tt[i]
 
-		i := inventory.New(&test.store)
+		i := inventory.Inventory{DB: &test.store}
 
 		id, err := i.Add(test.name)
 
@@ -134,12 +134,11 @@ func TestUpdateStatusT(t *testing.T) {
 	for i := 0; i < len(tt); i++ {
 		test := tt[i]
 
-		i := inventory.New(&test.store)
+		i := inventory.Inventory{DB: &test.store}
 
-		item, err := i.UpdateStatus(test.id, test.enabled)
+		err := i.UpdateStatus(test.id, test.enabled)
 
 		assert.Equal(t, test.err, err, test.testName)
-		assert.Equal(t, test.item, item, test.testName)
 		assert.Equal(t, test.store.calls, test.calls, test.testName)
 	}
 }

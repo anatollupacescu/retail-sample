@@ -126,7 +126,7 @@ func TestPlaceOrder(t *testing.T) {
 		store := &order.MockOrderStore{}
 		store.On("Add", mock.Anything).Return(zeroOrderID, expectedErr)
 
-		orders := order.Orders{Store: store, RecipeBook: recipeBook, Stock: mockStock}
+		orders := order.Orders{DB: store, RecipeBook: recipeBook, Stock: mockStock}
 
 		receivedID, err := orders.PlaceOrder(1, 1)
 
@@ -161,7 +161,7 @@ func TestPlaceOrder(t *testing.T) {
 		store := &order.MockOrderStore{}
 		store.On("Add", mock.Anything).Return(order.ID(1), nil)
 
-		orders := order.Orders{Store: store, RecipeBook: recipeBook, Stock: mockStock}
+		orders := order.Orders{DB: store, RecipeBook: recipeBook, Stock: mockStock}
 
 		receivedID, err := orders.PlaceOrder(1, 1)
 

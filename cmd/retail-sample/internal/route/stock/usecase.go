@@ -4,12 +4,13 @@ import (
 	"errors"
 	"net/http"
 
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
-	postgres "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 )
 
 var ErrCreateFail = errors.New("create use case failed")
@@ -28,13 +29,14 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 		logger: logger,
 	}
 
+	ctx := r.Context()
+
 	stock := tx.Stock()
-	proLog := tx.ProvisionLog()
 
-	inventoryDB := &postgres.InventoryPgxStore{DB: tx.Tx}
-	stockDB := &postgres.StockPgxStore{DB: tx.Tx}
+	stockDB := &pg.StockPgxStore{DB: tx.Tx}
+	inventoryDB := &pg.InventoryPgxStore{DB: tx.Tx}
 
-	uc := usecase.New(r.Context(), stock, proLog, stockDB, inventoryDB, logWrapper)
+	uc := usecase.New(ctx, stock, stockDB, inventoryDB, logWrapper)
 
 	return uc, nil
 }

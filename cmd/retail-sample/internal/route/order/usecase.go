@@ -7,6 +7,7 @@ import (
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/order"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -31,7 +32,9 @@ func useCase(r *http.Request) (usecase.Order, error) {
 	orders := tx.Orders()
 	ctx := r.Context()
 
-	uc := usecase.New(ctx, orders, logWrapper)
+	orderDB := &pg.OrderPgxStore{DB: tx.Tx}
+
+	uc := usecase.New(ctx, orders, orderDB, logWrapper)
 
 	return uc, nil
 }

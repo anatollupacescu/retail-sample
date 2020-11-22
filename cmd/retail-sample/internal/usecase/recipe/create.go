@@ -19,7 +19,7 @@ func (o *Recipe) Create(dto CreateDTO) (recipe recipe.Recipe, err error) {
 		return
 	}
 
-	recipe, err = o.book.Get(id)
+	recipe, err = o.book.DB.Get(id)
 
 	if err != nil {
 		o.logger.Error("get all", "call domain layer to retrieve the newly created recipe", err)

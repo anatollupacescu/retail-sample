@@ -12,16 +12,15 @@ type (
 		Enabled bool
 	}
 
-	Store interface {
+	DB interface {
 		Add(string) (int, error)
 		Find(string) (int, error)
 		Get(int) (Item, error)
-		List() ([]Item, error)
 		Update(Item) error
 	}
 
 	Inventory struct {
-		store Store
+		DB DB
 	}
 )
 
@@ -31,30 +30,22 @@ var (
 	ErrDuplicateName = errors.New("item type already present")
 )
 
-func New(store Store) Inventory {
-	return Inventory{store: store}
-}
+func (i Inventory) UpdateStatus(id int, enabled bool) error {
+	item, err := i.DB.Get(id)
 
-func (i Inventory) UpdateStatus(id int, enabled bool) (item Item, err error) {
-	item, err = i.store.Get(id)
-
-	switch err {
-	case nil: // continue
-	case ErrItemNotFound:
-		return
-	default:
-		return Item{}, err
+	if err != nil {
+		return err
 	}
 
 	item.Enabled = enabled
 
-	err = i.store.Update(item)
+	err = i.DB.Update(item)
 
 	if err != nil {
-		return Item{}, err
+		return err
 	}
 
-	return item, nil
+	return nil
 }
 
 func (i Inventory) Add(name string) (int, error) {
@@ -62,14 +53,21 @@ func (i Inventory) Add(name string) (int, error) {
 		return 0, ErrEmptyName
 	}
 
-	_, err := i.store.Find(name)
+	_, err := i.DB.Find(name)
 
 	switch err {
-	case ErrItemNotFound: //success
-		return i.store.Add(name)
+	case ErrItemNotFound: //continue
 	case nil:
 		return 0, ErrDuplicateName
 	default:
 		return 0, err
 	}
+
+	id, err := i.DB.Add(name)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

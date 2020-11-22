@@ -6,9 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 )
 
 var ErrParseItemID = errors.New("could not parse item ID")

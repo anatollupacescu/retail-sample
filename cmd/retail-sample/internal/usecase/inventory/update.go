@@ -12,8 +12,15 @@ type UpdateStatusDTO struct {
 func (a *Inventory) UpdateStatus(in UpdateStatusDTO) (item inventory.Item, err error) {
 	a.logger.Info("update status", "begin")
 
-	if item, err = a.inventory.UpdateStatus(in.ID, in.Enabled); err != nil {
+	if err = a.inventory.UpdateStatus(in.ID, in.Enabled); err != nil {
 		a.logger.Error("update status", "call domain", err)
+		return inventory.Item{}, err
+	}
+
+	item, err = a.inventory.DB.Get(in.ID)
+
+	if err != nil {
+		a.logger.Error("update status", "fetch updated item", err)
 		return inventory.Item{}, err
 	}
 

@@ -34,7 +34,7 @@ type (
 	}
 
 	Book struct {
-		Store     Store
+		DB        Store
 		Inventory Inventory
 	}
 )
@@ -46,13 +46,6 @@ var (
 	ErrIgredientNotEnabled = errors.New("ingredient not enabled")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
-
-func New(store Store, inventory Inventory) Book {
-	return Book{
-		Store:     store,
-		Inventory: inventory,
-	}
-}
 
 func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 	var zeroRecipeID ID
@@ -89,7 +82,7 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		}
 	}
 
-	return b.Store.Add(Recipe{
+	return b.DB.Add(Recipe{
 		Name:        name,
 		Ingredients: ingredients,
 		Enabled:     true,
@@ -98,20 +91,8 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 
 var ErrRecipeNotFound = errors.New("recipe not found")
 
-func (b Book) Get(id ID) (Recipe, error) {
-	return b.Store.Get(id)
-}
-
-func (b Book) List() (r []Recipe, err error) {
-	list, err := b.Store.List()
-
-	r = append(r, list...)
-
-	return
-}
-
 func (b Book) SetStatus(id ID, enabled bool) error {
-	r, err := b.Store.Get(id)
+	r, err := b.DB.Get(id)
 
 	if err != nil {
 		return err
@@ -119,7 +100,7 @@ func (b Book) SetStatus(id ID, enabled bool) error {
 
 	r.Enabled = enabled
 
-	err = b.Store.Save(r)
+	err = b.DB.Save(r)
 
 	return err
 }

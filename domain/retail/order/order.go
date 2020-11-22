@@ -21,10 +21,8 @@ type (
 		Date time.Time
 	}
 
-	Store interface {
+	DB interface {
 		Add(Order) (ID, error)
-		Get(ID) (Order, error)
-		List() ([]Order, error)
 	}
 
 	recipeBook interface {
@@ -36,7 +34,7 @@ type (
 	}
 
 	Orders struct {
-		Store      Store
+		DB         DB
 		RecipeBook recipeBook
 		Stock      orderStock
 	}
@@ -48,9 +46,9 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func New(s Store, rb recipeBook, stock orderStock) Orders {
+func New(s DB, rb recipeBook, stock orderStock) Orders {
 	return Orders{
-		Store:      s,
+		DB:         s,
 		RecipeBook: rb,
 		Stock:      stock,
 	}
@@ -89,19 +87,11 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 		Date: time.Now(),
 	}
 
-	orderID, err = o.Store.Add(ord)
+	orderID, err = o.DB.Add(ord)
 
 	if err != nil {
 		return zeroOrderID, err
 	}
 
 	return orderID, nil
-}
-
-func (o Orders) Get(id ID) (Order, error) {
-	return o.Store.Get(id)
-}
-
-func (o Orders) List() ([]Order, error) {
-	return o.Store.List()
 }

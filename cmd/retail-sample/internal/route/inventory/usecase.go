@@ -5,10 +5,9 @@ import (
 	"net/http"
 
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/inventory"
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
-	postgres "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -30,10 +29,12 @@ func useCase(r *http.Request) (usecase.Inventory, error) {
 		logger: logger,
 	}
 
-	store := &postgres.InventoryPgxStore{DB: &tx}
-	inv := inventory.New(store)
+	inv := tx.Inventory()
 	ctx := r.Context()
-	uc := usecase.New(ctx, inv, store, logWrapper)
+
+	inventoryDB := &pg.InventoryPgxStore{DB: tx.Tx}
+
+	uc := usecase.New(ctx, inv, inventoryDB, logWrapper)
 
 	return uc, nil
 }

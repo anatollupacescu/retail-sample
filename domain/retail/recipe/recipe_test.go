@@ -20,7 +20,7 @@ func TestDisableRecipe(t *testing.T) {
 		s.On("Get", mock.Anything).Return(r, recipe.ErrRecipeNotFound)
 
 		i := &recipe.MockInventory{}
-		b := recipe.Book{Store: s, Inventory: i}
+		b := recipe.Book{DB: s, Inventory: i}
 
 		err := b.SetStatus(1, false)
 
@@ -50,7 +50,7 @@ func TestDisableRecipe(t *testing.T) {
 
 		s.On("Save", r2).Return(nil)
 
-		b := recipe.Book{Store: s}
+		b := recipe.Book{DB: s}
 
 		err := b.SetStatus(1, false)
 
@@ -88,7 +88,7 @@ func TestAddRecipe(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 
 		i := &recipe.MockInventory{}
-		b := recipe.Book{Store: s, Inventory: i}
+		b := recipe.Book{DB: s, Inventory: i}
 
 		var item = inventory.Item{
 			ID:      1,
@@ -110,7 +110,7 @@ func TestAddRecipe(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 
 		i := &recipe.MockInventory{}
-		b := recipe.Book{Store: s, Inventory: i}
+		b := recipe.Book{DB: s, Inventory: i}
 
 		var zeroInventoryItem inventory.Item
 		i.On("Get", 1).Return(zeroInventoryItem, inventory.ErrItemNotFound)
@@ -126,7 +126,7 @@ func TestAddRecipe(t *testing.T) {
 	t.Run("should propagate downstream failure", func(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 		i := &recipe.MockInventory{}
-		b := recipe.Book{Store: s, Inventory: i}
+		b := recipe.Book{DB: s, Inventory: i}
 
 		i.On("Get", 1).Return(inventory.Item{
 			ID:      1,
@@ -147,7 +147,7 @@ func TestAddRecipe(t *testing.T) {
 	t.Run("should succeed with correct name and components", func(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 		i := &recipe.MockInventory{}
-		b := recipe.Book{Store: s, Inventory: i}
+		b := recipe.Book{DB: s, Inventory: i}
 
 		i.On("Get", 1).Return(inventory.Item{
 			ID:      1,
@@ -168,60 +168,4 @@ func TestAddRecipe(t *testing.T) {
 		s.AssertExpectations(t)
 		i.AssertExpectations(t)
 	})
-}
-
-func TestGetRecipe(t *testing.T) {
-
-	t.Run("should return zero value for non existent", func(t *testing.T) {
-		s := &recipe.MockRecipeStore{}
-		b := recipe.Book{Store: s}
-
-		var zeroValueRecipe = recipe.Recipe{}
-		s.On("Get", recipe.ID(1)).Return(zeroValueRecipe, nil)
-
-		r, err := b.Get(1)
-
-		assert.NoError(t, err)
-		assert.Equal(t, r, zeroValueRecipe)
-
-		s.AssertExpectations(t)
-	})
-
-	t.Run("should fetch stored recipe for valid id", func(t *testing.T) {
-		s := &recipe.MockRecipeStore{}
-		b := recipe.Book{Store: s}
-
-		var foundRecipe = recipe.Recipe{
-			Name: "test",
-			Ingredients: []recipe.Ingredient{{
-				ID:  1,
-				Qty: 2,
-			}},
-		}
-		s.On("Get", recipe.ID(1)).Return(foundRecipe, nil)
-
-		r, err := b.Get(1)
-
-		assert.NoError(t, err)
-		assert.Equal(t, r, foundRecipe)
-
-		s.AssertExpectations(t)
-	})
-}
-
-func TestGetRecipeNames(t *testing.T) {
-	s := &recipe.MockRecipeStore{}
-	b := recipe.Book{Store: s}
-
-	expectedRecipe := recipe.Recipe{
-		ID:   recipe.ID(1),
-		Name: recipe.Name("glintwine"),
-	}
-	s.On("List").Return([]recipe.Recipe{expectedRecipe}, nil)
-
-	r, err := b.List()
-
-	assert.NoError(t, err)
-	assert.Equal(t, r, []recipe.Recipe{expectedRecipe})
-	s.AssertExpectations(t)
 }

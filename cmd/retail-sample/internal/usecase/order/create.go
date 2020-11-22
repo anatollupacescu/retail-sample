@@ -17,7 +17,7 @@ func (o *Order) PlaceOrder(dto PlaceOrderDTO) (order.Order, error) {
 		return order.Order{}, err
 	}
 
-	newOrder, err := o.orders.Get(id)
+	newOrder, err := o.orderDB.Get(id)
 	if err != nil {
 		o.logger.Error("create order", "call domain to retrieve new order", err)
 		return order.Order{}, err

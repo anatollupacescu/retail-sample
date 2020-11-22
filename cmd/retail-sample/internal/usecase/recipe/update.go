@@ -25,7 +25,7 @@ func (o *Recipe) Update(in UpdateStatusDTO) (recipe.Recipe, error) {
 		return recipe.Recipe{}, err
 	}
 
-	rec, err := o.book.Get(recipeID)
+	rec, err := o.recipeDB.Get(recipeID)
 
 	if err != nil {
 		o.logger.Error("update status", "call domain to retrieve updated entity", err)

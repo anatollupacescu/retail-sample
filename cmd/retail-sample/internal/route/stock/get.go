@@ -5,12 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
+	"github.com/rs/zerolog/hlog"
+
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/stock"
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/hlog"
 )
 
 var ErrBadItemID = errors.New("could not parse ID")

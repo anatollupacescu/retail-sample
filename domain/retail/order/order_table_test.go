@@ -109,7 +109,7 @@ func TestPlaceOrderT(t *testing.T) {
 	for _, v := range tt {
 		t.Run(v.testName, func(t *testing.T) {
 			orders := order.Orders{
-				Store:      v.store,
+				DB:         v.store,
 				RecipeBook: v.recipes,
 				Stock:      v.stock,
 			}

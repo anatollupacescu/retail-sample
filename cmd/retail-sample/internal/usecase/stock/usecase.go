@@ -12,25 +12,31 @@ type logger interface {
 	Info(string, string)
 }
 
-func New(ctx context.Context, stock stock.Stock, provisionLog stock.ProvisionLog,
-	stockDB stock.Store,
-	inventoryDB inventory.Store,
+func New(ctx context.Context, stock stock.Stock,
+	stockDB stockDB, inventoryDB inventoryDB,
 	log logger) Stock {
 	return Stock{
-		ctx:          ctx,
-		stock:        stock,
-		provisionLog: provisionLog,
-		stockDB:      stockDB,
-		inventoryDB:  inventoryDB,
-		logger:       log,
+		ctx:         ctx,
+		stock:       stock,
+		stockDB:     stockDB,
+		inventoryDB: inventoryDB,
+		logger:      log,
 	}
 }
 
+type (
+	stockDB interface {
+		Quantity(id int) (int, error)
+	}
+	inventoryDB interface {
+		Get(id int) (inventory.Item, error)
+	}
+)
+
 type Stock struct {
-	logger       logger
-	stock        stock.Stock
-	provisionLog stock.ProvisionLog
-	stockDB      stock.Store
-	inventoryDB  inventory.Store
-	ctx          context.Context
+	logger      logger
+	stock       stock.Stock
+	stockDB     stockDB
+	inventoryDB inventoryDB
+	ctx         context.Context
 }

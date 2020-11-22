@@ -21,7 +21,7 @@ func TestProvision(t *testing.T) {
 		inv := &stock.MockInventory{}
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, inventory.ErrItemNotFound)
 
-		st := &stock.Stock{Inventory: inv}
+		st := &stock.Stock{InventoryDB: inv}
 
 		qty, err := st.Provision(1, 1)
 
@@ -42,7 +42,7 @@ func TestProvision(t *testing.T) {
 		inv := &stock.MockInventory{}
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
-		st := &stock.Stock{Store: mockStore, Inventory: inv}
+		st := &stock.Stock{DB: mockStore, InventoryDB: inv}
 
 		qty, err := st.Provision(1, 1)
 
@@ -66,8 +66,8 @@ func TestProvision(t *testing.T) {
 		provisionLog.On("Add", mock.Anything, mock.Anything).Return(0, expectedErr)
 
 		st := &stock.Stock{
-			Store:        mockStore,
-			Inventory:    inv,
+			DB:           mockStore,
+			InventoryDB:  inv,
 			ProvisionLog: provisionLog,
 		}
 
@@ -91,8 +91,8 @@ func TestProvision(t *testing.T) {
 		provisionLog.On("Add", mock.Anything, mock.Anything).Return(1, nil)
 
 		st := &stock.Stock{
-			Store:        mockStore,
-			Inventory:    inv,
+			DB:           mockStore,
+			InventoryDB:  inv,
 			ProvisionLog: provisionLog,
 		}
 
@@ -110,7 +110,7 @@ func TestSell(t *testing.T) {
 	t.Run("propagates error from store", func(t *testing.T) {
 		store := &stock.MockStore{}
 
-		st := stock.Stock{Store: store}
+		st := stock.Stock{DB: store}
 
 		expectedErr := errors.New("test")
 
@@ -129,7 +129,7 @@ func TestSell(t *testing.T) {
 	t.Run("returns error when quantity not enough", func(t *testing.T) {
 		store := &stock.MockStore{}
 
-		st := stock.Stock{Store: store}
+		st := stock.Stock{DB: store}
 
 		store.On("Quantity", mock.Anything).Return(1, nil)
 
@@ -147,7 +147,7 @@ func TestSell(t *testing.T) {
 	t.Run("calls store to sell items", func(t *testing.T) {
 		store := &stock.MockStore{}
 
-		st := stock.Stock{Store: store}
+		st := stock.Stock{DB: store}
 
 		store.On("Quantity", mock.Anything).Return(2, nil)
 

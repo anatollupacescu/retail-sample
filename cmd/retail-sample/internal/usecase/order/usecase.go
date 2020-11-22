@@ -11,16 +11,22 @@ type logger interface {
 	Info(string, string)
 }
 
-func New(ctx context.Context, orders order.Orders, log logger) Order {
+func New(ctx context.Context, orders order.Orders, db orderDB, log logger) Order {
 	return Order{
-		ctx:    ctx,
-		orders: orders,
-		logger: log,
+		ctx:     ctx,
+		orders:  orders,
+		orderDB: db,
+		logger:  log,
 	}
 }
 
+type orderDB interface {
+	Get(order.ID) (order.Order, error)
+}
+
 type Order struct {
-	logger logger
-	orders order.Orders
-	ctx    context.Context
+	logger  logger
+	orders  order.Orders
+	orderDB orderDB
+	ctx     context.Context
 }

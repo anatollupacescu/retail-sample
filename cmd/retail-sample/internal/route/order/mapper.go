@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/order"
 	"github.com/rs/zerolog/hlog"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/order"
 )
 
 type createPayload struct {

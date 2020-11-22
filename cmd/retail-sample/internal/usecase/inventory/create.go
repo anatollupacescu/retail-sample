@@ -18,7 +18,7 @@ func (a *Inventory) Create(in CreateDTO) (item inventory.Item, err error) {
 		return
 	}
 
-	if item, err = a.store.Get(id); err != nil {
+	if item, err = a.inventoryDB.Get(id); err != nil {
 		a.logger.Error("create", "retrieve new item", err)
 		return
 	}

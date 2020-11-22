@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
-
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/inventory"
 )
 
 var (
@@ -21,14 +21,14 @@ type updatePayload struct {
 	Enabled bool `json:"enabled"`
 }
 
-func toUpdateStatusDTO(r *http.Request) (usecase.UpdateStatusDTO, error) {
+func toUpdateStatusDTO(r *http.Request) (usecase.UpdateInventoryItemStatusDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
 	var requestPayload updatePayload
 	if err := d.Decode(&requestPayload); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' payload")
-		return usecase.UpdateStatusDTO{}, ErrParseBody
+		return usecase.UpdateInventoryItemStatusDTO{}, ErrParseBody
 	}
 
 	vars := mux.Vars(r)
@@ -36,10 +36,10 @@ func toUpdateStatusDTO(r *http.Request) (usecase.UpdateStatusDTO, error) {
 	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return usecase.UpdateStatusDTO{}, ErrParseItemID
+		return usecase.UpdateInventoryItemStatusDTO{}, ErrParseItemID
 	}
 
-	dto := usecase.UpdateStatusDTO{
+	dto := usecase.UpdateInventoryItemStatusDTO{
 		ID:      id,
 		Enabled: requestPayload.Enabled,
 	}
@@ -51,7 +51,7 @@ type createPayload struct {
 	Name string `json:"name"`
 }
 
-func toCreateDTO(r *http.Request) (usecase.CreateDTO, error) {
+func toCreateDTO(r *http.Request) (usecase.CreateInventoryItemDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -59,10 +59,10 @@ func toCreateDTO(r *http.Request) (usecase.CreateDTO, error) {
 
 	if err := d.Decode(&body); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'create' payload")
-		return usecase.CreateDTO{}, ErrParseBody
+		return usecase.CreateInventoryItemDTO{}, ErrParseBody
 	}
 
-	dto := usecase.CreateDTO{
+	dto := usecase.CreateInventoryItemDTO{
 		Name: body.Name,
 	}
 

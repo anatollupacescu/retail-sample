@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/rs/zerolog/hlog"
+	usecase2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/order"
+	"github.com/rs/zerolog/hlog"
 )
 
 type createPayload struct {
@@ -14,7 +14,7 @@ type createPayload struct {
 	Qty int `json:"qty"`
 }
 
-func toCreateDTO(r *http.Request) (usecase.PlaceOrderDTO, error) {
+func toCreateDTO(r *http.Request) (usecase2.PlaceOrderDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -22,10 +22,10 @@ func toCreateDTO(r *http.Request) (usecase.PlaceOrderDTO, error) {
 
 	if err := d.Decode(&payload); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'create order' payload")
-		return usecase.PlaceOrderDTO{}, err
+		return usecase2.PlaceOrderDTO{}, err
 	}
 
-	dto := usecase.PlaceOrderDTO{
+	dto := usecase2.PlaceOrderDTO{
 		RecipeID: payload.ID,
 		OrderQty: payload.Qty,
 	}

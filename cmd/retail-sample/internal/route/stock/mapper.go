@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
-
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
 )
 
 var ErrParseItemID = errors.New("could not parse item ID")
 
-func toProvisionDTO(r *http.Request) (stock.UpdateDTO, error) {
+func toProvisionDTO(r *http.Request) (usecase.UpdateDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -22,7 +22,7 @@ func toProvisionDTO(r *http.Request) (stock.UpdateDTO, error) {
 
 	if err := d.Decode(&body); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'provision' payload")
-		return stock.UpdateDTO{}, err
+		return usecase.UpdateDTO{}, err
 	}
 
 	vars := mux.Vars(r)
@@ -32,10 +32,10 @@ func toProvisionDTO(r *http.Request) (stock.UpdateDTO, error) {
 
 	if err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return stock.UpdateDTO{}, ErrParseItemID
+		return usecase.UpdateDTO{}, ErrParseItemID
 	}
 
-	dto := stock.UpdateDTO{
+	dto := usecase.UpdateDTO{
 		Qty:             body.Qty,
 		InventoryItemID: id,
 	}

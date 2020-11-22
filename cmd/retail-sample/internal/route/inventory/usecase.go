@@ -1,10 +1,9 @@
 package inventory
 
 import (
-	"errors"
 	"net/http"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/inventory"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
@@ -12,8 +11,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 )
-
-var ErrCreateFail = errors.New("create use case failed")
 
 func useCase(r *http.Request) (usecase.Inventory, error) {
 	logger := hlog.FromRequest(r)
@@ -34,7 +31,7 @@ func useCase(r *http.Request) (usecase.Inventory, error) {
 
 	inventoryDB := &pg.InventoryPgxStore{DB: tx.Tx}
 
-	uc := usecase.New(ctx, inv, inventoryDB, logWrapper)
+	uc := usecase.NewInventory(ctx, inv, inventoryDB, logWrapper)
 
 	return uc, nil
 }

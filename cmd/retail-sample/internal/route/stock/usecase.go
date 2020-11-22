@@ -1,19 +1,17 @@
 package stock
 
 import (
-	"errors"
 	"net/http"
 
-	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 )
-
-var ErrCreateFail = errors.New("create use case failed")
 
 func useCase(r *http.Request) (usecase.Stock, error) {
 	logger := hlog.FromRequest(r)
@@ -36,7 +34,7 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 	stockDB := &pg.StockPgxStore{DB: tx.Tx}
 	inventoryDB := &pg.InventoryPgxStore{DB: tx.Tx}
 
-	uc := usecase.New(ctx, stock, stockDB, inventoryDB, logWrapper)
+	uc := usecase.NewStock(ctx, stock, stockDB, inventoryDB, logWrapper)
 
 	return uc, nil
 }

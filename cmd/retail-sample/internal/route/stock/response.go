@@ -3,7 +3,8 @@ package stock
 import (
 	"time"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/stock"
+	usecase2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
@@ -21,7 +22,7 @@ type (
 	}
 )
 
-func toCollectionResponse(entries []usecase.Position) collection {
+func toCollectionResponse(entries []usecase2.Position) collection {
 	var response collection
 	response.Data = make([]entity, 0, len(entries))
 
@@ -38,7 +39,7 @@ func toCollectionResponse(entries []usecase.Position) collection {
 	return response
 }
 
-func toResponse(pos usecase.Position) single {
+func toResponse(pos usecase2.Position) single {
 	return single{
 		Data: entity{
 			ID:   pos.ID,

@@ -1,4 +1,34 @@
-package stock
+package usecase
+
+import (
+	"context"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
+)
+
+func NewStock(ctx context.Context, stock stock.Stock,
+	stockDB stockDB, inventoryDB inventoryDB,
+	log logger) Stock {
+	return Stock{
+		ctx:         ctx,
+		stock:       stock,
+		stockDB:     stockDB,
+		inventoryDB: inventoryDB,
+		logger:      log,
+	}
+}
+
+type stockDB interface {
+	Quantity(id int) (int, error)
+}
+
+type Stock struct {
+	logger      logger
+	stock       stock.Stock
+	stockDB     stockDB
+	inventoryDB inventoryDB
+	ctx         context.Context
+}
 
 type UpdateDTO struct {
 	InventoryItemID int

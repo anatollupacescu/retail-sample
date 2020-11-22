@@ -1,10 +1,9 @@
 package order
 
 import (
-	"errors"
 	"net/http"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/order"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
@@ -12,8 +11,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 )
-
-var ErrCreateFail = errors.New("create use case failed")
 
 func useCase(r *http.Request) (usecase.Order, error) {
 	logger := hlog.FromRequest(r)
@@ -34,7 +31,7 @@ func useCase(r *http.Request) (usecase.Order, error) {
 
 	orderDB := &pg.OrderPgxStore{DB: tx.Tx}
 
-	uc := usecase.New(ctx, orders, orderDB, logWrapper)
+	uc := usecase.NewOrder(ctx, orders, orderDB, logWrapper)
 
 	return uc, nil
 }

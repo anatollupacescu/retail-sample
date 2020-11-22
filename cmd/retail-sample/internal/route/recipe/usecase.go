@@ -1,10 +1,9 @@
 package recipe
 
 import (
-	"errors"
 	"net/http"
 
-	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/recipe"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
@@ -12,8 +11,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 )
-
-var ErrCreateFail = errors.New("create use case failed")
 
 func useCase(r *http.Request) (usecase.Recipe, error) {
 	logger := hlog.FromRequest(r)
@@ -32,7 +29,7 @@ func useCase(r *http.Request) (usecase.Recipe, error) {
 	ctx := r.Context()
 
 	recipeDB := &pg.RecipePgxStore{DB: tx.Tx}
-	uc := usecase.New(ctx, recipe, recipeDB, logWrapper)
+	uc := usecase.NewRecipe(ctx, recipe, recipeDB, logWrapper)
 
 	return uc, nil
 }

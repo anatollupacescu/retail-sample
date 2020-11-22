@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/recipe"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
@@ -19,7 +20,7 @@ type updatePayload struct {
 
 var ErrParseItemID = errors.New("could not parse item ID")
 
-func toUpdateStatusDTO(r *http.Request) (recipe.UpdateStatusDTO, error) {
+func toUpdateStatusDTO(r *http.Request) (usecase.UpdateStatusDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -27,7 +28,7 @@ func toUpdateStatusDTO(r *http.Request) (recipe.UpdateStatusDTO, error) {
 
 	if err := d.Decode(&requestBody); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update recipe status' payload")
-		return recipe.UpdateStatusDTO{}, err
+		return usecase.UpdateStatusDTO{}, err
 	}
 
 	vars := mux.Vars(r)
@@ -37,10 +38,10 @@ func toUpdateStatusDTO(r *http.Request) (recipe.UpdateStatusDTO, error) {
 
 	if err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return recipe.UpdateStatusDTO{}, ErrParseItemID
+		return usecase.UpdateStatusDTO{}, ErrParseItemID
 	}
 
-	dto := recipe.UpdateStatusDTO{
+	dto := usecase.UpdateStatusDTO{
 		RecipeID: id,
 		Enabled:  requestBody.Enabled,
 	}
@@ -53,7 +54,7 @@ type createPayload struct {
 	Items map[int]int `json:"items"`
 }
 
-func toCreateDTO(r *http.Request) (recipe.CreateDTO, error) {
+func toCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -61,7 +62,7 @@ func toCreateDTO(r *http.Request) (recipe.CreateDTO, error) {
 
 	if err := d.Decode(&requestBody); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'create' payload")
-		return recipe.CreateDTO{}, err
+		return usecase.CreateRecipeDTO{}, err
 	}
 
 	var ingredients = make([]domain.Ingredient, 0, len(requestBody.Items))
@@ -73,7 +74,7 @@ func toCreateDTO(r *http.Request) (recipe.CreateDTO, error) {
 		})
 	}
 
-	dto := recipe.CreateDTO{
+	dto := usecase.CreateRecipeDTO{
 		Name:        domain.Name(requestBody.Name),
 		Ingredients: ingredients,
 	}

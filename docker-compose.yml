@@ -21,7 +21,7 @@ services:
     networks:
       - shared-network
 
-  dbmigration:
+  tern:
     build: cmd/retail-sample/internal/persistence/postgres/migration
     depends_on: 
     - db

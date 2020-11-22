@@ -4,17 +4,26 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 )
 
-func (o *Order) Create(recipeID, qty int) (id order.ID, err error) {
-	o.logger.Info("get all", "enter")
+type PlaceOrderDTO struct {
+	RecipeID, OrderQty int
+}
 
-	id, err = o.orders.PlaceOrder(recipeID, qty)
+func (o *Order) PlaceOrder(dto PlaceOrderDTO) (order.Order, error) {
+	o.logger.Info("create order", "enter")
 
+	id, err := o.orders.PlaceOrder(dto.RecipeID, dto.OrderQty)
 	if err != nil {
-		o.logger.Error("get all", "call domain layer", err)
-		return
+		o.logger.Error("create order", "call domain layer", err)
+		return order.Order{}, err
 	}
 
-	o.logger.Info("get all", "success")
+	newOrder, err := o.orders.Get(id)
+	if err != nil {
+		o.logger.Error("create order", "call domain to retrieve new order", err)
+		return order.Order{}, err
+	}
 
-	return
+	o.logger.Info("create order", "success")
+
+	return newOrder, nil
 }

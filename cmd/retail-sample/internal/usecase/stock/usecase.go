@@ -11,16 +11,18 @@ type logger interface {
 	Info(string, string)
 }
 
-func New(ctx context.Context, stock stock.Stock, log logger) Stock {
+func New(ctx context.Context, stock stock.Stock, provisionLog stock.ProvisionLog, log logger) Stock {
 	return Stock{
-		ctx:    ctx,
-		stock:  stock,
-		logger: log,
+		ctx:          ctx,
+		stock:        stock,
+		provisionLog: provisionLog,
+		logger:       log,
 	}
 }
 
 type Stock struct {
-	logger logger
-	stock  stock.Stock
-	ctx    context.Context
+	logger       logger
+	stock        stock.Stock
+	provisionLog stock.ProvisionLog
+	ctx          context.Context
 }

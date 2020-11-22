@@ -39,16 +39,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = singleResponse{
-		Data: entity{
-			ID:      item.ID,
-			Name:    item.Name,
-			Enabled: item.Enabled,
-		},
-	}
-
 	w.WriteHeader(http.StatusAccepted)
 
+	response := toSingleResponse(item)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
@@ -77,7 +70,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case inventory.ErrEmptyName, inventory.ErrDuplicateName:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -86,20 +78,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = singleResponse{
-		Data: entity{
-			ID:      newItem.ID,
-			Name:    newItem.Name,
-			Enabled: newItem.Enabled,
-		},
-	}
-
 	w.WriteHeader(http.StatusCreated)
 
+	response := toSingleResponse(newItem)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		// logger.Log("action", "encode response", "error", err, "method", "inventory.create")
 		http.Error(w, serverError, http.StatusInternalServerError)
 	}
 }
@@ -111,7 +95,6 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case ErrParseItemID:
 		http.Error(w, ErrParseItemID.Error(), http.StatusBadRequest)
 		return
@@ -123,14 +106,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response = singleResponse{
-		Data: entity{
-			ID:      item.ID,
-			Name:    item.Name,
-			Enabled: item.Enabled,
-		},
-	}
-
+	response := toSingleResponse(item)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
@@ -143,26 +119,12 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 
 	all, err := ListItems(r)
 
-	switch err {
-	case nil:
-		break
-	default:
+	if err != nil {
 		http.Error(w, serverError, http.StatusInternalServerError)
 		return
 	}
 
-	var response = collectionResponse{
-		Data: make([]entity, 0, len(all)),
-	}
-
-	for _, item := range all {
-		response.Data = append(response.Data, entity{
-			ID:      item.ID,
-			Name:    item.Name,
-			Enabled: item.Enabled,
-		})
-	}
-
+	response := toCollectionResponse(all)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {

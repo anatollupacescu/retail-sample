@@ -2,7 +2,9 @@ package inventory
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
@@ -10,10 +12,12 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func GetByID(r *http.Request) (item inventory.Item, err error) {
+func GetByID(r *http.Request) (inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get by id")
 
-	id, err := parseItemID(r)
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get by id")
 		return inventory.Item{}, ErrParseItemID
@@ -25,10 +29,9 @@ func GetByID(r *http.Request) (item inventory.Item, err error) {
 		return inventory.Item{}, err
 	}
 
-	// use transaction to get the store
 	store := persistence.InventoryPgxStore{DB: tx}
 
-	item, err = store.Get(id)
+	item, err := store.Get(id)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by id")
 		return inventory.Item{}, err
@@ -39,7 +42,7 @@ func GetByID(r *http.Request) (item inventory.Item, err error) {
 	return item, nil
 }
 
-func ListItems(r *http.Request) (items []inventory.Item, err error) {
+func ListItems(r *http.Request) ([]inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get all")
 
 	tx, err := middleware.ExtractTransaction(r)
@@ -48,10 +51,9 @@ func ListItems(r *http.Request) (items []inventory.Item, err error) {
 		return nil, err
 	}
 
-	// use transaction to get the store
 	store := persistence.InventoryPgxStore{DB: tx}
 
-	items, err = store.List()
+	items, err := store.List()
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by id")
 		return nil, err

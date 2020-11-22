@@ -76,7 +76,7 @@ func (po *OrderPgxStore) Get(id order.ID) (result order.Order, err error) {
 		qty      int
 	)
 
-	err = po.DB.QueryRow(context.Background(), sql).Scan(&recipeID, &qty)
+	err = po.DB.QueryRow(context.Background(), sql, id).Scan(&recipeID, &qty)
 
 	switch err {
 	case nil:
@@ -87,10 +87,12 @@ func (po *OrderPgxStore) Get(id order.ID) (result order.Order, err error) {
 		return result, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	return order.Order{
+	result = order.Order{
 		Entry: order.Entry{
 			RecipeID: recipeID,
 			Qty:      qty,
 		},
-	}, nil
+	}
+
+	return
 }

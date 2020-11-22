@@ -1,39 +1,38 @@
 package recipe
 
 import (
-	"strconv"
+	"errors"
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func (o *Recipe) Update(reqID string, enabled bool) (r recipe.Recipe, err error) {
-	o.logger.Info("get all", "enter")
+var ErrBadItemID = errors.New("could not parse ID")
 
-	var id int
+type UpdateStatusDTO struct {
+	RecipeID int
+	Enabled  bool
+}
 
-	id, err = strconv.Atoi(reqID)
+func (o *Recipe) Update(in UpdateStatusDTO) (recipe.Recipe, error) {
+	o.logger.Info("update status", "begin")
 
-	if err != nil {
-		o.logger.Error("get by id", "convert request ID", err)
-		return recipe.Recipe{}, ErrBadItemID
-	}
+	recipeID := recipe.ID(in.RecipeID)
 
-	recipeID := recipe.ID(id)
-	err = o.book.SetStatus(recipeID, enabled)
-
-	if err != nil {
-		o.logger.Error("get all", "call domain layer", err)
-		return
-	}
-
-	r, err = o.book.Get(recipeID)
+	err := o.book.SetStatus(recipeID, in.Enabled)
 
 	if err != nil {
-		o.logger.Error("get all", "call domain layer to retrieve the newly updated recipe", err)
-		return
+		o.logger.Error("update status", "call domain", err)
+		return recipe.Recipe{}, err
 	}
 
-	o.logger.Info("get all", "success")
+	rec, err := o.book.Get(recipeID)
 
-	return
+	if err != nil {
+		o.logger.Error("update status", "call domain to retrieve updated entity", err)
+		return recipe.Recipe{}, err
+	}
+
+	o.logger.Info("update status", "success")
+
+	return rec, nil
 }

@@ -7,7 +7,6 @@ import (
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase/recipe"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
-	postgres "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -18,30 +17,20 @@ var ErrCreateFail = errors.New("create use case failed")
 func useCase(r *http.Request) (usecase.Recipe, error) {
 	logger := hlog.FromRequest(r)
 
-	ctxTransaction := r.Context().Value(middleware.TxKey)
+	tx, err := middleware.ExtractTransaction(r)
 
-	if ctxTransaction == nil {
-		logger.Err(ErrCreateFail).Msg("transaction not found")
-		return usecase.Recipe{}, ErrCreateFail
+	if err != nil {
+		logger.Error().Str("action", "extract transaction").Err(err)
+		return usecase.Recipe{}, err
 	}
-
-	var (
-		tx postgres.TX
-		ok bool
-	)
-
-	if tx, ok = ctxTransaction.(postgres.TX); !ok {
-		logger.Err(ErrCreateFail).Msg("transaction of a bad type")
-		return usecase.Recipe{}, ErrCreateFail
-	}
-
-	recipe := tx.Recipe()
 
 	logWrapper := logWrapper{
 		logger: logger,
 	}
+	recipe := tx.Recipe()
+	ctx := r.Context()
 
-	uc := usecase.New(r.Context(), recipe, logWrapper)
+	uc := usecase.New(ctx, recipe, logWrapper)
 
 	return uc, nil
 }

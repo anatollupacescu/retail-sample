@@ -22,7 +22,6 @@ func New(ctx context.Context, inventory inventory.Inventory, store store, log lo
 
 type store interface {
 	Get(int) (inventory.Item, error)
-	List() ([]inventory.Item, error)
 }
 
 type Inventory struct {

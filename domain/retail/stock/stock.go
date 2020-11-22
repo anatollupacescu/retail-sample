@@ -54,35 +54,6 @@ func New(store Store, inventory Inventory, log ProvisionLog) Stock {
 	}
 }
 
-func (s Stock) CurrentStock() (ps []Position, err error) {
-	items, err := s.Inventory.List()
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, item := range items {
-		itemID := item.ID
-		qty, err := s.Store.Quantity(itemID)
-
-		if errors.Is(err, ErrItemNotFound) {
-			continue
-		}
-
-		if err != nil {
-			return nil, err
-		}
-
-		ps = append(ps, Position{
-			ID:   itemID,
-			Name: item.Name,
-			Qty:  qty,
-		})
-	}
-
-	return
-}
-
 var ErrNotEnoughStock = errors.New("not enough stock")
 
 func (s Stock) Position(id int) (p Position, err error) {
@@ -123,14 +94,6 @@ func (s Stock) Provision(itemID, qty int) (id int, err error) {
 	}
 
 	return
-}
-
-func (s Stock) GetAllProvisions() ([]ProvisionEntry, error) {
-	return s.ProvisionLog.List()
-}
-
-func (s Stock) GetProvision(id int) (e ProvisionEntry, err error) {
-	return s.ProvisionLog.Get(id)
 }
 
 func (s Stock) Sell(ingredients []recipe.Ingredient, qty int) error {

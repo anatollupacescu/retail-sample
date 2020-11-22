@@ -2,12 +2,18 @@ package recipe
 
 import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func (o *Recipe) Create(name recipe.Name, ingredients []recipe.Ingredient) (recipe recipe.Recipe, err error) {
+type CreateDTO struct {
+	Name        domain.Name
+	Ingredients []domain.Ingredient
+}
+
+func (o *Recipe) Create(dto CreateDTO) (recipe recipe.Recipe, err error) {
 	o.logger.Info("get all", "enter")
 
-	id, err := o.book.Add(name, ingredients)
+	id, err := o.book.Add(dto.Name, dto.Ingredients)
 
 	if err != nil {
 		o.logger.Error("get all", "call domain layer", err)

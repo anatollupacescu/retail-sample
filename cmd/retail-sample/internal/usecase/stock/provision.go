@@ -1,27 +1,24 @@
 package stock
 
 import (
-	"strconv"
-
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
-func (o *Stock) Provision(reqID string, qty int) (stock.Position, error) {
+type UpdateDTO struct {
+	ReqID int
+	Qty   int
+}
+
+func (o *Stock) Provision(dto UpdateDTO) (stock.Position, error) {
 	o.logger.Info("provision", "enter")
 
-	id, err := strconv.Atoi(reqID)
-	if err != nil {
-		o.logger.Error("provision", "convert request ID", err)
-		return stock.Position{}, ErrBadItemID
-	}
-
-	provisionID, err := o.stock.Provision(id, qty)
+	provisionID, err := o.stock.Provision(dto.ReqID, dto.Qty)
 	if err != nil {
 		o.logger.Error("provision", "call domain layer", err)
 		return stock.Position{}, err
 	}
 
-	logEntry, err := o.stock.GetProvision(provisionID)
+	logEntry, err := o.provisionLog.Get(provisionID)
 	if err != nil {
 		o.logger.Error("provision", "call domain layer to retrieve provision record", err)
 		return stock.Position{}, err

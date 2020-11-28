@@ -12,6 +12,7 @@ type (
 	single struct {
 		Data entity `json:"data"`
 	}
+
 	collection struct {
 		Data []entity `json:"data"`
 	}

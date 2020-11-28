@@ -13,6 +13,10 @@ type PgxProvisionLog struct {
 	DB pgx.Tx
 }
 
+type ProvisionEntry struct {
+	ID, Qty int
+}
+
 func (pl *PgxProvisionLog) Add(itemID, qty int) (id int, err error) {
 	sql := "insert into provisionlog(inventoryid, quantity) values($1, $2) returning id"
 
@@ -25,7 +29,7 @@ func (pl *PgxProvisionLog) Add(itemID, qty int) (id int, err error) {
 	return
 }
 
-func (pl *PgxProvisionLog) Get(id int) (pe stock.ProvisionEntry, err error) {
+func (pl *PgxProvisionLog) Get(id int) (pe ProvisionEntry, err error) {
 	sql := "select inventoryid, quantity from provisionlog where id = $1"
 
 	var itemID, qty int
@@ -40,13 +44,13 @@ func (pl *PgxProvisionLog) Get(id int) (pe stock.ProvisionEntry, err error) {
 		return pe, errors.Wrapf(ErrDB, "get provision entry %v: %v", id, err)
 	}
 
-	return stock.ProvisionEntry{
+	return ProvisionEntry{
 		ID:  itemID,
 		Qty: qty,
 	}, nil
 }
 
-func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {
+func (pl *PgxProvisionLog) List() (ee []ProvisionEntry, err error) {
 	rows, err := pl.DB.Query(context.Background(), "select inventoryid, quantity from provisionlog")
 
 	if err != nil {
@@ -65,7 +69,7 @@ func (pl *PgxProvisionLog) List() (ee []stock.ProvisionEntry, err error) {
 			return nil, errors.Wrapf(ErrDB, "provisionlog list scan: %v", err)
 		}
 
-		ee = append(ee, stock.ProvisionEntry{
+		ee = append(ee, ProvisionEntry{
 			ID:  int(id),
 			Qty: int(qty),
 		})

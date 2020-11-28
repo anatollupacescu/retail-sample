@@ -16,33 +16,12 @@ func (m *MockStore) Quantity(id int) (qty int, err error) {
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockStore) Provision(a1 int, a2 int) (int, error) {
-	args := m.Called(a1, a2)
-	return args.Int(0), args.Error(1)
+func (m *MockStore) Provision(a1 int, a2 int) error {
+	return m.Called(a1, a2).Error(0)
 }
 
 func (m *MockStore) Sell(a1 []recipe.Ingredient, a2 int) error {
-	args := m.Called(a1, a2)
-	return args.Error(0)
-}
-
-type MockProvisionLog struct {
-	mock.Mock
-}
-
-func (m *MockProvisionLog) List() ([]ProvisionEntry, error) {
-	args := m.Called()
-	return args.Get(0).([]ProvisionEntry), args.Error(1)
-}
-
-func (m *MockProvisionLog) Add(id, qty int) (int, error) {
-	args := m.Called(id, qty)
-	return args.Int(0), args.Error(1)
-}
-
-func (m *MockProvisionLog) Get(id int) (ProvisionEntry, error) {
-	args := m.Called(id)
-	return args.Get(0).(ProvisionEntry), args.Error(1)
+	return m.Called(a1, a2).Error(0)
 }
 
 type MockInventory struct {

@@ -12,7 +12,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func GetByID(r *http.Request) (inventory.Item, error) {
+func getByID(r *http.Request) (inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get by id")
 
 	vars := mux.Vars(r)
@@ -42,12 +42,12 @@ func GetByID(r *http.Request) (inventory.Item, error) {
 	return item, nil
 }
 
-func ListItems(r *http.Request) ([]inventory.Item, error) {
+func getAll(r *http.Request) ([]inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get all")
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
-		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by id")
+		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get all")
 		return nil, err
 	}
 
@@ -55,7 +55,7 @@ func ListItems(r *http.Request) ([]inventory.Item, error) {
 
 	items, err := store.List()
 	if err != nil {
-		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by id")
+		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get all")
 		return nil, err
 	}
 

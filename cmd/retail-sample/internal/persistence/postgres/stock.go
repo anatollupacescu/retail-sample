@@ -14,7 +14,7 @@ type StockPgxStore struct {
 	DB pgx.Tx
 }
 
-func (ps *StockPgxStore) Provision(id, qty int) (int, error) {
+func (ps *StockPgxStore) Provision(id, qty int) error {
 	sql := `insert into stock(inventoryid, quantity) 
 					values ($1, $2) 
 					ON CONFLICT(inventoryid) DO UPDATE 
@@ -26,10 +26,10 @@ func (ps *StockPgxStore) Provision(id, qty int) (int, error) {
 	err := ps.DB.QueryRow(context.Background(), sql, id, qty).Scan(&newQty)
 
 	if err != nil {
-		return 0, errors.Wrapf(ErrDB, "provision stock: %v", err)
+		return errors.Wrapf(ErrDB, "provision stock: %v", err)
 	}
 
-	return newQty, nil
+	return nil
 }
 
 func (ps *StockPgxStore) Quantity(id int) (int, error) {

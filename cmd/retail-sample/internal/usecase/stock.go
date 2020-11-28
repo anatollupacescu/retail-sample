@@ -7,12 +7,13 @@ import (
 )
 
 func NewStock(ctx context.Context, stock stock.Stock,
-	stockDB stockDB, inventoryDB inventoryDB,
+	stockDB stockDB, logDB logDB, inventoryDB inventoryDB,
 	log logger) Stock {
 	return Stock{
 		ctx:         ctx,
 		stock:       stock,
 		stockDB:     stockDB,
+		logDB:       logDB,
 		inventoryDB: inventoryDB,
 		logger:      log,
 	}
@@ -22,15 +23,20 @@ type stockDB interface {
 	Quantity(id int) (int, error)
 }
 
+type logDB interface {
+	Add(id, qty int) (int, error)
+}
+
 type Stock struct {
 	logger      logger
 	stock       stock.Stock
 	stockDB     stockDB
 	inventoryDB inventoryDB
+	logDB       logDB
 	ctx         context.Context
 }
 
-type UpdateDTO struct {
+type ProvisionDTO struct {
 	InventoryItemID int
 	Qty             int
 }
@@ -41,10 +47,16 @@ type Position struct {
 	Qty  int
 }
 
-func (o *Stock) Provision(dto UpdateDTO) (Position, error) {
+func (o *Stock) Provision(dto ProvisionDTO) (Position, error) {
 	o.logger.Info("provision", "enter")
 
-	_, err := o.stock.Provision(dto.InventoryItemID, dto.Qty)
+	err := o.stock.Provision(dto.InventoryItemID, dto.Qty)
+	if err != nil {
+		o.logger.Error("provision", "call domain layer", err)
+		return Position{}, err
+	}
+
+	_, err = o.logDB.Add(dto.InventoryItemID, dto.Qty)
 	if err != nil {
 		o.logger.Error("provision", "call domain layer", err)
 		return Position{}, err

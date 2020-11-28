@@ -14,7 +14,7 @@ import (
 
 var ErrParseItemID = errors.New("could not parse item ID")
 
-func toProvisionDTO(r *http.Request) (usecase.UpdateDTO, error) {
+func toProvisionDTO(r *http.Request) (usecase.ProvisionDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -22,7 +22,7 @@ func toProvisionDTO(r *http.Request) (usecase.UpdateDTO, error) {
 
 	if err := d.Decode(&body); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'provision' payload")
-		return usecase.UpdateDTO{}, err
+		return usecase.ProvisionDTO{}, err
 	}
 
 	vars := mux.Vars(r)
@@ -32,10 +32,10 @@ func toProvisionDTO(r *http.Request) (usecase.UpdateDTO, error) {
 
 	if err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return usecase.UpdateDTO{}, ErrParseItemID
+		return usecase.ProvisionDTO{}, ErrParseItemID
 	}
 
-	dto := usecase.UpdateDTO{
+	dto := usecase.ProvisionDTO{
 		Qty:             body.Qty,
 		InventoryItemID: id,
 	}

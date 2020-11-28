@@ -22,7 +22,7 @@ func TestDisableRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		b := recipe.Book{DB: s, Inventory: i}
 
-		err := b.SetStatus(1, false)
+		err := b.UpdateStatus(1, false)
 
 		t.Run("calls store", func(t *testing.T) {
 			s.AssertExpectations(t)
@@ -52,7 +52,7 @@ func TestDisableRecipe(t *testing.T) {
 
 		b := recipe.Book{DB: s}
 
-		err := b.SetStatus(1, false)
+		err := b.UpdateStatus(1, false)
 
 		t.Run("calls store", func(t *testing.T) {
 			s.AssertExpectations(t)
@@ -100,7 +100,7 @@ func TestAddRecipe(t *testing.T) {
 
 		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
-		assert.Equal(t, recipe.ErrIgredientNotEnabled, err)
+		assert.Equal(t, recipe.ErrIgredientDisabled, err)
 
 		s.AssertExpectations(t)
 		i.AssertExpectations(t)

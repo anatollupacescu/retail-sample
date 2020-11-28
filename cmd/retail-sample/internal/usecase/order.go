@@ -6,6 +6,10 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 )
 
+type orderDB interface {
+	Get(order.ID) (order.Order, error)
+}
+
 func NewOrder(ctx context.Context, orders order.Orders, db orderDB, log logger) Order {
 	return Order{
 		ctx:     ctx,
@@ -13,10 +17,6 @@ func NewOrder(ctx context.Context, orders order.Orders, db orderDB, log logger) 
 		orderDB: db,
 		logger:  log,
 	}
-}
-
-type orderDB interface {
-	Get(order.ID) (order.Order, error)
 }
 
 type Order struct {

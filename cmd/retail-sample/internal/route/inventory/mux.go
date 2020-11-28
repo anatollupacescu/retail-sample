@@ -95,12 +95,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	item, err := GetByID(r)
+	item, err := getByID(r)
 
 	switch err {
 	case nil:
 	case ErrParseItemID:
-		http.Error(w, ErrParseItemID.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -121,7 +121,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	all, err := ListItems(r)
+	all, err := getAll(r)
 
 	if err != nil {
 		httpServerError(w)

@@ -9,8 +9,10 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
-func errorMsg() string {
-	return http.StatusText(http.StatusInternalServerError)
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
@@ -19,13 +21,13 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	uc, err := useCase(r)
 
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
 	dto, err := toCreateDTO(r)
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -42,7 +44,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -52,14 +54,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusBadRequest)
+		httpServerError(w)
 	}
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	order, err := GetByID(r)
+	order, err := getByID(r)
 
 	switch err {
 	case nil:
@@ -68,7 +70,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -76,17 +78,17 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	orders, err := List(r)
+	orders, err := getAll(r)
 
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 		return
 	}
 
@@ -94,6 +96,6 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {
-		http.Error(w, errorMsg(), http.StatusInternalServerError)
+		httpServerError(w)
 	}
 }

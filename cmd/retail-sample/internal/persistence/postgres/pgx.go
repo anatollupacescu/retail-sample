@@ -44,19 +44,17 @@ func (t TX) Orders() order.Orders {
 	return order.New(s, rb, stock)
 }
 
-func (t TX) ProvisionLog() stock.ProvisionLog {
+func (t TX) ProvisionLog() *PgxProvisionLog {
 	return &PgxProvisionLog{DB: t.Tx}
 }
 
 func (t TX) Stock() stock.Stock {
 	db := &StockPgxStore{DB: t.Tx}
 	inventory := &InventoryPgxStore{DB: t.Tx}
-	log := &PgxProvisionLog{DB: t.Tx}
 
 	return stock.Stock{
-		DB:           db,
-		InventoryDB:  inventory,
-		ProvisionLog: log,
+		DB:          db,
+		InventoryDB: inventory,
 	}
 }
 

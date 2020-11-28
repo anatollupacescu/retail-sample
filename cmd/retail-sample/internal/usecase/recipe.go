@@ -66,7 +66,7 @@ func (o *Recipe) Update(in UpdateStatusDTO) (recipe.Recipe, error) {
 
 	recipeID := recipe.ID(in.RecipeID)
 
-	err := o.book.SetStatus(recipeID, in.Enabled)
+	err := o.book.UpdateStatus(recipeID, in.Enabled)
 
 	if err != nil {
 		o.logger.Error("update status", "call domain", err)

@@ -23,12 +23,10 @@ func TestProvision(t *testing.T) {
 
 		st := &stock.Stock{InventoryDB: inv}
 
-		qty, err := st.Provision(1, 1)
+		err := st.Provision(1, 1)
 
 		t.Run("returns error", func(t *testing.T) {
 			mockStore.AssertExpectations(t)
-
-			assert.Zero(t, qty)
 			assert.Equal(t, expectedErr, err)
 		})
 	})
@@ -37,71 +35,38 @@ func TestProvision(t *testing.T) {
 		mockStore := &stock.MockStore{}
 
 		expectedErr := errors.New("err")
-		mockStore.On("Provision", mock.Anything, mock.Anything).Return(0, expectedErr)
+		mockStore.On("Provision", mock.Anything, mock.Anything).Return(expectedErr)
 
 		inv := &stock.MockInventory{}
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
 		st := &stock.Stock{DB: mockStore, InventoryDB: inv}
 
-		qty, err := st.Provision(1, 1)
-
-		t.Run("error is propagated", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-			assert.Zero(t, qty)
-			assert.Equal(t, expectedErr, err)
-		})
-	})
-
-	t.Run("given that provision log returns error", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-		mockStore.On("Provision", mock.Anything, mock.Anything).Return(10, nil)
-
-		inv := &stock.MockInventory{}
-		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
-
-		provisionLog := &stock.MockProvisionLog{}
-
-		var expectedErr = errors.New("expected")
-		provisionLog.On("Add", mock.Anything, mock.Anything).Return(0, expectedErr)
-
-		st := &stock.Stock{
-			DB:           mockStore,
-			InventoryDB:  inv,
-			ProvisionLog: provisionLog,
-		}
-
-		qty, err := st.Provision(1, 5)
+		err := st.Provision(1, 1)
 
 		t.Run("error is propagated", func(t *testing.T) {
 			mockStore.AssertExpectations(t)
 			assert.Equal(t, expectedErr, err)
-			assert.Zero(t, qty)
 		})
 	})
 
-	t.Run("given that all calls succeed", func(t *testing.T) {
+	t.Run("given that database is updated successfully", func(t *testing.T) {
 		mockStore := &stock.MockStore{}
-		mockStore.On("Provision", mock.Anything, mock.Anything).Return(10, nil)
+		mockStore.On("Provision", mock.Anything, mock.Anything).Return(nil)
 
 		inv := &stock.MockInventory{}
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
-		provisionLog := &stock.MockProvisionLog{}
-		provisionLog.On("Add", mock.Anything, mock.Anything).Return(1, nil)
-
 		st := &stock.Stock{
-			DB:           mockStore,
-			InventoryDB:  inv,
-			ProvisionLog: provisionLog,
+			DB:          mockStore,
+			InventoryDB: inv,
 		}
 
-		id, err := st.Provision(1, 5)
+		err := st.Provision(1, 5)
 
 		t.Run("return provision entry id", func(t *testing.T) {
 			mockStore.AssertExpectations(t)
 			assert.Nil(t, err)
-			assert.Equal(t, 1, id)
 		})
 	})
 }

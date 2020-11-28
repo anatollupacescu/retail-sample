@@ -12,7 +12,7 @@ type (
 		Enabled bool
 	}
 
-	DB interface {
+	db interface {
 		Add(string) (int, error)
 		Find(string) (int, error)
 		Get(int) (Item, error)
@@ -20,7 +20,7 @@ type (
 	}
 
 	Inventory struct {
-		DB DB
+		DB db
 	}
 )
 

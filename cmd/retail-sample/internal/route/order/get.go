@@ -15,7 +15,7 @@ import (
 
 var ErrBadItemID = errors.New("could not parse ID")
 
-func GetByID(r *http.Request) (domain.Order, error) {
+func getByID(r *http.Request) (domain.Order, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get order by id")
 
 	vars := mux.Vars(r)
@@ -47,7 +47,7 @@ func GetByID(r *http.Request) (domain.Order, error) {
 	return order, nil
 }
 
-func List(r *http.Request) ([]domain.Order, error) {
+func getAll(r *http.Request) ([]domain.Order, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("list orders")
 
 	tx, err := middleware.ExtractTransaction(r)

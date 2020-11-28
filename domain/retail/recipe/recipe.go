@@ -7,10 +7,6 @@ import (
 )
 
 type (
-	Inventory interface {
-		Get(int) (inventory.Item, error)
-	}
-
 	Name string
 	ID   int
 
@@ -26,15 +22,19 @@ type (
 		Qty int
 	}
 
-	Store interface {
+	db interface {
 		Add(Recipe) (ID, error)
 		List() ([]Recipe, error)
 		Get(ID) (Recipe, error)
 		Save(Recipe) error
 	}
 
+	Inventory interface {
+		Get(int) (inventory.Item, error)
+	}
+
 	Book struct {
-		DB        Store
+		DB        db
 		Inventory Inventory
 	}
 )
@@ -43,7 +43,7 @@ var (
 	ErrEmptyName           = errors.New("empty name")
 	ErrNoIngredients       = errors.New("no ingredients provided")
 	ErrIgredientNotFound   = errors.New("ingredient not found")
-	ErrIgredientNotEnabled = errors.New("ingredient not enabled")
+	ErrIgredientDisabled   = errors.New("ingredient disabled")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
@@ -78,7 +78,7 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 		}
 
 		if !item.Enabled {
-			return zeroRecipeID, ErrIgredientNotEnabled
+			return zeroRecipeID, ErrIgredientDisabled
 		}
 	}
 
@@ -91,7 +91,7 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 
 var ErrRecipeNotFound = errors.New("recipe not found")
 
-func (b Book) SetStatus(id ID, enabled bool) error {
+func (b Book) UpdateStatus(id ID, enabled bool) error {
 	r, err := b.DB.Get(id)
 
 	if err != nil {

@@ -21,7 +21,7 @@ type (
 		Date time.Time
 	}
 
-	DB interface {
+	db interface {
 		Add(Order) (ID, error)
 	}
 
@@ -34,7 +34,7 @@ type (
 	}
 
 	Orders struct {
-		DB         DB
+		DB         db
 		RecipeBook recipeBook
 		Stock      orderStock
 	}
@@ -46,7 +46,7 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func New(s DB, rb recipeBook, stock orderStock) Orders {
+func New(s db, rb recipeBook, stock orderStock) Orders {
 	return Orders{
 		DB:         s,
 		RecipeBook: rb,

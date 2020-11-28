@@ -3,9 +3,8 @@ package stock
 import (
 	"time"
 
+	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	usecase2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
-
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 type (
@@ -55,7 +54,7 @@ type provisionLogEntity struct {
 	Qty  int       `json:"qty"`
 }
 
-func toProvisionLog(pl []stock.ProvisionEntry) interface{} {
+func toProvisionLog(pl []persistence.ProvisionEntry) interface{} {
 	response := struct {
 		Data []provisionLogEntity `json:"data"`
 	}{

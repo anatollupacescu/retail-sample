@@ -107,7 +107,7 @@ func getAll(r *http.Request) ([]usecase2.Position, error) {
 	return positions, nil
 }
 
-func getProvisionLog(r *http.Request) ([]domain.ProvisionEntry, error) {
+func getProvisionLog(r *http.Request) ([]persistence.ProvisionEntry, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("list provision log")
 
 	tx, err := middleware.ExtractTransaction(r)

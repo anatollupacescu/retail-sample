@@ -5,7 +5,6 @@ import (
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
@@ -23,10 +22,6 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 		return usecase.Stock{}, err
 	}
 
-	logWrapper := logWrapper{
-		logger: logger,
-	}
-
 	stock := tx.Stock()
 
 	stockDB := &pg.StockPgxStore{DB: tx.Tx}
@@ -34,19 +29,7 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 	logDB := &pg.PgxProvisionLog{DB: tx.Tx}
 
 	ctx := r.Context()
-	uc := usecase.NewStock(ctx, stock, stockDB, logDB, inventoryDB, logWrapper)
+	uc := usecase.NewStock(ctx, stock, stockDB, logDB, inventoryDB)
 
 	return uc, nil
-}
-
-type logWrapper struct {
-	logger *zerolog.Logger
-}
-
-func (l logWrapper) Error(action, message string, err error) {
-	l.logger.Error().Str("action", action).Err(err).Msg(message)
-}
-
-func (l logWrapper) Info(action, message string) {
-	l.logger.Info().Str("action", action).Msg(message)
 }

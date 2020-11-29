@@ -4,26 +4,30 @@ import (
 	"context"
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type inventoryDB interface {
 	Get(int) (inventory.Item, error)
 }
 
-func NewInventory(ctx context.Context, inventory inventory.Inventory, db inventoryDB, log logger) Inventory {
+func NewInventory(ctx context.Context, inventory inventory.Inventory, db inventoryDB) Inventory {
+	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
+
 	return Inventory{
 		ctx:         ctx,
 		inventory:   inventory,
 		inventoryDB: db,
-		logger:      log,
+		logger:      &logger,
 	}
 }
 
 type Inventory struct {
-	logger      logger
 	inventory   inventory.Inventory
 	inventoryDB inventoryDB
 	ctx         context.Context
+	logger      *zerolog.Logger
 }
 
 type CreateInventoryItemDTO struct {
@@ -31,21 +35,17 @@ type CreateInventoryItemDTO struct {
 }
 
 func (a *Inventory) Create(in CreateInventoryItemDTO) (item inventory.Item, err error) {
-	a.logger.Info("create", "enter")
+	id, err := a.inventory.Add(in.Name)
 
-	var id int
-
-	if id, err = a.inventory.Add(in.Name); err != nil {
-		a.logger.Error("create", "call domain", err)
+	if err != nil {
+		a.logger.Error().Err(err).Msg("call domain")
 		return
 	}
 
 	if item, err = a.inventoryDB.Get(id); err != nil {
-		a.logger.Error("create", "retrieve new item", err)
+		a.logger.Error().Err(err).Msg("retrieve new item")
 		return
 	}
-
-	a.logger.Info("create", "success")
 
 	return item, nil
 }
@@ -56,21 +56,17 @@ type UpdateInventoryItemStatusDTO struct {
 }
 
 func (a *Inventory) UpdateStatus(in UpdateInventoryItemStatusDTO) (item inventory.Item, err error) {
-	a.logger.Info("update status", "begin")
-
 	if err = a.inventory.UpdateStatus(in.ID, in.Enabled); err != nil {
-		a.logger.Error("update status", "call domain", err)
+		a.logger.Error().Err(err).Msg("call domain")
 		return inventory.Item{}, err
 	}
 
 	item, err = a.inventory.DB.Get(in.ID)
 
 	if err != nil {
-		a.logger.Error("update status", "fetch updated item", err)
+		a.logger.Error().Err(err).Msg("fetch updated item")
 		return inventory.Item{}, err
 	}
-
-	a.logger.Info("update status", "success")
 
 	return item, nil
 }

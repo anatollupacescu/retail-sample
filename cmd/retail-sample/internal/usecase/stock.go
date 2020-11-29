@@ -4,18 +4,20 @@ import (
 	"context"
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-func NewStock(ctx context.Context, stock stock.Stock,
-	stockDB stockDB, logDB logDB, inventoryDB inventoryDB,
-	log logger) Stock {
+func NewStock(ctx context.Context, stock stock.Stock, stockDB stockDB, logDB logDB, inventoryDB inventoryDB) Stock {
+	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
+
 	return Stock{
 		ctx:         ctx,
 		stock:       stock,
 		stockDB:     stockDB,
 		logDB:       logDB,
 		inventoryDB: inventoryDB,
-		logger:      log,
+		logger:      &logger,
 	}
 }
 
@@ -28,7 +30,7 @@ type logDB interface {
 }
 
 type Stock struct {
-	logger      logger
+	logger      *zerolog.Logger
 	stock       stock.Stock
 	stockDB     stockDB
 	inventoryDB inventoryDB
@@ -48,33 +50,29 @@ type Position struct {
 }
 
 func (o *Stock) Provision(dto ProvisionDTO) (Position, error) {
-	o.logger.Info("provision", "enter")
-
 	err := o.stock.Provision(dto.InventoryItemID, dto.Qty)
 	if err != nil {
-		o.logger.Error("provision", "call domain layer", err)
+		o.logger.Error().Err(err).Msg("call domain layer")
 		return Position{}, err
 	}
 
 	_, err = o.logDB.Add(dto.InventoryItemID, dto.Qty)
 	if err != nil {
-		o.logger.Error("provision", "call domain layer", err)
+		o.logger.Error().Err(err).Msg("call domain layer")
 		return Position{}, err
 	}
 
 	qty, err := o.stockDB.Quantity(dto.InventoryItemID)
 	if err != nil {
-		o.logger.Error("provision", "call domain layer to retrieve quantity", err)
+		o.logger.Error().Err(err).Msg("call domain layer to retrieve quantity")
 		return Position{}, err
 	}
 
 	item, err := o.inventoryDB.Get(dto.InventoryItemID)
 	if err != nil {
-		o.logger.Error("provision", "call domain layer to retrieve stock position", err)
+		o.logger.Error().Err(err).Msg("call domain layer to retrieve stock position")
 		return Position{}, err
 	}
-
-	o.logger.Error("provision", "success", err)
 
 	pos := Position{
 		ID:   item.ID,

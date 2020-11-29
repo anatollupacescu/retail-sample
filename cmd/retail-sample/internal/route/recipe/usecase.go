@@ -8,7 +8,6 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 )
 
@@ -22,26 +21,11 @@ func newUseCase(r *http.Request) (usecase.Recipe, error) {
 		return usecase.Recipe{}, err
 	}
 
-	logWrapper := logWrapper{
-		logger: logger,
-	}
 	recipe := tx.Recipe()
 	ctx := r.Context()
 
 	recipeDB := &pg.RecipePgxStore{DB: tx.Tx}
-	uc := usecase.NewRecipe(ctx, recipe, recipeDB, logWrapper)
+	uc := usecase.NewRecipe(ctx, recipe, recipeDB)
 
 	return uc, nil
-}
-
-type logWrapper struct {
-	logger *zerolog.Logger
-}
-
-func (l logWrapper) Error(action, message string, err error) {
-	l.logger.Error().Str("action", action).Err(err).Msg(message)
-}
-
-func (l logWrapper) Info(action, message string) {
-	l.logger.Info().Str("action", action).Msg(message)
 }

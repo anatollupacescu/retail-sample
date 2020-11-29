@@ -1,6 +1,10 @@
 package order
 
-import "github.com/anatollupacescu/retail-sample/domain/retail/order"
+import (
+	"net/http"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/order"
+)
 
 type (
 	entity struct {
@@ -44,4 +48,10 @@ func toCollectionResponse(orders []order.Order) (response collection) {
 	}
 
 	return response
+}
+
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
 }

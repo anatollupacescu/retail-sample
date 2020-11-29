@@ -1,10 +1,11 @@
 package stock
 
 import (
+	"net/http"
 	"time"
 
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-	usecase2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 )
 
 type (
@@ -21,7 +22,7 @@ type (
 	}
 )
 
-func toCollectionResponse(entries []usecase2.Position) collection {
+func toCollectionResponse(entries []usecase.Position) collection {
 	var response collection
 	response.Data = make([]entity, 0, len(entries))
 
@@ -38,7 +39,7 @@ func toCollectionResponse(entries []usecase2.Position) collection {
 	return response
 }
 
-func toResponse(pos usecase2.Position) single {
+func toResponse(pos usecase.Position) single {
 	return single{
 		Data: entity{
 			ID:   pos.ID,
@@ -71,4 +72,10 @@ func toProvisionLog(pl []persistence.ProvisionEntry) interface{} {
 	}
 
 	return response
+}
+
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
 }

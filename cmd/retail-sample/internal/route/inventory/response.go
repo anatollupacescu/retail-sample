@@ -1,6 +1,10 @@
 package inventory
 
-import "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+import (
+	"net/http"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+)
 
 type (
 	entity struct {
@@ -40,4 +44,10 @@ func toSingleResponse(i inventory.Item) single {
 			Enabled: i.Enabled,
 		},
 	}
+}
+
+func httpServerError(w http.ResponseWriter) {
+	status := http.StatusInternalServerError
+	statusText := http.StatusText(status)
+	http.Error(w, statusText, http.StatusInternalServerError)
 }

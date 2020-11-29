@@ -20,7 +20,7 @@ type updatePayload struct {
 
 var ErrParseItemID = errors.New("could not parse item ID")
 
-func toUpdateStatusDTO(r *http.Request) (usecase.UpdateStatusDTO, error) {
+func newUpdateStatusDTO(r *http.Request) (usecase.UpdateStatusDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -54,7 +54,7 @@ type createPayload struct {
 	Items map[int]int `json:"items"`
 }
 
-func toCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
+func newCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
@@ -81,18 +81,3 @@ func toCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
 
 	return dto, nil
 }
-
-// func toIngredientCollection(items []item) []domain.Ingredient {
-// 	ingredients := make([]domain.Ingredient, 0, len(items))
-
-// 	for i := range items {
-// 		currentItem := items[i]
-
-// 		ingredients = append(ingredients, domain.Ingredient{
-// 			ID:  currentItem.ID,
-// 			Qty: currentItem.Qty,
-// 		})
-// 	}
-
-// 	return ingredients
-// }

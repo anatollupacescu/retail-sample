@@ -7,26 +7,18 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func httpServerError(w http.ResponseWriter) {
-	status := http.StatusInternalServerError
-	statusText := http.StatusText(status)
-	http.Error(w, statusText, http.StatusInternalServerError)
-}
-
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
-
+	dto, err := newCreateDTO(r)
 	if err != nil {
-		httpServerError(w)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	dto, err := toCreateDTO(r)
-
+	uc, err := newUseCase(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpServerError(w)
 		return
 	}
 
@@ -102,17 +94,15 @@ func Get(w http.ResponseWriter, r *http.Request) {
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
-
+	dto, err := newUpdateStatusDTO(r)
 	if err != nil {
-		httpServerError(w)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	dto, err := toUpdateStatusDTO(r)
-
+	uc, err := newUseCase(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpServerError(w)
 		return
 	}
 

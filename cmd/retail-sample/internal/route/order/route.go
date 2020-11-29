@@ -4,28 +4,23 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
+	"github.com/rs/zerolog/hlog"
 )
-
-func httpServerError(w http.ResponseWriter) {
-	status := http.StatusInternalServerError
-	statusText := http.StatusText(status)
-	http.Error(w, statusText, http.StatusInternalServerError)
-}
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
-
+	dto, err := newCreateDTO(r)
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	dto, err := toCreateDTO(r)
+	uc, err := newUseCase(r)
 	if err != nil {
 		httpServerError(w)
 		return
@@ -56,6 +51,30 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		httpServerError(w)
 	}
+}
+
+type createPayload struct {
+	ID  int `json:"id"`
+	Qty int `json:"qty"`
+}
+
+func newCreateDTO(r *http.Request) (usecase.PlaceOrderDTO, error) {
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	var payload createPayload
+
+	if err := d.Decode(&payload); err != nil {
+		hlog.FromRequest(r).Err(err).Msg("parse 'create order' payload")
+		return usecase.PlaceOrderDTO{}, err
+	}
+
+	dto := usecase.PlaceOrderDTO{
+		RecipeID: payload.ID,
+		OrderQty: payload.Qty,
+	}
+
+	return dto, nil
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {

@@ -12,7 +12,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func getByID(r *http.Request) (inventory.Item, error) {
+func inventoryItemByID(r *http.Request) (inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get by id")
 
 	vars := mux.Vars(r)
@@ -42,7 +42,7 @@ func getByID(r *http.Request) (inventory.Item, error) {
 	return item, nil
 }
 
-func getAll(r *http.Request) ([]inventory.Item, error) {
+func allInventoryItems(r *http.Request) ([]inventory.Item, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get all")
 
 	tx, err := middleware.ExtractTransaction(r)

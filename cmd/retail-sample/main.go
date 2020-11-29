@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/inventory"
+
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
@@ -19,8 +21,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
-
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/inventory"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/order"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/recipe"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/stock"

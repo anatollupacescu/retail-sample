@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/hlog"
 )
 
-func useCase(r *http.Request) (usecase.Recipe, error) {
+func newUseCase(r *http.Request) (usecase.Recipe, error) {
 	logger := hlog.FromRequest(r)
 
 	tx, err := middleware.ExtractTransaction(r)

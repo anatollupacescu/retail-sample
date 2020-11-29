@@ -76,7 +76,7 @@ func run(config Configuration) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	router.Use(middleware.Transaction(pool), middleware.Recovery)
+	router.Use(middleware.WithTransaction(pool))
 
 	router.HandleFunc("/inventory", inventory.GetAll).Methods(http.MethodGet)
 	router.HandleFunc("/inventory/{itemID}", inventory.Get).Methods(http.MethodGet)

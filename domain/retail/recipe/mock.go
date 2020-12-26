@@ -15,17 +15,12 @@ func (m *MockRecipeStore) Add(r Recipe) (ID, error) {
 	return args.Get(0).(ID), args.Error(1)
 }
 
-func (m *MockRecipeStore) List() ([]Recipe, error) {
-	args := m.Called()
-	return args.Get(0).([]Recipe), args.Error(1)
+func (m *MockRecipeStore) Find(n Name) (*Recipe, error) {
+	args := m.Called(n)
+	return args.Get(0).(*Recipe), args.Error(1)
 }
 
-func (m *MockRecipeStore) Get(id ID) (Recipe, error) {
-	args := m.Called(id)
-	return args.Get(0).(Recipe), args.Error(1)
-}
-
-func (m *MockRecipeStore) Save(r Recipe) error {
+func (m *MockRecipeStore) Save(r *Recipe) error {
 	return m.Called(r).Error(0)
 }
 

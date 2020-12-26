@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func NewRecipe(ctx context.Context, book recipe.Book, recipeDB recipeDB) Recipe {
+func NewRecipe(ctx context.Context, book recipe.Collection, recipeDB recipeDB) Recipe {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
 	return Recipe{
@@ -26,7 +26,7 @@ type recipeDB interface {
 
 type Recipe struct {
 	logger   *zerolog.Logger
-	book     recipe.Book
+	book     recipe.Collection
 	recipeDB recipeDB
 	ctx      context.Context
 }
@@ -44,7 +44,7 @@ func (o *Recipe) Create(dto CreateRecipeDTO) (recipe recipe.Recipe, err error) {
 		return
 	}
 
-	recipe, err = o.book.DB.Get(id)
+	recipe, err = o.recipeDB.Get(id)
 
 	if err != nil {
 		o.logger.Error().Err(err).Msg("retrieve the newly created recipe")
@@ -64,19 +64,23 @@ type UpdateStatusDTO struct {
 func (o *Recipe) Update(in UpdateStatusDTO) (recipe.Recipe, error) {
 	recipeID := recipe.ID(in.RecipeID)
 
-	err := o.book.UpdateStatus(recipeID, in.Enabled)
+	found, err := o.recipeDB.Get(recipeID)
+
+	if err != nil {
+		return recipe.Recipe{}, err
+	}
+
+	switch in.Enabled {
+	case true:
+		err = found.Enable()
+	default:
+		err = found.Disable()
+	}
 
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
 		return recipe.Recipe{}, err
 	}
 
-	rec, err := o.recipeDB.Get(recipeID)
-
-	if err != nil {
-		o.logger.Error().Err(err).Msg("retrieve updated entity")
-		return recipe.Recipe{}, err
-	}
-
-	return rec, nil
+	return found, nil
 }

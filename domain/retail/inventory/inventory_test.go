@@ -129,13 +129,3 @@ func TestAdd(t *testing.T) {
 		})
 	})
 }
-
-func TestList(t *testing.T) {
-	t.Run("calls store", func(t *testing.T) {})
-}
-func TestFind(t *testing.T) {
-	t.Run("calls store", func(t *testing.T) {})
-}
-func TestGet(t *testing.T) {
-	t.Run("calls store", func(t *testing.T) {})
-}

@@ -32,9 +32,9 @@ The frontend is a SPA (single page application) written as a single static HTML 
 
 Both front and back-end are written in such a way that their 'business' related code is separated from the delivery code:
 
-- for the back-end - all the implementation details are placed in the `cmd` folder, while all the business rules are in the `internal` directory.
+- for the back-end - all the implementation details are placed in the `cmd` folder, while all the business rules are in the `domain` package.
 
-- for the front-end - the `web/src/app` folder contains all the framework free code - the domain objects, rest clients and page behaviour (error messages, controls animation) while `web/src/jquery` or `web/src/plan` (WIP) contains the means by which this logic in bound to the web page components.
+- for the front-end - the `web/src/app` folder contains all the framework free code - the domain objects, rest clients and page behaviour (error messages, controls animation) while `web/src/jquery` or `web/src/plain` (WIP) contains the means by which this logic in bound to the web page components.
 
 ## Development
 
@@ -99,6 +99,7 @@ Then refresh the previously loaded page
 - errors in jsonapi format
 - pagination
 - pprof
+- unique IDs (<https://github.com/oklog/ulid>)
 - auth and roles
 
 ### business

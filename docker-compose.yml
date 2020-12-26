@@ -23,10 +23,6 @@ services:
 
   tern:
     build: cmd/retail-sample/internal/persistence/postgres/migration
-    depends_on: 
-    - db
     environment:
-      - HOST=db
+      - HOST=kandula.db.elephantsql.com
       - PORT=5432
-    networks:
-      - shared-network

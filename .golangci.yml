@@ -329,6 +329,10 @@ issues:
         - dupl
         - gosec
 
+    - path: cmd/retail-sample/internal/middleware
+      linters:
+        - golint
+        - stylecheck
     # Exclude some staticcheck messages
     # - linters:
     #     - staticcheck

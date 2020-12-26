@@ -58,11 +58,11 @@ func (t TX) Stock() stock.Stock {
 	}
 }
 
-func (t TX) Recipe() recipe.Book {
+func (t TX) Recipe() recipe.Collection {
 	store := &RecipePgxStore{DB: t.Tx}
 	inventory := &InventoryPgxStore{DB: t.Tx}
 
-	book := recipe.Book{
+	book := recipe.Collection{
 		DB:        store,
 		Inventory: inventory,
 	}

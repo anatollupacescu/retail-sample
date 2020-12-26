@@ -15,6 +15,8 @@ type (
 		Name        Name
 		Ingredients []Ingredient
 		Enabled     bool
+
+		DB db
 	}
 
 	Ingredient struct {
@@ -24,16 +26,15 @@ type (
 
 	db interface {
 		Add(Recipe) (ID, error)
-		List() ([]Recipe, error)
-		Get(ID) (Recipe, error)
-		Save(Recipe) error
+		Find(Name) (*Recipe, error)
+		Save(*Recipe) error
 	}
 
 	Inventory interface {
 		Get(int) (inventory.Item, error)
 	}
 
-	Book struct {
+	Collection struct {
 		DB        db
 		Inventory Inventory
 	}
@@ -44,45 +45,53 @@ var (
 	ErrNoIngredients       = errors.New("no ingredients provided")
 	ErrIgredientNotFound   = errors.New("ingredient not found")
 	ErrIgredientDisabled   = errors.New("ingredient disabled")
+	ErrDuplicateName       = errors.New("duplicate name")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
-	var zeroRecipeID ID
-
+func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
 	if name == "" {
-		return zeroRecipeID, ErrEmptyName
+		return 0, ErrEmptyName
 	}
 
 	if len(ingredients) == 0 {
-		return zeroRecipeID, ErrNoIngredients
+		return 0, ErrNoIngredients
 	}
 
 	for _, v := range ingredients {
 		if v.Qty == 0 {
-			return zeroRecipeID, ErrQuantityNotProvided
+			return 0, ErrQuantityNotProvided
 		}
+	}
+
+	found, err := c.DB.Find(name)
+	if err != nil {
+		return 0, err
+	}
+
+	if found != nil {
+		return 0, ErrDuplicateName
 	}
 
 	for _, v := range ingredients {
 		itemID := v.ID
 
-		item, err := b.Inventory.Get(itemID)
+		item, err := c.Inventory.Get(itemID)
 
 		switch err {
 		case nil: //continue
 		case inventory.ErrItemNotFound:
-			return zeroRecipeID, ErrIgredientNotFound
+			return 0, ErrIgredientNotFound
 		default:
-			return zeroRecipeID, err
+			return 0, err
 		}
 
 		if !item.Enabled {
-			return zeroRecipeID, ErrIgredientDisabled
+			return 0, ErrIgredientDisabled
 		}
 	}
 
-	return b.DB.Add(Recipe{
+	return c.DB.Add(Recipe{
 		Name:        name,
 		Ingredients: ingredients,
 		Enabled:     true,
@@ -91,16 +100,14 @@ func (b Book) Add(name Name, ingredients []Ingredient) (ID, error) {
 
 var ErrRecipeNotFound = errors.New("recipe not found")
 
-func (b Book) UpdateStatus(id ID, enabled bool) error {
-	r, err := b.DB.Get(id)
+func (r *Recipe) Disable() error {
+	r.Enabled = false
 
-	if err != nil {
-		return err
-	}
+	return r.DB.Save(r)
+}
 
-	r.Enabled = enabled
+func (r *Recipe) Enable() error {
+	r.Enabled = true
 
-	err = b.DB.Save(r)
-
-	return err
+	return r.DB.Save(r)
 }

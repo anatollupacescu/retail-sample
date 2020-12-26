@@ -26,7 +26,6 @@ func TestPlaceOrderT(t *testing.T) {
 		{
 			"rejects zero quantity",
 			nil, nil, nil,
-
 			1, 0,
 			order.ID(0), order.ErrInvalidQuantity,
 		}, {

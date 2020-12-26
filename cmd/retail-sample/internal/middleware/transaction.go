@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
@@ -10,10 +9,7 @@ import (
 	"github.com/rs/zerolog/hlog"
 )
 
-type Tx int
-
-const TxKey = Tx(0)
-
+// nolint:gocognit // transaction handing middleware is bound to have this complexity
 func WithTransaction(db *persistence.DB) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,20 +24,21 @@ func WithTransaction(db *persistence.DB) func(next http.Handler) http.Handler {
 				return
 			}
 
-			// save it in the context to make it available for downstream
+			// add to context to make it available for downstream
 			ctx := context.WithValue(rCtx, TxKey, tx)
 			r = r.WithContext(ctx)
 
 			crw := &capturingResponseWriter{w, http.StatusOK}
 
 			// rollback transaction in case of panic
-			defer recoverTransaction(crw, tx, ctx, logger)
+			defer recoverTransaction(ctx, crw, tx, logger)
 
 			next.ServeHTTP(crw, r)
 
-			if crw.statusCode >= 400 {
+			if crw.hasErrored() {
 				if err := tx.Rollback(ctx); err != nil {
 					logger.Err(err).Msg("rollback transaction")
+					return
 				}
 
 				logger.Info().Msg("rollback successful")
@@ -66,12 +63,18 @@ type capturingResponseWriter struct {
 	statusCode int
 }
 
-func (lrw *capturingResponseWriter) WriteHeader(code int) {
-	lrw.statusCode = code
-	lrw.ResponseWriter.WriteHeader(code)
+func (w *capturingResponseWriter) WriteHeader(code int) {
+	w.statusCode = code
+	w.ResponseWriter.WriteHeader(code)
 }
 
-func recoverTransaction(w http.ResponseWriter, tx persistence.TX, ctx context.Context, logger *zerolog.Logger) {
+const httpErrorTier = 400
+
+func (w *capturingResponseWriter) hasErrored() bool {
+	return w.statusCode >= httpErrorTier
+}
+
+func recoverTransaction(ctx context.Context, w http.ResponseWriter, tx persistence.TX, logger *zerolog.Logger) {
 	if rr := recover(); rr != nil {
 		logger.Error().Msgf("panic: %v", rr)
 		http.Error(w, "server error", http.StatusInternalServerError)
@@ -83,25 +86,4 @@ func recoverTransaction(w http.ResponseWriter, tx persistence.TX, ctx context.Co
 
 		logger.Info().Msg("rollback successful")
 	}
-}
-
-var (
-	errTransactionNotFound = errors.New("transaction not found")
-	errTransactionBadType  = errors.New("transaction invalid")
-)
-
-func ExtractTransaction(r *http.Request) (tx persistence.TX, err error) {
-	ctxTransaction := r.Context().Value(TxKey)
-
-	if ctxTransaction == nil {
-		return persistence.TX{}, errTransactionNotFound
-	}
-
-	var ok bool
-
-	if tx, ok = ctxTransaction.(persistence.TX); !ok {
-		return persistence.TX{}, errTransactionBadType
-	}
-
-	return
 }

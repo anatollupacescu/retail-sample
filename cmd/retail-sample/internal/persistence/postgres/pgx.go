@@ -30,18 +30,22 @@ func (t TX) Rollback(ctx context.Context) error {
 	return t.Tx.Rollback(ctx)
 }
 
-func (t TX) Inventory() inventory.Inventory {
+func (t TX) Inventory() inventory.Collection {
 	db := &InventoryPgxStore{DB: t.Tx}
-	return inventory.Inventory{DB: db}
+	return inventory.Collection{DB: db}
 }
 
 func (t TX) Orders() order.Orders {
 	s := &OrderPgxStore{DB: t.Tx}
-	rb := &RecipePgxStore{DB: t.Tx}
+	recipes := &RecipePgxStore{DB: t.Tx}
 
 	stock := t.Stock()
 
-	return order.New(s, rb, stock)
+	return order.Orders{
+		DB:      s,
+		Stock:   stock,
+		Recipes: recipes,
+	}
 }
 
 func (t TX) ProvisionLog() *PgxProvisionLog {

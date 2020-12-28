@@ -1,6 +1,6 @@
 module github.com/anatollupacescu/retail-sample
 
-go 1.14
+go 1.15
 
 require (
 	github.com/ardanlabs/conf v1.3.2

@@ -49,19 +49,27 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
+func checkPreconditions(name Name, ingredients []Ingredient) error {
 	if name == "" {
-		return 0, ErrEmptyName
+		return ErrEmptyName
 	}
 
 	if len(ingredients) == 0 {
-		return 0, ErrNoIngredients
+		return ErrNoIngredients
 	}
 
 	for _, v := range ingredients {
 		if v.Qty == 0 {
-			return 0, ErrQuantityNotProvided
+			return ErrQuantityNotProvided
 		}
+	}
+
+	return nil
+}
+
+func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
+	if err := checkPreconditions(name, ingredients); err != nil {
+		return 0, err
 	}
 
 	found, err := c.DB.Find(name)

@@ -25,7 +25,7 @@ type (
 		Add(Order) (ID, error)
 	}
 
-	recipeBook interface {
+	recipes interface {
 		Get(recipe.ID) (recipe.Recipe, error)
 	}
 
@@ -34,9 +34,9 @@ type (
 	}
 
 	Orders struct {
-		DB         db
-		RecipeBook recipeBook
-		Stock      orderStock
+		DB      db
+		Recipes recipes
+		Stock   orderStock
 	}
 )
 
@@ -46,37 +46,26 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func New(s db, rb recipeBook, stock orderStock) Orders {
-	return Orders{
-		DB:         s,
-		RecipeBook: rb,
-		Stock:      stock,
-	}
-}
-
 func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
-	var zeroOrderID ID
-
 	if qty <= 0 {
-		return zeroOrderID, ErrInvalidQuantity
+		return 0, ErrInvalidQuantity
 	}
 
 	recipeID := recipe.ID(id)
 
-	r, err := o.RecipeBook.Get(recipeID)
+	r, err := o.Recipes.Get(recipeID)
 
 	if err != nil {
-		return zeroOrderID, err
+		return 0, err
 	}
 
 	if !r.Enabled {
-		return zeroOrderID, ErrInvalidRecipe
+		return 0, ErrInvalidRecipe
 	}
 
-	ingredients := r.Ingredients
-
-	if err = o.Stock.Sell(ingredients, qty); err != nil {
-		return zeroOrderID, err
+	err = o.Stock.Sell(r.Ingredients, qty)
+	if err != nil {
+		return 0, err
 	}
 
 	ord := Order{
@@ -90,7 +79,7 @@ func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
 	orderID, err = o.DB.Add(ord)
 
 	if err != nil {
-		return zeroOrderID, err
+		return 0, err
 	}
 
 	return orderID, nil

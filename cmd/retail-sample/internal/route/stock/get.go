@@ -85,7 +85,8 @@ func getAll(r *http.Request) ([]usecase.Position, error) {
 
 	positions := make([]usecase.Position, 0, len(items))
 
-	for _, item := range items {
+	for i := range items {
+		item := items[i]
 		qty, err := stock.Quantity(item.ID)
 
 		switch err {

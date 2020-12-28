@@ -1,10 +1,10 @@
 package stock
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-
-	"github.com/pkg/errors"
 )
 
 type (

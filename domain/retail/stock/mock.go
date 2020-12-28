@@ -28,11 +28,6 @@ type MockInventory struct {
 	mock.Mock
 }
 
-func (m *MockInventory) List() ([]inventory.Item, error) {
-	args := m.Called()
-	return args.Get(0).([]inventory.Item), args.Error(1)
-}
-
 func (m *MockInventory) Get(id int) (inventory.Item, error) {
 	args := m.Called(id)
 	return args.Get(0).(inventory.Item), args.Error(1)

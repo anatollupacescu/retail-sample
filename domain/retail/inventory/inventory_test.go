@@ -5,127 +5,134 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func TestUpdate(t *testing.T) {
-	t.Run("when updating a missing item", func(t *testing.T) {
+func TestEnable(t *testing.T) {
+	t.Run("can enable", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.Inventory{DB: mockStore}
+		defer mockStore.AssertExpectations(t)
 
-		var expectedItem = inventory.Item{}
+		mockStore.On("Save", mock.Anything).Return(nil)
 
-		mockStore.On("Get", 1).Return(expectedItem, inventory.ErrItemNotFound)
+		var item = inventory.Item{DB: mockStore}
 
-		err := i.UpdateStatus(1, false)
+		err := item.Enable()
 
-		t.Run("does not call the store", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-		})
-
-		t.Run("propagates the error", func(t *testing.T) {
-			assert.Equal(t, inventory.ErrItemNotFound, err)
-		})
+		assert.NoError(t, err)
+		assert.True(t, item.Enabled)
 	})
 
-	t.Run("when updating an existing item", func(t *testing.T) {
+	t.Run("propagates error", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.Inventory{DB: mockStore}
+		defer mockStore.AssertExpectations(t)
 
-		var expectedItem = inventory.Item{
-			ID:      1,
-			Name:    "test",
-			Enabled: true,
-		}
+		expectedErr := errors.New("test")
+		mockStore.On("Save", mock.Anything).Return(expectedErr)
 
-		var updatedItem = expectedItem
-		updatedItem.Enabled = false
+		var item = inventory.Item{DB: mockStore}
 
-		mockStore.On("Get", 1).Return(expectedItem, nil)
-		mockStore.On("Update", updatedItem).Return(nil)
+		err := item.Enable()
 
-		err := i.UpdateStatus(1, false)
+		assert.Equal(t, expectedErr, err)
+		assert.True(t, item.Enabled)
+	})
+}
 
-		t.Run("calls the store", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-		})
+func TestDisable(t *testing.T) {
+	t.Run("can disable", func(t *testing.T) {
+		mockStore := &inventory.MockStore{}
+		defer mockStore.AssertExpectations(t)
 
-		t.Run("returns correct values", func(t *testing.T) {
-			assert.NoError(t, err)
-		})
+		mockStore.On("Save", mock.Anything).Return(nil)
+
+		var item = inventory.Item{DB: mockStore}
+
+		err := item.Disable()
+
+		assert.NoError(t, err)
+		assert.False(t, item.Enabled)
+	})
+
+	t.Run("propagates error", func(t *testing.T) {
+		mockStore := &inventory.MockStore{}
+		defer mockStore.AssertExpectations(t)
+
+		expectedErr := errors.New("test")
+		mockStore.On("Save", mock.Anything).Return(expectedErr)
+
+		var item = inventory.Item{DB: mockStore}
+
+		err := item.Disable()
+
+		assert.Equal(t, expectedErr, err)
+		assert.False(t, item.Enabled)
 	})
 }
 
 func TestAdd(t *testing.T) {
-	t.Run("when name is empty", func(t *testing.T) {
-		i := inventory.Inventory{}
+	t.Run("errors when name is empty", func(t *testing.T) {
+		i := inventory.Collection{}
 		_, err := i.Add("")
 
-		t.Run("throws empty name error", func(t *testing.T) {
-			assert.Equal(t, inventory.ErrEmptyName, err)
-		})
+		assert.Equal(t, inventory.ErrEmptyName, err)
 	})
 
-	t.Run("when name is already present", func(t *testing.T) {
-		milk := "milk"
-
+	t.Run("error when name is already present", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.Inventory{DB: mockStore}
+		defer mockStore.AssertExpectations(t)
 
-		mockStore.On("Find", milk).Return(1, nil)
+		mockStore.On("Find", "milk").Return(1, nil)
 
-		id, err := i.Add(milk)
+		i := inventory.Collection{DB: mockStore}
+		id, err := i.Add("milk")
 
-		t.Run("calls the store", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-		})
-
-		t.Run("throws duplicate name error", func(t *testing.T) {
-			assert.Equal(t, inventory.ErrDuplicateName, err)
-			assert.Zero(t, id)
-		})
+		assert.Equal(t, inventory.ErrDuplicateName, err)
+		assert.Zero(t, id)
 	})
 
-	t.Run("when name is valid", func(t *testing.T) {
-		milk := "milk"
-
+	t.Run("can add", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.Inventory{DB: mockStore}
+		mockStore.AssertExpectations(t)
 
-		mockStore.On("Find", milk).Return(0, inventory.ErrItemNotFound)
-		mockStore.On("Add", milk).Return(1, nil)
+		mockStore.On("Find", "milk").Return(0, inventory.ErrItemNotFound)
+		mockStore.On("Add", "milk").Return(1, nil)
 
-		id, err := i.Add(milk)
+		i := inventory.Collection{DB: mockStore}
+		id, err := i.Add("milk")
 
-		t.Run("calls the store", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-		})
-
-		t.Run("saves it to store", func(t *testing.T) {
-			assert.NoError(t, err)
-			assert.Equal(t, 1, id)
-		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, id)
 	})
 
-	t.Run("when store throws error during find op", func(t *testing.T) {
-		milk := "milk"
-
+	t.Run("propagates error during find op", func(t *testing.T) {
 		mockStore := &inventory.MockStore{}
-		i := inventory.Inventory{DB: mockStore}
+		mockStore.AssertExpectations(t)
 
 		expected := errors.New("unknown")
-		mockStore.On("Find", milk).Return(0, expected)
+		mockStore.On("Find", "milk").Return(0, expected)
 
-		id, err := i.Add(milk)
+		i := inventory.Collection{DB: mockStore}
+		id, err := i.Add("milk")
 
-		t.Run("calls the store", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-		})
+		assert.Equal(t, expected, err)
+		assert.Equal(t, 0, id)
+	})
 
-		t.Run("should propage it to the caller", func(t *testing.T) {
-			assert.Equal(t, expected, err)
-			assert.Equal(t, 0, id)
-		})
+	t.Run("propagates error from save op", func(t *testing.T) {
+		mockStore := &inventory.MockStore{}
+		defer mockStore.AssertExpectations(t)
+
+		expectedErr := errors.New("test")
+		mockStore.On("Find", "milk").Return(0, inventory.ErrItemNotFound)
+		mockStore.On("Add", "milk").Return(1, expectedErr)
+
+		i := inventory.Collection{DB: mockStore}
+		id, err := i.Add("milk")
+
+		assert.Zero(t, id)
+		assert.Equal(t, expectedErr, err)
 	})
 }

@@ -13,7 +13,7 @@ type InventoryPgxStore struct {
 	DB pgx.Tx
 }
 
-func (ps *InventoryPgxStore) Update(i inventory.Item) error {
+func (ps *InventoryPgxStore) Save(i *inventory.Item) error {
 	tag, err := ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
 
 	if err != nil {

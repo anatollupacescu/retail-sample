@@ -25,11 +25,11 @@ func toCollectionResponse(items []inventory.Item) collection {
 		Data: make([]entity, 0, len(items)),
 	}
 
-	for _, item := range items {
+	for i := range items {
 		response.Data = append(response.Data, entity{
-			ID:      item.ID,
-			Name:    item.Name,
-			Enabled: item.Enabled,
+			ID:      items[i].ID,
+			Name:    items[i].Name,
+			Enabled: items[i].Enabled,
 		})
 	}
 

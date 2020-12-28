@@ -10,16 +10,17 @@ type (
 		ID      int
 		Name    string
 		Enabled bool
+
+		DB db
 	}
 
 	db interface {
 		Add(string) (int, error)
 		Find(string) (int, error)
-		Get(int) (Item, error)
-		Update(Item) error
+		Save(*Item) error
 	}
 
-	Inventory struct {
+	Collection struct {
 		DB db
 	}
 )
@@ -30,25 +31,19 @@ var (
 	ErrDuplicateName = errors.New("item type already present")
 )
 
-func (i Inventory) UpdateStatus(id int, enabled bool) error {
-	item, err := i.DB.Get(id)
+func (i *Item) Enable() error {
+	i.Enabled = true
 
-	if err != nil {
-		return err
-	}
-
-	item.Enabled = enabled
-
-	err = i.DB.Update(item)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return i.DB.Save(i)
 }
 
-func (i Inventory) Add(name string) (int, error) {
+func (i *Item) Disable() error {
+	i.Enabled = false
+
+	return i.DB.Save(i)
+}
+
+func (i Collection) Add(name string) (int, error) {
 	if strings.TrimSpace(name) == "" {
 		return 0, ErrEmptyName
 	}

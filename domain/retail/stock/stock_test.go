@@ -13,88 +13,85 @@ import (
 )
 
 func TestProvision(t *testing.T) {
-	t.Run("given a non existent inventory item", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-
+	t.Run("propagates error from inventory", func(t *testing.T) {
 		var expectedErr = inventory.ErrItemNotFound
 
 		inv := &stock.MockInventory{}
-		inv.On("Get", mock.Anything).Return(inventory.Item{}, inventory.ErrItemNotFound)
+		defer inv.AssertExpectations(t)
+
+		inv.On("Get", mock.Anything).Return(inventory.Item{}, expectedErr)
 
 		st := &stock.Stock{InventoryDB: inv}
-
 		err := st.Provision(1, 1)
 
-		t.Run("returns error", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-			assert.Equal(t, expectedErr, err)
-		})
+		assert.Equal(t, expectedErr, err)
 	})
 
-	t.Run("given that store returns error", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-
+	t.Run("propagates error from store", func(t *testing.T) {
 		expectedErr := errors.New("err")
-		mockStore.On("Provision", mock.Anything, mock.Anything).Return(expectedErr)
+
+		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
+
+		store.On("Provision", mock.Anything, mock.Anything).Return(expectedErr)
 
 		inv := &stock.MockInventory{}
+		defer inv.AssertExpectations(t)
+
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
-		st := &stock.Stock{DB: mockStore, InventoryDB: inv}
-
+		st := &stock.Stock{DB: store, InventoryDB: inv}
 		err := st.Provision(1, 1)
 
-		t.Run("error is propagated", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-			assert.Equal(t, expectedErr, err)
-		})
+		assert.Equal(t, expectedErr, err)
 	})
 
-	t.Run("given that database is updated successfully", func(t *testing.T) {
-		mockStore := &stock.MockStore{}
-		mockStore.On("Provision", mock.Anything, mock.Anything).Return(nil)
+	t.Run("success", func(t *testing.T) {
+		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
+
+		store.On("Provision", mock.Anything, mock.Anything).Return(nil)
 
 		inv := &stock.MockInventory{}
+		defer inv.AssertExpectations(t)
+
 		inv.On("Get", mock.Anything).Return(inventory.Item{}, nil)
 
 		st := &stock.Stock{
-			DB:          mockStore,
+			DB:          store,
 			InventoryDB: inv,
 		}
 
 		err := st.Provision(1, 5)
 
-		t.Run("return provision entry id", func(t *testing.T) {
-			mockStore.AssertExpectations(t)
-			assert.Nil(t, err)
-		})
+		assert.NoError(t, err)
 	})
 }
 
 func TestSell(t *testing.T) {
-	t.Run("propagates error from store", func(t *testing.T) {
+	t.Run("propagates error from checking quantity", func(t *testing.T) {
 		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
 
-		st := stock.Stock{DB: store}
+		s := stock.Stock{DB: store}
 
 		expectedErr := errors.New("test")
-
 		store.On("Quantity", mock.Anything).Return(0, expectedErr)
 
 		ii := []recipe.Ingredient{{
 			ID: 1,
 		}}
 
-		err := st.Sell(ii, 1)
+		err := s.Sell(ii, 1)
 
 		assert.Equal(t, expectedErr, err)
-		store.AssertExpectations(t)
 	})
 
 	t.Run("returns error when quantity not enough", func(t *testing.T) {
 		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
 
-		st := stock.Stock{DB: store}
+		s := stock.Stock{DB: store}
 
 		store.On("Quantity", mock.Anything).Return(1, nil)
 
@@ -103,16 +100,16 @@ func TestSell(t *testing.T) {
 			Qty: 1,
 		}}
 
-		err := st.Sell(ii, 2)
+		err := s.Sell(ii, 2)
 
 		assert.Equal(t, stock.ErrNotEnoughStock, err)
-		store.AssertExpectations(t)
 	})
 
-	t.Run("calls store to sell items", func(t *testing.T) {
+	t.Run("propagates error from sell operation", func(t *testing.T) {
 		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
 
-		st := stock.Stock{DB: store}
+		s := stock.Stock{DB: store}
 
 		store.On("Quantity", mock.Anything).Return(2, nil)
 
@@ -124,9 +121,27 @@ func TestSell(t *testing.T) {
 			Qty: 1,
 		}}
 
-		err := st.Sell(ii, 2)
+		err := s.Sell(ii, 2)
 
 		assert.Equal(t, expectedErr, err)
-		store.AssertExpectations(t)
+	})
+
+	t.Run("success", func(t *testing.T) {
+		store := &stock.MockStore{}
+		defer store.AssertExpectations(t)
+
+		s := stock.Stock{DB: store}
+
+		store.On("Quantity", mock.Anything).Return(2, nil)
+		store.On("Sell", mock.Anything, mock.Anything).Return(nil)
+
+		ii := []recipe.Ingredient{{
+			ID:  1,
+			Qty: 1,
+		}}
+
+		err := s.Sell(ii, 2)
+
+		assert.NoError(t, err)
 	})
 }

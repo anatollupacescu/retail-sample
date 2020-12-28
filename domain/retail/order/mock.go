@@ -15,16 +15,6 @@ func (m *MockOrderStore) Add(i Order) (ID, error) {
 	return args.Get(0).(ID), args.Error(1)
 }
 
-func (m *MockOrderStore) List() ([]Order, error) {
-	args := m.Called()
-	return args.Get(0).([]Order), args.Error(1)
-}
-
-func (m *MockOrderStore) Get(ID) (Order, error) {
-	args := m.Called()
-	return args.Get(0).(Order), args.Error(1)
-}
-
 type MockRecipeBook struct {
 	mock.Mock
 }

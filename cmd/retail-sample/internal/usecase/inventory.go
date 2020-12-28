@@ -12,7 +12,7 @@ type inventoryDB interface {
 	Get(int) (inventory.Item, error)
 }
 
-func NewInventory(ctx context.Context, inventory inventory.Inventory, db inventoryDB) Inventory {
+func NewInventory(ctx context.Context, inventory inventory.Collection, db inventoryDB) Inventory {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
 	return Inventory{
@@ -24,7 +24,7 @@ func NewInventory(ctx context.Context, inventory inventory.Inventory, db invento
 }
 
 type Inventory struct {
-	inventory   inventory.Inventory
+	inventory   inventory.Collection
 	inventoryDB inventoryDB
 	ctx         context.Context
 	logger      *zerolog.Logger
@@ -56,15 +56,20 @@ type UpdateInventoryItemStatusDTO struct {
 }
 
 func (a *Inventory) UpdateStatus(in UpdateInventoryItemStatusDTO) (item inventory.Item, err error) {
-	if err = a.inventory.UpdateStatus(in.ID, in.Enabled); err != nil {
-		a.logger.Error().Err(err).Msg("call domain")
-		return inventory.Item{}, err
+	item, err = a.inventoryDB.Get(in.ID)
+	if err != nil {
+		return
 	}
 
-	item, err = a.inventory.DB.Get(in.ID)
+	switch in.Enabled {
+	case true:
+		err = item.Enable()
+	default:
+		err = item.Disable()
+	}
 
 	if err != nil {
-		a.logger.Error().Err(err).Msg("fetch updated item")
+		a.logger.Error().Err(err).Msg("call domain")
 		return inventory.Item{}, err
 	}
 

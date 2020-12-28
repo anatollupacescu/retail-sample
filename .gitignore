@@ -27,3 +27,6 @@ web/*.lock
 web/src/index.html
 web/lib
 web/*.log
+
+manifest.yml
+.ibm-project

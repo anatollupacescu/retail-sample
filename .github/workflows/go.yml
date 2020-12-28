@@ -21,7 +21,7 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Get dependencies
+    - name: Deps
       run: |
         go get -v -t -d ./...
         go mod download
@@ -31,3 +31,7 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Vet
+      run: go vet ./...
+

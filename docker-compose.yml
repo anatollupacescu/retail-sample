@@ -24,5 +24,10 @@ services:
   tern:
     build: cmd/retail-sample/internal/persistence/postgres/migration
     environment:
-      - HOST=kandula.db.elephantsql.com
-      - PORT=5432
+      - HOST=db
+      - PORT=5432     
+      - POSTGRES_DB=retail
+      - POSTGRES_USER=docker
+      - POSTGRES_PASSWORD=docker
+    networks:
+      - shared-network

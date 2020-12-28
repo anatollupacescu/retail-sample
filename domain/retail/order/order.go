@@ -46,7 +46,7 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func (o Orders) PlaceOrder(id int, qty int) (orderID ID, err error) {
+func (o Orders) Add(id int, qty int) (orderID ID, err error) {
 	if qty <= 0 {
 		return 0, ErrInvalidQuantity
 	}

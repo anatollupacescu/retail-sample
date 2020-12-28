@@ -11,11 +11,11 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func TestPlaceOrder(t *testing.T) {
+func TestAdd(t *testing.T) {
 	t.Run("when quantity is invalid", func(t *testing.T) {
 		orders := order.Orders{}
 
-		_, err := orders.PlaceOrder(1, 0)
+		_, err := orders.Add(1, 0)
 
 		t.Run("propagates error", func(t *testing.T) {
 			assert.Equal(t, order.ErrInvalidQuantity, err)
@@ -34,7 +34,7 @@ func TestPlaceOrder(t *testing.T) {
 
 		orders := order.Orders{Recipes: recipeBook}
 
-		receivedID, err := orders.PlaceOrder(1, 1)
+		receivedID, err := orders.Add(1, 1)
 
 		t.Run("calls recipe book", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)
@@ -59,7 +59,7 @@ func TestPlaceOrder(t *testing.T) {
 
 		orders := order.Orders{Recipes: recipeBook}
 
-		receivedID, err := orders.PlaceOrder(1, 1)
+		receivedID, err := orders.Add(1, 1)
 
 		t.Run("calls recipe book", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)
@@ -91,7 +91,7 @@ func TestPlaceOrder(t *testing.T) {
 
 		orders := order.Orders{Recipes: recipeBook, Stock: mockStock}
 
-		receivedID, err := orders.PlaceOrder(1, 1)
+		receivedID, err := orders.Add(1, 1)
 
 		t.Run("makes the expected calls", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)
@@ -128,7 +128,7 @@ func TestPlaceOrder(t *testing.T) {
 
 		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}
 
-		receivedID, err := orders.PlaceOrder(1, 1)
+		receivedID, err := orders.Add(1, 1)
 
 		t.Run("makes the expected calls", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)
@@ -163,7 +163,7 @@ func TestPlaceOrder(t *testing.T) {
 
 		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}
 
-		receivedID, err := orders.PlaceOrder(1, 1)
+		receivedID, err := orders.Add(1, 1)
 
 		t.Run("makes the expected calls", func(t *testing.T) {
 			recipeBook.AssertExpectations(t)

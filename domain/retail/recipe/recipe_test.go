@@ -88,6 +88,12 @@ func TestAddRecipe(t *testing.T) {
 		assert.Equal(t, recipe.ErrNoIngredients, err)
 	})
 
+	t.Run("errors on missing quantity", func(t *testing.T) {
+		b := recipe.Collection{}
+		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 0}})
+		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
+	})
+
 	t.Run("errors if ingredient name is taken", func(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 		defer s.AssertExpectations(t)
@@ -97,8 +103,9 @@ func TestAddRecipe(t *testing.T) {
 		s.On("Find", recipe.Name("test")).Return(item, nil)
 
 		recipes := recipe.Collection{DB: s}
-		_, err := recipes.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		id, err := recipes.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
+		assert.Zero(t, id)
 		assert.Equal(t, recipe.ErrDuplicateName, err)
 	})
 
@@ -106,20 +113,15 @@ func TestAddRecipe(t *testing.T) {
 		s := &recipe.MockRecipeStore{}
 		defer s.AssertExpectations(t)
 
-		var r *recipe.Recipe
 		expectedErr := errors.New("test")
-		s.On("Find", recipe.Name("test")).Return(r, expectedErr)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, expectedErr)
 
 		recipes := recipe.Collection{DB: s}
-		_, err := recipes.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		id, err := recipes.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
+		assert.Zero(t, id)
 		assert.Equal(t, expectedErr, err)
-	})
-
-	t.Run("errors on missing quantity", func(t *testing.T) {
-		b := recipe.Collection{}
-		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 0}})
-		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
 	})
 
 	t.Run("errors if an ingredient is disabled", func(t *testing.T) {
@@ -129,8 +131,8 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		defer i.AssertExpectations(t)
 
-		var found *recipe.Recipe
-		s.On("Find", recipe.Name("test")).Return(found, nil)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, recipe.ErrRecipeNotFound)
 
 		var item = inventory.Item{
 			ID:      1,
@@ -141,8 +143,9 @@ func TestAddRecipe(t *testing.T) {
 		i.On("Get", 1).Return(item, nil)
 
 		b := recipe.Collection{DB: s, Inventory: i}
-		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		id, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
+		assert.Zero(t, id)
 		assert.Equal(t, recipe.ErrIgredientDisabled, err)
 	})
 
@@ -153,15 +156,16 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		defer i.AssertExpectations(t)
 
-		var found *recipe.Recipe
-		s.On("Find", recipe.Name("test")).Return(found, nil)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, recipe.ErrRecipeNotFound)
 
 		var zeroInventoryItem inventory.Item
 		i.On("Get", 1).Return(zeroInventoryItem, inventory.ErrItemNotFound)
 
 		b := recipe.Collection{DB: s, Inventory: i}
-		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		id, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
+		assert.Zero(t, id)
 		assert.Equal(t, recipe.ErrIgredientNotFound, err)
 	})
 
@@ -172,8 +176,8 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		defer i.AssertExpectations(t)
 
-		var found *recipe.Recipe
-		s.On("Find", recipe.Name("test")).Return(found, nil)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, recipe.ErrRecipeNotFound)
 
 		expectedErr := errors.New("test")
 		i.On("Get", 1).Return(inventory.Item{}, expectedErr)
@@ -192,8 +196,8 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		defer i.AssertExpectations(t)
 
-		var found *recipe.Recipe
-		s.On("Find", recipe.Name("test")).Return(found, nil)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, recipe.ErrRecipeNotFound)
 
 		i.On("Get", 1).Return(inventory.Item{
 			ID:      1,
@@ -204,8 +208,9 @@ func TestAddRecipe(t *testing.T) {
 		s.On("Add", mock.Anything).Return(recipe.ID(0), expectedErr)
 
 		b := recipe.Collection{DB: s, Inventory: i}
-		_, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
+		id, err := b.Add("test", []recipe.Ingredient{{ID: 1, Qty: 2}})
 
+		assert.Zero(t, id)
 		assert.Equal(t, expectedErr, err)
 	})
 
@@ -216,8 +221,8 @@ func TestAddRecipe(t *testing.T) {
 		i := &recipe.MockInventory{}
 		defer i.AssertExpectations(t)
 
-		var found *recipe.Recipe
-		s.On("Find", recipe.Name("test")).Return(found, nil)
+		var nilRecipe *recipe.Recipe
+		s.On("Find", recipe.Name("test")).Return(nilRecipe, recipe.ErrRecipeNotFound)
 
 		i.On("Get", 1).Return(inventory.Item{
 			ID:      1,

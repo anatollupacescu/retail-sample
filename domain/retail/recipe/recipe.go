@@ -72,13 +72,14 @@ func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
 		return 0, err
 	}
 
-	found, err := c.DB.Find(name)
-	if err != nil {
-		return 0, err
-	}
+	_, err := c.DB.Find(name)
 
-	if found != nil {
+	switch err {
+	case ErrRecipeNotFound: //continue
+	case nil:
 		return 0, ErrDuplicateName
+	default:
+		return 0, err
 	}
 
 	for _, v := range ingredients {

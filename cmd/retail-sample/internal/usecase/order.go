@@ -35,7 +35,7 @@ type PlaceOrderDTO struct {
 }
 
 func (o *Order) PlaceOrder(dto PlaceOrderDTO) (order.Order, error) {
-	id, err := o.orders.PlaceOrder(dto.RecipeID, dto.OrderQty)
+	id, err := o.orders.Add(dto.RecipeID, dto.OrderQty)
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
 		return order.Order{}, err

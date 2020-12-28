@@ -185,6 +185,7 @@ func (pr *RecipePgxStore) List() ([]recipe.Recipe, error) {
 			Name:        recipe.Name(k.name),
 			Enabled:     k.enabled,
 			Ingredients: v,
+			DB:          pr,
 		})
 	}
 

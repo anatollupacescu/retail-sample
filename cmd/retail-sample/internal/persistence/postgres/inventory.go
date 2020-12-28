@@ -64,22 +64,24 @@ func (ps *InventoryPgxStore) Get(id int) (inventory.Item, error) {
 
 	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&name, &enabled)
 
-	var zeroItem inventory.Item
-
 	switch err {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return zeroItem, inventory.ErrItemNotFound
+		return inventory.Item{}, inventory.ErrItemNotFound
 	default:
-		return zeroItem, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
+		return inventory.Item{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	return inventory.Item{
+	item := inventory.Item{
 		ID:      id,
 		Name:    name,
 		Enabled: enabled,
-	}, nil
+
+		DB: ps,
+	}
+
+	return item, nil
 }
 
 func (ps *InventoryPgxStore) List() (items []inventory.Item, err error) {
@@ -106,6 +108,7 @@ func (ps *InventoryPgxStore) List() (items []inventory.Item, err error) {
 			ID:      int(id),
 			Name:    name,
 			Enabled: enabled,
+			DB:      ps,
 		})
 	}
 

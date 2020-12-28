@@ -1,4 +1,4 @@
-version: '3.1'
+version: '3.6'
 
 networks:
   shared-network:
@@ -21,8 +21,17 @@ services:
     networks:
       - shared-network
 
+  ui:
+    ports:
+      - '1234:1234'
+    build: web/
+    depends_on:
+      - db
+
   tern:
     build: cmd/retail-sample/internal/persistence/postgres/migration
+    depends_on:
+      - ui
     environment:
       - HOST=db
       - PORT=5432     

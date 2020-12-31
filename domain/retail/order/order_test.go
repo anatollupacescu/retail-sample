@@ -9,6 +9,7 @@ import (
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 func TestAdd(t *testing.T) {
@@ -29,15 +30,15 @@ func TestAdd(t *testing.T) {
 
 		expectedErr := errors.New("not found")
 
-		recipeBook := &order.MockRecipeBook{}
-		recipeBook.On("Get", recipeID).Return(zeroRecipe, expectedErr)
+		recipeDB := &recipe.MockDB{}
+		recipeDB.On("Get", recipeID).Return(zeroRecipe, expectedErr)
 
-		orders := order.Orders{Recipes: recipeBook}
+		orders := order.Orders{Recipes: recipeDB}
 
 		receivedID, err := orders.Add(1, 1)
 
 		t.Run("calls recipe book", func(t *testing.T) {
-			recipeBook.AssertExpectations(t)
+			recipeDB.AssertExpectations(t)
 		})
 
 		t.Run("propagates the error", func(t *testing.T) {
@@ -54,7 +55,7 @@ func TestAdd(t *testing.T) {
 			Enabled: false,
 		}
 
-		recipeBook := &order.MockRecipeBook{}
+		recipeBook := &recipe.MockDB{}
 		recipeBook.On("Get", recipeID).Return(r, nil)
 
 		orders := order.Orders{Recipes: recipeBook}
@@ -81,21 +82,21 @@ func TestAdd(t *testing.T) {
 			Enabled:     true,
 		}
 
-		recipeBook := &order.MockRecipeBook{}
-		recipeBook.On("Get", recipeID).Return(r, nil)
+		recipeDB := &recipe.MockDB{}
+		recipeDB.On("Get", recipeID).Return(r, nil)
 
 		expectedErr := errors.New("expected")
 
-		mockStock := &order.MockStock{}
-		mockStock.On("Sell", mock.Anything, 1).Return(expectedErr)
+		stockDB := &stock.MockDB{}
+		stockDB.On("Sell", mock.Anything, 1).Return(expectedErr)
 
-		orders := order.Orders{Recipes: recipeBook, Stock: mockStock}
+		orders := order.Orders{Recipes: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Add(1, 1)
 
 		t.Run("makes the expected calls", func(t *testing.T) {
-			recipeBook.AssertExpectations(t)
-			mockStock.AssertExpectations(t)
+			recipeDB.AssertExpectations(t)
+			stockDB.AssertExpectations(t)
 		})
 
 		t.Run("propagates the error", func(t *testing.T) {
@@ -114,16 +115,16 @@ func TestAdd(t *testing.T) {
 			Enabled:     true,
 		}
 
-		recipeBook := &order.MockRecipeBook{}
+		recipeBook := &recipe.MockDB{}
 		recipeBook.On("Get", recipeID).Return(r, nil)
 
-		mockStock := &order.MockStock{}
+		mockStock := &stock.MockDB{}
 		mockStock.On("Sell", mock.Anything, 1).Return(nil)
 
 		var zeroOrderID order.ID
 		expectedErr := errors.New("expected")
 
-		store := &order.MockOrderStore{}
+		store := &order.MockOrderDB{}
 		store.On("Add", mock.Anything).Return(zeroOrderID, expectedErr)
 
 		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}
@@ -152,13 +153,13 @@ func TestAdd(t *testing.T) {
 			Enabled:     true,
 		}
 
-		recipeBook := &order.MockRecipeBook{}
+		recipeBook := &recipe.MockDB{}
 		recipeBook.On("Get", recipeID).Return(r, nil)
 
-		mockStock := &order.MockStock{}
+		mockStock := &stock.MockDB{}
 		mockStock.On("Sell", mock.Anything, 1).Return(nil)
 
-		store := &order.MockOrderStore{}
+		store := &order.MockOrderDB{}
 		store.On("Add", mock.Anything).Return(order.ID(1), nil)
 
 		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}

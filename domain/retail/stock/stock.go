@@ -15,7 +15,7 @@ type (
 	}
 
 	inventoryDB interface {
-		Get(int) (inventory.Item, error)
+		Get(int) (inventory.ItemDTO, error)
 	}
 
 	Stock struct {

@@ -31,7 +31,7 @@ type (
 	}
 
 	Inventory interface {
-		Get(int) (inventory.Item, error)
+		Get(int) (inventory.ItemDTO, error)
 	}
 
 	Collection struct {

@@ -11,9 +11,10 @@ BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 
 format:
 	@goimports -w -local $(PROJECT) cmd/ domain/ internal/
+	@gci -w -local $(PROJECT) .
 
 test:
-	@go test -count=1 ./domain/... ./internal/...
+	@go test -count 1 -race ./...
 
 # build
 
@@ -45,9 +46,6 @@ BINARY?=$(shell pwd)/bin/retail
 
 $(BINARY):
 	$(MAKE) build
-
-run/mem: $(BINARY)
-	$(BINARY) --in-memory=true
 
 run/docker: $(BINARY)
 	$(MAKE) build/web

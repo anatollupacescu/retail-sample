@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/rs/zerolog/hlog"
+
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
-	"github.com/rs/zerolog/hlog"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {

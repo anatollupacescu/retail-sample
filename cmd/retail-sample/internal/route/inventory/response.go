@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func toCollectionResponse(items []inventory.Item) collection {
+func toCollectionResponse(items []inventory.ItemDTO) collection {
 	var response = collection{
 		Data: make([]entity, 0, len(items)),
 	}
@@ -36,7 +36,7 @@ func toCollectionResponse(items []inventory.Item) collection {
 	return response
 }
 
-func toSingleResponse(i inventory.Item) single {
+func toSingleResponse(i inventory.ItemDTO) single {
 	return single{
 		Data: entity{
 			ID:      i.ID,

@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
+
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 func GetAll(w http.ResponseWriter, r *http.Request) {

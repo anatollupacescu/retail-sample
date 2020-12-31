@@ -3,13 +3,11 @@ package stock
 import (
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
-
 	"github.com/rs/zerolog/hlog"
 
-	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 )
 
 func useCase(r *http.Request) (usecase.Stock, error) {

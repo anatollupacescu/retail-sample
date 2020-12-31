@@ -3,13 +3,14 @@ package usecase
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type inventoryDB interface {
-	Get(int) (inventory.Item, error)
+	Get(int) (inventory.ItemDTO, error)
 }
 
 func NewInventory(ctx context.Context, inventory inventory.Collection, db inventoryDB) Inventory {
@@ -34,7 +35,7 @@ type CreateInventoryItemDTO struct {
 	Name string
 }
 
-func (a *Inventory) Create(in CreateInventoryItemDTO) (item inventory.Item, err error) {
+func (a *Inventory) Create(in CreateInventoryItemDTO) (item inventory.ItemDTO, err error) {
 	id, err := a.inventory.Add(in.Name)
 
 	if err != nil {
@@ -55,10 +56,14 @@ type UpdateInventoryItemStatusDTO struct {
 	Enabled bool
 }
 
-func (a *Inventory) UpdateStatus(in UpdateInventoryItemStatusDTO) (item inventory.Item, err error) {
-	item, err = a.inventoryDB.Get(in.ID)
+func (a *Inventory) UpdateStatus(in UpdateInventoryItemStatusDTO) (dto inventory.ItemDTO, err error) {
+	dto, err = a.inventoryDB.Get(in.ID)
 	if err != nil {
 		return
+	}
+
+	item := inventory.Item{
+		ID: dto.ID, Name: dto.Name, DB: a.inventory.DB,
 	}
 
 	switch in.Enabled {
@@ -70,8 +75,10 @@ func (a *Inventory) UpdateStatus(in UpdateInventoryItemStatusDTO) (item inventor
 
 	if err != nil {
 		a.logger.Error().Err(err).Msg("call domain")
-		return inventory.Item{}, err
+		return inventory.ItemDTO{}, err
 	}
 
-	return item, nil
+	dto.Enabled = in.Enabled
+
+	return dto, nil
 }

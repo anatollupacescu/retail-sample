@@ -4,9 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
+
+	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 )
 
 // nolint:gocognit // transaction handing middleware is bound to have this complexity

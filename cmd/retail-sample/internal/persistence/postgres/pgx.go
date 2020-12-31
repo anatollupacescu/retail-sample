@@ -5,13 +5,13 @@ import (
 	"log"
 	"strings"
 
+	v4 "github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
+
 	inventory "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	order "github.com/anatollupacescu/retail-sample/domain/retail/order"
 	recipe "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
-
-	v4 "github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type DB struct {

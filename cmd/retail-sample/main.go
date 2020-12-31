@@ -11,21 +11,18 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/inventory"
-
+	"github.com/ardanlabs/conf"
+	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 
-	"github.com/ardanlabs/conf"
-	"github.com/gorilla/mux"
-
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
+	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/inventory"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/order"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/recipe"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/route/stock"
-
-	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/internal/version"
 )
 

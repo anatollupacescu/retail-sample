@@ -12,7 +12,7 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func inventoryItemByID(r *http.Request) (inventory.Item, error) {
+func inventoryItemByID(r *http.Request) (inventory.ItemDTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get by id")
 
 	vars := mux.Vars(r)
@@ -20,13 +20,13 @@ func inventoryItemByID(r *http.Request) (inventory.Item, error) {
 	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get by id")
-		return inventory.Item{}, ErrParseItemID
+		return inventory.ItemDTO{}, ErrParseItemID
 	}
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by id")
-		return inventory.Item{}, err
+		return inventory.ItemDTO{}, err
 	}
 
 	store := persistence.InventoryPgxStore{DB: tx}
@@ -34,7 +34,7 @@ func inventoryItemByID(r *http.Request) (inventory.Item, error) {
 	item, err := store.Get(id)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by id")
-		return inventory.Item{}, err
+		return inventory.ItemDTO{}, err
 	}
 
 	hlog.FromRequest(r).Info().Str("action", "success").Msg("get by id")
@@ -42,7 +42,7 @@ func inventoryItemByID(r *http.Request) (inventory.Item, error) {
 	return item, nil
 }
 
-func allInventoryItems(r *http.Request) ([]inventory.Item, error) {
+func allInventoryItems(r *http.Request) ([]inventory.ItemDTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get all")
 
 	tx, err := middleware.ExtractTransaction(r)

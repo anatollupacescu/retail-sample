@@ -3,9 +3,10 @@ package usecase
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 )
 
 type orderDB interface {

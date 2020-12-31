@@ -3,9 +3,10 @@ package usecase
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 func NewStock(ctx context.Context, stock stock.Stock, stockDB stockDB, logDB logDB, inventoryDB inventoryDB) Stock {

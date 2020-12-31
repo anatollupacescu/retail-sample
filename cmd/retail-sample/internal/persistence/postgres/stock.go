@@ -3,11 +3,11 @@ package persistence
 import (
 	"context"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
-
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 type StockPgxStore struct {

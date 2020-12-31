@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 func NewRecipe(ctx context.Context, book recipe.Collection, recipeDB recipeDB) Recipe {

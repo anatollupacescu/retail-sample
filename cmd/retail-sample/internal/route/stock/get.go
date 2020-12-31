@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
-
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 

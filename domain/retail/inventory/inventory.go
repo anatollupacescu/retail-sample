@@ -6,6 +6,12 @@ import (
 )
 
 type (
+	ItemDTO struct {
+		ID      int
+		Name    string
+		Enabled bool
+	}
+
 	Item struct {
 		ID      int
 		Name    string
@@ -17,7 +23,7 @@ type (
 	db interface {
 		Add(string) (int, error)
 		Find(string) (int, error)
-		Save(*Item) error
+		Save(*ItemDTO) error
 	}
 
 	Collection struct {
@@ -32,15 +38,31 @@ var (
 )
 
 func (i *Item) Enable() error {
+	dto := ItemDTO{
+		ID: i.ID, Name: i.Name, Enabled: true,
+	}
+
+	if err := i.DB.Save(&dto); err != nil {
+		return err
+	}
+
 	i.Enabled = true
 
-	return i.DB.Save(i)
+	return nil
 }
 
 func (i *Item) Disable() error {
+	dto := ItemDTO{
+		ID: i.ID, Name: i.Name, Enabled: false,
+	}
+
+	if err := i.DB.Save(&dto); err != nil {
+		return err
+	}
+
 	i.Enabled = false
 
-	return i.DB.Save(i)
+	return nil
 }
 
 func (i Collection) Add(name string) (int, error) {

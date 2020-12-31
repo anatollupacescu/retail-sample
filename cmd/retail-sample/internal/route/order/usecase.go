@@ -3,12 +3,11 @@ package order
 import (
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+	"github.com/rs/zerolog/hlog"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-
-	"github.com/rs/zerolog/hlog"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 )
 
 func newUseCase(r *http.Request) (usecase.Order, error) {

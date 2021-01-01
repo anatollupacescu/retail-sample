@@ -15,7 +15,7 @@ import (
 
 var ErrBadItemID = errors.New("could not parse ID")
 
-func getByID(r *http.Request) (domain.Order, error) {
+func getByID(r *http.Request) (domain.OrderDTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get order by id")
 
 	vars := mux.Vars(r)
@@ -25,13 +25,13 @@ func getByID(r *http.Request) (domain.Order, error) {
 
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get order by id")
-		return domain.Order{}, ErrBadItemID
+		return domain.OrderDTO{}, ErrBadItemID
 	}
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by order id")
-		return domain.Order{}, err
+		return domain.OrderDTO{}, err
 	}
 
 	store := persistence.OrderPgxStore{DB: tx}
@@ -39,7 +39,7 @@ func getByID(r *http.Request) (domain.Order, error) {
 	order, err := store.Get(domain.ID(id))
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by order id")
-		return domain.Order{}, err
+		return domain.OrderDTO{}, err
 	}
 
 	hlog.FromRequest(r).Info().Str("action", "success").Msg("get by order id")
@@ -47,7 +47,7 @@ func getByID(r *http.Request) (domain.Order, error) {
 	return order, nil
 }
 
-func getAll(r *http.Request) ([]domain.Order, error) {
+func getAll(r *http.Request) ([]domain.OrderDTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("list orders")
 
 	tx, err := middleware.ExtractTransaction(r)

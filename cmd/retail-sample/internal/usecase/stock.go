@@ -6,15 +6,15 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
-func NewStock(ctx context.Context, stock stock.Stock, stockDB stockDB, logDB logDB, inventoryDB inventoryDB) Stock {
+func NewStock(ctx context.Context, stockDB stockDB, logDB logDB, inventoryDB inventoryDB) Stock {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
 	return Stock{
 		ctx:         ctx,
-		stock:       stock,
 		stockDB:     stockDB,
 		logDB:       logDB,
 		inventoryDB: inventoryDB,
@@ -23,7 +23,8 @@ func NewStock(ctx context.Context, stock stock.Stock, stockDB stockDB, logDB log
 }
 
 type stockDB interface {
-	Quantity(id int) (int, error)
+	Get(int) (stock.PositionDTO, error)
+	Save(stock.PositionDTO) error
 }
 
 type logDB interface {
@@ -32,7 +33,6 @@ type logDB interface {
 
 type Stock struct {
 	logger      *zerolog.Logger
-	stock       stock.Stock
 	stockDB     stockDB
 	inventoryDB inventoryDB
 	logDB       logDB
@@ -51,7 +51,21 @@ type Position struct {
 }
 
 func (o *Stock) Provision(dto ProvisionDTO) (Position, error) {
-	err := o.stock.Provision(dto.InventoryItemID, dto.Qty)
+	stockPos, err := o.stockDB.Get(dto.InventoryItemID)
+
+	switch err {
+	case nil, persistence.ErrStockItemNotFound: //continue
+	default:
+		return Position{}, err
+	}
+
+	pos := stock.Position{
+		Qty:         stockPos.Qty,
+		InventoryID: dto.InventoryItemID,
+		DB:          o.stockDB,
+	}
+
+	err = pos.Provision(dto.Qty)
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
 		return Position{}, err
@@ -59,27 +73,21 @@ func (o *Stock) Provision(dto ProvisionDTO) (Position, error) {
 
 	_, err = o.logDB.Add(dto.InventoryItemID, dto.Qty)
 	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer")
-		return Position{}, err
-	}
-
-	qty, err := o.stockDB.Quantity(dto.InventoryItemID)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer to retrieve quantity")
+		o.logger.Error().Err(err).Msg("add log entry")
 		return Position{}, err
 	}
 
 	item, err := o.inventoryDB.Get(dto.InventoryItemID)
 	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer to retrieve stock position")
+		o.logger.Error().Err(err).Msg("get inventory item name")
 		return Position{}, err
 	}
 
-	pos := Position{
+	result := Position{
 		ID:   item.ID,
 		Name: item.Name,
-		Qty:  qty,
+		Qty:  pos.Qty,
 	}
 
-	return pos, nil
+	return result, nil
 }

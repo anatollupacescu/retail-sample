@@ -5,8 +5,6 @@ import (
 
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
-
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 type PgxProvisionLog struct {
@@ -29,6 +27,8 @@ func (pl *PgxProvisionLog) Add(itemID, qty int) (id int, err error) {
 	return
 }
 
+var ErrLogEntryNotFound = errors.New("log entry not found")
+
 func (pl *PgxProvisionLog) Get(id int) (pe ProvisionEntry, err error) {
 	sql := "select inventoryid, quantity from provisionlog where id = $1"
 
@@ -39,7 +39,7 @@ func (pl *PgxProvisionLog) Get(id int) (pe ProvisionEntry, err error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return pe, stock.ErrItemNotFound
+		return pe, ErrLogEntryNotFound
 	default:
 		return pe, errors.Wrapf(ErrDB, "get provision entry %v: %v", id, err)
 	}

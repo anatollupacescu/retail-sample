@@ -15,7 +15,7 @@ import (
 
 var ErrBadItemID = errors.New("could not parse ID")
 
-func getByID(r *http.Request) (domain.Recipe, error) {
+func getByID(r *http.Request) (domain.RecipeDTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get recipe by id")
 
 	vars := mux.Vars(r)
@@ -25,13 +25,13 @@ func getByID(r *http.Request) (domain.Recipe, error) {
 
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get recipe by id")
-		return domain.Recipe{}, ErrBadItemID
+		return domain.RecipeDTO{}, ErrBadItemID
 	}
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by recipe id")
-		return domain.Recipe{}, err
+		return domain.RecipeDTO{}, err
 	}
 
 	store := persistence.RecipePgxStore{DB: tx}
@@ -39,7 +39,7 @@ func getByID(r *http.Request) (domain.Recipe, error) {
 	rcp, err := store.Get(domain.ID(id))
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get recipe by id")
-		return domain.Recipe{}, err
+		return domain.RecipeDTO{}, err
 	}
 
 	hlog.FromRequest(r).Info().Str("action", "success").Msg("get recipe by id")

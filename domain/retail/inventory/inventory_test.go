@@ -71,7 +71,6 @@ func TestDisable(t *testing.T) {
 		assert.NoError(t, err)
 		assert.False(t, item.Enabled)
 	})
-
 }
 
 func TestAdd(t *testing.T) {

@@ -20,14 +20,12 @@ func useCase(r *http.Request) (usecase.Stock, error) {
 		return usecase.Stock{}, err
 	}
 
-	stock := tx.Stock()
-
 	stockDB := &pg.StockPgxStore{DB: tx.Tx}
 	inventoryDB := &pg.InventoryPgxStore{DB: tx.Tx}
 	logDB := &pg.PgxProvisionLog{DB: tx.Tx}
 
 	ctx := r.Context()
-	uc := usecase.NewStock(ctx, stock, stockDB, logDB, inventoryDB)
+	uc := usecase.NewStock(ctx, stockDB, logDB, inventoryDB)
 
 	return uc, nil
 }

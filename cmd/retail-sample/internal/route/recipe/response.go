@@ -28,7 +28,7 @@ type (
 	}
 )
 
-func toResponse(re recipe.Recipe) single {
+func toResponse(re recipe.RecipeDTO) single {
 	return single{
 		Data: entity{
 			ID:      int(re.ID),
@@ -39,7 +39,7 @@ func toResponse(re recipe.Recipe) single {
 	}
 }
 
-func toItems(i []recipe.Ingredient) (items []item) {
+func toItems(i []recipe.InventoryItem) (items []item) {
 	for _, ri := range i {
 		items = append(items, item{
 			ID:  ri.ID,

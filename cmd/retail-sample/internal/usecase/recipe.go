@@ -7,38 +7,41 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func NewRecipe(ctx context.Context, book recipe.Collection, recipeDB recipeDB) Recipe {
+func NewRecipe(ctx context.Context, book domain.Recipes, recipeDB recipeDB) Recipe {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
 	return Recipe{
 		ctx:      ctx,
-		book:     book,
+		recipes:  book,
 		recipeDB: recipeDB,
 		logger:   &logger,
 	}
 }
 
 type recipeDB interface {
-	Get(recipe.ID) (recipe.Recipe, error)
+	Add(domain.RecipeDTO) (domain.ID, error)
+	Find(domain.Name) (*domain.RecipeDTO, error)
+	Save(*domain.RecipeDTO) error
+	Get(domain.ID) (domain.RecipeDTO, error)
 }
 
 type Recipe struct {
 	logger   *zerolog.Logger
-	book     recipe.Collection
+	recipes  domain.Recipes
 	recipeDB recipeDB
 	ctx      context.Context
 }
 
 type CreateRecipeDTO struct {
-	Name        recipe.Name
-	Ingredients []recipe.Ingredient
+	Name        domain.Name
+	Ingredients []domain.InventoryItem
 }
 
-func (o *Recipe) Create(dto CreateRecipeDTO) (recipe recipe.Recipe, err error) {
-	id, err := o.book.Add(dto.Name, dto.Ingredients)
+func (o *Recipe) Create(dto CreateRecipeDTO) (recipe domain.RecipeDTO, err error) {
+	id, err := o.recipes.Add(dto.Name, dto.Ingredients)
 
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
@@ -62,26 +65,36 @@ type UpdateStatusDTO struct {
 	Enabled  bool
 }
 
-func (o *Recipe) Update(in UpdateStatusDTO) (recipe.Recipe, error) {
-	recipeID := recipe.ID(in.RecipeID)
+func (o *Recipe) Update(in UpdateStatusDTO) (domain.RecipeDTO, error) {
+	recipeID := domain.ID(in.RecipeID)
 
-	found, err := o.recipeDB.Get(recipeID)
+	dto, err := o.recipeDB.Get(recipeID)
 
 	if err != nil {
-		return recipe.Recipe{}, err
+		return domain.RecipeDTO{}, err
+	}
+
+	recipe := domain.Recipe{
+		ID:          dto.ID,
+		Name:        dto.Name,
+		Ingredients: dto.Ingredients,
+		Enabled:     dto.Enabled,
+		DB:          o.recipeDB,
 	}
 
 	switch in.Enabled {
 	case true:
-		err = found.Enable()
+		err = recipe.Enable()
 	default:
-		err = found.Disable()
+		err = recipe.Disable()
 	}
 
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
-		return recipe.Recipe{}, err
+		return domain.RecipeDTO{}, err
 	}
 
-	return found, nil
+	dto.Enabled = recipe.Enabled
+
+	return dto, nil
 }

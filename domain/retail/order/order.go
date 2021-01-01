@@ -15,28 +15,28 @@ type (
 
 	ID int
 
-	Order struct {
+	OrderDTO struct {
 		ID ID
 		Entry
 		Date time.Time
 	}
 
 	db interface {
-		Add(Order) (ID, error)
+		Add(OrderDTO) (ID, error)
 	}
 
 	recipes interface {
-		Get(recipe.ID) (recipe.Recipe, error)
+		Get(recipe.ID) (recipe.RecipeDTO, error)
 	}
 
-	orderStock interface {
-		Sell(ingredients []recipe.Ingredient, qty int) error
+	stockAdapter interface {
+		Extract(int, int) error
 	}
 
 	Orders struct {
 		DB      db
 		Recipes recipes
-		Stock   orderStock
+		Stock   stockAdapter
 	}
 )
 
@@ -46,31 +46,35 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func (o Orders) Add(id int, qty int) (orderID ID, err error) {
+func (o Orders) Add(recipeID int, qty int) (orderID ID, err error) {
 	if qty <= 0 {
 		return 0, ErrInvalidQuantity
 	}
 
-	recipeID := recipe.ID(id)
+	id := recipe.ID(recipeID)
 
-	r, err := o.Recipes.Get(recipeID)
+	recipe, err := o.Recipes.Get(id)
 
 	if err != nil {
 		return 0, err
 	}
 
-	if !r.Enabled {
+	if !recipe.Enabled {
 		return 0, ErrInvalidRecipe
 	}
 
-	err = o.Stock.Sell(r.Ingredients, qty)
-	if err != nil {
-		return 0, err
+	for _, ingredient := range recipe.Ingredients {
+		inventoryItemID := ingredient.ID
+		totalQty := ingredient.Qty * qty
+		err := o.Stock.Extract(inventoryItemID, totalQty)
+		if err != nil {
+			return 0, err
+		}
 	}
 
-	ord := Order{
+	ord := OrderDTO{
 		Entry: Entry{
-			RecipeID: id,
+			RecipeID: recipeID,
 			Qty:      qty,
 		},
 		Date: time.Now(),

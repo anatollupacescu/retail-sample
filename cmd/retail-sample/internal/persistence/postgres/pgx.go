@@ -9,9 +9,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	inventory "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
-	order "github.com/anatollupacescu/retail-sample/domain/retail/order"
 	recipe "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 type DB struct {
@@ -35,38 +33,15 @@ func (t TX) Inventory() inventory.Collection {
 	return inventory.Collection{DB: db}
 }
 
-func (t TX) Orders() order.Orders {
-	s := &OrderPgxStore{DB: t.Tx}
-	recipes := &RecipePgxStore{DB: t.Tx}
-
-	stock := t.Stock()
-
-	return order.Orders{
-		DB:      s,
-		Stock:   stock,
-		Recipes: recipes,
-	}
-}
-
 func (t TX) ProvisionLog() *PgxProvisionLog {
 	return &PgxProvisionLog{DB: t.Tx}
 }
 
-func (t TX) Stock() stock.Stock {
-	db := &StockPgxStore{DB: t.Tx}
-	inventory := &InventoryPgxStore{DB: t.Tx}
-
-	return stock.Stock{
-		DB:          db,
-		InventoryDB: inventory,
-	}
-}
-
-func (t TX) Recipe() recipe.Collection {
+func (t TX) Recipe() recipe.Recipes {
 	store := &RecipePgxStore{DB: t.Tx}
 	inventory := &InventoryPgxStore{DB: t.Tx}
 
-	book := recipe.Collection{
+	book := recipe.Recipes{
 		DB:        store,
 		Inventory: inventory,
 	}

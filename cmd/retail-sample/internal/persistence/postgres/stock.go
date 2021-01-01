@@ -6,7 +6,6 @@ import (
 	pgx "github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
@@ -14,51 +13,36 @@ type StockPgxStore struct {
 	DB pgx.Tx
 }
 
-func (ps *StockPgxStore) Provision(id, qty int) error {
-	sql := `insert into stock(inventoryid, quantity) 
-					values ($1, $2) 
-					ON CONFLICT(inventoryid) DO UPDATE 
-					set quantity = stock.quantity + $2 
-					where stock.inventoryid = $1
-					returning quantity`
+var ErrStockItemNotFound = errors.New("stock item not found")
 
-	var newQty int
-	err := ps.DB.QueryRow(context.Background(), sql, id, qty).Scan(&newQty)
+func (ps *StockPgxStore) Get(inventoryID int) (dto stock.PositionDTO, err error) {
+	sql := `select quantity from stock where inventoryid = $1`
 
-	if err != nil {
-		return errors.Wrapf(ErrDB, "provision stock: %v", err)
-	}
-
-	return nil
-}
-
-func (ps *StockPgxStore) Quantity(id int) (int, error) {
-	sql := "select quantity from stock where inventoryid = $1"
-
-	var qty int
-	err := ps.DB.QueryRow(context.Background(), sql, id).Scan(&qty)
+	err = ps.DB.QueryRow(context.Background(), sql, inventoryID).Scan(&dto.Qty)
 
 	switch err {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return 0, stock.ErrItemNotFound
+		return stock.PositionDTO{}, ErrStockItemNotFound
 	default:
-		return 0, errors.Wrapf(ErrDB, "get stock quantity for item with id %v: %v", id, err)
+		return stock.PositionDTO{}, errors.Wrapf(ErrDB, "get stock position for item with id %v: %v", inventoryID, err)
 	}
 
-	return qty, nil
+	dto.InventoryID = inventoryID
+
+	return dto, nil
 }
 
-func (ps *StockPgxStore) Sell(ii []recipe.Ingredient, qty int) error {
-	sql := "update stock set quantity = quantity - $1 where inventoryid = $2"
+func (ps *StockPgxStore) Save(dto stock.PositionDTO) error {
+	sql := `insert into stock (inventoryid, quantity) values ($1, $2)
+		ON CONFLICT(inventoryid) DO 
+		UPDATE SET quantity = $2 where stock.inventoryid = $1`
 
-	for _, i := range ii {
-		_, err := ps.DB.Exec(context.Background(), sql, qty*i.Qty, i.ID)
+	_, err := ps.DB.Exec(context.Background(), sql, dto.InventoryID, dto.Qty)
 
-		if err != nil {
-			return errors.Wrapf(ErrDB, "update stock: %v", err)
-		}
+	if err != nil {
+		return errors.Wrapf(ErrDB, "save stock position: %v", err)
 	}
 
 	return nil

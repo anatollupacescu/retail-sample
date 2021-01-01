@@ -9,172 +9,161 @@ import (
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 func TestAdd(t *testing.T) {
-	t.Run("when quantity is invalid", func(t *testing.T) {
+	t.Run("errors when quantity is zero", func(t *testing.T) {
 		orders := order.Orders{}
 
 		_, err := orders.Add(1, 0)
 
-		t.Run("propagates error", func(t *testing.T) {
-			assert.Equal(t, order.ErrInvalidQuantity, err)
-		})
+		assert.Equal(t, order.ErrInvalidQuantity, err)
 	})
 
-	t.Run("when recipe not found", func(t *testing.T) {
-		var recipeID = recipe.ID(1)
+	t.Run("errors when quantity is negative", func(t *testing.T) {
+		orders := order.Orders{}
 
-		var zeroRecipe recipe.Recipe
+		_, err := orders.Add(1, -1)
+
+		assert.Equal(t, order.ErrInvalidQuantity, err)
+	})
+
+	t.Run("errors when get recipe fails", func(t *testing.T) {
+		recipeDB := &recipe.MockDB{}
+		defer recipeDB.AssertExpectations(t)
 
 		expectedErr := errors.New("not found")
-
-		recipeDB := &recipe.MockDB{}
-		recipeDB.On("Get", recipeID).Return(zeroRecipe, expectedErr)
+		recipeDB.On("Get", recipe.ID(1)).Return(recipe.RecipeDTO{}, expectedErr)
 
 		orders := order.Orders{Recipes: recipeDB}
 
 		receivedID, err := orders.Add(1, 1)
 
-		t.Run("calls recipe book", func(t *testing.T) {
-			recipeDB.AssertExpectations(t)
-		})
-
-		t.Run("propagates the error", func(t *testing.T) {
-			assert.Equal(t, expectedErr, err)
-			assert.Equal(t, order.ID(0), receivedID)
-		})
+		assert.Equal(t, expectedErr, err)
+		assert.Equal(t, order.ID(0), receivedID)
 	})
 
-	t.Run("when recipe is disabled", func(t *testing.T) {
+	t.Run("errors when recipe is disabled", func(t *testing.T) {
 		var recipeID = recipe.ID(1)
 
-		var r = recipe.Recipe{
+		var r = recipe.RecipeDTO{
 			ID:      recipeID,
 			Enabled: false,
 		}
 
-		recipeBook := &recipe.MockDB{}
-		recipeBook.On("Get", recipeID).Return(r, nil)
+		recipeDB := &recipe.MockDB{}
+		defer recipeDB.AssertExpectations(t)
 
-		orders := order.Orders{Recipes: recipeBook}
+		recipeDB.On("Get", recipeID).Return(r, nil)
+
+		orders := order.Orders{Recipes: recipeDB}
 
 		receivedID, err := orders.Add(1, 1)
 
-		t.Run("calls recipe book", func(t *testing.T) {
-			recipeBook.AssertExpectations(t)
-		})
-
-		t.Run("propagates the error", func(t *testing.T) {
-			assert.Equal(t, order.ErrInvalidRecipe, err)
-			assert.Equal(t, order.ID(0), receivedID)
-		})
+		assert.Equal(t, order.ErrInvalidRecipe, err)
+		assert.Equal(t, order.ID(0), receivedID)
 	})
 
-	t.Run("when selling ingredients fails", func(t *testing.T) {
+	t.Run("errors when extracting from stock position fails", func(t *testing.T) {
 		var recipeID = recipe.ID(1)
 
-		var r = recipe.Recipe{
-			ID:          recipeID,
-			Ingredients: []recipe.Ingredient{},
-			Name:        "test",
-			Enabled:     true,
+		var r = recipe.RecipeDTO{
+			ID: recipeID,
+			Ingredients: []recipe.InventoryItem{
+				{ID: 1},
+			},
+			Name:    "test",
+			Enabled: true,
 		}
 
 		recipeDB := &recipe.MockDB{}
+		defer recipeDB.AssertExpectations(t)
+
 		recipeDB.On("Get", recipeID).Return(r, nil)
 
 		expectedErr := errors.New("expected")
 
-		stockDB := &stock.MockDB{}
-		stockDB.On("Sell", mock.Anything, 1).Return(expectedErr)
+		stockDB := &order.MockStock{}
+		defer stockDB.AssertExpectations(t)
+
+		stockDB.On("Extract", mock.Anything, mock.Anything).Return(expectedErr)
 
 		orders := order.Orders{Recipes: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Add(1, 1)
 
-		t.Run("makes the expected calls", func(t *testing.T) {
-			recipeDB.AssertExpectations(t)
-			stockDB.AssertExpectations(t)
-		})
-
-		t.Run("propagates the error", func(t *testing.T) {
-			assert.Equal(t, expectedErr, err)
-			assert.Equal(t, order.ID(0), receivedID)
-		})
+		assert.Equal(t, expectedErr, err)
+		assert.Zero(t, receivedID)
 	})
 
-	t.Run("when call to store fails", func(t *testing.T) {
+	t.Run("errors when save to DB fails", func(t *testing.T) {
 		var recipeID = recipe.ID(1)
 
-		var r = recipe.Recipe{
-			ID:          recipeID,
-			Ingredients: []recipe.Ingredient{},
-			Name:        "test",
-			Enabled:     true,
+		var r = recipe.RecipeDTO{
+			ID: recipeID,
+			Ingredients: []recipe.InventoryItem{
+				{ID: 1},
+			},
+			Name:    "test",
+			Enabled: true,
 		}
 
-		recipeBook := &recipe.MockDB{}
-		recipeBook.On("Get", recipeID).Return(r, nil)
+		recipeDB := &recipe.MockDB{}
+		defer recipeDB.AssertExpectations(t)
 
-		mockStock := &stock.MockDB{}
-		mockStock.On("Sell", mock.Anything, 1).Return(nil)
+		recipeDB.On("Get", recipeID).Return(r, nil)
 
-		var zeroOrderID order.ID
-		expectedErr := errors.New("expected")
+		stockDB := &order.MockStock{}
+		defer stockDB.AssertExpectations(t)
 
-		store := &order.MockOrderDB{}
-		store.On("Add", mock.Anything).Return(zeroOrderID, expectedErr)
+		stockDB.On("Extract", mock.Anything, mock.Anything).Return(nil)
 
-		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}
+		db := &order.MockDB{}
+		defer db.AssertExpectations(t)
+
+		var dbErr = errors.New("test")
+		db.On("Add", mock.Anything).Return(order.ID(0), dbErr)
+
+		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Add(1, 1)
 
-		t.Run("makes the expected calls", func(t *testing.T) {
-			recipeBook.AssertExpectations(t)
-			mockStock.AssertExpectations(t)
-			store.AssertExpectations(t)
-		})
-
-		t.Run("throws error", func(t *testing.T) {
-			assert.Equal(t, expectedErr, err)
-			assert.Zero(t, receivedID)
-		})
+		assert.Equal(t, dbErr, err)
+		assert.Zero(t, receivedID)
 	})
 
 	t.Run("when selling ingredients succeeds", func(t *testing.T) {
 		var recipeID = recipe.ID(1)
 
-		var r = recipe.Recipe{
-			ID:          recipeID,
-			Ingredients: []recipe.Ingredient{},
-			Name:        "test",
-			Enabled:     true,
+		var r = recipe.RecipeDTO{
+			ID: recipeID,
+			Ingredients: []recipe.InventoryItem{
+				{ID: 1},
+			},
+			Name:    "test",
+			Enabled: true,
 		}
 
-		recipeBook := &recipe.MockDB{}
-		recipeBook.On("Get", recipeID).Return(r, nil)
+		recipeDB := &recipe.MockDB{}
+		defer recipeDB.AssertExpectations(t)
 
-		mockStock := &stock.MockDB{}
-		mockStock.On("Sell", mock.Anything, 1).Return(nil)
+		recipeDB.On("Get", recipeID).Return(r, nil)
 
-		store := &order.MockOrderDB{}
-		store.On("Add", mock.Anything).Return(order.ID(1), nil)
+		stockDB := &order.MockStock{}
+		defer stockDB.AssertExpectations(t)
 
-		orders := order.Orders{DB: store, Recipes: recipeBook, Stock: mockStock}
+		stockDB.On("Extract", mock.Anything, mock.Anything).Return(nil)
+
+		db := &order.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Add", mock.Anything).Return(order.ID(1), nil)
+
+		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Add(1, 1)
 
-		t.Run("makes the expected calls", func(t *testing.T) {
-			recipeBook.AssertExpectations(t)
-			mockStock.AssertExpectations(t)
-			store.AssertExpectations(t)
-		})
-
-		t.Run("does not throw error", func(t *testing.T) {
-			assert.NoError(t, err)
-			assert.Equal(t, order.ID(1), receivedID)
-		})
+		assert.NoError(t, err)
+		assert.Equal(t, order.ID(1), receivedID)
 	})
 }

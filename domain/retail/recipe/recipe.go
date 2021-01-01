@@ -10,31 +10,38 @@ type (
 	Name string
 	ID   int
 
+	RecipeDTO struct {
+		ID          ID
+		Name        Name
+		Ingredients []InventoryItem
+		Enabled     bool
+	}
+
 	Recipe struct {
 		ID          ID
 		Name        Name
-		Ingredients []Ingredient
+		Ingredients []InventoryItem
 		Enabled     bool
 
 		DB db
 	}
 
-	Ingredient struct {
+	InventoryItem struct {
 		ID  int
 		Qty int
 	}
 
 	db interface {
-		Add(Recipe) (ID, error)
-		Find(Name) (*Recipe, error)
-		Save(*Recipe) error
+		Add(RecipeDTO) (ID, error)
+		Find(Name) (*RecipeDTO, error)
+		Save(*RecipeDTO) error
 	}
 
 	Inventory interface {
 		Get(int) (inventory.ItemDTO, error)
 	}
 
-	Collection struct {
+	Recipes struct {
 		DB        db
 		Inventory Inventory
 	}
@@ -49,7 +56,7 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-func checkPreconditions(name Name, ingredients []Ingredient) error {
+func checkPreconditions(name Name, ingredients []InventoryItem) error {
 	if name == "" {
 		return ErrEmptyName
 	}
@@ -67,7 +74,7 @@ func checkPreconditions(name Name, ingredients []Ingredient) error {
 	return nil
 }
 
-func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
+func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
 	if err := checkPreconditions(name, ingredients); err != nil {
 		return 0, err
 	}
@@ -82,10 +89,8 @@ func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
 		return 0, err
 	}
 
-	for _, v := range ingredients {
-		itemID := v.ID
-
-		item, err := c.Inventory.Get(itemID)
+	for _, i := range ingredients {
+		item, err := c.Inventory.Get(i.ID)
 
 		switch err {
 		case nil: //continue
@@ -100,23 +105,45 @@ func (c Collection) Add(name Name, ingredients []Ingredient) (ID, error) {
 		}
 	}
 
-	return c.DB.Add(Recipe{
+	dto := RecipeDTO{
 		Name:        name,
 		Ingredients: ingredients,
 		Enabled:     true,
-	})
+	}
+
+	return c.DB.Add(dto)
 }
 
 var ErrRecipeNotFound = errors.New("recipe not found")
 
 func (r *Recipe) Disable() error {
+	dto := RecipeDTO{
+		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: false,
+	}
+
+	err := r.DB.Save(&dto)
+
+	if err != nil {
+		return err
+	}
+
 	r.Enabled = false
 
-	return r.DB.Save(r)
+	return nil
 }
 
 func (r *Recipe) Enable() error {
+	dto := RecipeDTO{
+		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: true,
+	}
+
+	err := r.DB.Save(&dto)
+
+	if err != nil {
+		return err
+	}
+
 	r.Enabled = true
 
-	return r.DB.Save(r)
+	return nil
 }

@@ -14,7 +14,7 @@ type OrderPgxStore struct {
 	DB pgx.Tx
 }
 
-func (po *OrderPgxStore) Add(o order.Order) (order.ID, error) {
+func (po *OrderPgxStore) Add(o order.OrderDTO) (order.ID, error) {
 	sql := "insert into outbound_order(recipeid, quantity) values($1, $2) returning id"
 
 	var id int32
@@ -27,7 +27,7 @@ func (po *OrderPgxStore) Add(o order.Order) (order.ID, error) {
 	return order.ID(id), nil
 }
 
-func (po *OrderPgxStore) List() ([]order.Order, error) {
+func (po *OrderPgxStore) List() ([]order.OrderDTO, error) {
 	rows, err := po.DB.Query(context.Background(), "select id, recipeid, quantity, orderdate from outbound_order")
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (po *OrderPgxStore) List() ([]order.Order, error) {
 
 	defer rows.Close()
 
-	var orders = make([]order.Order, 0, len(rows.RawValues()))
+	var orders = make([]order.OrderDTO, 0, len(rows.RawValues()))
 
 	for rows.Next() {
 		var (
@@ -49,7 +49,7 @@ func (po *OrderPgxStore) List() ([]order.Order, error) {
 			return nil, errors.Wrapf(ErrDB, "scan orders: %v", err)
 		}
 
-		orders = append(orders, order.Order{
+		orders = append(orders, order.OrderDTO{
 			ID:   order.ID(id),
 			Date: time,
 			Entry: order.Entry{
@@ -62,7 +62,7 @@ func (po *OrderPgxStore) List() ([]order.Order, error) {
 	return orders, nil
 }
 
-func (po *OrderPgxStore) Get(id order.ID) (order.Order, error) {
+func (po *OrderPgxStore) Get(id order.ID) (order.OrderDTO, error) {
 	sql := `
 		select 
 			recipeid, quantity 
@@ -82,12 +82,12 @@ func (po *OrderPgxStore) Get(id order.ID) (order.Order, error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return order.Order{}, order.ErrOrderNotFound
+		return order.OrderDTO{}, order.ErrOrderNotFound
 	default:
-		return order.Order{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
+		return order.OrderDTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	result := order.Order{
+	result := order.OrderDTO{
 		Entry: order.Entry{
 			RecipeID: recipeID,
 			Qty:      qty,

@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func toSingleResponse(o order.Order) single {
+func toSingleResponse(o order.OrderDTO) single {
 	return single{
 		Data: entity{
 			ID:       int(o.ID),
@@ -32,7 +32,7 @@ func toSingleResponse(o order.Order) single {
 	}
 }
 
-func toCollectionResponse(orders []order.Order) (response collection) {
+func toCollectionResponse(orders []order.OrderDTO) (response collection) {
 	response.Data = make([]entity, 0, len(orders))
 
 	for i := range orders {

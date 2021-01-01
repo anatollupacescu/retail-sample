@@ -64,10 +64,10 @@ func newCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
 		return usecase.CreateRecipeDTO{}, err
 	}
 
-	var ingredients = make([]domain.Ingredient, 0, len(requestBody.Items))
+	var ingredients = make([]domain.InventoryItem, 0, len(requestBody.Items))
 
 	for id, qty := range requestBody.Items {
-		ingredients = append(ingredients, domain.Ingredient{
+		ingredients = append(ingredients, domain.InventoryItem{
 			ID:  id,
 			Qty: qty,
 		})

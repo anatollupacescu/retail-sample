@@ -3,30 +3,22 @@ package order
 import (
 	"errors"
 	"time"
-
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 type (
-	Entry struct {
+	DTO struct {
+		ID       int
 		RecipeID int
 		Qty      int
-	}
-
-	ID int
-
-	OrderDTO struct {
-		ID ID
-		Entry
-		Date time.Time
+		Date     time.Time
 	}
 
 	db interface {
-		Add(OrderDTO) (ID, error)
+		Add(DTO) (int, error)
 	}
 
 	recipes interface {
-		Get(recipe.ID) (recipe.RecipeDTO, error)
+		Valid(int) error
 	}
 
 	stock interface {
@@ -46,43 +38,26 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func (o Orders) Add(recipeID int, orderCount int) (orderID ID, err error) {
+func (o Orders) Add(recipeID, orderCount int) (int, error) {
 	if orderCount <= 0 {
 		return 0, ErrInvalidQuantity
 	}
 
-	id := recipe.ID(recipeID)
-
-	recipe, err := o.Recipes.Get(id)
-
-	if err != nil {
+	if err := o.Recipes.Valid(recipeID); err != nil {
 		return 0, err
 	}
 
-	if !recipe.Enabled {
-		return 0, ErrInvalidRecipe
+	if err := o.Stock.Extract(recipeID, orderCount); err != nil {
+		return 0, err
 	}
 
-	for _, ingredient := range recipe.Ingredients {
-		inventoryID := ingredient.ID
-		totalQty := ingredient.Qty * orderCount
-
-		err := o.Stock.Extract(inventoryID, totalQty)
-
-		if err != nil {
-			return 0, err
-		}
+	ord := DTO{
+		RecipeID: recipeID,
+		Qty:      orderCount,
+		Date:     time.Now(),
 	}
 
-	ord := OrderDTO{
-		Entry: Entry{
-			RecipeID: recipeID,
-			Qty:      orderCount,
-		},
-		Date: time.Now(),
-	}
-
-	orderID, err = o.DB.Add(ord)
+	orderID, err := o.DB.Add(ord)
 
 	if err != nil {
 		return 0, err

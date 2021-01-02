@@ -74,7 +74,7 @@ func newCreateDTO(r *http.Request) (usecase.CreateRecipeDTO, error) {
 	}
 
 	dto := usecase.CreateRecipeDTO{
-		Name:        domain.Name(requestBody.Name),
+		Name:        requestBody.Name,
 		Ingredients: ingredients,
 	}
 

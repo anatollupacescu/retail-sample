@@ -38,11 +38,11 @@ type UseCase struct {
 }
 
 type CreateRecipeDTO struct {
-	Name        domain.Name
+	Name        string
 	Ingredients []domain.InventoryItem
 }
 
-func (o *UseCase) Create(dto CreateRecipeDTO) (recipe domain.RecipeDTO, err error) {
+func (o *UseCase) Create(dto CreateRecipeDTO) (recipe domain.DTO, err error) {
 	id, err := o.recipes.Add(dto.Name, dto.Ingredients)
 
 	if err != nil {
@@ -67,13 +67,11 @@ type UpdateStatusDTO struct {
 	Enabled  bool
 }
 
-func (o *UseCase) UpdateStatus(in UpdateStatusDTO) (domain.RecipeDTO, error) {
-	recipeID := domain.ID(in.RecipeID)
-
-	dto, err := o.recipeDB.Get(recipeID)
+func (o *UseCase) UpdateStatus(in UpdateStatusDTO) (domain.DTO, error) {
+	dto, err := o.recipeDB.Get(in.RecipeID)
 
 	if err != nil {
-		return domain.RecipeDTO{}, err
+		return domain.DTO{}, err
 	}
 
 	recipe := domain.Recipe{
@@ -93,7 +91,7 @@ func (o *UseCase) UpdateStatus(in UpdateStatusDTO) (domain.RecipeDTO, error) {
 
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
-		return domain.RecipeDTO{}, err
+		return domain.DTO{}, err
 	}
 
 	dto.Enabled = recipe.Enabled

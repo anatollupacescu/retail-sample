@@ -8,15 +8,23 @@ type MockDB struct {
 	mock.Mock
 }
 
-func (m *MockDB) Add(i OrderDTO) (ID, error) {
-	args := m.Called(i)
-	return args.Get(0).(ID), args.Error(1)
+func (db *MockDB) Add(i DTO) (int, error) {
+	args := db.Called(i)
+	return args.Int(0), args.Error(1)
 }
 
 type MockStock struct {
 	mock.Mock
 }
 
-func (m *MockStock) Extract(id, qty int) error {
-	return m.Called(id, qty).Error(0)
+func (s *MockStock) Extract(id, qty int) error {
+	return s.Called(id, qty).Error(0)
+}
+
+type MockRecipe struct {
+	mock.Mock
+}
+
+func (r *MockRecipe) Valid(id int) error {
+	return r.Called(id).Error(0)
 }

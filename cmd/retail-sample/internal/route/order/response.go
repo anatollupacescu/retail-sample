@@ -22,24 +22,24 @@ type (
 	}
 )
 
-func toSingleResponse(o order.OrderDTO) single {
+func toSingleResponse(o order.DTO) single {
 	return single{
 		Data: entity{
-			ID:       int(o.ID),
-			RecipeID: o.Entry.RecipeID,
-			Qty:      o.Entry.Qty,
+			ID:       o.ID,
+			RecipeID: o.RecipeID,
+			Qty:      o.Qty,
 		},
 	}
 }
 
-func toCollectionResponse(orders []order.OrderDTO) (response collection) {
+func toCollectionResponse(orders []order.DTO) (response collection) {
 	response.Data = make([]entity, 0, len(orders))
 
 	for i := range orders {
 		currentOrder := orders[i]
 
 		e := entity{
-			ID:       int(currentOrder.ID),
+			ID:       currentOrder.ID,
 			RecipeID: currentOrder.RecipeID,
 			Qty:      currentOrder.Qty,
 		}

@@ -5,19 +5,16 @@ import (
 )
 
 type (
-	Name string
-	ID   int
-
-	RecipeDTO struct {
-		ID          ID
-		Name        Name
+	DTO struct {
+		ID          int
+		Name        string
 		Ingredients []InventoryItem
 		Enabled     bool
 	}
 
 	Recipe struct {
-		ID          ID
-		Name        Name
+		ID          int
+		Name        string
 		Ingredients []InventoryItem
 		Enabled     bool
 
@@ -30,9 +27,9 @@ type (
 	}
 
 	db interface {
-		Add(RecipeDTO) (ID, error)
-		Find(Name) (*RecipeDTO, error)
-		Save(*RecipeDTO) error
+		Add(DTO) (int, error)
+		Find(string) (*DTO, error)
+		Save(*DTO) error
 	}
 
 	inventory interface {
@@ -54,7 +51,7 @@ var (
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
-func checkPreconditions(name Name, ingredients []InventoryItem) error {
+func checkPreconditions(name string, ingredients []InventoryItem) error {
 	if name == "" {
 		return ErrEmptyName
 	}
@@ -72,7 +69,7 @@ func checkPreconditions(name Name, ingredients []InventoryItem) error {
 	return nil
 }
 
-func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
+func (c Recipes) Add(name string, ingredients []InventoryItem) (int, error) {
 	if err := checkPreconditions(name, ingredients); err != nil {
 		return 0, err
 	}
@@ -87,7 +84,7 @@ func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
 		return 0, err
 	}
 
-	var ids []int
+	var ids = make([]int, 0, len(ingredients))
 	for _, i := range ingredients {
 		ids = append(ids, i.ID)
 	}
@@ -97,7 +94,7 @@ func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
 		return 0, err
 	}
 
-	dto := RecipeDTO{
+	dto := DTO{
 		Name:        name,
 		Ingredients: ingredients,
 		Enabled:     true,
@@ -109,7 +106,7 @@ func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
 var ErrRecipeNotFound = errors.New("recipe not found")
 
 func (r *Recipe) Disable() error {
-	dto := RecipeDTO{
+	dto := DTO{
 		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: false,
 	}
 
@@ -125,7 +122,7 @@ func (r *Recipe) Disable() error {
 }
 
 func (r *Recipe) Enable() error {
-	dto := RecipeDTO{
+	dto := DTO{
 		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: true,
 	}
 

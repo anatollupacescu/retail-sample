@@ -8,24 +8,18 @@ type MockDB struct {
 	mock.Mock
 }
 
-func (m *MockDB) Add(r RecipeDTO) (ID, error) {
+func (m *MockDB) Add(r DTO) (int, error) {
 	args := m.Called(r)
-	return args.Get(0).(ID), args.Error(1)
+	return args.Int(0), args.Error(1)
 }
 
-func (m *MockDB) Find(n Name) (*RecipeDTO, error) {
+func (m *MockDB) Find(n string) (*DTO, error) {
 	args := m.Called(n)
-	return args.Get(0).(*RecipeDTO), args.Error(1)
+	return args.Get(0).(*DTO), args.Error(1)
 }
 
-func (m *MockDB) Save(r *RecipeDTO) error {
+func (m *MockDB) Save(r *DTO) error {
 	return m.Called(r).Error(0)
-}
-
-// Get not covered by the tests of this package
-func (rb *MockDB) Get(id ID) (RecipeDTO, error) {
-	args := rb.Called(id)
-	return args.Get(0).(RecipeDTO), args.Error(1)
 }
 
 type MockInventory struct {

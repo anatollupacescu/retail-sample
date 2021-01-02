@@ -28,11 +28,11 @@ type (
 	}
 )
 
-func toResponse(re recipe.RecipeDTO) single {
+func toResponse(re recipe.DTO) single {
 	return single{
 		Data: entity{
-			ID:      int(re.ID),
-			Name:    string(re.Name),
+			ID:      re.ID,
+			Name:    re.Name,
 			Items:   toItems(re.Ingredients),
 			Enabled: re.Enabled,
 		},
@@ -61,8 +61,8 @@ func toCollectionResponse(all []recipe.Recipe) collection {
 		r := all[i]
 
 		response.Data = append(response.Data, entity{
-			ID:      int(r.ID),
-			Name:    string(r.Name),
+			ID:      r.ID,
+			Name:    r.Name,
 			Items:   toItems(r.Ingredients),
 			Enabled: r.Enabled,
 		})

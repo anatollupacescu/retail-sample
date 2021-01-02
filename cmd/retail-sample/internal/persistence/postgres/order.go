@@ -14,20 +14,20 @@ type OrderPgxStore struct {
 	DB pgx.Tx
 }
 
-func (po *OrderPgxStore) Add(o order.OrderDTO) (order.ID, error) {
+func (po *OrderPgxStore) Add(o order.DTO) (int, error) {
 	sql := "insert into outbound_order(recipeid, quantity) values($1, $2) returning id"
 
-	var id int32
+	var id int
 	err := po.DB.QueryRow(context.Background(), sql, o.RecipeID, o.Qty).Scan(&id)
 
 	if err != nil {
-		return order.ID(0), errors.Wrapf(ErrDB, "add order: %v", err)
+		return 0, errors.Wrapf(ErrDB, "add order: %v", err)
 	}
 
-	return order.ID(id), nil
+	return id, nil
 }
 
-func (po *OrderPgxStore) List() ([]order.OrderDTO, error) {
+func (po *OrderPgxStore) List() ([]order.DTO, error) {
 	rows, err := po.DB.Query(context.Background(), "select id, recipeid, quantity, orderdate from outbound_order")
 
 	if err != nil {
@@ -36,12 +36,12 @@ func (po *OrderPgxStore) List() ([]order.OrderDTO, error) {
 
 	defer rows.Close()
 
-	var orders = make([]order.OrderDTO, 0, len(rows.RawValues()))
+	var orders = make([]order.DTO, 0, len(rows.RawValues()))
 
 	for rows.Next() {
 		var (
-			id, recipeID int64
-			qty          int16
+			id, recipeID int
+			qty          int
 			time         time.Time
 		)
 
@@ -49,20 +49,18 @@ func (po *OrderPgxStore) List() ([]order.OrderDTO, error) {
 			return nil, errors.Wrapf(ErrDB, "scan orders: %v", err)
 		}
 
-		orders = append(orders, order.OrderDTO{
-			ID:   order.ID(id),
-			Date: time,
-			Entry: order.Entry{
-				RecipeID: int(recipeID),
-				Qty:      int(qty),
-			},
+		orders = append(orders, order.DTO{
+			ID:       id,
+			Date:     time,
+			RecipeID: recipeID,
+			Qty:      qty,
 		})
 	}
 
 	return orders, nil
 }
 
-func (po *OrderPgxStore) Get(id order.ID) (order.OrderDTO, error) {
+func (po *OrderPgxStore) Get(id int) (order.DTO, error) {
 	sql := `
 		select 
 			recipeid, quantity 
@@ -82,16 +80,14 @@ func (po *OrderPgxStore) Get(id order.ID) (order.OrderDTO, error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return order.OrderDTO{}, order.ErrOrderNotFound
+		return order.DTO{}, order.ErrOrderNotFound
 	default:
-		return order.OrderDTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
+		return order.DTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	result := order.OrderDTO{
-		Entry: order.Entry{
-			RecipeID: recipeID,
-			Qty:      qty,
-		},
+	result := order.DTO{
+		RecipeID: recipeID,
+		Qty:      qty,
 	}
 
 	return result, nil

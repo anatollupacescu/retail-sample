@@ -19,8 +19,8 @@ func New(ctx context.Context, t pg.TX) UseCase {
 
 	orders := domain.Orders{
 		DB:      orderDB,
-		Stock:   &adapter{stock: stockDB},
-		Recipes: recipeDB,
+		Stock:   &extractor{recipes: recipeDB, stock: stockDB},
+		Recipes: &validator{recipes: recipeDB},
 	}
 
 	return UseCase{
@@ -42,17 +42,17 @@ type PlaceOrderDTO struct {
 	RecipeID, OrderQty int
 }
 
-func (o *UseCase) PlaceOrder(dto PlaceOrderDTO) (domain.OrderDTO, error) {
+func (o *UseCase) PlaceOrder(dto PlaceOrderDTO) (domain.DTO, error) {
 	id, err := o.orders.Add(dto.RecipeID, dto.OrderQty)
 	if err != nil {
 		o.logger.Error().Err(err).Msg("call domain layer")
-		return domain.OrderDTO{}, err
+		return domain.DTO{}, err
 	}
 
 	newOrder, err := o.orderDB.Get(id)
 	if err != nil {
 		o.logger.Error().Err(err).Msg("retrieve new order")
-		return domain.OrderDTO{}, err
+		return domain.DTO{}, err
 	}
 
 	return newOrder, nil

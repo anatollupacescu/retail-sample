@@ -106,7 +106,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedRecipe, err := uc.Update(dto)
+	updatedRecipe, err := uc.UpdateStatus(dto)
 
 	switch err {
 	case nil:

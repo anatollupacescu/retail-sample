@@ -2,8 +2,6 @@ package recipe
 
 import (
 	"errors"
-
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type (
@@ -37,13 +35,13 @@ type (
 		Save(*RecipeDTO) error
 	}
 
-	Inventory interface {
-		Get(int) (inventory.ItemDTO, error)
+	inventory interface {
+		Validate(...int) error
 	}
 
 	Recipes struct {
 		DB        db
-		Inventory Inventory
+		Inventory inventory
 	}
 )
 
@@ -89,20 +87,14 @@ func (c Recipes) Add(name Name, ingredients []InventoryItem) (ID, error) {
 		return 0, err
 	}
 
+	var ids []int
 	for _, i := range ingredients {
-		item, err := c.Inventory.Get(i.ID)
+		ids = append(ids, i.ID)
+	}
 
-		switch err {
-		case nil: //continue
-		case inventory.ErrItemNotFound:
-			return 0, ErrIgredientNotFound
-		default:
-			return 0, err
-		}
-
-		if !item.Enabled {
-			return 0, ErrIgredientDisabled
-		}
+	err = c.Inventory.Validate(ids...)
+	if err != nil {
+		return 0, err
 	}
 
 	dto := RecipeDTO{

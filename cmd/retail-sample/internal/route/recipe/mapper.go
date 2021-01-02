@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/recipe"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 

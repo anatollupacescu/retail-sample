@@ -29,14 +29,14 @@ type (
 		Get(recipe.ID) (recipe.RecipeDTO, error)
 	}
 
-	stockAdapter interface {
+	stock interface {
 		Extract(int, int) error
 	}
 
 	Orders struct {
 		DB      db
 		Recipes recipes
-		Stock   stockAdapter
+		Stock   stock
 	}
 )
 
@@ -46,8 +46,8 @@ var (
 	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func (o Orders) Add(recipeID int, qty int) (orderID ID, err error) {
-	if qty <= 0 {
+func (o Orders) Add(recipeID int, orderCount int) (orderID ID, err error) {
+	if orderCount <= 0 {
 		return 0, ErrInvalidQuantity
 	}
 
@@ -64,9 +64,11 @@ func (o Orders) Add(recipeID int, qty int) (orderID ID, err error) {
 	}
 
 	for _, ingredient := range recipe.Ingredients {
-		inventoryItemID := ingredient.ID
-		totalQty := ingredient.Qty * qty
-		err := o.Stock.Extract(inventoryItemID, totalQty)
+		inventoryID := ingredient.ID
+		totalQty := ingredient.Qty * orderCount
+
+		err := o.Stock.Extract(inventoryID, totalQty)
+
 		if err != nil {
 			return 0, err
 		}
@@ -75,7 +77,7 @@ func (o Orders) Add(recipeID int, qty int) (orderID ID, err error) {
 	ord := OrderDTO{
 		Entry: Entry{
 			RecipeID: recipeID,
-			Qty:      qty,
+			Qty:      orderCount,
 		},
 		Date: time.Now(),
 	}

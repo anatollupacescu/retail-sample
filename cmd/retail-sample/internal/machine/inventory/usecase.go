@@ -1,4 +1,4 @@
-package usecase
+package inventory
 
 import (
 	"context"
@@ -6,29 +6,27 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-type inventoryDB interface {
-	Get(int) (inventory.ItemDTO, error)
-}
-
-func NewInventory(ctx context.Context, inventory inventory.Collection, db inventoryDB) Inventory {
+func New(ctx context.Context, t pg.TX) Inventory {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
+	db := &pg.InventoryPgxStore{DB: t.Tx}
 
 	return Inventory{
 		ctx:         ctx,
-		inventory:   inventory,
+		inventory:   &inventory.Collection{DB: db},
 		inventoryDB: db,
 		logger:      &logger,
 	}
 }
 
 type Inventory struct {
-	inventory   inventory.Collection
-	inventoryDB inventoryDB
 	ctx         context.Context
 	logger      *zerolog.Logger
+	inventory   *inventory.Collection
+	inventoryDB *pg.InventoryPgxStore
 }
 
 type CreateInventoryItemDTO struct {

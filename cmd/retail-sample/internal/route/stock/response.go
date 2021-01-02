@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/stock"
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 )
 
 type (
@@ -22,7 +22,7 @@ type (
 	}
 )
 
-func toCollectionResponse(entries []usecase.Position) collection {
+func toCollectionResponse(entries []stock.Position) collection {
 	var response collection
 	response.Data = make([]entity, 0, len(entries))
 
@@ -39,7 +39,7 @@ func toCollectionResponse(entries []usecase.Position) collection {
 	return response
 }
 
-func toResponse(pos usecase.Position) single {
+func toResponse(pos stock.Position) single {
 	return single{
 		Data: entity{
 			ID:   pos.ID,

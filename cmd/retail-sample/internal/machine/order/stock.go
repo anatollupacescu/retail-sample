@@ -5,11 +5,11 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
-type extractor struct {
+type adapter struct {
 	stock *pg.StockPgxStore
 }
 
-func (o extractor) Extract(inventoryID int, qty int) error {
+func (o adapter) Extract(inventoryID int, qty int) error {
 	dto, err := o.stock.Get(inventoryID)
 	if err != nil {
 		return err

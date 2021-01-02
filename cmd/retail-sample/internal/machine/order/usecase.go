@@ -10,7 +10,7 @@ import (
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/order"
 )
 
-func NewUseCase(ctx context.Context, t pg.TX) UseCase {
+func New(ctx context.Context, t pg.TX) UseCase {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
 	orderDB := &pg.OrderPgxStore{DB: t.Tx}
@@ -19,7 +19,7 @@ func NewUseCase(ctx context.Context, t pg.TX) UseCase {
 
 	orders := domain.Orders{
 		DB:      orderDB,
-		Stock:   &extractor{stock: stockDB},
+		Stock:   &adapter{stock: stockDB},
 		Recipes: recipeDB,
 	}
 

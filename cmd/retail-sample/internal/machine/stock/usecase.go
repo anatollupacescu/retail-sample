@@ -1,4 +1,4 @@
-package usecase
+package stock
 
 import (
 	"context"
@@ -6,14 +6,18 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
-func NewStock(ctx context.Context, stockDB stockDB, logDB logDB, inventoryDB inventoryDB) Stock {
+func New(ctx context.Context, t pg.TX) UseCase {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
-	return Stock{
+	stockDB := &pg.StockPgxStore{DB: t.Tx}
+	logDB := &pg.PgxProvisionLog{DB: t.Tx}
+	inventoryDB := &pg.InventoryPgxStore{DB: t.Tx}
+
+	return UseCase{
 		ctx:         ctx,
 		stockDB:     stockDB,
 		logDB:       logDB,
@@ -22,20 +26,11 @@ func NewStock(ctx context.Context, stockDB stockDB, logDB logDB, inventoryDB inv
 	}
 }
 
-type stockDB interface {
-	Get(int) (stock.PositionDTO, error)
-	Save(stock.PositionDTO) error
-}
-
-type logDB interface {
-	Add(id, qty int) (int, error)
-}
-
-type Stock struct {
+type UseCase struct {
 	logger      *zerolog.Logger
-	stockDB     stockDB
-	inventoryDB inventoryDB
-	logDB       logDB
+	stockDB     *pg.StockPgxStore
+	inventoryDB *pg.InventoryPgxStore
+	logDB       *pg.PgxProvisionLog
 	ctx         context.Context
 }
 
@@ -50,11 +45,11 @@ type Position struct {
 	Qty  int
 }
 
-func (o *Stock) Provision(dto ProvisionDTO) (Position, error) {
+func (o *UseCase) Provision(dto ProvisionDTO) (Position, error) {
 	stockPos, err := o.stockDB.Get(dto.InventoryItemID)
 
 	switch err {
-	case nil, persistence.ErrStockItemNotFound: //continue
+	case nil, pg.ErrStockItemNotFound: //continue
 	default:
 		return Position{}, err
 	}

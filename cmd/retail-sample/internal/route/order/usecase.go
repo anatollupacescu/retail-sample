@@ -21,7 +21,7 @@ func newUseCase(r *http.Request) (order.UseCase, error) {
 
 	ctx := r.Context()
 
-	uc := order.NewUseCase(ctx, tx)
+	uc := order.New(ctx, tx)
 
 	return uc, nil
 }

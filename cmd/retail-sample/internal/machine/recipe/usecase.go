@@ -1,4 +1,4 @@
-package usecase
+package recipe
 
 import (
 	"context"
@@ -7,32 +7,34 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func NewRecipe(ctx context.Context, book domain.Recipes, recipeDB recipeDB) Recipe {
+func New(ctx context.Context, t pg.TX) UseCase {
 	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
 
-	return Recipe{
+	recipeDB := &pg.RecipePgxStore{DB: t.Tx}
+	inventoryDB := &pg.InventoryPgxStore{DB: t.Tx}
+
+	recipes := domain.Recipes{
+		DB:        recipeDB,
+		Inventory: &validator{Inventory: inventoryDB},
+	}
+
+	return UseCase{
 		ctx:      ctx,
-		recipes:  book,
+		recipes:  recipes,
 		recipeDB: recipeDB,
 		logger:   &logger,
 	}
 }
 
-type recipeDB interface {
-	Add(domain.RecipeDTO) (domain.ID, error)
-	Find(domain.Name) (*domain.RecipeDTO, error)
-	Save(*domain.RecipeDTO) error
-	Get(domain.ID) (domain.RecipeDTO, error)
-}
-
-type Recipe struct {
+type UseCase struct {
+	ctx      context.Context
 	logger   *zerolog.Logger
 	recipes  domain.Recipes
-	recipeDB recipeDB
-	ctx      context.Context
+	recipeDB *pg.RecipePgxStore
 }
 
 type CreateRecipeDTO struct {
@@ -40,7 +42,7 @@ type CreateRecipeDTO struct {
 	Ingredients []domain.InventoryItem
 }
 
-func (o *Recipe) Create(dto CreateRecipeDTO) (recipe domain.RecipeDTO, err error) {
+func (o *UseCase) Create(dto CreateRecipeDTO) (recipe domain.RecipeDTO, err error) {
 	id, err := o.recipes.Add(dto.Name, dto.Ingredients)
 
 	if err != nil {
@@ -65,7 +67,7 @@ type UpdateStatusDTO struct {
 	Enabled  bool
 }
 
-func (o *Recipe) Update(in UpdateStatusDTO) (domain.RecipeDTO, error) {
+func (o *UseCase) UpdateStatus(in UpdateStatusDTO) (domain.RecipeDTO, error) {
 	recipeID := domain.ID(in.RecipeID)
 
 	dto, err := o.recipeDB.Get(recipeID)

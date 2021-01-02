@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
+	inventory2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
@@ -59,14 +59,14 @@ type updatePayload struct {
 	Enabled bool `json:"enabled"`
 }
 
-func newUpdateDTO(r *http.Request) (usecase.UpdateInventoryItemStatusDTO, error) {
+func newUpdateDTO(r *http.Request) (inventory2.UpdateInventoryItemStatusDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
 	var requestPayload updatePayload
 	if err := d.Decode(&requestPayload); err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' payload")
-		return usecase.UpdateInventoryItemStatusDTO{}, ErrParseBody
+		return inventory2.UpdateInventoryItemStatusDTO{}, ErrParseBody
 	}
 
 	vars := mux.Vars(r)
@@ -74,10 +74,10 @@ func newUpdateDTO(r *http.Request) (usecase.UpdateInventoryItemStatusDTO, error)
 	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return usecase.UpdateInventoryItemStatusDTO{}, ErrParseItemID
+		return inventory2.UpdateInventoryItemStatusDTO{}, ErrParseItemID
 	}
 
-	dto := usecase.UpdateInventoryItemStatusDTO{
+	dto := inventory2.UpdateInventoryItemStatusDTO{
 		ID:      id,
 		Enabled: requestPayload.Enabled,
 	}
@@ -130,17 +130,17 @@ type createPayload struct {
 
 var ErrParseBody = errors.New("could not parse body")
 
-func newCreateDTO(r *http.Request) (usecase.CreateInventoryItemDTO, error) {
+func newCreateDTO(r *http.Request) (inventory2.CreateInventoryItemDTO, error) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
 	var body createPayload
 
 	if err := d.Decode(&body); err != nil {
-		return usecase.CreateInventoryItemDTO{}, ErrParseBody
+		return inventory2.CreateInventoryItemDTO{}, ErrParseBody
 	}
 
-	dto := usecase.CreateInventoryItemDTO{
+	dto := inventory2.CreateInventoryItemDTO{
 		Name: body.Name,
 	}
 

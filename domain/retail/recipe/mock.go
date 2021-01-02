@@ -27,3 +27,11 @@ func (rb *MockDB) Get(id ID) (RecipeDTO, error) {
 	args := rb.Called(id)
 	return args.Get(0).(RecipeDTO), args.Error(1)
 }
+
+type MockInventory struct {
+	mock.Mock
+}
+
+func (m *MockInventory) Validate(ids ...int) error {
+	return m.Called(ids).Error(0)
+}

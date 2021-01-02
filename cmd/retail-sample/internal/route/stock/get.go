@@ -8,14 +8,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/hlog"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/stock"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	persistence "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/usecase"
 )
 
 var ErrBadItemID = errors.New("could not parse ID")
 
-func getByID(r *http.Request) (usecase.Position, error) {
+func getByID(r *http.Request) (stock.Position, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get stock position by id")
 
 	vars := mux.Vars(r)
@@ -24,13 +24,13 @@ func getByID(r *http.Request) (usecase.Position, error) {
 	id, err := strconv.Atoi(itemID)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get stock position by id")
-		return usecase.Position{}, ErrBadItemID
+		return stock.Position{}, ErrBadItemID
 	}
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by recipe id")
-		return usecase.Position{}, err
+		return stock.Position{}, err
 	}
 
 	store := persistence.InventoryPgxStore{DB: tx}
@@ -38,21 +38,21 @@ func getByID(r *http.Request) (usecase.Position, error) {
 	item, err := store.Get(id)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by recipe id")
-		return usecase.Position{}, err
+		return stock.Position{}, err
 	}
 
-	stock := persistence.StockPgxStore{DB: tx}
+	stockDB := persistence.StockPgxStore{DB: tx}
 
-	dto, err := stock.Get(id)
+	dto, err := stockDB.Get(id)
 
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get stock position by id")
-		return usecase.Position{}, err
+		return stock.Position{}, err
 	}
 
 	hlog.FromRequest(r).Info().Str("action", "success").Msg("get stock position by id")
 
-	pos := usecase.Position{
+	pos := stock.Position{
 		ID:   id,
 		Name: item.Name,
 		Qty:  dto.Qty,
@@ -61,7 +61,7 @@ func getByID(r *http.Request) (usecase.Position, error) {
 	return pos, nil
 }
 
-func getAll(r *http.Request) ([]usecase.Position, error) {
+func getAll(r *http.Request) ([]stock.Position, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("list stock positions")
 
 	tx, err := middleware.ExtractTransaction(r)
@@ -79,13 +79,13 @@ func getAll(r *http.Request) ([]usecase.Position, error) {
 		return nil, err
 	}
 
-	stock := persistence.StockPgxStore{DB: tx}
+	stockDB := persistence.StockPgxStore{DB: tx}
 
-	positions := make([]usecase.Position, 0, len(items))
+	positions := make([]stock.Position, 0, len(items))
 
 	for i := range items {
 		item := items[i]
-		dto, err := stock.Get(item.ID)
+		dto, err := stockDB.Get(item.ID)
 
 		switch err {
 		case nil, persistence.ErrStockItemNotFound:
@@ -93,7 +93,7 @@ func getAll(r *http.Request) ([]usecase.Position, error) {
 			hlog.FromRequest(r).Error().Err(err).Str("action", "find item quantity").Msg("list stock positions")
 		}
 
-		pos := usecase.Position{
+		pos := stock.Position{
 			ID:   item.ID,
 			Name: item.Name,
 			Qty:  dto.Qty,

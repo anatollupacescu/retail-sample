@@ -12,9 +12,10 @@ BUILD_TIME := $(shell date -u '+%Y-%m-%d_%H:%M:%S')
 format:
 	@goimports -w -local $(PROJECT) cmd/ domain/ internal/
 	@gci -w -local $(PROJECT) .
+	@gofmt -s -w cmd/ domain/ internal/
 
 test:
-	@go test -count 1 -race ./...
+	@go test -count 1 -race -cover ./...
 
 # build
 

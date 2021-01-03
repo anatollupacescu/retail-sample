@@ -18,12 +18,12 @@ func (m *MockDB) Get(id int) (DTO, error) {
 	return args.Get(0).(DTO), args.Error(1)
 }
 
-func (m *MockDB) Find(n string) (*DTO, error) {
+func (m *MockDB) Find(n string) (DTO, error) {
 	args := m.Called(n)
-	return args.Get(0).(*DTO), args.Error(1)
+	return args.Get(0).(DTO), args.Error(1)
 }
 
-func (m *MockDB) Save(r *DTO) error {
+func (m *MockDB) Save(r DTO) error {
 	return m.Called(r).Error(0)
 }
 

@@ -13,7 +13,7 @@ type RecipePgxStore struct {
 	DB pgx.Tx
 }
 
-func (pr *RecipePgxStore) Save(r *recipe.DTO) error {
+func (pr *RecipePgxStore) Save(r recipe.DTO) error {
 	sql := "update recipe set enabled=$1 where id=$2"
 
 	tag, err := pr.DB.Exec(context.Background(), sql, r.Enabled, r.ID)
@@ -101,7 +101,7 @@ func (pr *RecipePgxStore) Get(recipeID int) (r recipe.DTO, err error) {
 	return r, nil
 }
 
-func (pr *RecipePgxStore) Find(name string) (*recipe.DTO, error) {
+func (pr *RecipePgxStore) Find(name string) (recipe.DTO, error) {
 	sql := "select id, name, enabled from recipe where name = $1"
 
 	var r recipe.DTO
@@ -112,12 +112,12 @@ func (pr *RecipePgxStore) Find(name string) (*recipe.DTO, error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return &r, recipe.ErrRecipeNotFound
+		return r, recipe.ErrRecipeNotFound
 	default:
-		return &r, errors.Wrapf(ErrDB, "get recipe: %v", err)
+		return r, errors.Wrapf(ErrDB, "get recipe: %v", err)
 	}
 
-	return &r, nil
+	return r, nil
 }
 
 func (pr *RecipePgxStore) List() ([]recipe.Recipe, error) {

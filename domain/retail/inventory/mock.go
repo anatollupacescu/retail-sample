@@ -8,7 +8,7 @@ type MockDB struct {
 	mock.Mock
 }
 
-func (m *MockDB) Save(i *DTO) error {
+func (m *MockDB) Save(i DTO) error {
 	args := m.Called(i)
 	return args.Error(0)
 }

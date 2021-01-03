@@ -24,7 +24,7 @@ type (
 		Get(int) (DTO, error)
 		Add(string) (int, error)
 		Find(string) (int, error)
-		Save(*DTO) error
+		Save(DTO) error
 	}
 
 	Collection struct {
@@ -44,7 +44,7 @@ func (i *Item) Enable() error {
 		ID: i.ID, Name: i.Name, Enabled: true,
 	}
 
-	if err := i.DB.Save(&dto); err != nil {
+	if err := i.DB.Save(dto); err != nil {
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (i *Item) Disable() error {
 		ID: i.ID, Name: i.Name, Enabled: false,
 	}
 
-	if err := i.DB.Save(&dto); err != nil {
+	if err := i.DB.Save(dto); err != nil {
 		return err
 	}
 

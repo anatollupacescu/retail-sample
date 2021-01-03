@@ -97,7 +97,7 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		item := &recipe.DTO{ID: 1, Name: "test"}
+		item := recipe.DTO{ID: 1, Name: "test"}
 
 		db.On("Find", "test").Return(item, nil)
 
@@ -113,8 +113,7 @@ func TestAddRecipe(t *testing.T) {
 		defer db.AssertExpectations(t)
 
 		expectedErr := errors.New("test")
-		var nilRecipe *recipe.DTO
-		db.On("Find", "test").Return(nilRecipe, expectedErr)
+		db.On("Find", "test").Return(recipe.DTO{}, expectedErr)
 
 		recipes := recipe.Recipes{DB: db}
 		id, err := recipes.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
@@ -127,8 +126,7 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		var nilRecipe *recipe.DTO
-		db.On("Find", "test").Return(nilRecipe, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
 
 		mi := &recipe.MockInventory{}
 		defer mi.AssertExpectations(t)
@@ -147,8 +145,7 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		var nilRecipe *recipe.DTO
-		db.On("Find", "test").Return(nilRecipe, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
 
 		mi := &recipe.MockInventory{}
 		defer mi.AssertExpectations(t)
@@ -169,8 +166,7 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		var nilRecipe *recipe.DTO
-		db.On("Find", "test").Return(nilRecipe, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
 
 		mi := &recipe.MockInventory{}
 		defer mi.AssertExpectations(t)

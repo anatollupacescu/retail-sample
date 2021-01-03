@@ -31,8 +31,8 @@ type (
 	db interface {
 		Get(int) (DTO, error)
 		Add(DTO) (int, error)
-		Find(string) (*DTO, error)
-		Save(*DTO) error
+		Find(string) (DTO, error)
+		Save(DTO) error
 	}
 
 	inventoryValidator interface {
@@ -118,7 +118,7 @@ func (r *Recipe) Disable() error {
 		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: false,
 	}
 
-	err := r.DB.Save(&dto)
+	err := r.DB.Save(dto)
 
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func (r *Recipe) Enable() error {
 		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: true,
 	}
 
-	err := r.DB.Save(&dto)
+	err := r.DB.Save(dto)
 
 	if err != nil {
 		return err

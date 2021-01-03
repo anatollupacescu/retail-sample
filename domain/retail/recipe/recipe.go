@@ -2,6 +2,8 @@ package recipe
 
 import (
 	"errors"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type (
@@ -27,27 +29,25 @@ type (
 	}
 
 	db interface {
+		Get(int) (DTO, error)
 		Add(DTO) (int, error)
 		Find(string) (*DTO, error)
 		Save(*DTO) error
 	}
 
-	inventory interface {
+	inventoryValidator interface {
 		Validate(...int) error
 	}
 
 	Recipes struct {
 		DB        db
-		Inventory inventory
+		Validator inventoryValidator
 	}
 )
 
 var (
 	ErrEmptyName           = errors.New("empty name")
 	ErrNoIngredients       = errors.New("no ingredients provided")
-	ErrIgredientNotFound   = errors.New("ingredient not found")
-	ErrIgredientDisabled   = errors.New("ingredient disabled")
-	ErrDuplicateName       = errors.New("duplicate name")
 	ErrQuantityNotProvided = errors.New("quantity not provided")
 )
 
@@ -69,7 +69,13 @@ func checkPreconditions(name string, ingredients []InventoryItem) error {
 	return nil
 }
 
-func (c Recipes) Add(name string, ingredients []InventoryItem) (int, error) {
+var (
+	ErrDuplicateName      = errors.New("duplicate name")
+	ErrRecipeNotFound     = errors.New("recipe not found")
+	ErrIngredientNotFound = errors.New("ingredient not found")
+)
+
+func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
 	if err := checkPreconditions(name, ingredients); err != nil {
 		return 0, err
 	}
@@ -89,8 +95,12 @@ func (c Recipes) Add(name string, ingredients []InventoryItem) (int, error) {
 		ids = append(ids, i.ID)
 	}
 
-	err = c.Inventory.Validate(ids...)
-	if err != nil {
+	err = c.Validator.Validate(ids...)
+	switch err {
+	case nil: //continue
+	case inventory.ErrItemNotFound:
+		return 0, ErrIngredientNotFound
+	default:
 		return 0, err
 	}
 
@@ -102,8 +112,6 @@ func (c Recipes) Add(name string, ingredients []InventoryItem) (int, error) {
 
 	return c.DB.Add(dto)
 }
-
-var ErrRecipeNotFound = errors.New("recipe not found")
 
 func (r *Recipe) Disable() error {
 	dto := DTO{

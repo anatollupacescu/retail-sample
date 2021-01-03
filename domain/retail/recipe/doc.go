@@ -1,2 +1,2 @@
-// Package recipe allows creating of new recipes and updating the status on existent
+// Package recipe manages a list of recipes, allows enabling and disabling of individual recipes
 package recipe

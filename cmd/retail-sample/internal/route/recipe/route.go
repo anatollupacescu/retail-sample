@@ -3,33 +3,55 @@ package recipe
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/gorilla/mux"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/recipe"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
+
+type createPayload struct {
+	Name  string      `json:"name"`
+	Items map[int]int `json:"items"`
+}
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dto, err := newCreateDTO(r)
-	if err != nil {
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	var requestBody createPayload
+
+	if err := d.Decode(&requestBody); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	uc, err := newUseCase(r)
+	var ingredients = make([]recipe.InventoryItem, 0, len(requestBody.Items))
+
+	for id, qty := range requestBody.Items {
+		ingredients = append(ingredients, recipe.InventoryItem{
+			ID:  id,
+			Qty: qty,
+		})
+	}
+
+	uc, err := usecase.New(r.Context())
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	re, err := uc.Create(dto)
+	re, err := uc.Create(requestBody.Name, ingredients)
 
 	switch err {
 	case nil:
 		break
 	case
 		recipe.ErrEmptyName,
-		recipe.ErrIgredientNotFound,
+		recipe.ErrIngredientNotFound,
 		recipe.ErrQuantityNotProvided,
 		recipe.ErrNoIngredients:
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -91,22 +113,39 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type updatePayload struct {
+	Enabled bool `json:"enabled"`
+}
+
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dto, err := newUpdateStatusDTO(r)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	var requestBody updatePayload
+
+	if err := d.Decode(&requestBody); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	vars := mux.Vars(r)
+	recipeID := vars["recipeID"]
+
+	id, err := strconv.Atoi(recipeID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	uc, err := newUseCase(r)
+	uc, err := usecase.New(r.Context())
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	updatedRecipe, err := uc.UpdateStatus(dto)
+	updatedRecipe, err := uc.UpdateStatus(id, requestBody.Enabled)
 
 	switch err {
 	case nil:

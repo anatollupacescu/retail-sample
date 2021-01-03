@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/hlog"
 
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/stock"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
@@ -62,21 +61,34 @@ type provisionPayload struct {
 func Provision(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	uc, err := useCase(r)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
 
-	if err != nil {
-		httpServerError(w)
+	var body provisionPayload
+
+	if err := d.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	dto, err := toProvisionDTO(r)
+	vars := mux.Vars(r)
+	itemID := vars["itemID"]
+
+	id, err := strconv.Atoi(itemID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	pos, err := uc.Provision(dto)
+	uc, err := stock.New(r.Context())
+
+	if err != nil {
+		httpServerError(w)
+		return
+	}
+
+	pos, err := uc.Provision(id, body.Qty)
 
 	switch err {
 	case nil:
@@ -100,35 +112,6 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 }
 
 var ErrParseItemID = errors.New("could not parse item ID")
-
-func toProvisionDTO(r *http.Request) (stock.ProvisionDTO, error) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-
-	var body provisionPayload
-
-	if err := d.Decode(&body); err != nil {
-		hlog.FromRequest(r).Err(err).Msg("parse 'provision' payload")
-		return stock.ProvisionDTO{}, err
-	}
-
-	vars := mux.Vars(r)
-	itemID := vars["itemID"]
-
-	id, err := strconv.Atoi(itemID)
-
-	if err != nil {
-		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return stock.ProvisionDTO{}, ErrParseItemID
-	}
-
-	dto := stock.ProvisionDTO{
-		Qty:             body.Qty,
-		InventoryItemID: id,
-	}
-
-	return dto, nil
-}
 
 func GetProvisionLog(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

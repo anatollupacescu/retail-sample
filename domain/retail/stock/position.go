@@ -19,6 +19,7 @@ type (
 
 	db interface {
 		Save(PositionDTO) error
+		Get(int) (PositionDTO, error)
 	}
 )
 

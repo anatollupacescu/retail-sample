@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -12,7 +13,9 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
-func inventoryItemByID(r *http.Request) (inventory.ItemDTO, error) {
+var ErrParseItemID = errors.New("could not parse item ID")
+
+func inventoryItemByID(r *http.Request) (inventory.DTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get by id")
 
 	vars := mux.Vars(r)
@@ -20,13 +23,13 @@ func inventoryItemByID(r *http.Request) (inventory.ItemDTO, error) {
 	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "convert request ID").Msg("get by id")
-		return inventory.ItemDTO{}, ErrParseItemID
+		return inventory.DTO{}, ErrParseItemID
 	}
 
 	tx, err := middleware.ExtractTransaction(r)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "extract transaction").Msg("get by id")
-		return inventory.ItemDTO{}, err
+		return inventory.DTO{}, err
 	}
 
 	store := persistence.InventoryPgxStore{DB: tx}
@@ -34,7 +37,7 @@ func inventoryItemByID(r *http.Request) (inventory.ItemDTO, error) {
 	item, err := store.Get(id)
 	if err != nil {
 		hlog.FromRequest(r).Error().Err(err).Str("action", "call persistence layer").Msg("get by id")
-		return inventory.ItemDTO{}, err
+		return inventory.DTO{}, err
 	}
 
 	hlog.FromRequest(r).Info().Str("action", "success").Msg("get by id")
@@ -42,7 +45,7 @@ func inventoryItemByID(r *http.Request) (inventory.ItemDTO, error) {
 	return item, nil
 }
 
-func allInventoryItems(r *http.Request) ([]inventory.ItemDTO, error) {
+func allInventoryItems(r *http.Request) ([]inventory.DTO, error) {
 	hlog.FromRequest(r).Info().Str("action", "enter").Msg("get all")
 
 	tx, err := middleware.ExtractTransaction(r)

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -18,6 +19,22 @@ var (
 
 func ExtractTransaction(r *http.Request) (tx persistence.TX, err error) {
 	ctxTransaction := r.Context().Value(TxKey)
+
+	if ctxTransaction == nil {
+		return persistence.TX{}, errTransactionNotFound
+	}
+
+	var ok bool
+
+	if tx, ok = ctxTransaction.(persistence.TX); !ok {
+		return persistence.TX{}, errTransactionBadType
+	}
+
+	return
+}
+
+func ExtractTransactionCtx(ctx context.Context) (tx persistence.TX, err error) {
+	ctxTransaction := ctx.Value(TxKey)
 
 	if ctxTransaction == nil {
 		return persistence.TX{}, errTransactionNotFound

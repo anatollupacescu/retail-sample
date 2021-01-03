@@ -9,14 +9,14 @@ import (
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 )
 
-func newUseCase(r *http.Request) (inventory.Inventory, error) {
+func newUseCase(r *http.Request) (inventory.UseCase, error) {
 	logger := hlog.FromRequest(r)
 
 	tx, err := middleware.ExtractTransaction(r)
 
 	if err != nil {
 		logger.Error().Str("action", "extract transaction").Err(err)
-		return inventory.Inventory{}, err
+		return inventory.UseCase{}, err
 	}
 
 	ctx := r.Context()

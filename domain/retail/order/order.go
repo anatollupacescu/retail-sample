@@ -35,10 +35,9 @@ type (
 var (
 	ErrOrderNotFound   = errors.New("order not found")
 	ErrInvalidQuantity = errors.New("quantity not valid")
-	ErrInvalidRecipe   = errors.New("invalid recipe")
 )
 
-func (o Orders) Add(recipeID, orderCount int) (int, error) {
+func (o Orders) Create(recipeID, orderCount int) (int, error) {
 	if orderCount <= 0 {
 		return 0, ErrInvalidQuantity
 	}

@@ -13,7 +13,7 @@ type InventoryPgxStore struct {
 	DB pgx.Tx
 }
 
-func (ps *InventoryPgxStore) Save(i *inventory.ItemDTO) error {
+func (ps *InventoryPgxStore) Save(i *inventory.DTO) error {
 	tag, err := ps.DB.Exec(context.Background(), "update inventory set enabled=$1 and name=$2 where id=$3", i.Enabled, i.Name, i.ID)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (ps *InventoryPgxStore) Find(n string) (int, error) {
 	}
 }
 
-func (ps *InventoryPgxStore) Get(id int) (inventory.ItemDTO, error) {
+func (ps *InventoryPgxStore) Get(id int) (inventory.DTO, error) {
 	var (
 		name    string
 		enabled bool
@@ -68,12 +68,12 @@ func (ps *InventoryPgxStore) Get(id int) (inventory.ItemDTO, error) {
 	case nil:
 		break
 	case pgx.ErrNoRows:
-		return inventory.ItemDTO{}, inventory.ErrItemNotFound
+		return inventory.DTO{}, inventory.ErrItemNotFound
 	default:
-		return inventory.ItemDTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
+		return inventory.DTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}
 
-	item := inventory.ItemDTO{
+	item := inventory.DTO{
 		ID:      id,
 		Name:    name,
 		Enabled: enabled,
@@ -82,7 +82,7 @@ func (ps *InventoryPgxStore) Get(id int) (inventory.ItemDTO, error) {
 	return item, nil
 }
 
-func (ps *InventoryPgxStore) List() (items []inventory.ItemDTO, err error) {
+func (ps *InventoryPgxStore) List() (items []inventory.DTO, err error) {
 	rows, err := ps.DB.Query(context.Background(), "select id, name, enabled from inventory")
 
 	if err != nil {
@@ -102,7 +102,7 @@ func (ps *InventoryPgxStore) List() (items []inventory.ItemDTO, err error) {
 			return nil, errors.Wrapf(ErrDB, "scan inventory: %v", err)
 		}
 
-		items = append(items, inventory.ItemDTO{
+		items = append(items, inventory.DTO{
 			ID:      int(id),
 			Name:    name,
 			Enabled: enabled,

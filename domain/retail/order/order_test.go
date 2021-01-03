@@ -14,7 +14,7 @@ func TestAdd(t *testing.T) {
 	t.Run("errors when quantity is zero", func(t *testing.T) {
 		orders := order.Orders{}
 
-		_, err := orders.Add(1, 0)
+		_, err := orders.Create(1, 0)
 
 		assert.Equal(t, order.ErrInvalidQuantity, err)
 	})
@@ -22,7 +22,7 @@ func TestAdd(t *testing.T) {
 	t.Run("errors when quantity is negative", func(t *testing.T) {
 		orders := order.Orders{}
 
-		_, err := orders.Add(1, -1)
+		_, err := orders.Create(1, -1)
 
 		assert.Equal(t, order.ErrInvalidQuantity, err)
 	})
@@ -36,7 +36,7 @@ func TestAdd(t *testing.T) {
 
 		orders := order.Orders{Recipes: recipe}
 
-		receivedID, err := orders.Add(1, 1)
+		receivedID, err := orders.Create(1, 1)
 
 		assert.Equal(t, expectedErr, err)
 		assert.Equal(t, 0, receivedID)
@@ -59,7 +59,7 @@ func TestAdd(t *testing.T) {
 
 		orders := order.Orders{Recipes: recipe, Stock: stock}
 
-		receivedID, err := orders.Add(1, 1)
+		receivedID, err := orders.Create(1, 1)
 
 		assert.Equal(t, expectedErr, err)
 		assert.Zero(t, receivedID)
@@ -86,7 +86,7 @@ func TestAdd(t *testing.T) {
 
 		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
 
-		receivedID, err := orders.Add(1, 1)
+		receivedID, err := orders.Create(1, 1)
 
 		assert.Equal(t, dbErr, err)
 		assert.Zero(t, receivedID)
@@ -112,7 +112,7 @@ func TestAdd(t *testing.T) {
 
 		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
 
-		receivedID, err := orders.Add(1, 1)
+		receivedID, err := orders.Create(1, 1)
 
 		assert.NoError(t, err)
 		assert.Equal(t, 1, receivedID)

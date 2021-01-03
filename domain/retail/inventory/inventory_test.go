@@ -76,7 +76,7 @@ func TestDisable(t *testing.T) {
 func TestAdd(t *testing.T) {
 	t.Run("errors when name is empty", func(t *testing.T) {
 		i := inventory.Collection{}
-		_, err := i.Add("")
+		_, err := i.Create("")
 
 		assert.Equal(t, inventory.ErrEmptyName, err)
 	})
@@ -88,7 +88,7 @@ func TestAdd(t *testing.T) {
 		db.On("Find", "milk").Return(1, nil)
 
 		i := inventory.Collection{DB: db}
-		id, err := i.Add("milk")
+		id, err := i.Create("milk")
 
 		assert.Equal(t, inventory.ErrDuplicateName, err)
 		assert.Zero(t, id)
@@ -102,7 +102,7 @@ func TestAdd(t *testing.T) {
 		db.On("Add", "milk").Return(1, nil)
 
 		i := inventory.Collection{DB: db}
-		id, err := i.Add("milk")
+		id, err := i.Create("milk")
 
 		assert.NoError(t, err)
 		assert.Equal(t, 1, id)
@@ -116,7 +116,7 @@ func TestAdd(t *testing.T) {
 		db.On("Find", "milk").Return(0, expected)
 
 		i := inventory.Collection{DB: db}
-		id, err := i.Add("milk")
+		id, err := i.Create("milk")
 
 		assert.Equal(t, expected, err)
 		assert.Equal(t, 0, id)
@@ -131,7 +131,7 @@ func TestAdd(t *testing.T) {
 		db.On("Add", "milk").Return(1, expectedErr)
 
 		i := inventory.Collection{DB: db}
-		id, err := i.Add("milk")
+		id, err := i.Create("milk")
 
 		assert.Zero(t, id)
 		assert.Equal(t, expectedErr, err)

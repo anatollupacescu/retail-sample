@@ -4,20 +4,26 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/rs/zerolog/hlog"
-
-	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/order"
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
-	domain "github.com/anatollupacescu/retail-sample/domain/retail/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
+
+type createPayload struct {
+	RecipeID int `json:"id"`
+	Count    int `json:"qty"`
+}
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dto, err := newCreateDTO(r)
-	if err != nil {
-		httpServerError(w)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	var payload createPayload
+
+	if err := d.Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -27,16 +33,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newOrder, err := uc.PlaceOrder(dto)
+	newOrder, err := uc.Create(payload.RecipeID, payload.Count)
 
 	switch err {
 	case nil:
 		break
-	case domain.ErrInvalidRecipe,
-		domain.ErrInvalidQuantity,
-		stock.ErrNotEnoughStock,
-		inventory.ErrDuplicateName,
-		inventory.ErrEmptyName:
+	case recipe.ErrDisabled,
+		order.ErrInvalidQuantity,
+		stock.ErrNotEnoughStock:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -54,39 +58,15 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type createPayload struct {
-	ID  int `json:"id"`
-	Qty int `json:"qty"`
-}
-
-func newCreateDTO(r *http.Request) (order.PlaceOrderDTO, error) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-
-	var payload createPayload
-
-	if err := d.Decode(&payload); err != nil {
-		hlog.FromRequest(r).Err(err).Msg("parse 'create order' payload")
-		return order.PlaceOrderDTO{}, err
-	}
-
-	dto := order.PlaceOrderDTO{
-		RecipeID: payload.ID,
-		OrderQty: payload.Qty,
-	}
-
-	return dto, nil
-}
-
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	order, err := getByID(r)
+	ordr, err := getByID(r)
 
 	switch err {
 	case nil:
 		break
-	case domain.ErrOrderNotFound, ErrBadItemID:
+	case order.ErrOrderNotFound, ErrBadItemID:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -94,7 +74,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := toSingleResponse(order)
+	response := toSingleResponse(ordr)
 	err = json.NewEncoder(w).Encode(response)
 
 	if err != nil {

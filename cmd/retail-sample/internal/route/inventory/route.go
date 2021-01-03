@@ -7,17 +7,30 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/hlog"
 
 	inventory2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
+type updatePayload struct {
+	Enabled bool `json:"enabled"`
+}
+
 func Update(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dto, err := newUpdateDTO(r)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
 
+	var requestPayload updatePayload
+	if err := d.Decode(&requestPayload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	vars := mux.Vars(r)
+
+	id, err := strconv.Atoi(vars["itemID"])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -30,7 +43,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item, err := uc.UpdateStatus(dto)
+	item, err := uc.UpdateStatus(id, requestPayload.Enabled)
 
 	switch err {
 	case nil:
@@ -51,38 +64,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		httpServerError(w)
 	}
-}
-
-var ErrParseItemID = errors.New("could not parse item ID")
-
-type updatePayload struct {
-	Enabled bool `json:"enabled"`
-}
-
-func newUpdateDTO(r *http.Request) (inventory2.UpdateInventoryItemStatusDTO, error) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-
-	var requestPayload updatePayload
-	if err := d.Decode(&requestPayload); err != nil {
-		hlog.FromRequest(r).Err(err).Msg("parse 'update status' payload")
-		return inventory2.UpdateInventoryItemStatusDTO{}, ErrParseBody
-	}
-
-	vars := mux.Vars(r)
-
-	id, err := strconv.Atoi(vars["itemID"])
-	if err != nil {
-		hlog.FromRequest(r).Err(err).Msg("parse 'update status' itemID")
-		return inventory2.UpdateInventoryItemStatusDTO{}, ErrParseItemID
-	}
-
-	dto := inventory2.UpdateInventoryItemStatusDTO{
-		ID:      id,
-		Enabled: requestPayload.Enabled,
-	}
-
-	return dto, nil
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {

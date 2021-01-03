@@ -7,20 +7,34 @@ import (
 	"github.com/rs/zerolog/log"
 
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
-	domain "github.com/anatollupacescu/retail-sample/domain/retail/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
+type UseCase struct {
+	ctx     context.Context
+	logger  *zerolog.Logger
+	orderDB *pg.OrderPgxStore
+	orders  order.Orders
+}
+
 func New(ctx context.Context, t pg.TX) UseCase {
-	logger := log.Ctx(ctx).With().Str("layer", "usecase").Logger()
+	logger := log.Ctx(ctx).With().Str("layer", "use case").Logger()
 
 	orderDB := &pg.OrderPgxStore{DB: t.Tx}
 	recipeDB := &pg.RecipePgxStore{DB: t.Tx}
 	stockDB := &pg.StockPgxStore{DB: t.Tx}
 
-	orders := domain.Orders{
-		DB:      orderDB,
-		Stock:   &extractor{recipes: recipeDB, stock: stockDB},
-		Recipes: &validator{recipes: recipeDB},
+	orders := order.Orders{
+		DB: orderDB,
+		Stock: &stock.Extractor{
+			Recipes: recipeDB,
+			Stock:   stockDB,
+		},
+		Recipes: &recipe.Validator{
+			Recipes: recipeDB,
+		},
 	}
 
 	return UseCase{
@@ -29,31 +43,4 @@ func New(ctx context.Context, t pg.TX) UseCase {
 		orderDB: orderDB,
 		logger:  &logger,
 	}
-}
-
-type UseCase struct {
-	ctx     context.Context
-	logger  *zerolog.Logger
-	orderDB *pg.OrderPgxStore
-	orders  domain.Orders
-}
-
-type PlaceOrderDTO struct {
-	RecipeID, OrderQty int
-}
-
-func (o *UseCase) PlaceOrder(dto PlaceOrderDTO) (domain.DTO, error) {
-	id, err := o.orders.Add(dto.RecipeID, dto.OrderQty)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer")
-		return domain.DTO{}, err
-	}
-
-	newOrder, err := o.orderDB.Get(id)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("retrieve new order")
-		return domain.DTO{}, err
-	}
-
-	return newOrder, nil
 }

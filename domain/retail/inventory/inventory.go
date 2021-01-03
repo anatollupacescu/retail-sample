@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	ItemDTO struct {
+	DTO struct {
 		ID      int
 		Name    string
 		Enabled bool
@@ -21,9 +21,10 @@ type (
 	}
 
 	db interface {
+		Get(int) (DTO, error)
 		Add(string) (int, error)
 		Find(string) (int, error)
-		Save(*ItemDTO) error
+		Save(*DTO) error
 	}
 
 	Collection struct {
@@ -33,12 +34,13 @@ type (
 
 var (
 	ErrItemNotFound  = errors.New("item not found")
+	ErrItemDisabled  = errors.New("item is disabled")
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 )
 
 func (i *Item) Enable() error {
-	dto := ItemDTO{
+	dto := DTO{
 		ID: i.ID, Name: i.Name, Enabled: true,
 	}
 
@@ -52,7 +54,7 @@ func (i *Item) Enable() error {
 }
 
 func (i *Item) Disable() error {
-	dto := ItemDTO{
+	dto := DTO{
 		ID: i.ID, Name: i.Name, Enabled: false,
 	}
 
@@ -65,7 +67,7 @@ func (i *Item) Disable() error {
 	return nil
 }
 
-func (i Collection) Add(name string) (int, error) {
+func (i Collection) Create(name string) (int, error) {
 	if strings.TrimSpace(name) == "" {
 		return 0, ErrEmptyName
 	}

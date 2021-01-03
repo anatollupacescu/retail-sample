@@ -77,19 +77,19 @@ func TestEnableRecipe(t *testing.T) {
 func TestAddRecipe(t *testing.T) {
 	t.Run("errors on empty name", func(t *testing.T) {
 		rr := recipe.Recipes{}
-		_, err := rr.Add("", nil)
+		_, err := rr.Create("", nil)
 		assert.Equal(t, recipe.ErrEmptyName, err)
 	})
 
 	t.Run("errors on empty list of ingredients", func(t *testing.T) {
 		rr := recipe.Recipes{}
-		_, err := rr.Add("test", nil)
+		_, err := rr.Create("test", nil)
 		assert.Equal(t, recipe.ErrNoIngredients, err)
 	})
 
 	t.Run("errors on missing quantity", func(t *testing.T) {
 		rr := recipe.Recipes{}
-		_, err := rr.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 0}})
+		_, err := rr.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 0}})
 		assert.Equal(t, recipe.ErrQuantityNotProvided, err)
 	})
 
@@ -102,7 +102,7 @@ func TestAddRecipe(t *testing.T) {
 		db.On("Find", "test").Return(item, nil)
 
 		recipes := recipe.Recipes{DB: db}
-		id, err := recipes.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+		id, err := recipes.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
 		assert.Equal(t, recipe.ErrDuplicateName, err)
@@ -117,7 +117,7 @@ func TestAddRecipe(t *testing.T) {
 		db.On("Find", "test").Return(nilRecipe, expectedErr)
 
 		recipes := recipe.Recipes{DB: db}
-		id, err := recipes.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+		id, err := recipes.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
 		assert.Equal(t, expectedErr, err)
@@ -133,14 +133,14 @@ func TestAddRecipe(t *testing.T) {
 		mi := &recipe.MockInventory{}
 		defer mi.AssertExpectations(t)
 
-		err := recipe.ErrIgredientDisabled
+		err := recipe.ErrDisabled
 		mi.On("Validate", mock.Anything).Return(err)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
-		id, err := b.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+		b := recipe.Recipes{DB: db, Validator: mi}
+		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
-		assert.Equal(t, recipe.ErrIgredientDisabled, err)
+		assert.Equal(t, recipe.ErrDisabled, err)
 	})
 
 	t.Run("errors when persistence fails", func(t *testing.T) {
@@ -158,8 +158,8 @@ func TestAddRecipe(t *testing.T) {
 		var expectedErr = errors.New("could not save")
 		db.On("Add", mock.Anything).Return(0, expectedErr)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
-		id, err := b.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+		b := recipe.Recipes{DB: db, Validator: mi}
+		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
 		assert.Equal(t, expectedErr, err)
@@ -184,8 +184,8 @@ func TestAddRecipe(t *testing.T) {
 		}
 		db.On("Add", add).Return(1, nil)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
-		recipeID, err := b.Add("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+		b := recipe.Recipes{DB: db, Validator: mi}
+		recipeID, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.NoError(t, err)
 		assert.Equal(t, 1, recipeID)

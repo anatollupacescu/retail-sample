@@ -134,7 +134,7 @@ func TestAddRecipe(t *testing.T) {
 		err := recipe.ErrDisabled
 		mi.On("Validate", mock.Anything).Return(err)
 
-		b := recipe.Recipes{DB: db, Validator: mi}
+		b := recipe.Recipes{DB: db, Inventory: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
@@ -155,7 +155,7 @@ func TestAddRecipe(t *testing.T) {
 		var expectedErr = errors.New("could not save")
 		db.On("Add", mock.Anything).Return(0, expectedErr)
 
-		b := recipe.Recipes{DB: db, Validator: mi}
+		b := recipe.Recipes{DB: db, Inventory: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
@@ -180,7 +180,7 @@ func TestAddRecipe(t *testing.T) {
 		}
 		db.On("Add", add).Return(1, nil)
 
-		b := recipe.Recipes{DB: db, Validator: mi}
+		b := recipe.Recipes{DB: db, Inventory: mi}
 		recipeID, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.NoError(t, err)

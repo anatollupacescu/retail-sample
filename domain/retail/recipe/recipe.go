@@ -3,7 +3,7 @@ package recipe
 import (
 	"errors"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+	inv "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type (
@@ -35,13 +35,13 @@ type (
 		Save(DTO) error
 	}
 
-	inventoryValidator interface {
+	inventory interface {
 		Validate(...int) error
 	}
 
 	Recipes struct {
 		DB        db
-		Validator inventoryValidator
+		Inventory inventory
 	}
 )
 
@@ -69,38 +69,18 @@ func checkPreconditions(name string, ingredients []InventoryItem) error {
 	return nil
 }
 
-var (
-	ErrDuplicateName      = errors.New("duplicate name")
-	ErrRecipeNotFound     = errors.New("recipe not found")
-	ErrIngredientNotFound = errors.New("ingredient not found")
-)
-
 func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
 	if err := checkPreconditions(name, ingredients); err != nil {
 		return 0, err
 	}
 
-	_, err := c.DB.Find(name)
-
-	switch err {
-	case ErrRecipeNotFound: //continue
-	case nil:
-		return 0, ErrDuplicateName
-	default:
+	err := checkIsAlreadyPresent(c.DB, name)
+	if err != nil {
 		return 0, err
 	}
 
-	var ids = make([]int, 0, len(ingredients))
-	for _, i := range ingredients {
-		ids = append(ids, i.ID)
-	}
-
-	err = c.Validator.Validate(ids...)
-	switch err {
-	case nil: //continue
-	case inventory.ErrItemNotFound:
-		return 0, ErrIngredientNotFound
-	default:
+	err = checkIngredientsAreValid(c.Inventory, ingredients)
+	if err != nil {
 		return 0, err
 	}
 
@@ -143,4 +123,41 @@ func (r *Recipe) Enable() error {
 	r.Enabled = true
 
 	return nil
+}
+
+var (
+	ErrDuplicateName  = errors.New("duplicate name")
+	ErrRecipeNotFound = errors.New("recipe not found")
+)
+
+func checkIsAlreadyPresent(db db, name string) error {
+	_, err := db.Find(name)
+	switch err {
+	case ErrRecipeNotFound:
+		return nil
+	case nil:
+		return ErrDuplicateName
+	default:
+		return err
+	}
+}
+
+var ErrIngredientNotFound = errors.New("ingredient not found")
+
+func checkIngredientsAreValid(validator inventory, ingredients []InventoryItem) error {
+	var ids = make([]int, 0, len(ingredients))
+	for _, i := range ingredients {
+		ids = append(ids, i.ID)
+	}
+
+	err := validator.Validate(ids...)
+
+	switch err {
+	case nil:
+		return nil
+	case inv.ErrItemNotFound:
+		return ErrIngredientNotFound
+	default:
+		return err
+	}
 }

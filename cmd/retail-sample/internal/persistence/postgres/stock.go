@@ -22,7 +22,6 @@ func (ps *StockPgxStore) Get(inventoryID int) (dto stock.PositionDTO, err error)
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return stock.PositionDTO{}, ErrStockItemNotFound
 	default:

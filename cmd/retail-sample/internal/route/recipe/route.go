@@ -48,7 +48,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case
 		recipe.ErrEmptyName,
 		recipe.ErrIngredientNotFound,
@@ -96,7 +95,6 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case recipe.ErrRecipeNotFound, ErrBadItemID:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -149,7 +147,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case recipe.ErrRecipeNotFound:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

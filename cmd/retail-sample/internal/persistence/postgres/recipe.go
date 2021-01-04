@@ -60,7 +60,6 @@ func (pr *RecipePgxStore) Get(recipeID int) (r recipe.DTO, err error) {
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return recipe.DTO{}, recipe.ErrRecipeNotFound
 	default:
@@ -110,7 +109,6 @@ func (pr *RecipePgxStore) Find(name string) (recipe.DTO, error) {
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return r, recipe.ErrRecipeNotFound
 	default:

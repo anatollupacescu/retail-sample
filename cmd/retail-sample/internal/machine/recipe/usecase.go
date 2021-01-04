@@ -33,7 +33,7 @@ func New(ctx context.Context) (UseCase, error) {
 
 	recipes := recipe.Recipes{
 		DB:        recipeDB,
-		Validator: &inventory.Validator{Inventory: inventoryDB},
+		Inventory: &inventory.Validator{Inventory: inventoryDB},
 	}
 
 	uc := UseCase{

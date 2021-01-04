@@ -37,7 +37,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case recipe.ErrDisabled,
 		order.ErrInvalidQuantity,
 		stock.ErrNotEnoughStock:
@@ -65,7 +64,6 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case order.ErrOrderNotFound, ErrBadItemID:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

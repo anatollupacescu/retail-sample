@@ -47,7 +47,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

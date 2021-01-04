@@ -78,7 +78,6 @@ func (po *OrderPgxStore) Get(id int) (order.DTO, error) {
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return order.DTO{}, order.ErrOrderNotFound
 	default:

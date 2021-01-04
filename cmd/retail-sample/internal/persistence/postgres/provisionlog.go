@@ -37,7 +37,6 @@ func (pl *PgxProvisionLog) Get(id int) (pe ProvisionEntry, err error) {
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return pe, ErrLogEntryNotFound
 	default:

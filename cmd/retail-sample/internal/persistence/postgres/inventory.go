@@ -66,7 +66,6 @@ func (ps *InventoryPgxStore) Get(id int) (inventory.DTO, error) {
 
 	switch err {
 	case nil:
-		break
 	case pgx.ErrNoRows:
 		return inventory.DTO{}, inventory.ErrItemNotFound
 	default:

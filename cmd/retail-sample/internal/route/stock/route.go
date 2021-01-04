@@ -37,7 +37,6 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case inventory.ErrItemNotFound, ErrBadItemID:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -92,7 +91,6 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 
 	switch err {
 	case nil:
-		break
 	case inventory.ErrItemNotFound:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

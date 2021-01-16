@@ -2,11 +2,13 @@ package order
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/order"
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
+	"github.com/gorilla/mux"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	order "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/order"
 )
 
 type createPayload struct {
@@ -27,7 +29,8 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uc, err := newUseCase(r)
+	uc, err := order.New(r.Context())
+
 	if err != nil {
 		httpServerError(w)
 		return
@@ -35,11 +38,12 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	newOrder, err := uc.Create(payload.RecipeID, payload.Count)
 
-	switch err {
-	case nil:
-	case recipe.ErrDisabled,
-		order.ErrInvalidQuantity,
-		stock.ErrNotEnoughStock:
+	switch {
+	case err == nil:
+	case errors.Is(err, usecase.ErrNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case errors.Is(err, usecase.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -60,11 +64,24 @@ func Create(w http.ResponseWriter, r *http.Request) {
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	ordr, err := getByID(r)
+	uc, err := order.New(r.Context())
+
+	if err != nil {
+		httpServerError(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+	orderID := vars["orderID"]
+
+	ordr, err := uc.GetByID(orderID)
 
 	switch err {
 	case nil:
-	case order.ErrOrderNotFound, ErrBadItemID:
+	case usecase.ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case usecase.ErrBadRequest:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -81,19 +98,27 @@ func Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
+	var err error
+	defer func() {
+		if err != nil {
+			httpServerError(w)
+		}
+	}()
+
 	w.Header().Set("Content-Type", "application/json")
 
-	orders, err := getAll(r)
+	uc, err := order.New(r.Context())
 
 	if err != nil {
-		httpServerError(w)
+		return
+	}
+
+	orders, err := uc.GetAll()
+
+	if err != nil {
 		return
 	}
 
 	response := toCollectionResponse(orders)
 	err = json.NewEncoder(w).Encode(response)
-
-	if err != nil {
-		httpServerError(w)
-	}
 }

@@ -2,14 +2,13 @@ package inventory
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 
-	inventory2 "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/inventory"
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/inventory"
 )
 
 type updatePayload struct {
@@ -28,27 +27,25 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-
-	id, err := strconv.Atoi(vars["itemID"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	uc, err := newUseCase(r)
+	uc, err := inventory.New(r.Context())
 
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
+	vars := mux.Vars(r)
+	id := vars["itemID"]
+
 	item, err := uc.UpdateStatus(id, requestPayload.Enabled)
 
-	switch err {
-	case nil:
-	case inventory.ErrItemNotFound:
+	switch {
+	case err == nil:
+	case errors.Is(err, usecase.ErrNotFound):
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case errors.Is(err, usecase.ErrBadRequest):
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
 		httpServerError(w)
@@ -68,25 +65,28 @@ func Update(w http.ResponseWriter, r *http.Request) {
 func Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	dto, err := newCreateDTO(r)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
 
-	if err != nil {
+	var body createPayload
+
+	if err := d.Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	uc, err := newUseCase(r)
+	uc, err := inventory.New(r.Context())
 
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	newItem, err := uc.Create(dto)
+	newItem, err := uc.Create(body.Name)
 
-	switch err {
-	case nil:
-	case inventory.ErrEmptyName, inventory.ErrDuplicateName:
+	switch {
+	case err == nil:
+	case errors.Is(err, usecase.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -108,36 +108,27 @@ type createPayload struct {
 	Name string `json:"name"`
 }
 
-var ErrParseBody = errors.New("could not parse body")
-
-func newCreateDTO(r *http.Request) (inventory2.CreateInventoryItemDTO, error) {
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-
-	var body createPayload
-
-	if err := d.Decode(&body); err != nil {
-		return inventory2.CreateInventoryItemDTO{}, ErrParseBody
-	}
-
-	dto := inventory2.CreateInventoryItemDTO{
-		Name: body.Name,
-	}
-
-	return dto, nil
-}
-
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	item, err := inventoryItemByID(r)
+	uc, err := inventory.New(r.Context())
 
-	switch err {
-	case nil:
-	case ErrParseItemID:
+	if err != nil {
+		httpServerError(w)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id := vars["itemID"]
+
+	item, err := uc.GetByID(id)
+
+	switch {
+	case err == nil:
+	case errors.Is(err, usecase.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
-	case inventory.ErrItemNotFound:
+	case errors.Is(err, usecase.ErrNotFound):
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
@@ -154,19 +145,27 @@ func Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
+	var err error
+	defer func() {
+		if err != nil {
+			httpServerError(w)
+		}
+	}()
+
 	w.Header().Set("Content-Type", "application/json")
 
-	all, err := allInventoryItems(r)
+	uc, err := inventory.New(r.Context())
 
 	if err != nil {
-		httpServerError(w)
 		return
 	}
 
-	response := toCollectionResponse(all)
-	err = json.NewEncoder(w).Encode(response)
+	items, err := uc.GetAll()
 
 	if err != nil {
-		httpServerError(w)
+		return
 	}
+
+	response := toCollectionResponse(items)
+	err = json.NewEncoder(w).Encode(response)
 }

@@ -1,20 +1,40 @@
 package recipe
 
-import domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+import (
+	"github.com/pkg/errors"
 
-func (o *UseCase) Create(name string, items []domain.InventoryItem) (recipe domain.DTO, err error) {
-	// call domain to create recipe
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+)
+
+func (o *UseCase) Create(name string, items []domain.InventoryItem) (domain.DTO, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			o.logger.Error().Str("action", "create order").Err(err).Send()
+		}
+	}()
+
 	id, err := o.recipes.Create(name, items)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer")
-		return
+
+	switch err {
+	case nil:
+	case domain.ErrIngredientNotFound:
+		return domain.DTO{}, errors.Wrap(usecase.ErrNotFound, err.Error())
+	case
+		domain.ErrEmptyName,
+		domain.ErrQuantityNotProvided,
+		domain.ErrNoIngredients:
+		return domain.DTO{}, errors.Wrap(usecase.ErrBadRequest, err.Error())
 	}
 
-	recipe, err = o.recipeDB.Get(id)
+	o.logger.Info().Int("id", id).Msg("successfully created recipe")
+
+	recipe, err := o.recipeDB.Get(id)
+
 	if err != nil {
-		o.logger.Error().Err(err).Msg("retrieve the newly created recipe")
-		return
+		return domain.DTO{}, err
 	}
 
-	return
+	return recipe, nil
 }

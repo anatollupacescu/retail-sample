@@ -19,7 +19,7 @@ type UseCase struct {
 }
 
 func New(ctx context.Context) (UseCase, error) {
-	logger := log.Ctx(ctx).With().Str("layer", "use case").Logger()
+	logger := log.Ctx(ctx).With().Str("domain", "stock").Logger()
 
 	tx, err := middleware.ExtractTransactionCtx(ctx)
 

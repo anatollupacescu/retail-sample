@@ -2,11 +2,12 @@ package recipe
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
+	machine "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/recipe"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
@@ -46,13 +47,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	re, err := uc.Create(requestBody.Name, ingredients)
 
-	switch err {
-	case nil:
-	case
-		recipe.ErrEmptyName,
-		recipe.ErrIngredientNotFound,
-		recipe.ErrQuantityNotProvided,
-		recipe.ErrNoIngredients:
+	switch {
+	case err == nil:
+	case errors.Is(err, machine.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -72,30 +69,48 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var err error
+	defer func() {
+		if err != nil {
+			httpServerError(w)
+		}
+	}()
 
-	all, err := getAll(r)
+	uc, err := usecase.New(r.Context())
+	if err != nil {
+		return
+	}
+
+	all, err := uc.GetAll()
 
 	if err != nil {
-		httpServerError(w)
 		return
 	}
 
 	response := toCollectionResponse(all)
 	err = json.NewEncoder(w).Encode(response)
-
-	if err != nil {
-		httpServerError(w)
-	}
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	rcp, err := getByID(r)
+	uc, err := usecase.New(r.Context())
+	if err != nil {
+		httpServerError(w)
+		return
+	}
 
-	switch err {
-	case nil:
-	case recipe.ErrRecipeNotFound, ErrBadItemID:
+	vars := mux.Vars(r)
+	recipeID := vars["recipeID"]
+
+	rcp, err := uc.GetByID(recipeID)
+
+	switch {
+	case err == nil:
+	case errors.Is(err, machine.ErrNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case errors.Is(err, machine.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -131,23 +146,21 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	recipeID := vars["recipeID"]
 
-	id, err := strconv.Atoi(recipeID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	uc, err := usecase.New(r.Context())
+
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	updatedRecipe, err := uc.UpdateStatus(id, requestBody.Enabled)
+	updatedRecipe, err := uc.UpdateStatus(recipeID, requestBody.Enabled)
 
-	switch err {
-	case nil:
-	case recipe.ErrRecipeNotFound:
+	switch {
+	case err == nil:
+	case errors.Is(err, machine.ErrNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case errors.Is(err, machine.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:

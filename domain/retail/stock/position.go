@@ -23,7 +23,10 @@ type (
 	}
 )
 
-var ErrInvalidProvisionQuantity = errors.New("invalid provision quantity")
+var (
+	ErrInvalidProvisionQuantity = errors.New("invalid provision quantity")
+	ErrPositionNotFound         = errors.New("stock position not found")
+)
 
 func (p *Position) Provision(qty int) error {
 	if qty <= 0 {

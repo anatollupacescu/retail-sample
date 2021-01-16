@@ -1,15 +1,38 @@
 package recipe
 
-import domain "github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+import (
+	"strconv"
 
-func (o *UseCase) UpdateStatus(recipeID int, enabled bool) (dto domain.DTO, err error) {
-	dto, err = o.recipeDB.Get(recipeID)
+	"github.com/pkg/errors"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+)
+
+func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (dto recipe.DTO, err error) {
+	defer func() {
+		if err != nil {
+			o.logger.Error().Str("action", "update").Err(err).Send()
+		}
+	}()
+
+	id, err := strconv.Atoi(recipeID)
 
 	if err != nil {
-		return
+		return recipe.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "parse recipe ID: %s", recipeID)
 	}
 
-	recipe := domain.Recipe{
+	dto, err = o.recipeDB.Get(id)
+
+	switch err {
+	case nil:
+	case recipe.ErrRecipeNotFound:
+		return recipe.DTO{}, errors.Wrapf(usecase.ErrNotFound, "get recipe with id %d: %v", id, err)
+	default:
+		return recipe.DTO{}, err
+	}
+
+	recipe := recipe.Recipe{
 		ID:          dto.ID,
 		Name:        dto.Name,
 		Ingredients: dto.Ingredients,
@@ -25,11 +48,12 @@ func (o *UseCase) UpdateStatus(recipeID int, enabled bool) (dto domain.DTO, err 
 	}
 
 	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer")
 		return
 	}
 
 	dto.Enabled = recipe.Enabled
+
+	o.logger.Info().Int("id", id).Msg("successfully updated recipe")
 
 	return
 }

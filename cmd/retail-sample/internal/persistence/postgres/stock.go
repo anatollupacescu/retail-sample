@@ -13,8 +13,6 @@ type StockPgxStore struct {
 	DB pgx.Tx
 }
 
-var ErrStockItemNotFound = errors.New("stock item not found")
-
 func (ps *StockPgxStore) Get(inventoryID int) (dto stock.PositionDTO, err error) {
 	sql := `select quantity from stock where inventoryid = $1`
 
@@ -23,7 +21,7 @@ func (ps *StockPgxStore) Get(inventoryID int) (dto stock.PositionDTO, err error)
 	switch err {
 	case nil:
 	case pgx.ErrNoRows:
-		return stock.PositionDTO{}, ErrStockItemNotFound
+		return stock.PositionDTO{}, stock.ErrPositionNotFound
 	default:
 		return stock.PositionDTO{}, errors.Wrapf(ErrDB, "get stock position for item with id %v: %v", inventoryID, err)
 	}
@@ -45,4 +43,36 @@ func (ps *StockPgxStore) Save(dto stock.PositionDTO) error {
 	}
 
 	return nil
+}
+
+func (ps *StockPgxStore) List() ([]stock.PositionDTO, error) {
+	sql := "select inventoryid, quantity from stock"
+
+	rows, err := ps.DB.Query(context.Background(), sql)
+
+	if err != nil {
+		return nil, errors.Wrapf(ErrDB, "save stock position: %v", err)
+	}
+
+	defer rows.Close()
+
+	var entries = make([]stock.PositionDTO, 0)
+
+	for rows.Next() {
+		var (
+			id  int
+			qty int
+		)
+
+		if err := rows.Scan(&id, &qty); err != nil {
+			return nil, errors.Wrapf(ErrDB, "provisionlog list scan: %v", err)
+		}
+
+		entries = append(entries, stock.PositionDTO{
+			InventoryID: id,
+			Qty:         qty,
+		})
+	}
+
+	return entries, nil
 }

@@ -1,22 +1,38 @@
 package inventory
 
-import "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+import (
+	"github.com/pkg/errors"
 
-type CreateInventoryItemDTO struct {
-	Name string
-}
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+)
 
-func (a *UseCase) Create(in CreateInventoryItemDTO) (item inventory.DTO, err error) {
-	id, err := a.inventory.Create(in.Name)
+func (a *UseCase) Create(name string) (inventory.DTO, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			a.logger.Error().Str("action", "create item").Err(err).Send()
+		}
+	}()
 
-	if err != nil {
-		a.logger.Error().Err(err).Msg("call domain")
-		return
+	id, err := a.inventory.Create(name)
+
+	switch err {
+	case nil:
+	case
+		inventory.ErrEmptyName,
+		inventory.ErrDuplicateName:
+		return inventory.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "create item with name '%s': %v", name, err)
+	default:
+		return inventory.DTO{}, err
 	}
 
-	if item, err = a.inventoryDB.Get(id); err != nil {
-		a.logger.Error().Err(err).Msg("retrieve new item")
-		return
+	a.logger.Info().Int("id", id).Msg("successfully created inventory item")
+
+	item, err := a.inventoryDB.Get(id)
+
+	if err != nil {
+		return inventory.DTO{}, err
 	}
 
 	return item, nil

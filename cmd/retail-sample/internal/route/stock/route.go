@@ -4,41 +4,58 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
 	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine/stock"
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
+	var err error
+	defer func() {
+		if err != nil {
+			httpServerError(w)
+		}
+	}()
+
 	w.Header().Set("Content-Type", "application/json")
 
-	all, err := getAll(r)
+	uc, err := stock.New(r.Context())
+
+	if err != nil {
+		return
+	}
+
+	all, err := uc.GetAll()
+
+	if err != nil {
+		return
+	}
+
+	response := toCollectionResponse(all)
+	err = json.NewEncoder(w).Encode(response)
+}
+
+func Get(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	uc, err := stock.New(r.Context())
 
 	if err != nil {
 		httpServerError(w)
 		return
 	}
 
-	response := toCollectionResponse(all)
-	err = json.NewEncoder(w).Encode(response)
+	vars := mux.Vars(r)
+	itemID := vars["itemID"]
 
-	if err != nil {
-		httpServerError(w)
-	}
-}
+	position, err := uc.GetByID(itemID)
 
-func Get(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	position, err := getByID(r)
-
-	switch err {
-	case nil:
-	case inventory.ErrItemNotFound, ErrBadItemID:
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	switch {
+	case err == nil:
+	case errors.Is(err, usecase.ErrNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	default:
 		httpServerError(w)
@@ -70,16 +87,6 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	itemID := vars["itemID"]
-
-	id, err := strconv.Atoi(itemID)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	uc, err := stock.New(r.Context())
 
 	if err != nil {
@@ -87,11 +94,17 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pos, err := uc.Provision(id, body.Qty)
+	vars := mux.Vars(r)
+	itemID := vars["itemID"]
+
+	pos, err := uc.Provision(itemID, body.Qty)
 
 	switch err {
 	case nil:
-	case inventory.ErrItemNotFound:
+	case usecase.ErrNotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	case usecase.ErrBadRequest:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	default:
@@ -109,21 +122,29 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var ErrParseItemID = errors.New("could not parse item ID")
-
 func GetProvisionLog(w http.ResponseWriter, r *http.Request) {
+	var err error
+	defer func() {
+		if err != nil {
+			httpServerError(w)
+		}
+	}()
+
 	w.Header().Set("Content-Type", "application/json")
 
-	pl, err := getProvisionLog(r)
+	uc, err := stock.New(r.Context())
 
 	if err != nil {
-		httpServerError(w)
+		return
+	}
+
+	pl, err := uc.GetProvisionLog()
+
+	if err != nil {
+		return
 	}
 
 	response := toProvisionLog(pl)
-	err = json.NewEncoder(w).Encode(response)
 
-	if err != nil {
-		httpServerError(w)
-	}
+	err = json.NewEncoder(w).Encode(response)
 }

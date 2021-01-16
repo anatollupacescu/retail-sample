@@ -1,7 +1,13 @@
 package stock
 
 import (
+	"strconv"
+
+	"github.com/pkg/errors"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
@@ -11,38 +17,51 @@ type Position struct {
 	Qty  int
 }
 
-func (o *UseCase) Provision(inventoryItemID, qty int) (Position, error) {
-	stockPos, err := o.stockDB.Get(inventoryItemID)
+func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
+	var err error
+	defer func() {
+		if err != nil {
+			o.logger.Error().Str("action", "provision").Err(err).Send()
+		}
+	}()
+
+	id, err := strconv.Atoi(itemID)
+
+	if err != nil {
+		return Position{}, errors.Wrapf(usecase.ErrBadRequest, "parse item id: %s", itemID)
+	}
+
+	item, err := o.inventoryDB.Get(id)
 
 	switch err {
 	case nil: //continue,
-	case pg.ErrStockItemNotFound:
-		stockPos = stock.PositionDTO{InventoryID: inventoryItemID}
+	case inventory.ErrItemNotFound:
+		return Position{}, errors.Wrapf(usecase.ErrNotFound, "find item with id: %d", id)
 	default:
 		return Position{}, err
 	}
 
-	pos := stock.Position{
-		Qty:         stockPos.Qty,
-		InventoryID: stockPos.InventoryID,
-		DB:          o.stockDB,
+	pos, err := getPosition(o.stockDB, item.ID)
+
+	if err != nil {
+		return Position{}, err
 	}
 
 	err = pos.Provision(qty)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("call domain layer")
+
+	switch err {
+	case nil:
+	case stock.ErrInvalidProvisionQuantity:
+		return Position{}, errors.Wrap(usecase.ErrBadRequest, err.Error())
+	default:
 		return Position{}, err
 	}
 
-	_, err = o.logDB.Add(inventoryItemID, qty)
-	if err != nil {
-		o.logger.Error().Err(err).Msg("add log entry")
-		return Position{}, err
-	}
+	o.logger.Info().Int("id", id).Msg("successfully provisioned stock")
 
-	item, err := o.inventoryDB.Get(inventoryItemID)
+	_, err = o.logDB.Add(item.ID, qty)
+
 	if err != nil {
-		o.logger.Error().Err(err).Msg("get inventory item name")
 		return Position{}, err
 	}
 
@@ -53,4 +72,22 @@ func (o *UseCase) Provision(inventoryItemID, qty int) (Position, error) {
 	}
 
 	return result, nil
+}
+
+func getPosition(stockDB *pg.StockPgxStore, itemID int) (pos stock.Position, err error) {
+	pos.InventoryID = itemID
+	pos.DB = stockDB
+
+	stockPos, err := stockDB.Get(itemID)
+
+	switch err {
+	case nil:
+		pos.Qty = stockPos.Qty
+	case stock.ErrPositionNotFound: // first time provisioning, zero quantity
+		return pos, nil
+	default:
+		return stock.Position{}, err
+	}
+
+	return
 }

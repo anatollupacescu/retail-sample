@@ -1,10 +1,34 @@
 package inventory
 
-import "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+import (
+	"strconv"
 
-func (a *UseCase) UpdateStatus(id int, enabled bool) (dto inventory.DTO, err error) {
-	dto, err = a.inventoryDB.Get(id)
+	"github.com/pkg/errors"
+
+	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+)
+
+func (a *UseCase) UpdateStatus(recipeID string, enabled bool) (dto inventory.DTO, err error) {
+	defer func() {
+		if err != nil {
+			a.logger.Error().Str("action", "update").Err(err).Send()
+		}
+	}()
+
+	id, err := strconv.Atoi(recipeID)
+
 	if err != nil {
+		return inventory.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "parse item ID: %s", recipeID)
+	}
+
+	dto, err = a.inventoryDB.Get(id)
+
+	switch err {
+	case nil:
+	case inventory.ErrItemNotFound:
+		return inventory.DTO{}, errors.Wrapf(usecase.ErrNotFound, "get item with id %d: %v", id, err)
+	default:
 		return
 	}
 
@@ -22,11 +46,12 @@ func (a *UseCase) UpdateStatus(id int, enabled bool) (dto inventory.DTO, err err
 	}
 
 	if err != nil {
-		a.logger.Error().Err(err).Msg("call domain")
 		return inventory.DTO{}, err
 	}
 
 	dto.Enabled = enabled
+
+	a.logger.Info().Int("id", id).Msg("successfully update inventory item")
 
 	return dto, nil
 }

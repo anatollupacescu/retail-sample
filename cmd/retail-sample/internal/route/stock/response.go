@@ -76,6 +76,5 @@ func toProvisionLog(pl []persistence.ProvisionEntry) interface{} {
 
 func httpServerError(w http.ResponseWriter) {
 	status := http.StatusInternalServerError
-	statusText := http.StatusText(status)
-	http.Error(w, statusText, http.StatusInternalServerError)
+	http.Error(w, http.StatusText(status), status)
 }

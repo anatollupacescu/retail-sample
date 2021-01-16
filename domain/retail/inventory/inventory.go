@@ -34,38 +34,9 @@ type (
 
 var (
 	ErrItemNotFound  = errors.New("item not found")
-	ErrItemDisabled  = errors.New("item is disabled")
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 )
-
-func (i *Item) Enable() error {
-	dto := DTO{
-		ID: i.ID, Name: i.Name, Enabled: true,
-	}
-
-	if err := i.DB.Save(dto); err != nil {
-		return err
-	}
-
-	i.Enabled = true
-
-	return nil
-}
-
-func (i *Item) Disable() error {
-	dto := DTO{
-		ID: i.ID, Name: i.Name, Enabled: false,
-	}
-
-	if err := i.DB.Save(dto); err != nil {
-		return err
-	}
-
-	i.Enabled = false
-
-	return nil
-}
 
 func (i Collection) Create(name string) (int, error) {
 	if strings.TrimSpace(name) == "" {
@@ -89,4 +60,38 @@ func (i Collection) Create(name string) (int, error) {
 	}
 
 	return id, nil
+}
+
+func (i *Item) Enable() error {
+	dto := DTO{
+		ID:   i.ID,
+		Name: i.Name,
+
+		Enabled: true,
+	}
+
+	if err := i.DB.Save(dto); err != nil {
+		return err
+	}
+
+	i.Enabled = true
+
+	return nil
+}
+
+func (i *Item) Disable() error {
+	dto := DTO{
+		ID:   i.ID,
+		Name: i.Name,
+
+		Enabled: false,
+	}
+
+	if err := i.DB.Save(dto); err != nil {
+		return err
+	}
+
+	i.Enabled = false
+
+	return nil
 }

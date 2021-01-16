@@ -95,7 +95,11 @@ func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
 
 func (r *Recipe) Disable() error {
 	dto := DTO{
-		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: false,
+		ID:          r.ID,
+		Name:        r.Name,
+		Ingredients: r.Ingredients,
+
+		Enabled: false,
 	}
 
 	err := r.DB.Save(dto)
@@ -111,7 +115,11 @@ func (r *Recipe) Disable() error {
 
 func (r *Recipe) Enable() error {
 	dto := DTO{
-		ID: r.ID, Name: r.Name, Ingredients: r.Ingredients, Enabled: true,
+		ID:          r.ID,
+		Name:        r.Name,
+		Ingredients: r.Ingredients,
+
+		Enabled: true,
 	}
 
 	err := r.DB.Save(dto)

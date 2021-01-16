@@ -6,6 +6,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	"github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/middleware"
 	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
@@ -19,12 +20,19 @@ type UseCase struct {
 	orders  order.Orders
 }
 
-func New(ctx context.Context, t pg.TX) UseCase {
-	logger := log.Ctx(ctx).With().Str("layer", "use case").Logger()
+func New(ctx context.Context) (UseCase, error) {
+	logger := log.Ctx(ctx).With().Str("domain", "order").Logger()
 
-	orderDB := &pg.OrderPgxStore{DB: t.Tx}
-	recipeDB := &pg.RecipePgxStore{DB: t.Tx}
-	stockDB := &pg.StockPgxStore{DB: t.Tx}
+	tx, err := middleware.ExtractTransactionCtx(ctx)
+
+	if err != nil {
+		logger.Error().Str("action", "extract transaction").Err(err)
+		return UseCase{}, err
+	}
+
+	orderDB := &pg.OrderPgxStore{DB: tx}
+	recipeDB := &pg.RecipePgxStore{DB: tx}
+	stockDB := &pg.StockPgxStore{DB: tx}
 
 	orders := order.Orders{
 		DB: orderDB,
@@ -37,10 +45,12 @@ func New(ctx context.Context, t pg.TX) UseCase {
 		},
 	}
 
-	return UseCase{
+	uc := UseCase{
 		ctx:     ctx,
 		orders:  orders,
 		orderDB: orderDB,
 		logger:  &logger,
 	}
+
+	return uc, nil
 }

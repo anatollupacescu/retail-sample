@@ -1,4 +1,4 @@
-import { AxiosInstance } from 'axios'
+import { AxiosResponse, AxiosInstance } from 'axios'
 
 export interface RecipeItem {
   id: number
@@ -31,7 +31,7 @@ export default class Client {
       items: items
     }
     try {
-      let res = await this.httpClient.post('/recipe', payload)
+      let res: AxiosResponse = await this.httpClient.post('/recipe', payload)
       return res.data.data
     } catch (error) {
       throw error.response.data.trim()
@@ -59,18 +59,16 @@ export default class Client {
 
     try {
       let data = await this.apiSaveRecipe(name, ingredients)
-
-      Object.keys(data).forEach((name: any) => {
-        let id = data[name]
-        this.state.push({
-          id: Number(id),
-          name: String(name),
-          items: ingredients,
-          enabled: true
-        })
+      this.state.push({
+        id: Number(data.id),
+        name: String(name),
+        items: ingredients,
+        enabled: true
       })
     } catch (error) {
-      switch (error) {
+      switch (
+        error //TODO fixme
+      ) {
         case 'empty name':
           throw errNameEmpty
         case 'item type already present':

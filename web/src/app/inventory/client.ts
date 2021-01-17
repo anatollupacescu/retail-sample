@@ -86,7 +86,9 @@ export default class Client {
       this.state.push(newItem)
       return newItem
     } catch (error) {
-      switch (error) {
+      switch (
+        error //TODO fixme
+      ) {
         case 'name not provided':
           throw errMsgEmptyName
         case 'item type already present':

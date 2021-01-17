@@ -54,12 +54,10 @@ export default class Client {
 
       return newID
     } catch (error) {
-      switch (error) {
-        case 'not enough stock':
-          throw 'not enough stock'
-        default:
-          throw `unknown error: ${error}`
+      if (error.endsWith('not enough stock: bad request')) {
+        throw 'not enough stock'
       }
+      throw `unknown error: ${error}`
     }
   }
 

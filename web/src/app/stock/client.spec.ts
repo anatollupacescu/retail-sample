@@ -21,16 +21,15 @@ describe('provision stock', () => {
 
   let apiProvision = chai.spy.on(app, 'apiProvision', () =>
     Promise.resolve({
-      1: 2
+      id: 1,
+      qty: 2
     })
   )
 
   it('calls the api and stores the state locally', async () => {
     await app.provision('1', 2)
     expect(apiProvision).to.have.been.called.once
-    expect(app.getState()).to.have.length(1)
-    expect(app.getState()[0].qty).to.equal(2)
-    expect(app.getState()[0].id).to.equal(1)
+    expect(app.getState()[1]).to.equal(2)
   })
 })
 
@@ -46,8 +45,6 @@ describe('fetching state', () => {
   it('calls the api and stores the state locally', async () => {
     await app.fetchState()
     expect(mockApi).to.have.been.called.once
-    expect(app.getState()).to.have.length(1)
-    expect(app.getState()[0].qty).to.equal(2)
-    expect(app.getState()[0].id).to.equal(1)
+    expect(app.getState()[1]).to.equal(2)
   })
 })

@@ -25,15 +25,17 @@ func New(ctx context.Context) (UseCase, error) {
 	tx, err := middleware.ExtractTransactionCtx(ctx)
 
 	if err != nil {
+		logger.Error().Str("action", "extract transaction").Err(err)
 		return UseCase{}, err
 	}
 
 	recipeDB := &pg.RecipePgxStore{DB: tx}
 	inventoryDB := &pg.InventoryPgxStore{DB: tx}
+	validator := &inventory.Validator{Inventory: inventoryDB}
 
 	recipes := recipe.Recipes{
-		DB:        recipeDB,
-		Inventory: &inventory.Validator{Inventory: inventoryDB},
+		DB: recipeDB,
+		Iv: validator,
 	}
 
 	uc := UseCase{

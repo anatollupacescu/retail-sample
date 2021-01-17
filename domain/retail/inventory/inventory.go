@@ -33,7 +33,7 @@ type (
 )
 
 var (
-	ErrItemNotFound  = errors.New("item not found")
+	ErrNotFound      = errors.New("item not found")
 	ErrEmptyName     = errors.New("name not provided")
 	ErrDuplicateName = errors.New("item type already present")
 )
@@ -46,7 +46,7 @@ func (i Collection) Create(name string) (int, error) {
 	_, err := i.DB.Find(name)
 
 	switch err {
-	case ErrItemNotFound: //continue
+	case ErrNotFound: //continue
 	case nil:
 		return 0, ErrDuplicateName
 	default:

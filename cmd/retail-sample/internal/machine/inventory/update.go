@@ -26,7 +26,7 @@ func (a *UseCase) UpdateStatus(recipeID string, enabled bool) (dto inventory.DTO
 
 	switch err {
 	case nil:
-	case inventory.ErrItemNotFound:
+	case inventory.ErrNotFound:
 		return inventory.DTO{}, errors.Wrapf(usecase.ErrNotFound, "get item with id %d: %v", id, err)
 	default:
 		return

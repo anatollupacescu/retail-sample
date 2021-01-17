@@ -23,7 +23,7 @@ func (pr *RecipePgxStore) Save(r recipe.DTO) error {
 	}
 
 	if tag.RowsAffected() != 1 {
-		return recipe.ErrRecipeNotFound
+		return recipe.ErrNotFound
 	}
 
 	return nil
@@ -61,7 +61,7 @@ func (pr *RecipePgxStore) Get(recipeID int) (r recipe.DTO, err error) {
 	switch err {
 	case nil:
 	case pgx.ErrNoRows:
-		return recipe.DTO{}, recipe.ErrRecipeNotFound
+		return recipe.DTO{}, recipe.ErrNotFound
 	default:
 		return recipe.DTO{}, errors.Wrapf(ErrDB, "get recipe: %v", err)
 	}
@@ -110,7 +110,7 @@ func (pr *RecipePgxStore) Find(name string) (recipe.DTO, error) {
 	switch err {
 	case nil:
 	case pgx.ErrNoRows:
-		return r, recipe.ErrRecipeNotFound
+		return r, recipe.ErrNotFound
 	default:
 		return r, errors.Wrapf(ErrDB, "get recipe: %v", err)
 	}

@@ -27,10 +27,10 @@ func (m *MockDB) Save(r DTO) error {
 	return m.Called(r).Error(0)
 }
 
-type MockInventory struct {
+type MockValidator struct {
 	mock.Mock
 }
 
-func (m *MockInventory) Validate(ids ...int) error {
-	return m.Called(ids).Error(0)
+func (m *MockValidator) Validate(id int) error {
+	return m.Called(id).Error(0)
 }

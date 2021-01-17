@@ -51,7 +51,7 @@ func TestProvision(t *testing.T) {
 	})
 }
 
-func TestExtract(t *testing.T) {
+func TestPositionExtract(t *testing.T) {
 	t.Run("errors when given quantity is negative", func(t *testing.T) {
 		st := new(stock.Position)
 		err := st.Extract(-12)

@@ -2,6 +2,8 @@ package stock
 
 import (
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 type MockDB struct {
@@ -15,4 +17,13 @@ func (m *MockDB) Save(dto PositionDTO) error {
 func (m *MockDB) Get(id int) (PositionDTO, error) {
 	args := m.Called(id)
 	return args.Get(0).(PositionDTO), args.Error(1)
+}
+
+type MockRecipeDB struct {
+	mock.Mock
+}
+
+func (m *MockRecipeDB) Get(id int) (recipe.DTO, error) {
+	args := m.Called(id)
+	return args.Get(0).(recipe.DTO), args.Error(1)
 }

@@ -35,7 +35,7 @@ func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
 
 	switch err {
 	case nil: //continue,
-	case inventory.ErrItemNotFound:
+	case inventory.ErrNotFound:
 		return Position{}, errors.Wrapf(usecase.ErrNotFound, "find item with id: %d", id)
 	default:
 		return Position{}, err

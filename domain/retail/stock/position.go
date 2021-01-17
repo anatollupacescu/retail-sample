@@ -33,9 +33,7 @@ func (p *Position) Provision(qty int) error {
 		return ErrInvalidProvisionQuantity
 	}
 
-	current := p.Qty
-
-	current += qty
+	current := p.Qty + qty
 
 	dto := PositionDTO{
 		InventoryID: p.InventoryID,
@@ -63,13 +61,11 @@ func (p *Position) Extract(qty int) error {
 		return ErrInvalidExtractQuantity
 	}
 
-	current := p.Qty
-
-	current -= qty
-
-	if current < 0 {
+	if qty > p.Qty {
 		return ErrNotEnoughStock
 	}
+
+	current := p.Qty - qty
 
 	dto := PositionDTO{
 		InventoryID: p.InventoryID,

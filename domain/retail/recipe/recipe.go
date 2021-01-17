@@ -1,9 +1,9 @@
 package recipe
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
-	inv "github.com/anatollupacescu/retail-sample/domain/retail/inventory"
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type (
@@ -35,15 +35,39 @@ type (
 		Save(DTO) error
 	}
 
-	inventory interface {
-		Validate(...int) error
+	inventoryValidator interface {
+		Validate(int) error
 	}
 
 	Recipes struct {
-		DB        db
-		Inventory inventory
+		DB db
+		Iv inventoryValidator
 	}
 )
+
+func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
+	if err := checkPreconditions(name, ingredients); err != nil {
+		return 0, err
+	}
+
+	err := checkIsAlreadyPresent(c.DB, name)
+	if err != nil {
+		return 0, err
+	}
+
+	err = checkIngredientsAreValid(c.Iv, ingredients)
+	if err != nil {
+		return 0, err
+	}
+
+	dto := DTO{
+		Name:        name,
+		Ingredients: ingredients,
+		Enabled:     true,
+	}
+
+	return c.DB.Add(dto)
+}
 
 var (
 	ErrEmptyName           = errors.New("empty name")
@@ -69,28 +93,41 @@ func checkPreconditions(name string, ingredients []InventoryItem) error {
 	return nil
 }
 
-func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
-	if err := checkPreconditions(name, ingredients); err != nil {
-		return 0, err
+var (
+	ErrDuplicateName = errors.New("duplicate name")
+	ErrNotFound      = errors.New("recipe not found")
+)
+
+func checkIsAlreadyPresent(db db, name string) error {
+	_, err := db.Find(name)
+
+	switch err {
+	case ErrNotFound:
+		return nil
+	case nil:
+		return ErrDuplicateName
+	default:
+		return err
+	}
+}
+
+var ErrIngredientNotFound = errors.New("ingredient not found")
+
+func checkIngredientsAreValid(validator inventoryValidator, ingredients []InventoryItem) error {
+	for _, i := range ingredients {
+
+		err := validator.Validate(i.ID)
+
+		switch err {
+		case nil:
+		case inventory.ErrNotFound:
+			return errors.Wrapf(ErrIngredientNotFound, "id not found: %d", i.ID)
+		default:
+			return err
+		}
 	}
 
-	err := checkIsAlreadyPresent(c.DB, name)
-	if err != nil {
-		return 0, err
-	}
-
-	err = checkIngredientsAreValid(c.Inventory, ingredients)
-	if err != nil {
-		return 0, err
-	}
-
-	dto := DTO{
-		Name:        name,
-		Ingredients: ingredients,
-		Enabled:     true,
-	}
-
-	return c.DB.Add(dto)
+	return nil
 }
 
 func (r *Recipe) Disable() error {
@@ -131,41 +168,4 @@ func (r *Recipe) Enable() error {
 	r.Enabled = true
 
 	return nil
-}
-
-var (
-	ErrDuplicateName  = errors.New("duplicate name")
-	ErrRecipeNotFound = errors.New("recipe not found")
-)
-
-func checkIsAlreadyPresent(db db, name string) error {
-	_, err := db.Find(name)
-	switch err {
-	case ErrRecipeNotFound:
-		return nil
-	case nil:
-		return ErrDuplicateName
-	default:
-		return err
-	}
-}
-
-var ErrIngredientNotFound = errors.New("ingredient not found")
-
-func checkIngredientsAreValid(validator inventory, ingredients []InventoryItem) error {
-	var ids = make([]int, 0, len(ingredients))
-	for _, i := range ingredients {
-		ids = append(ids, i.ID)
-	}
-
-	err := validator.Validate(ids...)
-
-	switch err {
-	case nil:
-		return nil
-	case inv.ErrItemNotFound:
-		return ErrIngredientNotFound
-	default:
-		return err
-	}
 }

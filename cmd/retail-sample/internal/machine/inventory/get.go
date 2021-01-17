@@ -26,7 +26,7 @@ func (a *UseCase) GetByID(itemID string) (dto inventory.DTO, err error) {
 
 	switch err {
 	case nil:
-	case inventory.ErrItemNotFound:
+	case inventory.ErrNotFound:
 		return dto, errors.Wrapf(usecase.ErrNotFound, "find item with id: %v", id)
 	default:
 		return dto, err

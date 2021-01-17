@@ -15,6 +15,7 @@ type Extractor struct {
 
 func (o Extractor) Extract(recipeID int, count int) error {
 	recipe, err := o.Recipes.Get(recipeID)
+
 	if err != nil {
 		return err
 	}
@@ -24,7 +25,12 @@ func (o Extractor) Extract(recipeID int, count int) error {
 		totalQty := ingredient.Qty * count
 
 		dto, err := o.Stock.Get(inventoryID)
-		if err != nil {
+
+		switch err {
+		case nil:
+		case ErrPositionNotFound:
+			return ErrNotEnoughStock
+		default:
 			return err
 		}
 

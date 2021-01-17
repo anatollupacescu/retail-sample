@@ -7,21 +7,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func TestDisableRecipe(t *testing.T) {
+func TestDisable(t *testing.T) {
 	t.Run("errors if save fails", func(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		db.On("Save", mock.Anything).Return(recipe.ErrRecipeNotFound)
+		db.On("Save", mock.Anything).Return(recipe.ErrNotFound)
 
 		r := recipe.Recipe{ID: 1, DB: db}
 
 		err := r.Disable()
 
-		assert.Equal(t, recipe.ErrRecipeNotFound, err)
+		assert.Equal(t, recipe.ErrNotFound, err)
 	})
 
 	t.Run("succeeds", func(t *testing.T) {
@@ -42,18 +43,18 @@ func TestDisableRecipe(t *testing.T) {
 	})
 }
 
-func TestEnableRecipe(t *testing.T) {
+func TestEnable(t *testing.T) {
 	t.Run("errors if save fails", func(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		db.On("Save", mock.Anything).Return(recipe.ErrRecipeNotFound)
+		db.On("Save", mock.Anything).Return(recipe.ErrNotFound)
 
 		r := recipe.Recipe{DB: db}
 
 		err := r.Enable()
 
-		assert.Equal(t, recipe.ErrRecipeNotFound, err)
+		assert.Equal(t, recipe.ErrNotFound, err)
 	})
 
 	t.Run("succeeds", func(t *testing.T) {
@@ -74,7 +75,7 @@ func TestEnableRecipe(t *testing.T) {
 	})
 }
 
-func TestAddRecipe(t *testing.T) {
+func TestCreate(t *testing.T) {
 	t.Run("errors on empty name", func(t *testing.T) {
 		rr := recipe.Recipes{}
 		_, err := rr.Create("", nil)
@@ -126,28 +127,47 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
 
-		mi := &recipe.MockInventory{}
+		mi := &recipe.MockValidator{}
 		defer mi.AssertExpectations(t)
 
-		err := recipe.ErrDisabled
-		mi.On("Validate", mock.Anything).Return(err)
+		expected := recipe.ErrDisabled
+		mi.On("Validate", mock.Anything).Return(expected)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
+		b := recipe.Recipes{DB: db, Iv: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
 		assert.Equal(t, recipe.ErrDisabled, err)
 	})
 
+	t.Run("errors if ingredient not found", func(t *testing.T) {
+		db := &recipe.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
+
+		mi := &recipe.MockValidator{}
+		defer mi.AssertExpectations(t)
+
+		expected := inventory.ErrNotFound
+		mi.On("Validate", mock.Anything).Return(expected)
+
+		b := recipe.Recipes{DB: db, Iv: mi}
+		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+
+		assert.Zero(t, id)
+		assert.True(t, errors.Is(err, recipe.ErrIngredientNotFound))
+	})
+
 	t.Run("errors when persistence fails", func(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
 
-		mi := &recipe.MockInventory{}
+		mi := &recipe.MockValidator{}
 		defer mi.AssertExpectations(t)
 
 		mi.On("Validate", mock.Anything).Return(nil)
@@ -155,7 +175,7 @@ func TestAddRecipe(t *testing.T) {
 		var expectedErr = errors.New("could not save")
 		db.On("Add", mock.Anything).Return(0, expectedErr)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
+		b := recipe.Recipes{DB: db, Iv: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.Zero(t, id)
@@ -166,9 +186,9 @@ func TestAddRecipe(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
-		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrRecipeNotFound)
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
 
-		mi := &recipe.MockInventory{}
+		mi := &recipe.MockValidator{}
 		defer mi.AssertExpectations(t)
 
 		mi.On("Validate", mock.Anything).Return(nil)
@@ -180,7 +200,7 @@ func TestAddRecipe(t *testing.T) {
 		}
 		db.On("Add", add).Return(1, nil)
 
-		b := recipe.Recipes{DB: db, Inventory: mi}
+		b := recipe.Recipes{DB: db, Iv: mi}
 		recipeID, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		assert.NoError(t, err)

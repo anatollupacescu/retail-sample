@@ -28,8 +28,8 @@ func (o *UseCase) GetByID(itemID string) (Position, error) {
 
 	switch err {
 	case nil:
-	case inventory.ErrItemNotFound:
-		return Position{}, errors.Wrapf(usecase.ErrNotFound, "get stock position for item id: %v", itemID)
+	case inventory.ErrNotFound:
+		return Position{ID: id}, nil
 	default:
 		return Position{}, err
 	}
@@ -38,7 +38,7 @@ func (o *UseCase) GetByID(itemID string) (Position, error) {
 
 	switch err {
 	case nil:
-	case inventory.ErrItemNotFound:
+	case inventory.ErrNotFound:
 		return Position{}, errors.Wrapf(usecase.ErrNotFound, "get item with id: %v", itemID)
 	default:
 		return Position{}, err

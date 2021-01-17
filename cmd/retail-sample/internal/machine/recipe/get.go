@@ -27,7 +27,7 @@ func (o *UseCase) GetByID(recipeID string) (domain.DTO, error) {
 
 	switch err {
 	case nil:
-	case domain.ErrRecipeNotFound:
+	case domain.ErrNotFound:
 		return domain.DTO{}, errors.Wrapf(usecase.ErrNotFound, "get order with id: %v", id)
 	default:
 		return domain.DTO{}, err

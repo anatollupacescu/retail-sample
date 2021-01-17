@@ -17,14 +17,14 @@ func (o *UseCase) Create(name string, items []domain.InventoryItem) (domain.DTO,
 
 	id, err := o.recipes.Create(name, items)
 
-	switch err {
-	case nil:
-	case domain.ErrIngredientNotFound:
+	switch {
+	case err == nil:
+	case errors.Is(err, domain.ErrIngredientNotFound):
 		return domain.DTO{}, errors.Wrap(usecase.ErrNotFound, err.Error())
 	case
-		domain.ErrEmptyName,
-		domain.ErrQuantityNotProvided,
-		domain.ErrNoIngredients:
+		err == domain.ErrEmptyName,
+		err == domain.ErrQuantityNotProvided,
+		err == domain.ErrNoIngredients:
 		return domain.DTO{}, errors.Wrap(usecase.ErrBadRequest, err.Error())
 	}
 

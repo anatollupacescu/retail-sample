@@ -21,7 +21,7 @@ func (ps *InventoryPgxStore) Save(i inventory.DTO) error {
 	}
 
 	if tag.RowsAffected() != 1 {
-		return inventory.ErrItemNotFound
+		return inventory.ErrNotFound
 	}
 
 	return nil
@@ -46,7 +46,7 @@ func (ps *InventoryPgxStore) Find(n string) (int, error) {
 	case nil:
 		return id, nil
 	case pgx.ErrNoRows:
-		return 0, inventory.ErrItemNotFound
+		return 0, inventory.ErrNotFound
 	default:
 		return 0, errors.Wrapf(ErrDB, "find inventory item id: %v", err)
 	}
@@ -67,7 +67,7 @@ func (ps *InventoryPgxStore) Get(id int) (inventory.DTO, error) {
 	switch err {
 	case nil:
 	case pgx.ErrNoRows:
-		return inventory.DTO{}, inventory.ErrItemNotFound
+		return inventory.DTO{}, inventory.ErrNotFound
 	default:
 		return inventory.DTO{}, errors.Wrapf(ErrDB, "get inventory item by id: %v", err)
 	}

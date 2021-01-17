@@ -8,17 +8,15 @@ type Validator struct {
 
 var ErrItemDisabled = errors.New("item is disabled")
 
-func (v Validator) Validate(ids ...int) error {
-	// check individual items
-	for _, id := range ids {
-		item, err := v.Inventory.Get(id)
-		if err != nil {
-			return err
-		}
+func (v Validator) Validate(id int) error {
+	item, err := v.Inventory.Get(id)
 
-		if !item.Enabled {
-			return ErrItemDisabled
-		}
+	if err != nil {
+		return err
+	}
+
+	if !item.Enabled {
+		return ErrItemDisabled
 	}
 
 	return nil

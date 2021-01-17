@@ -49,6 +49,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case err == nil:
+	case errors.Is(err, machine.ErrNotFound):
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	case errors.Is(err, machine.ErrBadRequest):
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

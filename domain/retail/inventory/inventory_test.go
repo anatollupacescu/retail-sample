@@ -98,7 +98,7 @@ func TestAdd(t *testing.T) {
 		db := &inventory.MockDB{}
 		db.AssertExpectations(t)
 
-		db.On("Find", "milk").Return(0, inventory.ErrItemNotFound)
+		db.On("Find", "milk").Return(0, inventory.ErrNotFound)
 		db.On("Add", "milk").Return(1, nil)
 
 		i := inventory.Collection{DB: db}
@@ -127,7 +127,7 @@ func TestAdd(t *testing.T) {
 		defer db.AssertExpectations(t)
 
 		expectedErr := errors.New("test")
-		db.On("Find", "milk").Return(0, inventory.ErrItemNotFound)
+		db.On("Find", "milk").Return(0, inventory.ErrNotFound)
 		db.On("Add", "milk").Return(1, expectedErr)
 
 		i := inventory.Collection{DB: db}

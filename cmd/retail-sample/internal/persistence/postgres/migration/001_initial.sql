@@ -1,7 +1,10 @@
 CREATE TABLE inventory (
   id bigserial PRIMARY KEY,
-  name varchar(36) NOT NULL
+  name varchar(36) NOT NULL,
+  enabled bool NOT NULL DEFAULT TRUE
 );
+
+CREATE UNIQUE INDEX idx_inventory_name ON inventory(name);
 
 CREATE TABLE stock (
   id bigserial PRIMARY KEY,
@@ -11,7 +14,8 @@ CREATE TABLE stock (
 
 CREATE TABLE recipe (
   id bigserial PRIMARY KEY,
-  name varchar(36) NOT NULL UNIQUE
+  name varchar(36) NOT NULL UNIQUE,
+  enabled bool NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE recipe_ingredient (

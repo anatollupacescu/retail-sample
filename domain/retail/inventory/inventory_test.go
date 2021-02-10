@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestCreateItem(t *testing.T) {
-	t.Run("given empty name", func(t *testing.T) {
+func TestCreateInventoryItem(t *testing.T) {
+	t.Run("given an empty name", func(t *testing.T) {
 		i := inventory.Collection{}
 		_, err := i.Create("")
 
@@ -32,7 +32,7 @@ func TestCreateItem(t *testing.T) {
 			assert.Zero(t, id)
 		})
 	})
-	t.Run("given failure to check for uniqueness", func(t *testing.T) {
+	t.Run("given an error occured when checking for uniqueness", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		db.AssertExpectations(t)
 
@@ -42,12 +42,12 @@ func TestCreateItem(t *testing.T) {
 		i := inventory.Collection{DB: db}
 		id, err := i.Create("milk")
 
-		t.Run("assert error", func(t *testing.T) {
+		t.Run("assert error is propagated", func(t *testing.T) {
 			assert.Equal(t, expected, err)
 			assert.Equal(t, 0, id)
 		})
 	})
-	t.Run("given valid item is not created", func(t *testing.T) {
+	t.Run("given an error occured when saving the item", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 
@@ -58,12 +58,12 @@ func TestCreateItem(t *testing.T) {
 		i := inventory.Collection{DB: db}
 		id, err := i.Create("milk")
 
-		t.Run("assert error", func(t *testing.T) {
+		t.Run("assert error is propagated", func(t *testing.T) {
 			assert.Zero(t, id)
 			assert.Equal(t, expectedErr, err)
 		})
 	})
-	t.Run("given valid item", func(t *testing.T) {
+	t.Run("given item is saved", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		db.AssertExpectations(t)
 
@@ -149,7 +149,7 @@ func TestEnableItem(t *testing.T) {
 }
 
 func TestValidateItem(t *testing.T) {
-	t.Run("given item is not found", func(t *testing.T) {
+	t.Run("given a non existent item", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 
@@ -167,23 +167,7 @@ func TestValidateItem(t *testing.T) {
 			assert.Equal(t, expected, err)
 		})
 	})
-	t.Run("given item enabled status is false", func(t *testing.T) {
-		db := &inventory.MockDB{}
-		defer db.AssertExpectations(t)
-
-		db.On("Get", 1).Return(inventory.DTO{Enabled: false}, nil)
-
-		v := inventory.Validator{
-			Inventory: db,
-		}
-
-		err := v.Validate(1)
-
-		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, inventory.ErrItemDisabled, err)
-		})
-	})
-	t.Run("given item is valid", func(t *testing.T) {
+	t.Run("given item is enabled", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 
@@ -195,8 +179,24 @@ func TestValidateItem(t *testing.T) {
 
 		err := v.Validate(1)
 
-		t.Run("assert success", func(t *testing.T) {
+		t.Run("assert returns valid", func(t *testing.T) {
 			assert.NoError(t, err)
+		})
+	})
+	t.Run("given item is not enabled", func(t *testing.T) {
+		db := &inventory.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Get", 1).Return(inventory.DTO{Enabled: false}, nil)
+
+		v := inventory.Validator{
+			Inventory: db,
+		}
+
+		err := v.Validate(1)
+
+		t.Run("assert returns invalid", func(t *testing.T) {
+			assert.Equal(t, inventory.ErrItemDisabled, err)
 		})
 	})
 }

@@ -1,0 +1,34 @@
+file inventory/inventory_test.go
+
+pkg inventory_test
+
+fun create(name) # create inventory item
+
+pre
+    \ name_empty        # an empty name
+    \ name_not_unique   # an item with a non unique name
+
+pos
+    \ uniqueness_check_failed   # an error occured when checking for uniqueness | error is propagated
+    \ item_not_created          # an error occured when saving the item | error is propagated
+    \ item_created              # item is saved | item is created
+
+fun disable() # disable item
+
+pos
+    \ item_disabled     # item is disabled | success
+    \ item_not_disabled # failed to disable item | error
+
+fun enable() # enable item
+
+pos
+    \ item_enabled      # item is enabled | success
+    \ item_not_enabled  # failed to enable item | error
+
+fun valid() # validate item
+
+pre _ # a non existent item
+
+pos
+    \ item_enabled      # item is enabled | returns valid
+    \ item_not_enabled  # item is not enabled | returns invalid

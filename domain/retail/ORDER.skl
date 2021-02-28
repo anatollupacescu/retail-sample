@@ -1,0 +1,16 @@
+pkg order
+
+doc
+    \ Package order allows placing of a new order. The order will be place only if the associated recipe is valid and the stock has enough quantity
+
+file order_test.go
+
+fun
+    \ create order
+pre
+    \ quantity is invalid
+    \ recipe is not valid
+pos
+    \ fail to update stock  \ error
+    \ fail to save order    \ error
+    \ stock is updated      \ success

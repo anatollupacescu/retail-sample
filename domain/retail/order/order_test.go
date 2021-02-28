@@ -11,23 +11,31 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	t.Run("errors when quantity is zero", func(t *testing.T) {
-		orders := order.Orders{}
+	t.Run("given quantity is invalid", func(t *testing.T) {
+		// test for zero and negative value
+		var err error
+		t.Run("errors when quantity is zero", func(t *testing.T) {
+			orders := order.Orders{}
 
-		_, err := orders.Create(1, 0)
+			_, err = orders.Create(1, 0)
 
-		assert.Equal(t, order.ErrInvalidQuantity, err)
+			t.Run("assert error", func(t *testing.T) {
+				assert.Equal(t, order.ErrInvalidQuantity, err)
+			})
+		})
+
+		t.Run("errors when quantity is negative", func(t *testing.T) {
+			orders := order.Orders{}
+
+			_, err = orders.Create(1, -1)
+
+			t.Run("assert error", func(t *testing.T) {
+				assert.Equal(t, order.ErrInvalidQuantity, err)
+			})
+		})
 	})
 
-	t.Run("errors when quantity is negative", func(t *testing.T) {
-		orders := order.Orders{}
-
-		_, err := orders.Create(1, -1)
-
-		assert.Equal(t, order.ErrInvalidQuantity, err)
-	})
-
-	t.Run("errors when recipe is not valid", func(t *testing.T) {
+	t.Run("given recipe is not valid", func(t *testing.T) {
 		recipe := &order.MockRecipe{}
 		defer recipe.AssertExpectations(t)
 
@@ -38,11 +46,13 @@ func TestAdd(t *testing.T) {
 
 		receivedID, err := orders.Create(1, 1)
 
-		assert.Equal(t, expectedErr, err)
-		assert.Equal(t, 0, receivedID)
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, expectedErr, err)
+			assert.Equal(t, 0, receivedID)
+		})
 	})
 
-	t.Run("errors when extracting from stock fails", func(t *testing.T) {
+	t.Run("given fail to update stock", func(t *testing.T) {
 		var recipeID = 1
 
 		recipe := &order.MockRecipe{}
@@ -61,11 +71,13 @@ func TestAdd(t *testing.T) {
 
 		receivedID, err := orders.Create(1, 1)
 
-		assert.Equal(t, expectedErr, err)
-		assert.Zero(t, receivedID)
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, expectedErr, err)
+			assert.Zero(t, receivedID)
+		})
 	})
 
-	t.Run("errors when save to DB fails", func(t *testing.T) {
+	t.Run("given fail to save order", func(t *testing.T) {
 		var recipeID = 1
 
 		recipeDB := &order.MockRecipe{}
@@ -88,11 +100,13 @@ func TestAdd(t *testing.T) {
 
 		receivedID, err := orders.Create(1, 1)
 
-		assert.Equal(t, dbErr, err)
-		assert.Zero(t, receivedID)
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, dbErr, err)
+			assert.Zero(t, receivedID)
+		})
 	})
 
-	t.Run("when selling ingredients succeeds", func(t *testing.T) {
+	t.Run("given stock is updated", func(t *testing.T) {
 		var recipeID = 1
 
 		recipeDB := &order.MockRecipe{}
@@ -114,7 +128,9 @@ func TestAdd(t *testing.T) {
 
 		receivedID, err := orders.Create(1, 1)
 
-		assert.NoError(t, err)
-		assert.Equal(t, 1, receivedID)
+		t.Run("assert success", func(t *testing.T) {
+			assert.NoError(t, err)
+			assert.Equal(t, 1, receivedID)
+		})
 	})
 }

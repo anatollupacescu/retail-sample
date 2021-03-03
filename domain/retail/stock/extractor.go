@@ -2,6 +2,7 @@ package stock
 
 import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	"github.com/pkg/errors"
 )
 
 type recipes interface {
@@ -13,18 +14,23 @@ type Extractor struct {
 	Recipes recipes
 }
 
-func (o Extractor) Extract(recipeID int, count int) error {
-	recipe, err := o.Recipes.Get(recipeID)
+var ErrRecipeDisabled = errors.New("can not process disabled recipe")
 
+func (e Extractor) Extract(recipeID int, count int) error {
+	recipe, err := e.Recipes.Get(recipeID)
 	if err != nil {
 		return err
+	}
+
+	if !recipe.Enabled {
+		return ErrRecipeDisabled
 	}
 
 	for _, ingredient := range recipe.Ingredients {
 		inventoryID := ingredient.ID
 		totalQty := ingredient.Qty * count
 
-		dto, err := o.Stock.Get(inventoryID)
+		dto, err := e.Stock.Get(inventoryID)
 
 		switch err {
 		case nil:
@@ -37,7 +43,7 @@ func (o Extractor) Extract(recipeID int, count int) error {
 		pos := Position{
 			InventoryID: dto.InventoryID,
 			Qty:         dto.Qty,
-			DB:          o.Stock,
+			DB:          e.Stock,
 		}
 
 		if err := pos.Extract(totalQty); err != nil {

@@ -1,0 +1,33 @@
+pkg inventory
+
+doc
+    \ Inventory is a collection of items that can be part of the stock and recipe
+    \ Inventory items can be added or disabled. Disabled items can not added to a new recipe or provisioned in stock
+
+file inventory_test.go
+
+fun
+    \ create inventory item
+
+pre
+    \ name empty
+    \ name non unique   \ fail to check for uniqueness
+pos
+    \ item is saved     \ fail to saving the item
+
+fun
+    \ disable item
+pos
+    \ item is disabled      \ failed to disable item
+
+fun
+    \ enable item
+pos
+    \ item is enabled       \ failed to enable item
+
+fun
+    \ validate item
+pre
+    \ item does not exist   \ fail to check for presence
+pos
+    \ item valid

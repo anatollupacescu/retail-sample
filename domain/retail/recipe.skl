@@ -1,0 +1,28 @@
+pkg recipe
+
+doc
+    \ A recipe has a name and a list of ingredients, where each ingredient is a inventory item associated with a quantity
+    \ A recipe can be added given that all its ingredients are valid, meaning that they are enabled and have a positive quantity
+    \ Recipes can also be disabled and enabled back. A disabled recipe can not be used in an order
+
+file recipe_test.go
+
+fun
+    \ create recipe
+pre
+    \ empty name
+    \ no ingredients
+    \ invalid ingredient quantity
+    \ duplicate ingredient
+    \ invalid ingredient        \ fail to validate ingredient
+    \ recipe name not unique    \ fail to check for name uniqueness
+pos
+    \ recipe created            \ fail to save recipe
+
+fun
+    \ validate recipe
+pre
+    \ recipe not found     \ fail to check for presence
+    \ recipe disabled
+pos
+    \ recipe validated

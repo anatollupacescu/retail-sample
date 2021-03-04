@@ -74,6 +74,22 @@ func TestCreateRecipe(t *testing.T) {
 			assert.Zero(t, id)
 		})
 	})
+	t.Run("given fail to find ingredient", func(t *testing.T) {
+		reset()
+
+		dbErr := errors.New("db err")
+		db.On("Find", "test").Return(recipe.DTO{}, dbErr)
+
+		b := recipe.Recipes{DB: db}
+		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+
+		db.AssertExpectations(t)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, dbErr, err)
+			assert.Zero(t, id)
+		})
+	})
 	t.Run("given ingredient disabled", func(t *testing.T) {
 		reset()
 

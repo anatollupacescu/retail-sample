@@ -3,6 +3,7 @@ package recipe_test
 import (
 	"testing"
 
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -53,13 +54,13 @@ func TestCreateRecipe(t *testing.T) {
 			assert.Equal(t, recipe.ErrDuplicateName, err)
 		})
 	})
-	t.Run("given invalid ingredient", func(t *testing.T) {
+	t.Run("given ingredient not found", func(t *testing.T) {
 		reset()
 
 		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
 
 		mi := &recipe.MockValidator{}
-		expected := recipe.ErrDisabled
+		expected := inventory.ErrNotFound
 		mi.On("Validate", mock.Anything).Return(expected)
 
 		b := recipe.Recipes{DB: db, Iv: mi}
@@ -69,10 +70,29 @@ func TestCreateRecipe(t *testing.T) {
 		mi.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, recipe.ErrDisabled, err)
+			assert.True(t, errors.Is(err, recipe.ErrIngredientNotFound))
 			assert.Zero(t, id)
 		})
+	})
+	t.Run("given ingredient disabled", func(t *testing.T) {
+		reset()
 
+		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
+
+		mi := &recipe.MockValidator{}
+		expected := inventory.ErrItemDisabled
+		mi.On("Validate", mock.Anything).Return(expected)
+
+		b := recipe.Recipes{DB: db, Iv: mi}
+		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
+
+		db.AssertExpectations(t)
+		mi.AssertExpectations(t)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, expected, err)
+			assert.Zero(t, id)
+		})
 	})
 	t.Run("given fail to validate ingredient", func(t *testing.T) {
 		reset()
@@ -163,6 +183,75 @@ func TestCreateRecipe(t *testing.T) {
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, dbErr, err)
+		})
+	})
+}
+
+func TestDisableRecipe(t *testing.T) {
+	t.Run("given recipe is disabled", func(t *testing.T) {
+		db := &recipe.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Save", mock.Anything).Return(nil)
+
+		r := recipe.Recipe{
+			Enabled: true,
+			DB:      db,
+		}
+
+		err := r.Disable()
+
+		t.Run("assert success", func(t *testing.T) {
+			assert.NoError(t, err)
+			assert.False(t, r.Enabled)
+		})
+	})
+	t.Run("given failed to disable recipe", func(t *testing.T) {
+		db := &recipe.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Save", mock.Anything).Return(recipe.ErrNotFound)
+
+		r := recipe.Recipe{ID: 1, DB: db}
+
+		err := r.Disable()
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, recipe.ErrNotFound, err)
+		})
+	})
+}
+
+func TestEnableRecipe(t *testing.T) {
+	t.Run("given recipe is enabled", func(t *testing.T) {
+		db := &recipe.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Save", mock.Anything).Return(nil)
+
+		r := recipe.Recipe{
+			DB: db,
+		}
+
+		err := r.Enable()
+
+		t.Run("assert success", func(t *testing.T) {
+			assert.NoError(t, err)
+			assert.True(t, r.Enabled)
+		})
+	})
+	t.Run("given failed to enable recipe", func(t *testing.T) {
+		db := &recipe.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Save", mock.Anything).Return(recipe.ErrNotFound)
+
+		r := recipe.Recipe{ID: 1, DB: db}
+
+		err := r.Enable()
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, recipe.ErrNotFound, err)
 		})
 	})
 }

@@ -14,10 +14,21 @@ pre
     \ no ingredients
     \ invalid ingredient quantity
     \ duplicate ingredient
-    \ invalid ingredient        \ fail to validate ingredient
+    \ ingredient not found      \ fail to find ingredient
+    \ ingredient disabled
     \ recipe name not unique    \ fail to check for name uniqueness
 pos
     \ recipe created            \ fail to save recipe
+
+fun
+    \ disable recipe
+pos
+    \ recipe is disabled      \ failed to disable recipe
+
+fun
+    \ enable recipe
+pos
+    \ recipe is enabled       \ failed to enable recipe
 
 fun
     \ validate recipe

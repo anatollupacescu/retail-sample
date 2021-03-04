@@ -4,10 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/order"
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/order"
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 func TestCreateOrder(t *testing.T) {

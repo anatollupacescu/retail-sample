@@ -16,10 +16,10 @@ pos
 fun
     \ extract
 pre
+    \ quantity is negative
     \ recipe not found                  \ failure to get recipe
     \ recipe is invalid
     \ item not present in stock         \ failure to check for stock item
-    \ quantity is negative
     \ not enough stock for item
 pos
     \ position updated                  \ failure to update position quantity

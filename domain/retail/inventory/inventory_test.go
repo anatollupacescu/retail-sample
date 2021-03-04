@@ -4,9 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 func TestCreateInventoryItem(t *testing.T) {

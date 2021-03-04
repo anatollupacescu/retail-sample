@@ -56,11 +56,7 @@ var (
 	ErrInvalidExtractQuantity = errors.New("invalid extract quantity")
 )
 
-func (p *Position) Extract(qty int) error {
-	if qty <= 0 {
-		return ErrInvalidExtractQuantity
-	}
-
+func (p *Position) extract(qty int) error {
 	if qty > p.Qty {
 		return ErrNotEnoughStock
 	}

@@ -3,11 +3,12 @@ package stock_test
 import (
 	"testing"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
-	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
+	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
 
 func TestProvision(t *testing.T) {
@@ -97,6 +98,15 @@ func TestExtract(t *testing.T) {
 			stockDB.On("Save", mock.Anything).Return(err)
 		}
 	)
+	t.Run("given quantity is negative", func(t *testing.T) {
+		reset()
+
+		err := newExtractor().Extract(1, -1)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, stock.ErrInvalidExtractQuantity, err)
+		})
+	})
 	t.Run("given recipe not found", func(t *testing.T) {
 		reset()
 
@@ -167,22 +177,6 @@ func TestExtract(t *testing.T) {
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, expectedErr, err)
-			recipeDB.AssertExpectations(t)
-			stockDB.AssertExpectations(t)
-		})
-	})
-	t.Run("given quantity is negative", func(t *testing.T) {
-		reset()
-
-		id := 1
-		expectRecipeValid(id)
-		qty := 23
-		expectGetStockOK(qty)
-
-		err := newExtractor().Extract(id, -1)
-
-		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, stock.ErrInvalidExtractQuantity, err)
 			recipeDB.AssertExpectations(t)
 			stockDB.AssertExpectations(t)
 		})

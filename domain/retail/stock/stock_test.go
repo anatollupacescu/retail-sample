@@ -121,21 +121,7 @@ func TestExtract(t *testing.T) {
 			stockDB.AssertExpectations(t)
 		})
 	})
-	t.Run("given recipe is invalid", func(t *testing.T) {
-		reset()
-
-		id := 1
-		expectRecipeInvalid(id)
-
-		err := newExtractor().Extract(id, 1)
-
-		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, stock.ErrRecipeDisabled, err)
-			recipeDB.AssertExpectations(t)
-			stockDB.AssertExpectations(t)
-		})
-	})
-	t.Run("given failure to check recipe", func(t *testing.T) {
+	t.Run("given failure to get recipe", func(t *testing.T) {
 		reset()
 
 		id := 1
@@ -146,6 +132,20 @@ func TestExtract(t *testing.T) {
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, expectedErr, err)
+			recipeDB.AssertExpectations(t)
+			stockDB.AssertExpectations(t)
+		})
+	})
+	t.Run("given recipe is invalid", func(t *testing.T) {
+		reset()
+
+		id := 1
+		expectRecipeInvalid(id)
+
+		err := newExtractor().Extract(id, 1)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, stock.ErrRecipeDisabled, err)
 			recipeDB.AssertExpectations(t)
 			stockDB.AssertExpectations(t)
 		})
@@ -165,7 +165,7 @@ func TestExtract(t *testing.T) {
 			stockDB.AssertExpectations(t)
 		})
 	})
-	t.Run("given failure to check for stock item", func(t *testing.T) {
+	t.Run("given failure to get stock item", func(t *testing.T) {
 		reset()
 
 		id := 1

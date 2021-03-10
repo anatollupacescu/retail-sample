@@ -13,6 +13,7 @@ import (
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			httpServerError(w)
@@ -124,6 +125,7 @@ func Provision(w http.ResponseWriter, r *http.Request) {
 
 func GetProvisionLog(w http.ResponseWriter, r *http.Request) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			httpServerError(w)

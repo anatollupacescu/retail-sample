@@ -19,25 +19,16 @@ type Position struct {
 
 func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "provision").Err(err).Send()
 		}
 	}()
 
-	id, err := strconv.Atoi(itemID)
+	item, err := getInventoryItem(o.inventoryDB, itemID)
 
 	if err != nil {
-		return Position{}, errors.Wrapf(usecase.ErrBadRequest, "parse item id: %s", itemID)
-	}
-
-	item, err := o.inventoryDB.Get(id)
-
-	switch err {
-	case nil: //continue,
-	case inventory.ErrNotFound:
-		return Position{}, errors.Wrapf(usecase.ErrNotFound, "find item with id: %d", id)
-	default:
 		return Position{}, err
 	}
 
@@ -57,7 +48,7 @@ func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
 		return Position{}, err
 	}
 
-	o.logger.Info().Int("id", id).Msg("successfully provisioned stock")
+	o.logger.Info().Int("id", item.ID).Msg("successfully provisioned stock")
 
 	_, err = o.logDB.Add(item.ID, qty)
 
@@ -90,4 +81,24 @@ func getPosition(stockDB *pg.StockPgxStore, itemID int) (pos stock.Position, err
 	}
 
 	return
+}
+
+func getInventoryItem(inv *pg.InventoryPgxStore, itemID string) (inventory.DTO, error) {
+	id, err := strconv.Atoi(itemID)
+
+	if err != nil {
+		return inventory.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "parse item id: %s", itemID)
+	}
+
+	item, err := inv.Get(id)
+
+	switch err {
+	case nil: //continue,
+	case inventory.ErrNotFound:
+		return inventory.DTO{}, errors.Wrapf(usecase.ErrNotFound, "find item with id: %d", id)
+	default:
+		return inventory.DTO{}, err
+	}
+
+	return item, nil
 }

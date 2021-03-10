@@ -115,7 +115,6 @@ var ErrIngredientNotFound = errors.New("ingredient not found")
 
 func checkIngredientsAreValid(validator inventoryValidator, ingredients []InventoryItem) error {
 	for _, i := range ingredients {
-
 		err := validator.Validate(i.ID)
 
 		switch err {

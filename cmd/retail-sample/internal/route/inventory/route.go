@@ -146,6 +146,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			httpServerError(w)

@@ -9,7 +9,9 @@ import (
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
-func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (dto recipe.DTO, err error) {
+func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (recipe.DTO, error) {
+	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "update").Err(err).Send()
@@ -22,7 +24,7 @@ func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (dto recipe.DTO, e
 		return recipe.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "parse recipe ID: %s", recipeID)
 	}
 
-	dto, err = o.recipeDB.Get(id)
+	dto, err := o.recipeDB.Get(id)
 
 	switch err {
 	case nil:
@@ -32,7 +34,7 @@ func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (dto recipe.DTO, e
 		return recipe.DTO{}, err
 	}
 
-	recipe := recipe.Recipe{
+	r := recipe.Recipe{
 		ID:          dto.ID,
 		Name:        dto.Name,
 		Ingredients: dto.Ingredients,
@@ -42,18 +44,18 @@ func (o *UseCase) UpdateStatus(recipeID string, enabled bool) (dto recipe.DTO, e
 
 	switch enabled {
 	case true:
-		err = recipe.Enable()
+		err = r.Enable()
 	default:
-		err = recipe.Disable()
+		err = r.Disable()
 	}
 
 	if err != nil {
-		return
+		return recipe.DTO{}, err
 	}
 
-	dto.Enabled = recipe.Enabled
+	dto.Enabled = r.Enabled
 
 	o.logger.Info().Int("id", id).Msg("successfully updated recipe")
 
-	return
+	return dto, nil
 }

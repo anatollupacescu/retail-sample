@@ -1,4 +1,4 @@
-# retail-sample
+# Sample stock management app
 
 An attempt to design a stock management system with domain driven principles in mind.
 This was achieved by writing both the front and back-end code in such a way that their 'business' related logic is separated from the delivery and persistence code.
@@ -6,23 +6,15 @@ This allows to easily swap frameworks, libraries and databases without interferi
 
 ## Quick start
 
-Given that you have `yarn` and `go` installed, just run:
+Given that you have `yarn`, `go` and `docker` installed:
 
 ```sh
-make clean build run/mem
+docker-compose up -d db
+docker-compose up -d --build tern
+make run
 ```
 
-To run the app in docker compose with a postgres instance:
-
-```sh
-make clean build run/docker
-```
-
-To run the acceptance tests against a running instance - enter the `test/acceptance` folder then run:
-
-```sh
-yarn test
-```
+Go to <http://localhost:1234>
 
 ## Summary
 

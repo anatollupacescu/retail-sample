@@ -11,6 +11,7 @@ import (
 
 func (o *UseCase) GetByID(recipeID string) (domain.DTO, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "get order").Err(err).Send()

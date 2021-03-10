@@ -9,6 +9,7 @@ import (
 
 func (a *UseCase) Create(name string) (inventory.DTO, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			a.logger.Error().Str("action", "create item").Err(err).Send()

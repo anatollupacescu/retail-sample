@@ -72,7 +72,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
 	var err error
+
 	defer func() {
 		if err != nil {
 			httpServerError(w)

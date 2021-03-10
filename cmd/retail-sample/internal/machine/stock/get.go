@@ -12,6 +12,7 @@ import (
 
 func (o *UseCase) GetByID(itemID string) (Position, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "get by id").Err(err).Send()
@@ -55,6 +56,7 @@ func (o *UseCase) GetByID(itemID string) (Position, error) {
 
 func (o *UseCase) GetAll() ([]Position, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "get all").Err(err).Send()

@@ -11,6 +11,7 @@ import (
 
 func (o *UseCase) Create(recipeID, count int) (order.DTO, error) {
 	var err error
+
 	defer func() {
 		if err != nil {
 			o.logger.Error().Str("action", "create order").Err(err).Send()

@@ -1,8 +1,9 @@
 module github.com/anatollupacescu/retail-sample
 
-go 1.15
+go 1.16
 
 require (
+	github.com/anatollupacescu/arbortest v0.0.3-0.20210310131644-c61b850d72e3 // indirect
 	github.com/ardanlabs/conf v1.3.2
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgx/v4 v4.10.0

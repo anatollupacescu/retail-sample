@@ -1,0 +1,90 @@
+pkg tests
+
+fol tests
+
+file inventory_test.go
+
+fun
+    \ create inventory item
+pre
+    \ name empty
+    \ name non unique
+pos
+    \ item is saved
+
+fun
+    \ disable item
+pos
+    \ item is disabled
+
+fun
+    \ enable item
+pos
+    \ item is enabled
+
+pkg tests
+
+fol tests
+
+file order_test.go
+
+fun
+    \ create order
+pre
+    \ quantity is invalid
+    \ recipe is not valid
+pos
+    \ stock is updated and order created
+
+pkg tests
+
+fol tests
+
+file recipe_test.go
+
+fun
+    \ create recipe
+pre
+    \ empty name
+    \ no ingredients
+    \ invalid ingredient quantity
+    \ duplicate ingredient
+    \ ingredient not found
+    \ ingredient disabled
+    \ recipe name not unique
+pos
+    \ recipe created
+
+fun
+    \ disable recipe
+pos
+    \ recipe is disabled
+
+fun
+    \ enable recipe
+pos
+    \ recipe is enabled
+
+pkg tests
+
+fol tests
+
+file stock_test.go
+
+fun
+    \ provision
+pre
+    \ quantity is negative
+pos
+    \ position updated
+
+fun
+    \ extract
+pre
+    \ quantity is negative
+    \ recipe not found
+    \ recipe is invalid
+    \ item not present in stock
+    \ not enough stock for item
+pos
+    \ position updated

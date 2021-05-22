@@ -23,12 +23,12 @@ pos
 fun
     \ disable recipe
 pos
-    \ recipe is disabled      \ failed to disable recipe
+    \ recipe is disabled      \ fail to disable recipe
 
 fun
     \ enable recipe
 pos
-    \ recipe is enabled       \ failed to enable recipe
+    \ recipe is enabled       \ fail to enable recipe
 
 fun
     \ validate recipe

@@ -8,7 +8,7 @@ fun
     \ create inventory item
 pre
     \ name empty
-    \ name non unique
+    \ name non unique   # no technical failures for acceptance tests
 pos
     \ item is saved
 
@@ -22,8 +22,6 @@ fun
 pos
     \ item is enabled
 
-pkg tests
-
 fol tests
 
 file order_test.go
@@ -35,10 +33,6 @@ pre
     \ recipe is not valid
 pos
     \ stock is updated and order created
-
-pkg tests
-
-fol tests
 
 file recipe_test.go
 
@@ -64,10 +58,6 @@ fun
     \ enable recipe
 pos
     \ recipe is enabled
-
-pkg tests
-
-fol tests
 
 file stock_test.go
 

@@ -10,16 +10,17 @@ fun
     \ provision
 pre
     \ quantity is negative
+#   \ item is invalid           \ fail to check validity
 pos
-    \ position updated          \ failure to update quantity
+    \ position updated          \ fail to update quantity
 
 fun
     \ extract
 pre
     \ quantity is negative
-    \ recipe not found                  \ failure to get recipe
+    \ recipe not found                  \ fail to get recipe
     \ recipe is invalid
-    \ item not present in stock         \ failure to get stock item
+    \ item not present in stock         \ fail to get stock item
     \ not enough stock for item
 pos
-    \ position updated                  \ failure to update position quantity
+    \ position updated                  \ fail to update position quantity

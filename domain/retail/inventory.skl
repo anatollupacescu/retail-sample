@@ -1,14 +1,13 @@
-pkg inventory
+pkg inventory_test
 
 doc
     \ Inventory is a collection of items that can be part of the stock and recipe
-    \ Inventory items can be added or disabled. Disabled items can not added to a new recipe or provisioned in stock
+    \ Inventory items can be added or disabled. Disabled items can not be added to a new recipe or provisioned in stock
 
 file inventory_test.go
 
 fun
     \ create inventory item
-
 pre
     \ name empty
     \ name non unique   \ fail to check for uniqueness
@@ -18,12 +17,12 @@ pos
 fun
     \ disable item
 pos
-    \ item is disabled      \ failed to disable item
+    \ item is disabled      \ fail to disable item
 
 fun
     \ enable item
 pos
-    \ item is enabled       \ failed to enable item
+    \ item is enabled       \ fail to enable item
 
 fun
     \ validate item

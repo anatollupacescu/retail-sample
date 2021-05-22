@@ -125,7 +125,7 @@ func TestDisableItem(t *testing.T) {
 			assert.False(t, item.Enabled)
 		})
 	})
-	t.Run("given failed to disable item", func(t *testing.T) {
+	t.Run("given fail to disable item", func(t *testing.T) {
 		reset()
 
 		expectedErr := errors.New("test")
@@ -157,7 +157,7 @@ func TestEnableItem(t *testing.T) {
 			assert.True(t, item.Enabled)
 		})
 	})
-	t.Run("given failed to enable item", func(t *testing.T) {
+	t.Run("given fail to enable item", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 

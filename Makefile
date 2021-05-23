@@ -15,7 +15,7 @@ format:
 	@gofmt -s -w cmd/ domain/ internal/
 
 test:
-	@go test -count 1 -race -cover ./...
+	@go test -count 1 -race -cover ./domain/...
 
 # build
 
@@ -85,7 +85,7 @@ start/arbor:
 .PHONY: test/acceptance
 
 test/acceptance:
-	@go test $(shell pwd)/cmd/retail-sample-test/... \
+	@go test $(shell pwd)/cmd/acceptance/tests/... \
 	-v -tags=acceptance -args \
 	--apiURL=http://localhost:8080 \
 	--arborURL=http://localhost:3000/data/

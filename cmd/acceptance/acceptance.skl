@@ -22,8 +22,6 @@ fun
 pos
     \ item is enabled
 
-fol tests
-
 file order_test.go
 
 fun

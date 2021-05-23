@@ -12,54 +12,32 @@ import (
 
 func TestCreateInventoryItem(t *testing.T) {
 	var (
-		name  string
-		db    *inventory.MockDB
-		i     inventory.Collection
-		reset = func() {
-			name = "milk"
-			db = &inventory.MockDB{}
-			i = inventory.Collection{DB: db}
-		}
-		givenNameIsEmpty = func() {
-			name = ""
-		}
-		create = func() (id int, err error) {
-			id, err = i.Create(name)
-			db.AssertExpectations(t)
-			return
-		}
-		givenNonUniqueName = func() {
-			db.On("Find", "milk").Return(1, nil)
-		}
-		uniqunessCheckErr               = errors.New("unknown")
-		givenErrorCheckingForUniqueness = func() {
-			db.On("Find", "milk").Return(0, uniqunessCheckErr)
-		}
-		saveItemErr          = errors.New("db")
-		givenErrorSavingItem = func() {
-			db.On("Find", "milk").Return(0, inventory.ErrNotFound)
-			db.On("Add", "milk").Return(0, saveItemErr)
-		}
-		givenCanSaveItem = func() {
-			db.On("Find", "milk").Return(0, inventory.ErrNotFound)
-			db.On("Add", "milk").Return(1, nil)
-		}
+		db *inventory.MockDB
+		i  inventory.Collection
 	)
+
+	var reset = func() {
+		db = &inventory.MockDB{}
+		i = inventory.Collection{DB: db}
+	}
+
 	t.Run("given name empty", func(t *testing.T) {
 		reset()
-		givenNameIsEmpty()
 
-		_, err := create()
+		id, err := i.Create("")
+		db.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
+			assert.Zero(t, id)
 			assert.Equal(t, inventory.ErrEmptyName, err)
 		})
 	})
 	t.Run("given name non unique", func(t *testing.T) {
 		reset()
-		givenNonUniqueName()
 
-		id, err := create()
+		db.On("Find", "milk").Return(1, nil)
+		id, err := i.Create("milk")
+		db.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, inventory.ErrDuplicateName, err)
@@ -68,9 +46,12 @@ func TestCreateInventoryItem(t *testing.T) {
 	})
 	t.Run("given fail to check for uniqueness", func(t *testing.T) {
 		reset()
-		givenErrorCheckingForUniqueness()
 
-		id, err := create()
+		var uniqunessCheckErr = errors.New("unknown")
+
+		db.On("Find", "milk").Return(0, uniqunessCheckErr)
+		id, err := i.Create("milk")
+		db.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, uniqunessCheckErr, err)
@@ -79,9 +60,12 @@ func TestCreateInventoryItem(t *testing.T) {
 	})
 	t.Run("given item is saved", func(t *testing.T) {
 		reset()
-		givenCanSaveItem()
 
-		id, err := create()
+		db.On("Find", "milk").Return(0, inventory.ErrNotFound)
+		db.On("Add", "milk").Return(1, nil)
+
+		id, err := i.Create("milk")
+		db.AssertExpectations(t)
 
 		t.Run("assert success", func(t *testing.T) {
 			assert.NoError(t, err)
@@ -90,9 +74,14 @@ func TestCreateInventoryItem(t *testing.T) {
 	})
 	t.Run("given fail to saving the item", func(t *testing.T) {
 		reset()
-		givenErrorSavingItem()
 
-		id, err := create()
+		var saveItemErr = errors.New("db")
+
+		db.On("Find", "milk").Return(0, inventory.ErrNotFound)
+		db.On("Add", "milk").Return(0, saveItemErr)
+
+		id, err := i.Create("milk")
+		db.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
 			assert.Equal(t, saveItemErr, err)
@@ -102,14 +91,10 @@ func TestCreateInventoryItem(t *testing.T) {
 }
 
 func TestDisableItem(t *testing.T) {
-	var (
-		db   *inventory.MockDB
-		item inventory.Item
-	)
+	var db *inventory.MockDB
 
 	var reset = func() {
 		db = &inventory.MockDB{}
-		item = inventory.Item{DB: db, Enabled: true}
 	}
 
 	t.Run("given item is disabled", func(t *testing.T) {
@@ -117,6 +102,7 @@ func TestDisableItem(t *testing.T) {
 
 		db.On("Save", mock.Anything).Return(nil)
 
+		item := inventory.Item{DB: db, Enabled: true}
 		err := item.Disable()
 
 		db.AssertExpectations(t)
@@ -131,6 +117,7 @@ func TestDisableItem(t *testing.T) {
 		expectedErr := errors.New("test")
 		db.On("Save", mock.Anything).Return(expectedErr)
 
+		item := inventory.Item{DB: db, Enabled: true}
 		err := item.Disable()
 
 		db.AssertExpectations(t)

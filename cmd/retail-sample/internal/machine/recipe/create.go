@@ -23,9 +23,10 @@ func (o *UseCase) Create(name string, items []domain.InventoryItem) (domain.DTO,
 	case errors.Is(err, domain.ErrIngredientNotFound):
 		return domain.DTO{}, errors.Wrap(usecase.ErrNotFound, err.Error())
 	case
-		err == domain.ErrEmptyName,
-		err == domain.ErrQuantityNotProvided,
-		err == domain.ErrNoIngredients:
+		errors.Is(err, domain.ErrIngredientNotValid),
+		errors.Is(err, domain.ErrEmptyName),
+		errors.Is(err, domain.ErrQuantityNotProvided),
+		errors.Is(err, domain.ErrNoIngredients):
 		return domain.DTO{}, errors.Wrap(usecase.ErrBadRequest, err.Error())
 	}
 

@@ -2193,7 +2193,7 @@
 											"})",
 											"",
 											"pm.test(\"recipe is disabled\", function () {",
-											"    pm.expect(pm.response.text()).to.include(\"invalid recipe\");",
+											"    pm.expect(pm.response.text()).to.include(\"recipe not valid\");",
 											"});",
 											""
 										],

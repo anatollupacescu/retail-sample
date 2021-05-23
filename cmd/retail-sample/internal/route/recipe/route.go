@@ -40,6 +40,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	uc, err := usecase.New(r.Context())
+
 	if err != nil {
 		httpServerError(w)
 		return
@@ -82,6 +83,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	uc, err := usecase.New(r.Context())
+
 	if err != nil {
 		return
 	}
@@ -100,6 +102,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uc, err := usecase.New(r.Context())
+
 	if err != nil {
 		httpServerError(w)
 		return

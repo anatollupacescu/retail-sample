@@ -1,25 +1,15 @@
 package recipe
 
-import (
-	"errors"
-)
-
 type Validator struct {
 	Recipes db
 }
 
-var ErrDisabled = errors.New("invalid recipe")
-
-func (v Validator) Valid(id int) error {
+func (v Validator) Valid(id int) (bool, error) {
 	recipe, err := v.Recipes.Get(id)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	if !recipe.Enabled {
-		return ErrDisabled
-	}
-
-	return nil
+	return recipe.Enabled, nil
 }

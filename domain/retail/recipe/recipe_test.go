@@ -36,7 +36,7 @@ func TestCreateRecipe(t *testing.T) {
 		rr := recipe.Recipes{}
 		_, err := rr.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 0}})
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, recipe.ErrQuantityNotProvided, err)
+			assert.True(t, errors.Is(err, recipe.ErrQuantityNotProvided))
 		})
 	})
 	t.Run("given duplicate ingredient", func(t *testing.T) {
@@ -62,9 +62,9 @@ func TestCreateRecipe(t *testing.T) {
 
 		mi := &recipe.MockValidator{}
 		expected := inventory.ErrNotFound
-		mi.On("Validate", mock.Anything).Return(expected)
+		mi.On("Valid", mock.Anything).Return(false, expected)
 
-		b := recipe.Recipes{DB: db, Iv: mi}
+		b := recipe.Recipes{DB: db, ItemValidator: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		db.AssertExpectations(t)
@@ -97,17 +97,16 @@ func TestCreateRecipe(t *testing.T) {
 		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
 
 		mi := &recipe.MockValidator{}
-		expected := inventory.ErrItemDisabled
-		mi.On("Validate", mock.Anything).Return(expected)
+		mi.On("Valid", mock.Anything).Return(false, nil)
 
-		b := recipe.Recipes{DB: db, Iv: mi}
+		b := recipe.Recipes{DB: db, ItemValidator: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		db.AssertExpectations(t)
 		mi.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, expected, err)
+			assert.True(t, errors.Is(err, recipe.ErrIngredientNotValid))
 			assert.Zero(t, id)
 		})
 	})
@@ -118,9 +117,9 @@ func TestCreateRecipe(t *testing.T) {
 
 		mi := &recipe.MockValidator{}
 		expected := errors.New("other")
-		mi.On("Validate", mock.Anything).Return(expected)
+		mi.On("Valid", mock.Anything).Return(false, expected)
 
-		b := recipe.Recipes{DB: db, Iv: mi}
+		b := recipe.Recipes{DB: db, ItemValidator: mi}
 		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		db.AssertExpectations(t)
@@ -169,9 +168,9 @@ func TestCreateRecipe(t *testing.T) {
 		db.On("Add", mock.Anything).Return(3, nil)
 
 		validator := &recipe.MockValidator{}
-		validator.On("Validate", mock.Anything).Return(nil)
+		validator.On("Valid", mock.Anything).Return(true, nil)
 
-		recipes := recipe.Recipes{DB: db, Iv: validator}
+		recipes := recipe.Recipes{DB: db, ItemValidator: validator}
 		id, err := recipes.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		db.AssertExpectations(t)
@@ -190,9 +189,9 @@ func TestCreateRecipe(t *testing.T) {
 		db.On("Add", mock.Anything).Return(0, dbErr)
 
 		validator := &recipe.MockValidator{}
-		validator.On("Validate", mock.Anything).Return(nil)
+		validator.On("Valid", mock.Anything).Return(true, nil)
 
-		recipes := recipe.Recipes{DB: db, Iv: validator}
+		recipes := recipe.Recipes{DB: db, ItemValidator: validator}
 		_, err := recipes.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
 
 		db.AssertExpectations(t)
@@ -291,7 +290,7 @@ func TestValidateRecipe(t *testing.T) {
 		expected := recipe.ErrNotFound
 		db.On("Get", 1).Return(recipe.DTO{}, expected)
 
-		err := validator().Valid(1)
+		_, err := validator().Valid(1)
 
 		db.AssertExpectations(t)
 		t.Run("assert error", func(t *testing.T) {
@@ -304,7 +303,7 @@ func TestValidateRecipe(t *testing.T) {
 		expected := errors.New("test")
 		db.On("Get", 1).Return(recipe.DTO{}, expected)
 
-		err := validator().Valid(1)
+		_, err := validator().Valid(1)
 
 		db.AssertExpectations(t)
 		t.Run("assert error", func(t *testing.T) {
@@ -316,11 +315,12 @@ func TestValidateRecipe(t *testing.T) {
 
 		db.On("Get", 1).Return(recipe.DTO{Enabled: false}, nil)
 
-		err := validator().Valid(1)
+		valid, err := validator().Valid(1)
 
 		db.AssertExpectations(t)
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, recipe.ErrDisabled, err)
+			assert.NoError(t, err)
+			assert.False(t, valid)
 		})
 	})
 	t.Run("given recipe validated", func(t *testing.T) {
@@ -328,7 +328,7 @@ func TestValidateRecipe(t *testing.T) {
 
 		db.On("Get", 1).Return(recipe.DTO{Enabled: true}, nil)
 
-		err := validator().Valid(1)
+		_, err := validator().Valid(1)
 
 		db.AssertExpectations(t)
 		t.Run("assert success", func(t *testing.T) {

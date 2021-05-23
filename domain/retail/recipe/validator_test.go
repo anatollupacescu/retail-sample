@@ -21,7 +21,7 @@ func TestValidator(t *testing.T) {
 			Recipes: db,
 		}
 
-		err := v.Valid(1)
+		_, err := v.Valid(1)
 
 		t.Run("assert is not valid", func(t *testing.T) {
 			assert.Equal(t, expected, err)
@@ -38,10 +38,11 @@ func TestValidator(t *testing.T) {
 			Recipes: db,
 		}
 
-		err := v.Valid(1)
+		valid, err := v.Valid(1)
 
 		t.Run("assert is not valid", func(t *testing.T) {
-			assert.Equal(t, recipe.ErrDisabled, err)
+			assert.NoError(t, err)
+			assert.False(t, valid)
 		})
 	})
 
@@ -55,10 +56,11 @@ func TestValidator(t *testing.T) {
 			Recipes: db,
 		}
 
-		err := v.Valid(1)
+		valid, err := v.Valid(1)
 
 		t.Run("assert is valid", func(t *testing.T) {
 			assert.NoError(t, err)
+			assert.True(t, valid)
 		})
 	})
 }

@@ -167,18 +167,18 @@ func TestValidateItem(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 
-		expected := errors.New("test")
-
-		db.On("Get", 1).Return(inventory.DTO{}, expected)
+		notFoundErr := errors.New("not found")
+		db.On("Get", 1).Return(inventory.DTO{}, notFoundErr)
 
 		v := inventory.Validator{
 			Inventory: db,
 		}
 
-		err := v.Validate(1)
+		valid, err := v.Valid(1)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, expected, err)
+			assert.Equal(t, notFoundErr, err)
+			assert.False(t, valid)
 		})
 	})
 	t.Run("given fail to check for presence", func(t *testing.T) {
@@ -191,13 +191,31 @@ func TestValidateItem(t *testing.T) {
 			Inventory: db,
 		}
 
-		err := v.Validate(1)
+		valid, err := v.Valid(1)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, inventory.ErrItemDisabled, err)
+			assert.NoError(t, err)
+			assert.False(t, valid)
 		})
 	})
-	t.Run("given item valid", func(t *testing.T) {
+	t.Run("given item disabled", func(t *testing.T) {
+		db := &inventory.MockDB{}
+		defer db.AssertExpectations(t)
+
+		db.On("Get", 1).Return(inventory.DTO{Enabled: false}, nil)
+
+		v := inventory.Validator{
+			Inventory: db,
+		}
+
+		valid, err := v.Valid(1)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.NoError(t, err)
+			assert.False(t, valid)
+		})
+	})
+	t.Run("given item is enabled", func(t *testing.T) {
 		db := &inventory.MockDB{}
 		defer db.AssertExpectations(t)
 
@@ -207,10 +225,11 @@ func TestValidateItem(t *testing.T) {
 			Inventory: db,
 		}
 
-		err := v.Validate(1)
+		valid, err := v.Valid(1)
 
 		t.Run("assert success", func(t *testing.T) {
 			assert.NoError(t, err)
+			assert.True(t, valid)
 		})
 	})
 }

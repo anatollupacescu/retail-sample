@@ -23,6 +23,7 @@ func (e Extractor) Extract(recipeID int, count int) error {
 	}
 
 	recipe, err := e.Recipes.Get(recipeID)
+
 	if err != nil {
 		return err
 	}

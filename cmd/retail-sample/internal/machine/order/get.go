@@ -38,6 +38,7 @@ func (o *UseCase) GetByID(orderID string) (domain.DTO, error) {
 
 func (o *UseCase) GetAll() ([]domain.DTO, error) {
 	orders, err := o.orderDB.List()
+
 	if err != nil {
 		o.logger.Error().Str("action", "get all").Err(err).Send()
 		return nil, err

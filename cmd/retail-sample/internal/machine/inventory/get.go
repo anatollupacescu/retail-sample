@@ -37,6 +37,7 @@ func (a *UseCase) GetByID(itemID string) (dto inventory.DTO, err error) {
 
 func (a *UseCase) GetAll() ([]inventory.DTO, error) {
 	items, err := a.inventoryDB.List()
+
 	if err != nil {
 		a.logger.Error().Str("action", "get all").Err(err).Send()
 		return nil, err

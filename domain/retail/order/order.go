@@ -17,8 +17,8 @@ type (
 		Add(DTO) (int, error)
 	}
 
-	recipes interface {
-		Valid(int) error
+	recipeValidator interface {
+		Valid(int) (bool, error)
 	}
 
 	stock interface {
@@ -26,15 +26,16 @@ type (
 	}
 
 	Orders struct {
-		DB      db
-		Recipes recipes
-		Stock   stock
+		DB              db
+		RecipeValidator recipeValidator
+		Stock           stock
 	}
 )
 
 var (
 	ErrOrderNotFound   = errors.New("order not found")
 	ErrInvalidQuantity = errors.New("quantity not valid")
+	ErrInvalidRecipe   = errors.New("recipe not valid")
 )
 
 func (o Orders) Create(recipeID, orderCount int) (int, error) {
@@ -42,11 +43,17 @@ func (o Orders) Create(recipeID, orderCount int) (int, error) {
 		return 0, ErrInvalidQuantity
 	}
 
-	if err := o.Recipes.Valid(recipeID); err != nil {
+	valid, err := o.RecipeValidator.Valid(recipeID)
+
+	if err != nil {
 		return 0, err
 	}
 
-	if err := o.Stock.Extract(recipeID, orderCount); err != nil {
+	if !valid {
+		return 0, ErrInvalidRecipe
+	}
+
+	if err = o.Stock.Extract(recipeID, orderCount); err != nil {
 		return 0, err
 	}
 

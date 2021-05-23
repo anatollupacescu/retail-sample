@@ -28,5 +28,6 @@ fun
     \ validate item
 pre
     \ item does not exist   \ fail to check for presence
+    \ item disabled
 pos
-    \ item valid
+    \ item is enabled

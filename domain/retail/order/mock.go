@@ -25,6 +25,7 @@ type MockRecipe struct {
 	mock.Mock
 }
 
-func (r *MockRecipe) Valid(id int) error {
-	return r.Called(id).Error(0)
+func (r *MockRecipe) Valid(id int) (bool, error) {
+	args := r.Called(id)
+	return args.Bool(0), args.Error(1)
 }

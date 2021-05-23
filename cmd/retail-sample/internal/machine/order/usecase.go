@@ -40,7 +40,7 @@ func New(ctx context.Context) (UseCase, error) {
 			Recipes: recipeDB,
 			Stock:   stockDB,
 		},
-		Recipes: &recipe.Validator{
+		RecipeValidator: &recipe.Validator{
 			Recipes: recipeDB,
 		},
 	}

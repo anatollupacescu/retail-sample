@@ -25,7 +25,7 @@ func (o *UseCase) Create(recipeID, count int) (order.DTO, error) {
 	case recipe.ErrNotFound:
 		return order.DTO{}, errors.Wrapf(usecase.ErrNotFound, "create order for recipe %d: %v", recipeID, err)
 	case
-		recipe.ErrDisabled,
+		order.ErrInvalidRecipe,
 		order.ErrInvalidQuantity,
 		stock.ErrInvalidExtractQuantity,
 		stock.ErrNotEnoughStock:

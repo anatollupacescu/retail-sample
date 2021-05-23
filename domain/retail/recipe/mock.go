@@ -31,6 +31,7 @@ type MockValidator struct {
 	mock.Mock
 }
 
-func (m *MockValidator) Validate(id int) error {
-	return m.Called(id).Error(0)
+func (m *MockValidator) Valid(id int) (bool, error) {
+	args := m.Called(id)
+	return args.Bool(0), args.Error(1)
 }

@@ -36,12 +36,12 @@ type (
 	}
 
 	inventoryValidator interface {
-		Validate(int) error
+		Valid(int) (bool, error)
 	}
 
 	Recipes struct {
-		DB db
-		Iv inventoryValidator
+		DB            db
+		ItemValidator inventoryValidator
 	}
 )
 
@@ -50,13 +50,11 @@ func (c Recipes) Create(name string, ingredients []InventoryItem) (int, error) {
 		return 0, err
 	}
 
-	err := checkIsAlreadyPresent(c.DB, name)
-	if err != nil {
+	if err := checkIsAlreadyPresent(c.DB, name); err != nil {
 		return 0, err
 	}
 
-	err = checkIngredientsAreValid(c.Iv, ingredients)
-	if err != nil {
+	if err := checkIngredientsAreValid(c.ItemValidator, ingredients); err != nil {
 		return 0, err
 	}
 
@@ -86,7 +84,7 @@ func checkPreconditions(name string, ingredients []InventoryItem) error {
 
 	for _, v := range ingredients {
 		if v.Qty == 0 {
-			return ErrQuantityNotProvided
+			return errors.Wrapf(ErrQuantityNotProvided, "id: %d", v.ID)
 		}
 	}
 
@@ -111,19 +109,28 @@ func checkIsAlreadyPresent(db db, name string) error {
 	}
 }
 
-var ErrIngredientNotFound = errors.New("ingredient not found")
+var (
+	ErrIngredientNotFound = errors.New("ingredient not found")
+	ErrIngredientNotValid = errors.New("ingredient not valid")
+)
 
 func checkIngredientsAreValid(validator inventoryValidator, ingredients []InventoryItem) error {
 	for _, i := range ingredients {
-		err := validator.Validate(i.ID)
+		valid, err := validator.Valid(i.ID)
 
-		switch err {
-		case nil:
-		case inventory.ErrNotFound:
-			return errors.Wrapf(ErrIngredientNotFound, "id not found: %d", i.ID)
-		default:
-			return err
+		if err == nil {
+			if !valid {
+				return errors.Wrapf(ErrIngredientNotValid, "id: %d", i.ID)
+			}
+
+			continue
 		}
+
+		if errors.Is(err, inventory.ErrNotFound) {
+			return errors.Wrapf(ErrIngredientNotFound, "id not found: %d", i.ID)
+		}
+
+		return err
 	}
 
 	return nil
@@ -138,9 +145,7 @@ func (r *Recipe) Disable() error {
 		Enabled: false,
 	}
 
-	err := r.DB.Save(dto)
-
-	if err != nil {
+	if err := r.DB.Save(dto); err != nil {
 		return err
 	}
 
@@ -158,9 +163,7 @@ func (r *Recipe) Enable() error {
 		Enabled: true,
 	}
 
-	err := r.DB.Save(dto)
-
-	if err != nil {
+	if err := r.DB.Save(dto); err != nil {
 		return err
 	}
 

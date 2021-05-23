@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/anatollupacescu/retail-sample/domain/retail/order"
-	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
 func TestCreateOrder(t *testing.T) {
@@ -39,15 +38,14 @@ func TestCreateOrder(t *testing.T) {
 		recipeDB := &order.MockRecipe{}
 		defer recipeDB.AssertExpectations(t)
 
-		expectedErr := recipe.ErrDisabled
-		recipeDB.On("Valid", 1).Return(expectedErr)
+		recipeDB.On("Valid", 1).Return(false, nil)
 
-		orders := order.Orders{Recipes: recipeDB}
+		orders := order.Orders{RecipeValidator: recipeDB}
 
 		receivedID, err := orders.Create(1, 1)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, expectedErr, err)
+			assert.Equal(t, err, order.ErrInvalidRecipe)
 			assert.Equal(t, 0, receivedID)
 		})
 	})
@@ -56,9 +54,9 @@ func TestCreateOrder(t *testing.T) {
 		defer recipe.AssertExpectations(t)
 
 		expectedErr := errors.New("not found")
-		recipe.On("Valid", 1).Return(expectedErr)
+		recipe.On("Valid", 1).Return(false, expectedErr)
 
-		orders := order.Orders{Recipes: recipe}
+		orders := order.Orders{RecipeValidator: recipe}
 
 		receivedID, err := orders.Create(1, 1)
 
@@ -73,7 +71,7 @@ func TestCreateOrder(t *testing.T) {
 		recipeDB := &order.MockRecipe{}
 		defer recipeDB.AssertExpectations(t)
 
-		recipeDB.On("Valid", recipeID).Return(nil)
+		recipeDB.On("Valid", recipeID).Return(true, nil)
 
 		stockDB := &order.MockStock{}
 		defer stockDB.AssertExpectations(t)
@@ -85,7 +83,7 @@ func TestCreateOrder(t *testing.T) {
 
 		db.On("Add", mock.Anything).Return(1, nil)
 
-		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
+		orders := order.Orders{DB: db, RecipeValidator: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Create(1, 1)
 
@@ -100,7 +98,7 @@ func TestCreateOrder(t *testing.T) {
 		recipe := &order.MockRecipe{}
 		defer recipe.AssertExpectations(t)
 
-		recipe.On("Valid", recipeID).Return(nil)
+		recipe.On("Valid", recipeID).Return(true, nil)
 
 		expectedErr := errors.New("expected")
 
@@ -109,7 +107,7 @@ func TestCreateOrder(t *testing.T) {
 
 		stock.On("Extract", mock.Anything, mock.Anything).Return(expectedErr)
 
-		orders := order.Orders{Recipes: recipe, Stock: stock}
+		orders := order.Orders{RecipeValidator: recipe, Stock: stock}
 
 		receivedID, err := orders.Create(1, 1)
 
@@ -124,7 +122,7 @@ func TestCreateOrder(t *testing.T) {
 		recipeDB := &order.MockRecipe{}
 		defer recipeDB.AssertExpectations(t)
 
-		recipeDB.On("Valid", recipeID).Return(nil)
+		recipeDB.On("Valid", recipeID).Return(true, nil)
 
 		stockDB := &order.MockStock{}
 		defer stockDB.AssertExpectations(t)
@@ -136,7 +134,7 @@ func TestCreateOrder(t *testing.T) {
 
 		db.On("Add", mock.Anything).Return(0, nil)
 
-		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
+		orders := order.Orders{DB: db, RecipeValidator: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Create(1, 1)
 
@@ -151,7 +149,7 @@ func TestCreateOrder(t *testing.T) {
 		recipeDB := &order.MockRecipe{}
 		defer recipeDB.AssertExpectations(t)
 
-		recipeDB.On("Valid", recipeID).Return(nil)
+		recipeDB.On("Valid", recipeID).Return(true, nil)
 
 		stockDB := &order.MockStock{}
 		defer stockDB.AssertExpectations(t)
@@ -164,7 +162,7 @@ func TestCreateOrder(t *testing.T) {
 		var dbErr = errors.New("test")
 		db.On("Add", mock.Anything).Return(0, dbErr)
 
-		orders := order.Orders{DB: db, Recipes: recipeDB, Stock: stockDB}
+		orders := order.Orders{DB: db, RecipeValidator: recipeDB, Stock: stockDB}
 
 		receivedID, err := orders.Create(1, 1)
 

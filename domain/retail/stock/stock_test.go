@@ -12,16 +12,11 @@ import (
 )
 
 func TestProvision(t *testing.T) {
-	var (
-		db *stock.MockDB
+	var db *stock.MockDB
+	var reset = func() {
+		db = &stock.MockDB{}
+	}
 
-		reset = func() {
-			db = &stock.MockDB{}
-		}
-		expectOnSave = func(err error) {
-			db.On("Save", mock.Anything).Return(err)
-		}
-	)
 	t.Run("given quantity is negative", func(t *testing.T) {
 		st := new(stock.Position)
 		err := st.Provision(-12)
@@ -30,9 +25,15 @@ func TestProvision(t *testing.T) {
 			assert.Zero(t, st.Qty)
 		})
 	})
+	t.Run("given item is invalid", func(t *testing.T) {
+		t.Run("assert error", func(t *testing.T) {
+			t.Skip()
+		})
+	})
 	t.Run("given position updated", func(t *testing.T) {
 		reset()
-		expectOnSave(nil)
+
+		db.On("Save", mock.Anything).Return(nil)
 
 		st := &stock.Position{InventoryID: 1, Qty: 1, DB: db}
 		err := st.Provision(10)
@@ -43,11 +44,11 @@ func TestProvision(t *testing.T) {
 			db.AssertExpectations(t)
 		})
 	})
-	t.Run("given failure to update quantity", func(t *testing.T) {
+	t.Run("given fail to update quantity", func(t *testing.T) {
 		reset()
 
 		expectedErr := errors.New("err")
-		expectOnSave(expectedErr)
+		db.On("Save", mock.Anything).Return(expectedErr)
 
 		st := &stock.Position{Qty: 4, DB: db}
 		err := st.Provision(10)
@@ -74,9 +75,7 @@ func TestExtract(t *testing.T) {
 				Stock:   stockDB,
 			}
 		}
-		expectRecipeErr = func(id int, err error) {
-			recipeDB.On("Get", id).Return(recipe.DTO{}, err)
-		}
+
 		expectRecipeInvalid = func(id int) {
 			ingredients := []recipe.InventoryItem{{ID: id, Qty: 1}}
 			recipeDB.On("Get", 1).Return(recipe.DTO{Enabled: false, Ingredients: ingredients}, nil)
@@ -110,8 +109,8 @@ func TestExtract(t *testing.T) {
 	t.Run("given recipe not found", func(t *testing.T) {
 		reset()
 
-		id := 1
-		expectRecipeErr(id, recipe.ErrNotFound)
+		id := 10
+		recipeDB.On("Get", id).Return(recipe.DTO{}, recipe.ErrNotFound)
 
 		err := newExtractor().Extract(id, 1)
 
@@ -121,12 +120,14 @@ func TestExtract(t *testing.T) {
 			stockDB.AssertExpectations(t)
 		})
 	})
-	t.Run("given failure to get recipe", func(t *testing.T) {
+	t.Run("given fail to get recipe", func(t *testing.T) {
 		reset()
 
-		id := 1
-		expectedErr := errors.New("db err")
-		expectRecipeErr(id, expectedErr)
+		var (
+			expectedErr = errors.New("db err")
+			id          = 10
+		)
+		recipeDB.On("Get", id).Return(recipe.DTO{}, expectedErr)
 
 		err := newExtractor().Extract(id, 1)
 
@@ -165,7 +166,7 @@ func TestExtract(t *testing.T) {
 			stockDB.AssertExpectations(t)
 		})
 	})
-	t.Run("given failure to get stock item", func(t *testing.T) {
+	t.Run("given fail to get stock item", func(t *testing.T) {
 		reset()
 
 		id := 1
@@ -212,7 +213,7 @@ func TestExtract(t *testing.T) {
 			stockDB.AssertExpectations(t)
 		})
 	})
-	t.Run("given failure to update position quantity", func(t *testing.T) {
+	t.Run("given fail to update position quantity", func(t *testing.T) {
 		reset()
 
 		id := 1

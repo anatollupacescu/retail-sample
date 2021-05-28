@@ -49,5 +49,5 @@ func toSingleResponse(i inventory.DTO) single {
 func httpServerError(w http.ResponseWriter) {
 	status := http.StatusInternalServerError
 	statusText := http.StatusText(status)
-	http.Error(w, statusText, http.StatusInternalServerError)
+	http.Error(w, statusText, status)
 }

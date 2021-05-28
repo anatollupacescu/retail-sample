@@ -10,7 +10,7 @@ fun
     \ provision
 pre
     \ quantity is negative
-#   \ item is invalid           \ fail to check validity
+    \ item is invalid
 pos
     \ position updated          \ fail to update quantity
 

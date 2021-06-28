@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	faker "github.com/bxcodec/faker/v3"
-
 	"github.com/google/uuid"
 )
 

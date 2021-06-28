@@ -8,8 +8,9 @@ import (
 	"testing"
 
 	"github.com/anatollupacescu/arbortest/runner"
-	"github.com/anatollupacescu/retail-sample/cmd/acceptance/helper"
 	"github.com/bxcodec/faker/v3"
+
+	"github.com/anatollupacescu/retail-sample/cmd/acceptance/helper"
 )
 
 // group:inventory

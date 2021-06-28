@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 
 	usecase "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/machine"
-	pg "github.com/anatollupacescu/retail-sample/cmd/retail-sample/internal/persistence/postgres"
 	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/stock"
 )
@@ -26,13 +25,13 @@ func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
 		}
 	}()
 
-	item, err := getInventoryItem(o.inventoryDB, itemID)
+	item, err := o.getInventoryItem(itemID)
 
 	if err != nil {
 		return Position{}, err
 	}
 
-	pos, err := getPosition(o.stockDB, item.ID)
+	pos, err := o.getStockPosition(item.ID)
 
 	if err != nil {
 		return Position{}, err
@@ -65,11 +64,12 @@ func (o *UseCase) Provision(itemID string, qty int) (Position, error) {
 	return result, nil
 }
 
-func getPosition(stockDB *pg.StockPgxStore, itemID int) (pos stock.Position, err error) {
+func (o *UseCase) getStockPosition(itemID int) (pos stock.Position, err error) {
+	pos.Validator = o.validator
 	pos.InventoryID = itemID
-	pos.DB = stockDB
+	pos.DB = o.stockDB
 
-	stockPos, err := stockDB.Get(itemID)
+	stockPos, err := o.stockDB.Get(itemID)
 
 	switch err {
 	case nil:
@@ -83,14 +83,14 @@ func getPosition(stockDB *pg.StockPgxStore, itemID int) (pos stock.Position, err
 	return
 }
 
-func getInventoryItem(inv *pg.InventoryPgxStore, itemID string) (inventory.DTO, error) {
+func (o *UseCase) getInventoryItem(itemID string) (inventory.DTO, error) {
 	id, err := strconv.Atoi(itemID)
 
 	if err != nil {
 		return inventory.DTO{}, errors.Wrapf(usecase.ErrBadRequest, "parse item id: %s", itemID)
 	}
 
-	item, err := inv.Get(id)
+	item, err := o.inventoryDB.Get(id)
 
 	switch err {
 	case nil: //continue,

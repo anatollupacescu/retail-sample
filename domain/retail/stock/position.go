@@ -6,6 +6,7 @@ import (
 
 type (
 	Position struct {
+		Validator   inventoryValidator
 		InventoryID int
 		Qty         int
 
@@ -21,16 +22,31 @@ type (
 		Save(PositionDTO) error
 		Get(int) (PositionDTO, error)
 	}
+
+	inventoryValidator interface {
+		Valid(id int) (bool, error)
+	}
 )
 
 var (
 	ErrInvalidProvisionQuantity = errors.New("invalid provision quantity")
 	ErrPositionNotFound         = errors.New("stock position not found")
+	ErrItemInvalid              = errors.New("item invalid")
 )
 
 func (p *Position) Provision(qty int) error {
 	if qty <= 0 {
 		return ErrInvalidProvisionQuantity
+	}
+
+	valid, err := p.Validator.Valid(p.InventoryID)
+
+	if err != nil {
+		return err
+	}
+
+	if !valid {
+		return ErrItemInvalid
 	}
 
 	current := p.Qty + qty
@@ -40,7 +56,7 @@ func (p *Position) Provision(qty int) error {
 		Qty:         current,
 	}
 
-	err := p.DB.Save(dto)
+	err = p.DB.Save(dto)
 
 	if err != nil {
 		return err

@@ -12,9 +12,13 @@ import (
 )
 
 func TestProvision(t *testing.T) {
-	var db *stock.MockDB
+	var (
+		db            *stock.MockDB
+		mockValidator *stock.MockValidator
+	)
 	var reset = func() {
 		db = &stock.MockDB{}
+		mockValidator = &stock.MockValidator{}
 	}
 
 	t.Run("given quantity is negative", func(t *testing.T) {
@@ -26,16 +30,52 @@ func TestProvision(t *testing.T) {
 		})
 	})
 	t.Run("given item is invalid", func(t *testing.T) {
+		reset()
+
+		mockValidator.On("Valid", 1).Return(false, nil)
+
+		pos := stock.Position{
+			InventoryID: 1,
+			Validator:   mockValidator,
+		}
+
+		err := pos.Provision(3)
+
 		t.Run("assert error", func(t *testing.T) {
-			t.Skip()
+			assert.Equal(t, stock.ErrItemInvalid, err)
+			mockValidator.AssertExpectations(t)
+		})
+	})
+	t.Run("fail to check item validity", func(t *testing.T) {
+		reset()
+
+		expectedErr := errors.New("test")
+		mockValidator.On("Valid", 1).Return(false, expectedErr)
+
+		pos := stock.Position{
+			InventoryID: 1,
+			Validator:   mockValidator,
+		}
+
+		err := pos.Provision(3)
+
+		t.Run("assert error", func(t *testing.T) {
+			assert.Equal(t, expectedErr, err)
+			mockValidator.AssertExpectations(t)
 		})
 	})
 	t.Run("given position updated", func(t *testing.T) {
 		reset()
 
+		mockValidator.On("Valid", 1).Return(true, nil)
 		db.On("Save", mock.Anything).Return(nil)
 
-		st := &stock.Position{InventoryID: 1, Qty: 1, DB: db}
+		st := &stock.Position{
+			InventoryID: 1,
+			Qty:         1,
+			DB:          db,
+			Validator:   mockValidator}
+
 		err := st.Provision(10)
 
 		t.Run("assert success", func(t *testing.T) {
@@ -49,8 +89,14 @@ func TestProvision(t *testing.T) {
 
 		expectedErr := errors.New("err")
 		db.On("Save", mock.Anything).Return(expectedErr)
+		mockValidator.On("Valid", 1).Return(true, nil)
 
-		st := &stock.Position{Qty: 4, DB: db}
+		st := &stock.Position{
+			InventoryID: 1,
+			Qty:         4,
+			DB:          db,
+			Validator:   mockValidator}
+
 		err := st.Provision(10)
 
 		t.Run("assert error", func(t *testing.T) {

@@ -2,8 +2,6 @@ package recipe
 
 import (
 	"github.com/pkg/errors"
-
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 )
 
 type (
@@ -109,28 +107,19 @@ func checkIsAlreadyPresent(db db, name string) error {
 	}
 }
 
-var (
-	ErrIngredientNotFound = errors.New("ingredient not found")
-	ErrIngredientNotValid = errors.New("ingredient not valid")
-)
+var ErrIngredientNotValid = errors.New("ingredient not valid")
 
 func checkIngredientsAreValid(validator inventoryValidator, ingredients []InventoryItem) error {
 	for _, i := range ingredients {
 		valid, err := validator.Valid(i.ID)
 
-		if err == nil {
-			if !valid {
-				return errors.Wrapf(ErrIngredientNotValid, "id: %d", i.ID)
-			}
-
-			continue
+		if err != nil {
+			return errors.Wrapf(ErrIngredientNotValid, "id %d: %v", i.ID, err)
 		}
 
-		if errors.Is(err, inventory.ErrNotFound) {
-			return errors.Wrapf(ErrIngredientNotFound, "id not found: %d", i.ID)
+		if !valid {
+			return errors.Wrapf(ErrIngredientNotValid, "id: %d", i.ID)
 		}
-
-		return err
 	}
 
 	return nil

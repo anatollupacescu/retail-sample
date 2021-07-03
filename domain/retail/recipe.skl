@@ -14,8 +14,7 @@ pre
     \ no ingredients
     \ invalid ingredient quantity
     \ duplicate ingredient
-    \ ingredient not found      \ fail to find ingredient
-    \ ingredient disabled
+    \ ingredient invalid        \ fail to check validity
     \ recipe name not unique    \ fail to check for name uniqueness
 pos
     \ recipe created            \ fail to save recipe

@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/anatollupacescu/retail-sample/domain/retail/inventory"
 	"github.com/anatollupacescu/retail-sample/domain/retail/recipe"
 )
 
@@ -55,43 +54,7 @@ func TestCreateRecipe(t *testing.T) {
 			assert.Equal(t, recipe.ErrDuplicateName, err)
 		})
 	})
-	t.Run("given ingredient not found", func(t *testing.T) {
-		reset()
-
-		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
-
-		mi := &recipe.MockValidator{}
-		expected := inventory.ErrNotFound
-		mi.On("Valid", mock.Anything).Return(false, expected)
-
-		b := recipe.Recipes{DB: db, ItemValidator: mi}
-		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
-
-		db.AssertExpectations(t)
-		mi.AssertExpectations(t)
-
-		t.Run("assert error", func(t *testing.T) {
-			assert.True(t, errors.Is(err, recipe.ErrIngredientNotFound))
-			assert.Zero(t, id)
-		})
-	})
-	t.Run("given fail to find ingredient", func(t *testing.T) {
-		reset()
-
-		dbErr := errors.New("db err")
-		db.On("Find", "test").Return(recipe.DTO{}, dbErr)
-
-		b := recipe.Recipes{DB: db}
-		id, err := b.Create("test", []recipe.InventoryItem{{ID: 1, Qty: 2}})
-
-		db.AssertExpectations(t)
-
-		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, dbErr, err)
-			assert.Zero(t, id)
-		})
-	})
-	t.Run("given ingredient disabled", func(t *testing.T) {
+	t.Run("given ingredient invalid", func(t *testing.T) {
 		reset()
 
 		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
@@ -110,7 +73,7 @@ func TestCreateRecipe(t *testing.T) {
 			assert.Zero(t, id)
 		})
 	})
-	t.Run("given fail to validate ingredient", func(t *testing.T) {
+	t.Run("given fail to check validity", func(t *testing.T) {
 		reset()
 
 		db.On("Find", "test").Return(recipe.DTO{}, recipe.ErrNotFound)
@@ -126,7 +89,7 @@ func TestCreateRecipe(t *testing.T) {
 		mi.AssertExpectations(t)
 
 		t.Run("assert error", func(t *testing.T) {
-			assert.Equal(t, expected, err)
+			assert.True(t, errors.Is(err, recipe.ErrIngredientNotValid))
 			assert.Zero(t, id)
 		})
 	})
@@ -222,7 +185,7 @@ func TestDisableRecipe(t *testing.T) {
 			assert.False(t, r.Enabled)
 		})
 	})
-	t.Run("given failed to disable recipe", func(t *testing.T) {
+	t.Run("given fail to disable recipe", func(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
@@ -256,7 +219,7 @@ func TestEnableRecipe(t *testing.T) {
 			assert.True(t, r.Enabled)
 		})
 	})
-	t.Run("given failed to enable recipe", func(t *testing.T) {
+	t.Run("given fail to enable recipe", func(t *testing.T) {
 		db := &recipe.MockDB{}
 		defer db.AssertExpectations(t)
 
